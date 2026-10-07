@@ -1,0 +1,256 @@
+diff --git a/src/lib/api/modelTestRunner.ts b/src/lib/api/modelTestRunner.ts
+index ea98429c6..b805b8c95 100644
+--- a/src/lib/api/modelTestRunner.ts
++++ b/src/lib/api/modelTestRunner.ts
+@@ -1,4 +1,5 @@
+ import { randomUUID } from "node:crypto";
++import { createModelTestScope, runWithModelTestScope } from "./modelTestScope";
+ import { POST as postChatCompletion } from "@/app/api/v1/chat/completions/route";
+ import { POST as postAudioTranscription } from "@/app/api/v1/audio/transcriptions/route";
+ import { handleValidatedEmbeddingRequestBody } from "@/app/api/v1/embeddings/route";
+@@ -174,6 +175,7 @@ export function buildInternalChatRequest(
+       // #6240: a connection test must be clean — never let the operator's globally-enabled
+       // Output Styles (e.g. "Ultra terse") leak a system prompt into a test-model call.
+       "X-OmniRoute-Compression": "off",
++      "X-Session-Id": `model-test-${randomUUID()}`,
+       "X-Request-Id": `model-test-${randomUUID()}`,
+       ...(connectionId ? { "X-OmniRoute-Connection": connectionId } : {}),
+     },
+@@ -354,6 +356,7 @@ export interface RunSingleModelTestOptions {
+   connectionId?: string;
+   timeoutMs?: number;
+   streamChat?: boolean;
++  signal?: AbortSignal;
+ }
+ 
+ export interface SingleModelTestResult {
+@@ -361,6 +364,7 @@ export interface SingleModelTestResult {
+   status: "ok" | "error" | "rate_limited" | "slow";
+   latencyMs: number;
+   responseText?: string;
++  selectedConnectionId?: string;
+   statusCode?: number;
+   httpStatus: number;
+   error?: string;
+@@ -460,7 +464,9 @@ export async function runSingleModelTest(
+     connectionId,
+     timeoutMs = DEFAULT_MODEL_TEST_TIMEOUT_MS,
+     streamChat = true,
++    signal: parentSignal,
+   } = options;
++  const testScope = createModelTestScope(connectionId);
+ 
+   if (connectionId && (await isConnectionUnavailableToAuxiliaryActivity(connectionId))) {
+     const fullModelId = modelId.includes("/") ? modelId : `${providerId}/${modelId}`;
+@@ -544,6 +550,16 @@ export async function runSingleModelTest(
+             maxTokens: !isEmbedding && streamChat ? STREAMING_CHAT_TEST_MAX_TOKENS : undefined,
+           });
+ 
++  if (parentSignal?.aborted) {
++    return {
++      modelId: fullModelStr,
++      status: "error",
++      latencyMs: Date.now() - startTime,
++      httpStatus: 499,
++      error: "Model test cancelled",
++    };
++  }
++
+   // Per-model AbortController. We track whether the timeout fired so we can
+   // distinguish "rate-limit queue aborted" (withRateLimit threw AbortError
+   // with no timeout) from "timeout fired and aborted withRateLimit".
+@@ -554,6 +570,13 @@ export async function runSingleModelTest(
+     controller.abort(createModelTestTimeoutError(effectiveTimeoutMs));
+   }, effectiveTimeoutMs);
+ 
++  const cancel = () => controller.abort(parentSignal?.reason);
++  parentSignal?.addEventListener("abort", cancel, { once: true });
++  const cleanupDeadline = () => {
++    clearTimeout(timeoutHandle);
++    parentSignal?.removeEventListener("abort", cancel);
++  };
++
+   const runInner = async (signal: AbortSignal): Promise<Response> => {
+     if (isEmbedding) {
+       return handleValidatedEmbeddingRequestBody(
+@@ -585,16 +608,26 @@ export async function runSingleModelTest(
+         // T-PROBE: wrap the scheduled fn, not the withRateLimit call — a
+         // queued Bottleneck job executes from its own async resource and
+         // would otherwise run outside the probe context below.
+-        (signal) => runAsProbe(() => runInner(signal)),
++        (signal) => runWithModelTestScope(testScope, () => runAsProbe(() => runInner(signal))),
+         controller.signal
+       );
+     } else {
+-      res = await runAsProbe(() => runInner(controller.signal));
++      res = await runWithModelTestScope(testScope, () =>
++        runAsProbe(() => runInner(controller.signal))
++      );
+     }
+   } catch (error: unknown) {
+-    clearTimeout(timeoutHandle);
++    cleanupDeadline();
+     const latencyMs = Date.now() - startTime;
+     const errorName = getErrorName(error);
++    if (parentSignal?.aborted)
++      return {
++        modelId: fullModelStr,
++        status: "error",
++        latencyMs,
++        httpStatus: 499,
++        error: "Model test cancelled",
++      };
+     if (timedOut) {
+       return {
+         modelId: fullModelStr,
+@@ -628,9 +661,23 @@ export async function runSingleModelTest(
+     };
+   }
+   let latencyMs = Date.now() - startTime;
+-
++  let selectedConnectionId =
++    res.headers.get("X-OmniRoute-Selected-Connection-Id") ||
++    testScope.selectedConnectionId ||
++    undefined;
++  if (parentSignal?.aborted) {
++    cleanupDeadline();
++    await res.body?.cancel().catch(() => {});
++    return {
++      modelId: fullModelStr,
++      status: "error",
++      latencyMs,
++      httpStatus: 499,
++      error: "Model test cancelled",
++    };
++  }
+   if (timedOut) {
+-    clearTimeout(timeoutHandle);
++    cleanupDeadline();
+     return {
+       modelId: fullModelStr,
+       status: "slow",
+@@ -651,8 +698,20 @@ export async function runSingleModelTest(
+     } catch {
+       errorMsg = res.statusText || errorMsg;
+     }
++    if (parentSignal?.aborted) {
++      cleanupDeadline();
++      return {
++        modelId: fullModelStr,
++        status: "error",
++        latencyMs,
++        httpStatus: 499,
++        selectedConnectionId,
++        error: "Model test cancelled",
++      };
++    }
+     const result: SingleModelTestResult = {
+       modelId: fullModelStr,
++      selectedConnectionId,
+       status: "rate_limited",
+       latencyMs,
+       statusCode: res.status,
+@@ -661,7 +720,7 @@ export async function runSingleModelTest(
+       rateLimited: true,
+       ...(retryAfter !== undefined ? { retryAfter } : {}),
+     };
+-    clearTimeout(timeoutHandle);
++    cleanupDeadline();
+     return result;
+   }
+ 
+@@ -675,17 +734,34 @@ export async function runSingleModelTest(
+       // error frame inside a 200 stream (Sentinel blocks, "account
+       // deactivated") would run outside runAsProbe and could still reach
+       // markAccountUnavailable (#9817).
+-      const parsedResponse = await runAsProbe(() =>
+-        extractModelTestResponseText(res, !isEmbedding && !isRerank && !isResponses && streamChat)
++      const parsedResponse = await runWithModelTestScope(testScope, () =>
++        runAsProbe(() =>
++          extractModelTestResponseText(res, !isEmbedding && !isRerank && !isResponses && streamChat)
++        )
+       );
+       responseText = parsedResponse.text;
+       streamError = parsedResponse.error;
+     } catch {
+       responseText = "";
+     } finally {
+-      clearTimeout(timeoutHandle);
++      cleanupDeadline();
+     }
+     latencyMs = Date.now() - startTime;
++    // Early SSE wrappers cannot carry headers from a response not created yet.
++    // Verify selection after consuming the stream, using the same dispatch scope.
++    selectedConnectionId =
++      res.headers.get("X-OmniRoute-Selected-Connection-Id") ||
++      testScope.selectedConnectionId ||
++      undefined;
++    if (parentSignal?.aborted)
++      return {
++        modelId: fullModelStr,
++        status: "error",
++        latencyMs,
++        httpStatus: 499,
++        selectedConnectionId,
++        error: "Model test cancelled",
++      };
+     if (streamError) {
+       const error = sanitizeErrorMessage(streamError.message) || "Upstream stream failed";
+       const rateLimited = streamError.statusCode === 429 || isRateLimitMessage(error);
+@@ -741,11 +817,29 @@ export async function runSingleModelTest(
+         error: "Provider returned HTTP 200 but no text content.",
+       };
+     }
++    if (
++      connectionId &&
++      !isEmbedding &&
++      !isAudioTranscription &&
++      !isResponses &&
++      (selectedConnectionId !== connectionId ||
++        (testScope.selectedConnectionId && testScope.selectedConnectionId !== connectionId))
++    ) {
++      return {
++        modelId: fullModelStr,
++        status: "error",
++        latencyMs,
++        httpStatus: 409,
++        selectedConnectionId,
++        error: "Model test did not use the requested connection",
++      };
++    }
+     return {
+       modelId: fullModelStr,
+       status: "ok",
+       latencyMs,
+       httpStatus: 200,
++      selectedConnectionId,
+       responseText,
+     };
+   }
+@@ -757,8 +851,17 @@ export async function runSingleModelTest(
+   } catch {
+     errorMsg = res.statusText;
+   } finally {
+-    clearTimeout(timeoutHandle);
++    cleanupDeadline();
+   }
++  if (parentSignal?.aborted)
++    return {
++      modelId: fullModelStr,
++      status: "error",
++      latencyMs,
++      httpStatus: 499,
++      selectedConnectionId,
++      error: "Model test cancelled",
++    };
+   // #9511: classify quota signals on the generic error branch so that
+   // 401/402/403 "insufficient balance" / "quota exhausted" errors are
+   // NOT auto-hidden by Test All.
+@@ -769,6 +872,7 @@ export async function runSingleModelTest(
+     latencyMs,
+     statusCode: res.status,
+     httpStatus: res.status,
++    selectedConnectionId,
+     error: errorMsg,
+     ...(quotaFlags.isTransient ? { isTransient: true } : {}),
+     ...(quotaFlags.isQuota ? { isQuota: true } : {}),

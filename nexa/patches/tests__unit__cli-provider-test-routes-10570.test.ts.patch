@@ -1,0 +1,58 @@
+diff --git a/tests/unit/cli-provider-test-routes-10570.test.ts b/tests/unit/cli-provider-test-routes-10570.test.ts
+index 56319745f..71760b7df 100644
+--- a/tests/unit/cli-provider-test-routes-10570.test.ts
++++ b/tests/unit/cli-provider-test-routes-10570.test.ts
+@@ -67,7 +67,7 @@ test("omniroute test resolves a connection and calls its server-owned test route
+       const url = new URL(String(input));
+       const method = String(init?.method ?? "GET").toUpperCase();
+       requests.push({ path: `${url.pathname}${url.search}`, method });
+-      if (url.pathname === "/api/health") return jsonResponse({ status: "ok" });
++      if (url.pathname === "/api/health/ping") return jsonResponse({ status: "ok" });
+       if (url.pathname === "/api/providers") {
+         return jsonResponse({
+           connections: [
+@@ -96,7 +96,7 @@ test("omniroute test resolves a connection and calls its server-owned test route
+ 
+     assert.equal(exitCode, 0);
+     assert.deepEqual(requests, [
+-      { path: "/api/health", method: "GET" },
++      { path: "/api/health/ping", method: "GET" },
+       { path: "/api/providers?limit=200", method: "GET" },
+       { path: "/api/providers/conn%2Fcustom%201/test", method: "POST" },
+     ]);
+@@ -110,7 +110,7 @@ test("omniroute test --all-providers consumes the current connections response s
+       const url = new URL(String(input));
+       const method = String(init?.method ?? "GET").toUpperCase();
+       requests.push({ path: `${url.pathname}${url.search}`, method });
+-      if (url.pathname === "/api/health") return jsonResponse({ status: "ok" });
++      if (url.pathname === "/api/health/ping") return jsonResponse({ status: "ok" });
+       if (url.pathname === "/api/providers") {
+         return jsonResponse({
+           connections: [
+@@ -140,7 +140,7 @@ test("omniroute test --all-providers consumes the current connections response s
+ 
+     assert.equal(exitCode, 0);
+     assert.deepEqual(requests, [
+-      { path: "/api/health", method: "GET" },
++      { path: "/api/health/ping", method: "GET" },
+       { path: "/api/providers?limit=200", method: "GET" },
+       { path: "/api/providers/conn-all-1/test", method: "POST" },
+     ]);
+@@ -168,7 +168,7 @@ test("providers test-all falls back to the server for unsupported custom API-key
+       const url = new URL(String(input));
+       const method = String(init?.method ?? "GET").toUpperCase();
+       requests.push({ path: url.pathname, method });
+-      if (url.pathname === "/api/health") return jsonResponse({ status: "ok" });
++      if (url.pathname === "/api/health/ping") return jsonResponse({ status: "ok" });
+       if (url.pathname === `/api/providers/${connection.id}/test` && method === "POST") {
+         return jsonResponse({ valid: true, error: null, latencyMs: 9 });
+       }
+@@ -180,7 +180,7 @@ test("providers test-all falls back to the server for unsupported custom API-key
+ 
+     assert.equal(exitCode, 0);
+     assert.deepEqual(requests, [
+-      { path: "/api/health", method: "GET" },
++      { path: "/api/health/ping", method: "GET" },
+       { path: `/api/providers/${connection.id}/test`, method: "POST" },
+     ]);
+   });

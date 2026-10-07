@@ -1,0 +1,33 @@
+diff --git a/open-sse/services/sessionManager.ts b/open-sse/services/sessionManager.ts
+index 28612f6c5..7c42645f4 100644
+--- a/open-sse/services/sessionManager.ts
++++ b/open-sse/services/sessionManager.ts
+@@ -6,6 +6,7 @@
+  */
+ 
+ import { createHash } from "node:crypto";
++import { getNativeClaudeSessionId } from "./nativeClaudeSession.ts";
+ 
+ interface SessionEntry {
+   createdAt: number;
+@@ -105,6 +106,8 @@ export function generateSessionId(
+   options: SessionFingerprintOptions = {}
+ ): string | null {
+   if (!body || typeof body !== "object") return null;
++  const nativeSessionId = getNativeClaudeSessionId(body);
++  if (nativeSessionId) return `claude:${nativeSessionId}`;
+   const parts: string[] = [];
+ 
+   // Model contributes to fingerprint
+@@ -340,7 +343,10 @@ export function extractExternalSessionId(
+     h.get("x-omniroute-session") ?? // OmniRoute-specific form
+     h.get("session-id") ?? // Bare session-id
+     null;
+-  if (!raw || !raw.trim()) return null;
++  if (!raw || !raw.trim()) {
++    const nativeSessionId = getNativeClaudeSessionId(null, headers);
++    return nativeSessionId ? `claude:${nativeSessionId}` : null;
++  }
+   // Prefix "ext:" to ensure no collision with internal SHA-256 hash IDs
+   return `ext:${raw.trim().slice(0, 64)}`; // max 64 chars to avoid abuse
+ }

@@ -1,0 +1,13 @@
+diff --git a/src/lib/db/compression.ts b/src/lib/db/compression.ts
+index f95cb8813..90a12fa01 100644
+--- a/src/lib/db/compression.ts
++++ b/src/lib/db/compression.ts
+@@ -349,6 +349,8 @@ const STACKED_PIPELINE_ENGINE_IDS = new Set([
+ ]);
+ 
+ export function normalizeStackedPipeline(value: unknown): CompressionPipelineStep[] {
++  // An explicit empty pipeline is an operator opt-out, not a missing legacy value.
++  if (Array.isArray(value) && value.length === 0) return [];
+   const source = Array.isArray(value) ? value : (DEFAULT_COMPRESSION_CONFIG.stackedPipeline ?? []);
+   const pipeline: CompressionPipelineStep[] = [];
+   for (const entry of source) {

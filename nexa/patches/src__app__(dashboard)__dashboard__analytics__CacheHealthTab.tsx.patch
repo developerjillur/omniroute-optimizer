@@ -1,0 +1,32 @@
+diff --git a/src/app/(dashboard)/dashboard/analytics/CacheHealthTab.tsx b/src/app/(dashboard)/dashboard/analytics/CacheHealthTab.tsx
+index 3f3bb0477..6742f4483 100644
+--- a/src/app/(dashboard)/dashboard/analytics/CacheHealthTab.tsx
++++ b/src/app/(dashboard)/dashboard/analytics/CacheHealthTab.tsx
+@@ -8,6 +8,8 @@ import { Skeleton } from "@/shared/components/Loading";
+ import TimeRangeSelector from "@/shared/components/analytics/TimeRangeSelector";
+ import type { UtilizationTimeRange } from "@/shared/types/utilization";
+ import { cn } from "@/shared/utils/cn";
++import NativeCachePanel from "./NativeCachePanel";
++import type { ComponentProps } from "react";
+ 
+ type CacheHealthVerdict = "healthy" | "degraded" | "thrash" | "no-data";
+ 
+@@ -42,6 +44,8 @@ type CacheHealthResponse = {
+   timeRange: UtilizationTimeRange;
+   since: string;
+   truncated: boolean;
++  native?: { models: ComponentProps<typeof NativeCachePanel>["models"] };
++  nativeHourly?: ComponentProps<typeof NativeCachePanel>["hourly"];
+ };
+ 
+ type Translator = ((key: string, values?: Record<string, unknown>) => string) & {
+@@ -268,6 +272,9 @@ export default function CacheHealthTab() {
+               </table>
+             </div>
+           </Card>
++          {data.native ? (
++            <NativeCachePanel models={data.native.models} hourly={data.nativeHourly} />
++          ) : null}
+         </>
+       )}
+     </div>

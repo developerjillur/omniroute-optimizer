@@ -1,0 +1,22 @@
+diff --git a/open-sse/services/combo/executeTargetAttempt.ts b/open-sse/services/combo/executeTargetAttempt.ts
+index 5a13fe8dd..fa9e1ca0b 100644
+--- a/open-sse/services/combo/executeTargetAttempt.ts
++++ b/open-sse/services/combo/executeTargetAttempt.ts
+@@ -26,6 +26,7 @@ import {
+ } from "../../utils/error.ts";
+ import { recordComboFailure, clearComboFailureTracking } from "./failureTracker.ts";
+ import { recordComboRequest, getComboMetrics } from "../comboMetrics.ts";
++import { resolveCompressionSettings } from "../../handlers/chatCore/compressionSettings.ts";
+ import {
+   expandComboSystemPromptIfPresent,
+   resolveTargetFingerprint,
+@@ -265,7 +266,8 @@ export async function executeTargetAttempt(opts: {
+       deps.config.zeroLatencyOptimizationsEnabled === true &&
+       i > 0 &&
+       deps.config.fallbackCompressionMode &&
+-      deps.config.fallbackCompressionMode !== "off"
++      deps.config.fallbackCompressionMode !== "off" &&
++      (await resolveCompressionSettings(deps.log)).enabled
+     ) {
+       const { estimateTokens } = await import("../contextManager.ts");
+       // #7847: object, not JSON.stringify — the string branch mis-counts inline images.

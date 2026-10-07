@@ -1,0 +1,53 @@
+diff --git a/open-sse/handlers/chatCore/attemptLogging.ts b/open-sse/handlers/chatCore/attemptLogging.ts
+index f07d0507e..1bee6e4ca 100644
+--- a/open-sse/handlers/chatCore/attemptLogging.ts
++++ b/open-sse/handlers/chatCore/attemptLogging.ts
+@@ -1,3 +1,8 @@
++import { createHash } from "node:crypto";
++import { getNativeClaudeSessionId } from "../../services/nativeClaudeSession.ts";
++import { readCacheCreationTtl } from "@/lib/usage/claudeUsageDetails";
++import { nativeClaudeCacheGroup } from "../../services/nativeClaudeCacheIdentity.ts";
++import { getNativeClaudeThreadCacheGroup } from "@/lib/db/nativeClaudeThreads";
+ /**
+  * chatCore per-attempt logging persistence (Quality Gate v2 / Fase 9 — chatCore god-file
+  * decomposition, #3501).
+@@ -278,7 +283,7 @@ export type PersistAttemptLogsContext = {
+   detailedLoggingEnabled: boolean;
+   reqLogger: { getPipelinePayloads?: () => Record<string, unknown> | undefined } | null | undefined;
+   pendingRequestId: unknown;
+-  clientRawRequest: { endpoint?: string } | null | undefined;
++  clientRawRequest: { endpoint?: string; headers?: Record<string, string> } | null | undefined;
+   requestedModel: unknown;
+   credentials: { connectionId?: string } | null | undefined;
+   startTime: number;
+@@ -562,7 +567,30 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
+   // capture sink by the executor. Fail-soft: null outside a capture or when
+   // nothing was published — the row stores NULL (no wait), never throws.
+   const addedWait = readAddedWait();
++  const nativeSessionId =
++    provider === "claude" ? getNativeClaudeSessionId(body, ctx.clientRawRequest?.headers) : null;
++  const nativeSessionTag = nativeSessionId
++    ? createHash("sha256").update(nativeSessionId).digest("hex")
++    : null;
++  const nativeBody = body && typeof body === "object" ? (body as Record<string, unknown>) : {};
++  const nativeThread = nativeBody.thread as Record<string, unknown> | undefined;
++  const nativeCacheGroupTag =
++    nativeThread?.type === "continue"
++      ? getNativeClaudeThreadCacheGroup(nativeSessionId, nativeThread.previous_message_id)
++      : nativeClaudeCacheGroup(body, nativeSessionId);
++  const providerEnvelope =
++    providerResponse && typeof providerResponse === "object"
++      ? (providerResponse as Record<string, unknown>)
++      : {};
++  const providerSummary =
++    providerEnvelope.summary && typeof providerEnvelope.summary === "object"
++      ? (providerEnvelope.summary as Record<string, unknown>)
++      : providerEnvelope;
++  const cacheTtl = readCacheCreationTtl(providerSummary.usage);
+   saveCallLog({
++    nativeSessionTag,
++    nativeCacheGroupTag,
++    ...cacheTtl,
+     pendingRequestId: ctx.pendingRequestId,
+     method: "POST",
+     path: clientRawRequest?.endpoint || "/v1/chat/completions",

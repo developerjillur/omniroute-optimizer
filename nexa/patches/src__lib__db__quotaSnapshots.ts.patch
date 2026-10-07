@@ -1,0 +1,27 @@
+diff --git a/src/lib/db/quotaSnapshots.ts b/src/lib/db/quotaSnapshots.ts
+index 5a2391130..36f943faf 100644
+--- a/src/lib/db/quotaSnapshots.ts
++++ b/src/lib/db/quotaSnapshots.ts
+@@ -1,4 +1,5 @@
+ import { getDbInstance, rowToCamel } from "./core";
++import { shouldPersistClaudeQuotaSnapshot } from "./claudeQuotaSnapshots";
+ import type { QuotaSnapshotRow, ProviderUtilizationPoint } from "@/shared/types/utilization";
+ import {
+   hasCodexScopeCooldown,
+@@ -25,6 +26,16 @@ export function saveQuotaSnapshot(snapshot: Omit<QuotaSnapshotRow, "id" | "creat
+   const now = new Date().toISOString();
+ 
+   try {
++    if (snapshot.provider === "claude") {
++      const prior = db
++        .prepare<Omit<QuotaSnapshotRow, "id">>(
++          `SELECT * FROM quota_snapshots
++        WHERE provider = ? AND connection_id = ? AND window_key = ?
++        ORDER BY created_at DESC, id DESC LIMIT 1`
++        )
++        .get(snapshot.provider, snapshot.connection_id, snapshot.window_key);
++      if (!shouldPersistClaudeQuotaSnapshot(prior, snapshot, Date.parse(now))) return;
++    }
+     db.prepare(
+       `INSERT INTO quota_snapshots
+        (provider, connection_id, window_key, remaining_percentage, is_exhausted,

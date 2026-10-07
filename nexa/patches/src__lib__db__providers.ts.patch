@@ -1,0 +1,35 @@
+diff --git a/src/lib/db/providers.ts b/src/lib/db/providers.ts
+index 54803a515..c1a06eca5 100644
+--- a/src/lib/db/providers.ts
++++ b/src/lib/db/providers.ts
+@@ -42,6 +42,7 @@ import { isMicrosoftDesignerWebRetiredProviderId } from "@/shared/constants/desi
+ import { reconcileCodexUsageHistory } from "./providers/usageIdentityReconciliation";
+ import { isRuntimeRetiredProviderId } from "@/shared/constants/providerRetirement";
+ import { applyCodexChildCooldownClearOnUpdate } from "./providers/codexAccountState";
++import { isGoogleCloudAccount, prepareTokenRefreshUpdate } from "@/lib/providers/googleAccountHealth";
+ 
+ /**
+  * normalizeProviderSpecificData + the Codex fingerprint-seed invariant: Codex
+@@ -972,7 +973,7 @@ function _updateConnectionRow(db: DbLike, id: string, data: JsonRecord) {
+ 
+ export async function updateProviderConnection(id: string, data: JsonRecord) {
+   const db = getDbInstance() as unknown as DbLike;
+-  const existing = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
++  let existing = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
+   if (!existing) return null;
+ 
+   // The incoming value only. A connection that already holds the password has
+@@ -981,6 +982,13 @@ export async function updateProviderConnection(id: string, data: JsonRecord) {
+   // on every unrelated field edit.
+   await assertApiKeyIsNotManagementPassword(data.apiKey);
+ 
++  if (data.preserveHealthOnTokenRefresh === true || isGoogleCloudAccount(toRecord(existing).provider)) {
++    // Re-read after the async guard; another request may have recorded a block.
++    existing = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
++    if (!existing) return null;
++    data = prepareTokenRefreshUpdate(toRecord(rowToCamel(existing)), data);
++  }
++
+   const existingCamel = toRecord(rowToCamel(existing));
+   const merged: JsonRecord = {
+     ...existingCamel,

@@ -1,0 +1,28 @@
+diff --git a/src/app/(dashboard)/dashboard/costs/components/ApiKeyUsageLimitCard.tsx b/src/app/(dashboard)/dashboard/costs/components/ApiKeyUsageLimitCard.tsx
+index bf7e1feb1..f078cb536 100644
+--- a/src/app/(dashboard)/dashboard/costs/components/ApiKeyUsageLimitCard.tsx
++++ b/src/app/(dashboard)/dashboard/costs/components/ApiKeyUsageLimitCard.tsx
+@@ -88,11 +88,18 @@ export function ApiKeyUsageLimitCard({
+   const [saving, setSaving] = useState(false);
+   const [error, setError] = useState<string | null>(null);
+ 
+-  // Reset the form when a new payload arrives — state adjustment during render
+-  // (react-hooks/set-state-in-effect; see react.dev "adjusting state when a prop changes").
+-  const [prevPayload, setPrevPayload] = useState<typeof payload>(null);
+-  if (payload && payload !== prevPayload) {
+-    setPrevPayload(payload);
++  // Spend refreshes must not overwrite a policy edit still in progress.
++  const policySignature = payload
++    ? JSON.stringify([
++        payload.key.id,
++        payload.key.usageLimitEnabled,
++        payload.key.dailyUsageLimitUsd,
++        payload.key.weeklyUsageLimitUsd,
++      ])
++    : "";
++  const [previousPolicy, setPreviousPolicy] = useState("");
++  if (payload && policySignature !== previousPolicy) {
++    setPreviousPolicy(policySignature);
+     setEnabled(payload.key.usageLimitEnabled);
+     setDailyLimit(
+       typeof payload.key.dailyUsageLimitUsd === "number"

@@ -1,0 +1,22 @@
+diff --git a/tests/unit/usage-history-provider-alias-13459.test.ts b/tests/unit/usage-history-provider-alias-13459.test.ts
+index a7a1e5866..826f78312 100644
+--- a/tests/unit/usage-history-provider-alias-13459.test.ts
++++ b/tests/unit/usage-history-provider-alias-13459.test.ts
+@@ -19,14 +19,15 @@ test.after(() => {
+ });
+ 
+ test("#13459 saveRequestUsage stores the canonical provider id for an alias", async () => {
+-  for (const provider of ["af", "api-airforce"]) {
++  const startedAt = Date.now();
++  for (const [index, provider] of ["af", "api-airforce"].entries()) {
+     await usageHistory.saveRequestUsage({
+       provider,
+       model: "gpt-4o-mini",
+       tokens: { input: 10, output: 5 },
+       success: true,
+       latencyMs: 100,
+-      timestamp: new Date().toISOString(),
++      timestamp: new Date(startedAt + index).toISOString(),
+     });
+   }
+   const rows = core

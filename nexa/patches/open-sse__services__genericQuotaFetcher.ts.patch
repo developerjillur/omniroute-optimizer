@@ -1,0 +1,63 @@
+diff --git a/open-sse/services/genericQuotaFetcher.ts b/open-sse/services/genericQuotaFetcher.ts
+index 7137867f0..402c4ee01 100644
+--- a/open-sse/services/genericQuotaFetcher.ts
++++ b/open-sse/services/genericQuotaFetcher.ts
+@@ -24,7 +24,12 @@ import {
+   type QuotaFetcher,
+   type QuotaInfo,
+ } from "./quotaPreflight.ts";
+-import { getAntigravityQuotaFamily, getQuotaFetchScope } from "./antigravityQuotaFamily.ts";
++import {
++  getAntigravityQuotaFamily,
++  getQuotaFetchScope,
++  selectAntigravityQuotaWindowNames,
++  type AntigravityQuotaFamily,
++} from "./antigravityQuotaFamily.ts";
+ import { boundedMap } from "../../src/lib/quota/boundedMap.ts";
+ import { toNumberOrNull } from "@/shared/utils/numeric";
+ 
+@@ -268,14 +273,11 @@ export function convertUsageToQuotaInfo(
+       ? getAntigravityQuotaFamily(context.requestedModel)
+       : null;
+   const providerScopedWindows =
+-    requestedFamily === "gemini" || requestedFamily === "claude"
++    requestedFamily !== null
+       ? Object.fromEntries(
+-          Object.entries(windows).filter(([key]) => {
+-            if (key.endsWith("_weekly")) {
+-              return antigravityWeeklyWindowMatchesFamily(key, requestedFamily);
+-            }
+-            return getAntigravityQuotaFamily(key) === requestedFamily;
+-          })
++          selectAntigravityQuotaWindowNames(Object.keys(windows), context.requestedModel).map(
++            (key) => [key, windows[key]]
++          )
+         )
+       : windows;
+   if (Object.keys(providerScopedWindows).length === 0) return null;
+@@ -306,9 +308,14 @@ function isAntigravityProvider(provider: string | null | undefined): boolean {
+   return provider === "antigravity" || provider === "agy";
+ }
+ 
+-function antigravityWeeklyWindowMatchesFamily(key: string, family: "gemini" | "claude"): boolean {
++function antigravityWeeklyWindowMatchesFamily(
++  key: string,
++  family: AntigravityQuotaFamily | null
++): boolean {
+   if (!key.endsWith("_weekly")) return false;
+-  return family === "gemini" ? key === "gemini_weekly" : key === "claude_gpt_weekly";
++  return family?.startsWith("gemini")
++    ? key === "gemini_weekly"
++    : family === "claude" && key === "claude_gpt_weekly";
+ }
+ 
+ const TIME_WINDOW_KEYS = new Set([
+@@ -364,7 +371,7 @@ function normalizeQuotaWindows(
+ 
+   // Antigravity-style weekly buckets: pick worst only inside requested family.
+   const weeklyWindows = Object.entries(windows).filter(([key]) => {
+-    const hasFamilyScope = requestedFamily === "gemini" || requestedFamily === "claude";
++    const hasFamilyScope = requestedFamily !== null && requestedFamily !== "other";
+     return (
+       key.endsWith("_weekly") &&
+       (!hasFamilyScope || antigravityWeeklyWindowMatchesFamily(key, requestedFamily))

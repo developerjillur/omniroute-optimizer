@@ -1,0 +1,81 @@
+diff --git a/src/sse/services/sessionAffinityPin.ts b/src/sse/services/sessionAffinityPin.ts
+index 262db8491..a0532e436 100644
+--- a/src/sse/services/sessionAffinityPin.ts
++++ b/src/sse/services/sessionAffinityPin.ts
+@@ -27,6 +27,7 @@
+  */
+ 
+ import { createHash } from "crypto";
++import { isNativeClaudeSession } from "./claudeSessionSelection";
+ import {
+   getSessionAccountAffinity,
+   upsertSessionAccountAffinity,
+@@ -44,6 +45,7 @@ import {
+ import { isComboPerModelTimeoutAbort } from "@omniroute/open-sse/services/combo/comboAbortReasons.ts";
+ import * as log from "../utils/logger";
+ import { readHeaderValue } from "./headerReader.ts";
++import { getNativeClaudeSessionId } from "@omniroute/open-sse/services/nativeClaudeSession.ts";
+ 
+ export { readHeaderValue } from "./headerReader.ts";
+ 
+@@ -216,6 +218,9 @@ export function extractSessionAffinityKey(
+     normalizeSessionKey(record.prompt_cache_key, "prompt-cache");
+   if (explicitKey) return explicitKey;
+ 
++  const nativeSessionId = getNativeClaudeSessionId(body, headers);
++  if (nativeSessionId) return `claude:${nativeSessionId}`;
++
+   const inputText = getFirstInputText(body);
+   if (!inputText) return null;
+   return `input:sha256:${createHash("sha256").update(inputText).digest("hex")}`;
+@@ -273,7 +278,8 @@ export async function selectSessionAffinityConnection<T extends SessionAffinityC
+   provider: string,
+   sessionKey: string | null | undefined,
+   connections: T[],
+-  ttlMs = 0
++  ttlMs = 0,
++  createIfMissing = true
+ ): Promise<T | null> {
+   if (!sessionKey || connections.length === 0 || ttlMs <= 0) return null;
+ 
+@@ -303,6 +309,7 @@ export async function selectSessionAffinityConnection<T extends SessionAffinityC
+     );
+   }
+ 
++  if (!createIfMissing) return null;
+   const connection = [...connections].sort(compareLruConnections)[0] ?? null;
+   if (!connection) return null;
+ 
+@@ -327,12 +334,14 @@ export function planSessionAffinityConnection<T extends SessionAffinityConnectio
+   provider: string,
+   sessionKey: string | null | undefined,
+   connections: T[],
+-  ttlMs = 0
++  ttlMs = 0,
++  createIfMissing = true
+ ) {
+   if (!sessionKey || connections.length === 0 || ttlMs <= 0) return null;
+   const existing = getSessionAccountAffinity(sessionKey, provider, ttlMs);
+   const existingConnection =
+     existing && connections.find((candidate) => candidate.id === existing.connectionId);
++  if (!existingConnection && !createIfMissing) return null;
+   const connection = existingConnection ?? [...connections].sort(compareLruConnections)[0] ?? null;
+   if (!connection) return null;
+ 
+@@ -441,7 +450,7 @@ export interface AffinityPinSettings {
+  * site with one call.
+  */
+ export function resolveSessionAffinityTtlMs(
+-  _provider: string,
++  provider: string,
+   options: AffinityPinOptions,
+   settings: AffinityPinSettings
+ ): number {
+@@ -449,6 +458,7 @@ export function resolveSessionAffinityTtlMs(
+   if (Number.isFinite(override) && override > 0) return override;
+   const configured = Number(settings.sessionAffinityTtlMs ?? settings.codexSessionAffinityTtlMs);
+   if (Number.isFinite(configured) && configured > 0) return configured;
++  if (isNativeClaudeSession(provider, options.sessionKey)) return 24 * 60 * 60 * 1000;
+   return 0;
+ }
+ 

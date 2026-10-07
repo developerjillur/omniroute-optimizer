@@ -1,0 +1,35 @@
+diff --git a/bin/omniroute.mjs b/bin/omniroute.mjs
+index f9e785bd6..9cb73e734 100755
+--- a/bin/omniroute.mjs
++++ b/bin/omniroute.mjs
+@@ -188,8 +188,19 @@ function loadEnvFile() {
+     }
+   }
+ 
++  // Route the env-provisioning notice to STDERR in machine-output mode so it does
++  // not corrupt JSON/JSONL/CSV stdout parsing (QA finding: "CLI machine output").
++  const argv = process.argv.slice(2);
++  const machineOutput =
++    !process.stdout.isTTY ||
++    argv.includes("--json") ||
++    argv.includes("--quiet") ||
++    argv.some((a) => /^--output=(json|jsonl|csv)$/.test(a)) ||
++    argv.some((a, i) => a === "--output" && ["json", "jsonl", "csv"].includes(argv[i + 1]));
+   for (const envPath of loadedEnvPaths) {
+-    console.log(`  \x1b[2m📋 Loaded env from ${envPath}\x1b[0m`);
++    const line = `  \x1b[2m📋 Loaded env from ${envPath}\x1b[0m`;
++    if (machineOutput) process.stderr.write(line + "\n");
++    else console.log(line);
+   }
+ 
+   for (const [key, { winner, loser }] of shadowed) {
+@@ -215,6 +226,9 @@ function loadEnvFile() {
+ 
+ loadEnvFile();
+ 
++const { pinPackageMigrations } = await import("./cli/utils/packageMigrations.mjs");
++pinPackageMigrations(ROOT);
++
+ // Next.js has no android branch in getCacheDirectory(): if ~/.cache (and tmp)
+ // do not already exist it aborts the instrumentation hook, and every request
+ // then returns a silent HTTP 500 even though the CLI still looks "running".

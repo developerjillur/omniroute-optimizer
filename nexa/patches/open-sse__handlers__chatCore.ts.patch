@@ -1,0 +1,46 @@
+diff --git a/open-sse/handlers/chatCore.ts b/open-sse/handlers/chatCore.ts
+index 3f48d582e..8da3ad5ea 100644
+--- a/open-sse/handlers/chatCore.ts
++++ b/open-sse/handlers/chatCore.ts
+@@ -153,6 +153,7 @@ import { collectCustomToolNamesForSourceFormat } from "../translator/request/ope
+ import { sanitizeKiroTools } from "../utils/kiroSanitizer.ts";
+ import { splitMisplacedToolResults } from "../translator/helpers/claudeHelper.ts";
+ import { ensureCacheControlOnLastUserMessage } from "../services/claudeCodeConstraints.ts";
++import { isNativeClaudeThreadRequest } from "../services/nativeClaudeThread.ts";
+ import {
+   createSSETransformStreamWithLogger,
+   createPassthroughStreamWithLogger,
+@@ -2481,13 +2482,19 @@ async function handleChatCoreInner({
+       // payloads at high context (150+ msgs, 100+ tools). Fix: #1359.
+       // Claude Code sends well-formed Messages API payloads — trust them
+       // regardless of combo strategy or cache_control settings.
+-      translatedBody = applyReasoningRuleDirective({ ...body }, "claude");
++      const nativeThreadPassthrough =
++        isClaudeCodeSemanticPassthrough &&
++        provider === "claude" &&
++        isNativeClaudeThreadRequest(body);
++      translatedBody = nativeThreadPassthrough
++        ? structuredClone(body)
++        : applyReasoningRuleDirective({ ...body }, "claude");
+       translatedBody._disableToolPrefix = true;
+ 
+       // Sanitize historical thinking-block signatures for Anthropic-native Claude OAuth.
+       // Only Anthropic's first-party API validates these signatures (token-bound); third-party
+       // Claude-shape providers do not. See redactPassthroughThinkingSignatures + issue #2454.
+-      if (provider === "claude") {
++      if (provider === "claude" && !nativeThreadPassthrough) {
+         translatedBody.messages = redactPassthroughThinkingSignatures(
+           translatedBody.messages,
+           DEFAULT_THINKING_CLAUDE_SIGNATURE
+@@ -2498,7 +2505,10 @@ async function handleChatCoreInner({
+ 
+       // Legacy models reject role:"system" messages. Supported models accept
+       // them behind a beta, and hoisting them breaks the prompt cache prefix.
+-      if (isClaudeCodeSemanticPassthrough) {
++      if (nativeThreadPassthrough) {
++        // A sparse delta contains only this turn's directives. Hoisting them
++        // would replace the stored Thread's system/cache invariants.
++      } else if (isClaudeCodeSemanticPassthrough) {
+         if (
+           provider !== "claude" ||
+           !shouldUseMidConversationSystem(translatedBody, effectiveModel)

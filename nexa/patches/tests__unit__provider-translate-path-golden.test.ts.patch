@@ -1,0 +1,12 @@
+diff --git a/tests/unit/provider-translate-path-golden.test.ts b/tests/unit/provider-translate-path-golden.test.ts
+index 36e81677d..619428347 100644
+--- a/tests/unit/provider-translate-path-golden.test.ts
++++ b/tests/unit/provider-translate-path-golden.test.ts
+@@ -79,6 +79,7 @@ function sanitize(headers: Record<string, unknown>): Record<string, unknown> {
+         "<PLATFORM>"
+       )
+       .replace(/(antigravity\/ide\/\d+\.\d+\.\d+) [^/\s]+\/[^\s)]+/g, "$1 <OS>/<ARCH>")
++      .replace(/(copilot\/\d+\.\d+\.\d+) \((?:linux|darwin|win32)\)/g, "$1 (<PLATFORM>)")
+       .replace(
+         /(antigravity\/cli\/\d+\.\d+\.\d+ \(aidev_client; os_type=)[^;]+(; arch=)[^;]+(; auth_method=[^)]+\))/g,
+         "$1<OS>$2<ARCH>$3"

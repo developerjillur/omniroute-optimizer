@@ -1,0 +1,13 @@
+diff --git a/tests/unit/cli-helper/config-generator.test.ts b/tests/unit/cli-helper/config-generator.test.ts
+index f76696890..48c331247 100644
+--- a/tests/unit/cli-helper/config-generator.test.ts
++++ b/tests/unit/cli-helper/config-generator.test.ts
+@@ -187,6 +187,8 @@ describe("config-generator", () => {
+         "background_review",
+         "moa_reference",
+         "moa_aggregator",
++        "moa_advisor_1",
++        "moa_advisor_2",
+       ];
+       assert.deepStrictEqual([...ids].sort(), [...expectedIds].sort());
+     });

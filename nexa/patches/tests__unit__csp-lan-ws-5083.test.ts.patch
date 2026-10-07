@@ -1,0 +1,101 @@
+diff --git a/tests/unit/csp-lan-ws-5083.test.ts b/tests/unit/csp-lan-ws-5083.test.ts
+index c74f78b26..9bae12602 100644
+--- a/tests/unit/csp-lan-ws-5083.test.ts
++++ b/tests/unit/csp-lan-ws-5083.test.ts
+@@ -14,21 +14,33 @@
+ import test from "node:test";
+ import assert from "node:assert/strict";
+ import { readFileSync } from "node:fs";
+-import { fileURLToPath } from "node:url";
++import { fileURLToPath, pathToFileURL } from "node:url";
+ import { dirname, resolve } from "node:path";
+ 
+ const here = dirname(fileURLToPath(import.meta.url));
+ const nextConfig = readFileSync(resolve(here, "../../next.config.mjs"), "utf8");
+ 
+-// Extract the connect-src directive string literal from the CSP array.
+-function connectSrcDirective(): string {
+-  const match = nextConfig.match(/"(connect-src[^"]*)"/);
+-  assert.ok(match, "next.config.mjs must define a connect-src directive in the CSP array");
+-  return match![1];
++// Inspect effective configuration so computed production policy is covered too.
++async function connectSrcDirective(): Promise<string> {
++  const mod = await import(
++    `${pathToFileURL(resolve(here, "../../next.config.mjs")).href}?csp=${Date.now()}-${Math.random()}`
++  );
++  const rules = (await mod.default.headers()) as {
++    headers: { key: string; value: string }[];
++  }[];
++  const csp = rules
++    .flatMap((rule) => rule.headers)
++    .find((header) => header.key.toLowerCase() === "content-security-policy")?.value;
++  const directive = csp
++    ?.split(";")
++    .map((part) => part.trim())
++    .find((part) => part.startsWith("connect-src "));
++  assert.ok(directive, "effective security headers must define connect-src");
++  return directive;
+ }
+ 
+-test("#5083 connect-src permits the bare ws: scheme for non-loopback dashboards", () => {
+-  const connectSrc = connectSrcDirective();
++test("#5083 development connect-src permits the bare ws: scheme", async () => {
++  const connectSrc = await connectSrcDirective();
+   // Bare `ws:` must be present as its own token (not just `ws://localhost`).
+   assert.match(
+     connectSrc,
+@@ -37,13 +49,13 @@ test("#5083 connect-src permits the bare ws: scheme for non-loopback dashboards"
+   );
+ });
+ 
+-test("#5083 connect-src keeps the bare wss: scheme it mirrors", () => {
+-  const connectSrc = connectSrcDirective();
++test("#5083 development connect-src keeps the bare wss: scheme", async () => {
++  const connectSrc = await connectSrcDirective();
+   assert.match(connectSrc, /(^|\s)wss:(\s|$)/, "connect-src must still allow bare wss:");
+ });
+ 
+-test("#5083 connect-src still scopes 'self' and explicit loopback origins", () => {
+-  const connectSrc = connectSrcDirective();
++test("#5083 connect-src still scopes 'self' and explicit loopback origins", async () => {
++  const connectSrc = await connectSrcDirective();
+   assert.ok(connectSrc.includes("'self'"), "connect-src must still include 'self'");
+   assert.ok(
+     connectSrc.includes("ws://localhost:*") && connectSrc.includes("ws://127.0.0.1:*"),
+@@ -51,6 +63,23 @@ test("#5083 connect-src still scopes 'self' and explicit loopback origins", () =
+   );
+ });
+ 
++test("production connect-src permits explicit LAN origins without blanket schemes", async () => {
++  const originalEnv = process.env.NODE_ENV;
++  const originalExtras = process.env.OMNIROUTE_CSP_CONNECT_SRC;
++  process.env.NODE_ENV = "production";
++  process.env.OMNIROUTE_CSP_CONNECT_SRC = "ws://192.168.1.20:20128";
++  try {
++    const connectSrc = await connectSrcDirective();
++    assert.ok(connectSrc.includes("ws://192.168.1.20:20128"));
++    assert.doesNotMatch(connectSrc, /(^|\s)(https:|ws:|wss:)(\s|$)/);
++  } finally {
++    if (originalEnv === undefined) delete process.env.NODE_ENV;
++    else process.env.NODE_ENV = originalEnv;
++    if (originalExtras === undefined) delete process.env.OMNIROUTE_CSP_CONNECT_SRC;
++    else process.env.OMNIROUTE_CSP_CONNECT_SRC = originalExtras;
++  }
++});
++
+ test("#5083 fix does NOT introduce a global Next.js middleware", () => {
+   // The project has no global middleware by design; the CSP fix must stay declarative.
+   let exists = true;
+@@ -59,7 +88,11 @@ test("#5083 fix does NOT introduce a global Next.js middleware", () => {
+   } catch {
+     exists = false;
+   }
+-  assert.equal(exists, false, "src/middleware.ts must not exist (no global middleware — see CLAUDE.md)");
++  assert.equal(
++    exists,
++    false,
++    "src/middleware.ts must not exist (no global middleware — see CLAUDE.md)"
++  );
+ });
+ 
+ test("#5083 baseline security directives remain intact in the CSP", () => {

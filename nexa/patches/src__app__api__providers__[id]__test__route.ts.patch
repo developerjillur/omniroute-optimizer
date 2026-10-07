@@ -1,0 +1,54 @@
+diff --git a/src/app/api/providers/[id]/test/route.ts b/src/app/api/providers/[id]/test/route.ts
+index 373c7781c..f8caf9988 100644
+--- a/src/app/api/providers/[id]/test/route.ts
++++ b/src/app/api/providers/[id]/test/route.ts
+@@ -34,6 +34,8 @@ import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLease
+ import { buildApiKeyConnectionTestResult } from "./apiKeyTestResult";
+ import { classifyOAuthProbeInconclusive, OAUTH_TEST_CONFIG } from "./oauthTestConfig";
+ import { isGeoBlockedError } from "@omniroute/open-sse/services/errorClassifier.ts";
++import { googleVerificationObservedAt, isGoogleCloudAccount, isGoogleVerificationFailure, GOOGLE_VERIFICATION_MESSAGE } from "@/lib/providers/googleAccountHealth";
++import { getGoogleAccountVerificationSnapshot, setGoogleAccountVerification } from "@/sse/services/googleAccountVerification";
+ import * as retirement from "@/lib/providers/chatgptWebRetirementResponse";
+ import {
+   classifyFailure,
+@@ -663,6 +665,7 @@ export async function testOAuthConnection(
+         error: null,
+         refreshed,
+         newTokens,
++        statusCode: res.status,
+         diagnosis: makeDiagnosis("ok", "upstream", null, null),
+       };
+     }
+@@ -857,7 +860,9 @@ export async function testOAuthConnection(
+       connection.provider === "gitlab-duo" && res.status === 403
+         ? `Access denied: ${sanitizeUpstreamBodyText(bodyText)}`
+         : "Access denied";
+-    const error = isGeoBlockedError(bodyText)
++    const error = isGoogleVerificationFailure(connection.provider, res.status, bodyText)
++      ? GOOGLE_VERIFICATION_MESSAGE
++      : isGeoBlockedError(bodyText)
+       ? "Egress location blocked by Google (User location is not supported). The Cloud Code API is not offered from this server's proxy exit region — route antigravity/agy through a proxy in a supported region (e.g. US/EU) or use a different provider. This is NOT an account problem."
+       : isAccountDeactivatedMessage(bodyText)
+         ? "Account deactivated by the provider"
+@@ -974,6 +979,8 @@ export async function testSingleConnection(
+     };
+   }
+   retirement.assertProviderAvailable(provider);
++  const verificationSnapshot = isGoogleCloudAccount(provider)
++    ? await getGoogleAccountVerificationSnapshot(connectionId) : undefined;
+ 
+   let proxyInfo: any = null;
+   try {
+@@ -1161,6 +1168,12 @@ export async function testSingleConnection(
+ 
+   // Update status in db
+   await updateProviderConnection(connectionId, updateData);
++  if (isGoogleVerificationFailure(provider, result.statusCode, result.error)) {
++    await setGoogleAccountVerification(connectionId, true);
++  } else if (isGoogleCloudAccount(provider) && result.valid &&
++    Number(result.statusCode) >= 200 && Number(result.statusCode) < 300) {
++    await setGoogleAccountVerification(connectionId, false, googleVerificationObservedAt(connection), verificationSnapshot);
++  }
+ 
+   // Sync to cloud if token was refreshed
+   if (result.refreshed) {

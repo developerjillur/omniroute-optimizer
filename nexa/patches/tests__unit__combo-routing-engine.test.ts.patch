@@ -1,0 +1,13 @@
+diff --git a/tests/unit/combo-routing-engine.test.ts b/tests/unit/combo-routing-engine.test.ts
+index 41e4f43d3..723a75aaf 100644
+--- a/tests/unit/combo-routing-engine.test.ts
++++ b/tests/unit/combo-routing-engine.test.ts
+@@ -1561,6 +1561,8 @@ test("handleComboChat preserves fallback request bodies when zero-latency optimi
+ });
+ 
+ test("handleComboChat applies fallback compression only after explicit zero-latency opt-in", async () => {
++  const { updateCompressionSettings } = await import("../../src/lib/db/compression.ts");
++  await updateCompressionSettings({ enabled: true });
+   const longToolOutput = "x".repeat(2500);
+   let fallbackBody: any = null;
+ 

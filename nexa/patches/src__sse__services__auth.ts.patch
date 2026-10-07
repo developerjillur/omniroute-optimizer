@@ -1,0 +1,295 @@
+diff --git a/src/sse/services/auth.ts b/src/sse/services/auth.ts
+index d22d86d41..d53a90f11 100644
+--- a/src/sse/services/auth.ts
++++ b/src/sse/services/auth.ts
+@@ -1,4 +1,16 @@
+ import { randomUUID } from "crypto";
++import {
++  getModelTestConnectionId,
++  recordModelTestSelection,
++  restrictModelTestConnections,
++} from "@/lib/api/modelTestScope";
++import {
++  googleAccountIdentity,
++  googleVerificationBlockedIdentities,
++  isGoogleVerificationFailure,
++  GOOGLE_VERIFICATION_MESSAGE,
++} from "@/lib/providers/googleAccountHealth";
++import { setGoogleAccountVerification } from "./googleAccountVerification.ts";
+ import { nodeTypeFromId } from "@/lib/db/providerNodeSelect";
+ import { hydrateConnectionProviderSpecificData } from "./compatibleNodeBaseUrl.ts"; // #13452
+ import { extractGoogApiKeyHeader } from "./googApiKeyAuth.ts";
+@@ -50,12 +62,14 @@ import {
+   DEFAULT_QUOTA_THRESHOLD_PERCENT,
+   getCachedClaudeQuotaScopeDecision as readClaudeScope,
+   getQuotaCache,
++  getQuotaWeightedRemainingPercent,
+   getQuotaWindowStatus,
+   hydrateCodexQuotaCacheForRequest,
+   isQuotaExhaustedForRequest,
+   resolveClaudeQuotaCooldownMs as resolveClaudeCooldown,
+ } from "@/domain/quotaCache";
+ import { isClaudeExtraUsageAllowed } from "@/lib/providers/claudeExtraUsage";
++import { pickClaudeNewSession, isNativeClaudeSession } from "./claudeSessionSelection";
+ import {
+   getQuotaScopeLabelForProvider,
+   isAntigravityQuotaProvider,
+@@ -1076,6 +1090,7 @@ async function materializeConnection(
+   } = {}
+ ) {
+   const providerSpecificData = await hydrateConnectionProviderSpecificData(connection);
++  recordModelTestSelection(connection.id);
+   const apiKeyHealth = providerSpecificData.apiKeyHealth as Record<string, KeyHealth> | undefined;
+   if (apiKeyHealth) syncHealthFromDB(connection.id, apiKeyHealth);
+   const releaseOAuthSession =
+@@ -1263,6 +1278,8 @@ export async function getProviderCredentials(
+     // Fetched early so the session-affinity-pin override (#5903) can consult
+     // the TTL before forcedConnectionId narrows the connection pool.
+     const settings = await getSettings();
++    const cachedQuotaFilteringEnabled =
++      resolveResilienceSettings(settings).quotaPreflight.cachedQuotaFilteringEnabled !== false;
+     const sessionAffinityTtlMs = resolveSessionAffinityTtlMs(provider, options, settings);
+ 
+     // Fix #922: Check for aliases (nvidia/nvidia_nim) to ensure credentials are found
+@@ -1289,6 +1306,7 @@ export async function getProviderCredentials(
+     if (allowedConnections && allowedConnections.length > 0) {
+       connections = connections.filter((conn) => allowedConnections.includes(conn.id));
+     }
++    connections = restrictModelTestConnections(connections);
+     let explicitProbeKind: "probe" | "suppressed" | "skip" = "skip";
+     if (forcedConnectionId && !connections.some((c) => c.id === forcedConnectionId)) {
+       const pinnedRaw = await getCachedProviderConnectionById(forcedConnectionId);
+@@ -1328,7 +1346,7 @@ export async function getProviderCredentials(
+ 
+     // #5903: an active session-affinity pin outranks a per-request reset-aware
+     // forcedConnectionId (see sessionAffinityPin leaf for the full rationale).
+-    if (!options.lease) {
++    if (!options.lease && !getModelTestConnectionId()) {
+       forcedConnectionId =
+         applySessionAffinityPin({
+           forcedConnectionId,
+@@ -1367,8 +1385,9 @@ export async function getProviderCredentials(
+         excludedConnectionIds,
+         connections,
+         allowRateLimitedConnections,
+-        bypassQuotaPolicy,
++        bypassQuotaPolicy: bypassQuotaPolicy || !cachedQuotaFilteringEnabled,
+         isQuotaExhausted: (connectionId) => {
++          if (!cachedQuotaFilteringEnabled) return false;
+           const conn = connections.find((candidate) => candidate.id === connectionId);
+           return isQuotaExhaustedForRequest(
+             connectionId,
+@@ -1429,6 +1448,7 @@ export async function getProviderCredentials(
+         allConnections = allConnections.filter((conn) => allowedConnections.includes(conn.id));
+       }
+       const blockedByKeyPolicyCount = connectionsBeforeKeyPolicy - allConnections.length;
++      allConnections = restrictModelTestConnections(allConnections);
+       if (forcedConnectionId) {
+         allConnections = allConnections.filter((conn) => conn.id === forcedConnectionId);
+       }
+@@ -1539,6 +1559,7 @@ export async function getProviderCredentials(
+       requestedModel
+     );
+     // Filter out unavailable accounts and excluded connection
++    const verificationBlockedIdentities = googleVerificationBlockedIdentities(connections);
+     let availableConnections = connections.filter((c) => {
+       if (excludedConnectionIds.has(c.id)) {
+         connectionFilterStatus.set(c.id, "excluded");
+@@ -1556,6 +1577,13 @@ export async function getProviderCredentials(
+         return false;
+       }
+       if (!allowSuppressedConnections && explicitProbeKind !== "probe") {
++        if (
++          verificationBlockedIdentities.has(googleAccountIdentity(c)) &&
++          !isTerminalConnectionStatusForModel(c, provider, requestedModel)
++        ) {
++          connectionFilterStatus.set(c.id, "verificationRequired");
++          return false;
++        }
+         if (!allowRateLimitedConnections && isAccountUnavailable(c.rateLimitedUntil)) {
+           connectionFilterStatus.set(c.id, "rateLimited");
+           return false;
+@@ -1663,6 +1691,24 @@ export async function getProviderCredentials(
+     });
+ 
+     if (availableConnections.length === 0) {
++      if (
++        connections.length > 0 &&
++        connections.every(
++          (c) =>
++            verificationBlockedIdentities.has(googleAccountIdentity(c)) &&
++            !isTerminalConnectionStatus(c)
++        )
++      ) {
++        invalidateManagedLease(options, "CONNECTION_INELIGIBLE");
++        return {
++          allRateLimited: true,
++          retryAfter: null,
++          retryAfterHuman: undefined,
++          lastError: GOOGLE_VERIFICATION_MESSAGE,
++          lastErrorCode: 403,
++          connectionsCount: connections.length,
++        };
++      }
+       const cooldownStates: CooldownInspectionState[] = connections.map((connection) => {
+         const connectionCooldownMs = parseFutureDateMs(connection.rateLimitedUntil);
+         const codexScopeCooldownMs =
+@@ -1798,7 +1844,7 @@ export async function getProviderCredentials(
+       }
+     }
+ 
+-    if (!bypassQuotaPolicy) {
++    if (!bypassQuotaPolicy && cachedQuotaFilteringEnabled) {
+       policyEligibleConnections = peakHourEligibleConnections.filter((connection) => {
+         const evaluation = evaluateQuotaLimitPolicy(provider, connection, requestedModel);
+         quotaResults.set(connection.id, { blocked: evaluation.blocked, exhausted: false });
+@@ -1872,12 +1918,9 @@ export async function getProviderCredentials(
+     const withQuota: typeof policyEligibleConnections = [];
+     const exhaustedQuota: typeof policyEligibleConnections = [];
+     for (const c of policyEligibleConnections) {
+-      const exhausted = isQuotaExhaustedForRequest(
+-        c.id,
+-        provider,
+-        requestedModel,
+-        c.providerSpecificData
+-      );
++      const exhausted =
++        cachedQuotaFilteringEnabled &&
++        isQuotaExhaustedForRequest(c.id, provider, requestedModel, c.providerSpecificData);
+       const existing = quotaResults.get(c.id);
+       if (existing) existing.exhausted = exhausted;
+       if (!exhausted) {
+@@ -1895,6 +1938,21 @@ export async function getProviderCredentials(
+     }
+ 
+     if (withQuota.length === 0 && exhaustedQuota.length > 0) {
++      // A sibling excluded after an upstream failure can still have quota.
++      // Preserve that request's failure instead of classifying the whole pool
++      // as exhausted from only the remaining candidates' cached telemetry.
++      const excludedWithQuota = connections.some(
++        (connection) =>
++          excludedConnectionIds.has(connection.id) &&
++          !isQuotaExhaustedForRequest(
++            connection.id,
++            provider,
++            requestedModel,
++            connection.providerSpecificData
++          )
++      );
++      if (excludedWithQuota) return null;
++
+       // All remaining eligible accounts are exhausted
+       const earliestResetAt = getEarliestFutureDate(
+         exhaustedQuota.map((c) => {
+@@ -1912,7 +1970,10 @@ export async function getProviderCredentials(
+         allRateLimited: true,
+         retryAfter,
+         retryAfterHuman: formatRetryAfter(retryAfter),
+-        lastError: `All ${provider} accounts have exhausted their quota (cached quota state, no upstream attempt; earliest reset ${formatRetryAfter(retryAfter)})`,
++        lastError:
++          verificationBlockedIdentities.size > 0
++            ? `No usable ${provider} accounts: some require Google verification; the remaining eligible accounts have exhausted quota (cached state; earliest reset ${formatRetryAfter(retryAfter)})`
++            : `All ${provider} accounts have exhausted their quota (cached quota state, no upstream attempt; earliest reset ${formatRetryAfter(retryAfter)})`,
+         lastErrorCode: 429,
+       };
+     }
+@@ -1956,6 +2017,7 @@ export async function getProviderCredentials(
+     >;
+     const providerOverride = providerStrategyOverrides[resolvedId] || {};
+     const strategy = providerOverride.fallbackStrategy || settings.fallbackStrategy || "fill-first";
++    const nativeClaudeSession = isNativeClaudeSession(provider, options.sessionKey);
+ 
+     let commitSelectionSideEffects: (() => Promise<void> | void) | undefined;
+     let connection = leasePolicy.activeLease
+@@ -1969,7 +2031,8 @@ export async function getProviderCredentials(
+             provider,
+             options.sessionKey,
+             orderedConnections,
+-            sessionAffinityTtlMs
++            sessionAffinityTtlMs,
++            !nativeClaudeSession
+           )
+         : null;
+     const affinityConnection = connection
+@@ -1980,7 +2043,8 @@ export async function getProviderCredentials(
+             provider,
+             options.sessionKey,
+             orderedConnections,
+-            sessionAffinityTtlMs
++            sessionAffinityTtlMs,
++            !nativeClaudeSession
+           );
+     if (affinityConnection) {
+       connection = affinityConnection;
+@@ -2154,10 +2218,17 @@ export async function getProviderCredentials(
+       }
+     } else {
+       // Default: fill-first (already sorted by priority in getProviderConnections)
+-      connection = orderedConnections[0];
++      connection = nativeClaudeSession
++        ? (pickClaudeNewSession(orderedConnections, getQuotaWeightedRemainingPercent) ??
++          orderedConnections[0])
++        : orderedConnections[0];
+     }
+ 
+-    if (options.reserveOAuthSession === true && connection?.authType === "oauth") {
++    if (
++      options.reserveOAuthSession === true &&
++      connection?.authType === "oauth" &&
++      !nativeClaudeSession
++    ) {
+       const selectedPriority = connection.priority || 999;
+       const selectedAvailability = getOAuthSessionAvailability(connection.id, options.sessionKey);
+       const moreAvailablePeer = [...orderedConnections]
+@@ -2177,6 +2248,17 @@ export async function getProviderCredentials(
+       if (moreAvailablePeer) connection = moreAvailablePeer;
+     }
+ 
++    if (nativeClaudeSession && !affinityConnection && connection) {
++      const pin = planSessionAffinityConnection(
++        provider,
++        options.sessionKey,
++        [connection],
++        sessionAffinityTtlMs
++      );
++      if (options.lease) commitSelectionSideEffects = pin?.commit;
++      else await pin?.commit();
++    }
++
+     let exclusiveLease: ExclusiveConnectionLease | undefined;
+     if (options.lease) {
+       const candidateIds = orderedConnections.map((candidate) => candidate.id);
+@@ -2282,6 +2364,18 @@ export async function getProviderCredentialsWithQuotaPreflight(
+   );
+ 
+   const resilience = resolveResilienceSettings(await getCachedSettings());
++  if (resilience.quotaPreflight.cachedQuotaFilteringEnabled === false) {
++    return getProviderCredentials(
++      provider,
++      excludeConnectionId,
++      allowedConnections,
++      requestedModel,
++      {
++        ...options,
++        bypassQuotaPolicy: true,
++      }
++    );
++  }
+   const { defaultThresholdPercent, warnThresholdPercent, providerWindowDefaults } =
+     resilience.quotaPreflight;
+   const providerWindowMap = providerWindowDefaults[provider] || {};
+@@ -2732,6 +2826,14 @@ export async function markAccountUnavailable(
+     if (isOpencodeFreeTierRefusalForProvider(provider, status, errorText))
+       return { shouldFallback: true, cooldownMs: 0 };
+ 
++    if (
++      isGoogleVerificationFailure(provider, status, errorText) &&
++      !(await shouldIsolateProbeFailures())
++    ) {
++      await setGoogleAccountVerification(connectionId, true);
++      return { shouldFallback: true, cooldownMs: 0, reason: "project_route_error" };
++    }
++
+     // ─── Anti-Thundering Herd Guard ─────────────────────────────────
+     // If this connection was ALREADY marked unavailable by a prior concurrent
+     // request (within the mutex window), skip re-marking to avoid resetting

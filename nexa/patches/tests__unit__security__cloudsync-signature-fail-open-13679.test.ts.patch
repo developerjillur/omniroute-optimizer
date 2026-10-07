@@ -1,0 +1,69 @@
+diff --git a/tests/unit/security/cloudsync-signature-fail-open-13679.test.ts b/tests/unit/security/cloudsync-signature-fail-open-13679.test.ts
+index c8c960b35..c392fcb54 100644
+--- a/tests/unit/security/cloudsync-signature-fail-open-13679.test.ts
++++ b/tests/unit/security/cloudsync-signature-fail-open-13679.test.ts
+@@ -14,20 +14,23 @@
+  *      regardless of the opt-in enforce flag below.
+  *  (a) opt-in only (OMNIROUTE_CLOUD_SYNC_ENFORCE_SIGNATURE=true, default OFF):
+  *      also rejects a payload carrying NO signature at all. Default stays
+- *      legacy pass-through for v3.8.x peers that haven't rotated in a shared
+- *      secret yet — the default flips to enforced in v3.9.
++ *      unsigned legacy responses require an explicit compatibility opt-in in
++ *      the local overlay. Unverifiable signatures are always rejected.
+  */
+ import { test } from "node:test";
+ import assert from "node:assert/strict";
+ 
+ const ORIGINAL_SECRET = process.env.OMNIROUTE_CLOUD_SYNC_SECRET;
+ const ORIGINAL_ENFORCE = process.env.OMNIROUTE_CLOUD_SYNC_ENFORCE_SIGNATURE;
++const ORIGINAL_ALLOW = process.env.OMNIROUTE_CLOUD_SYNC_ALLOW_UNVERIFIED;
+ 
+ function restoreEnv() {
+   if (ORIGINAL_SECRET === undefined) delete process.env.OMNIROUTE_CLOUD_SYNC_SECRET;
+   else process.env.OMNIROUTE_CLOUD_SYNC_SECRET = ORIGINAL_SECRET;
+   if (ORIGINAL_ENFORCE === undefined) delete process.env.OMNIROUTE_CLOUD_SYNC_ENFORCE_SIGNATURE;
+   else process.env.OMNIROUTE_CLOUD_SYNC_ENFORCE_SIGNATURE = ORIGINAL_ENFORCE;
++  if (ORIGINAL_ALLOW === undefined) delete process.env.OMNIROUTE_CLOUD_SYNC_ALLOW_UNVERIFIED;
++  else process.env.OMNIROUTE_CLOUD_SYNC_ALLOW_UNVERIFIED = ORIGINAL_ALLOW;
+ }
+ 
+ test.after(restoreEnv);
+@@ -52,9 +55,10 @@ test("issue #13679: a present-but-unverifiable X-Cloud-Sig is rejected even with
+   }
+ });
+ 
+-test("issue #13679: legacy peers with NO X-Cloud-Sig header still pass by default (v3.8.x back-compat)", async () => {
++test("unsigned legacy peers are rejected without an explicit compatibility opt-in", async () => {
+   delete process.env.OMNIROUTE_CLOUD_SYNC_SECRET;
+   delete process.env.OMNIROUTE_CLOUD_SYNC_ENFORCE_SIGNATURE;
++  delete process.env.OMNIROUTE_CLOUD_SYNC_ALLOW_UNVERIFIED;
+   try {
+     const { verifyCloudSignature } = await import(
+       `../../../src/lib/cloudSync.ts?case=13679-legacy-${Date.now()}-${Math.random()}`
+@@ -63,9 +67,24 @@ test("issue #13679: legacy peers with NO X-Cloud-Sig header still pass by defaul
+ 
+     assert.equal(
+       verifyCloudSignature(rawBody, null),
+-      true,
+-      "an unsigned payload from a legacy peer must still pass through by default in v3.8.x"
++      false,
++      "unsigned responses must not pass through by default"
++    );
++  } finally {
++    restoreEnv();
++  }
++});
++
++test("unsigned legacy compatibility requires an explicit operator opt-in", async () => {
++  delete process.env.OMNIROUTE_CLOUD_SYNC_SECRET;
++  delete process.env.OMNIROUTE_CLOUD_SYNC_ENFORCE_SIGNATURE;
++  process.env.OMNIROUTE_CLOUD_SYNC_ALLOW_UNVERIFIED = "true";
++  try {
++    const { verifyCloudSignature } = await import(
++      `../../../src/lib/cloudSync.ts?case=legacy-opt-in-${Date.now()}-${Math.random()}`
+     );
++    assert.equal(verifyCloudSignature(JSON.stringify({ providers: [] }), null), true);
++    assert.equal(verifyCloudSignature(JSON.stringify({ providers: [] }), "0".repeat(64)), false);
+   } finally {
+     restoreEnv();
+   }

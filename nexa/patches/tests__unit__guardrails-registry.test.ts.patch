@@ -1,0 +1,28 @@
+diff --git a/tests/unit/guardrails-registry.test.ts b/tests/unit/guardrails-registry.test.ts
+index bb64e067e..71980608c 100644
+--- a/tests/unit/guardrails-registry.test.ts
++++ b/tests/unit/guardrails-registry.test.ts
+@@ -90,14 +90,21 @@ test("guardrail registry respects disabledGuardrails from context", async () =>
+   );
+ });
+ 
+-test("resolveDisabledGuardrails merges api key, body metadata, and headers", () => {
++test("resolveDisabledGuardrails accepts trusted API key policy and ignores request overrides", () => {
+   const disabled = resolveDisabledGuardrails({
+     apiKeyInfo: { disabledGuardrails: ["pii-masker"] },
+     body: { metadata: { disabledGuardrails: ["prompt_injection"] } },
+     headers: { "x-omniroute-disabled-guardrails": "custom-rule" },
+   });
+ 
+-  assert.deepEqual(disabled, ["pii-masker", "prompt-injection", "custom-rule"]);
++  assert.deepEqual(disabled, ["pii-masker"]);
++  assert.deepEqual(
++    resolveDisabledGuardrails({
++      body: { metadata: { disabledGuardrails: ["prompt_injection"] } },
++      headers: { "x-omniroute-disabled-guardrails": "custom-rule" },
++    }),
++    []
++  );
+ });
+ 
+ test("prompt injection guardrail blocks suspicious content in block mode", async () => {

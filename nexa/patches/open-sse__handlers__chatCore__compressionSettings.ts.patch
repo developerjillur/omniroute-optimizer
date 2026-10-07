@@ -1,0 +1,13 @@
+diff --git a/open-sse/handlers/chatCore/compressionSettings.ts b/open-sse/handlers/chatCore/compressionSettings.ts
+index 467a851f5..c0b2e8a8c 100644
+--- a/open-sse/handlers/chatCore/compressionSettings.ts
++++ b/open-sse/handlers/chatCore/compressionSettings.ts
+@@ -36,7 +36,7 @@ export async function resolveCompressionSettings(log?: LoggerLike): Promise<{
+     return {
+       settings,
+       enabled: settings.enabled,
+-      contextEditingEnabled: settings.contextEditing?.enabled === true,
++      contextEditingEnabled: settings.enabled && settings.contextEditing?.enabled === true,
+     };
+   } catch (err) {
+     log?.warn?.(

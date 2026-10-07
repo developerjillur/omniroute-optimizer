@@ -1,0 +1,24 @@
+diff --git a/tests/unit/hard-session-lease-bypass-inventory.test.ts b/tests/unit/hard-session-lease-bypass-inventory.test.ts
+index 7d21b58d1..3c3a29eca 100644
+--- a/tests/unit/hard-session-lease-bypass-inventory.test.ts
++++ b/tests/unit/hard-session-lease-bypass-inventory.test.ts
+@@ -76,7 +76,7 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
+     "src/lib/search/executeWebSearch.ts": 2,
+     "src/lib/skills/webFetchExecution.ts": 1,
+     "src/sse/handlers/chat.ts": 2,
+-    "src/sse/services/auth.ts": 4,
++    "src/sse/services/auth.ts": 5,
+     "src/sse/services/imageCredentialRetry.ts": 1,
+   },
+   executor: {
+@@ -236,7 +236,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
+     "src/shared/services/codexCatalogRevalidation.ts": 2,
+     "src/shared/services/modelSyncScheduler.ts": 1,
+     "src/sse/handlers/chatHelpers.ts": 1,
++    // Native ownership reads add one eligible-account lookup.
+     "src/sse/services/auth.ts": 4,
++    // Verification state reads update operator metadata; they do not dispatch inference.
++    "src/sse/services/googleAccountVerification.ts": 5,
+   },
+ };
+ 

@@ -1,0 +1,94 @@
+#!/usr/bin/env node
+// nexa/gen-manifest.mjs — regenerate nexa/manifest.json from the live overlay contents.
+// The manifest is the registry: every customization, which ladder-layer it occupies, its
+// class (nexa-specific vs upstream-candidate), and its upstream target. Seeds class from the
+// recovered legacy map when present; defaults new items to needs-review.
+import fs from "node:fs";
+import path from "node:path";
+import { NEXA, listPatches, listNewFiles, patchTarget, baseVersion, git } from "./lib/overlay.mjs";
+
+const legacyPath = path.join(NEXA, ".work", "old-classes.json");
+const legacy = fs.existsSync(legacyPath) ? JSON.parse(fs.readFileSync(legacyPath, "utf8")) : {};
+const existingPath = path.join(NEXA, "manifest.json");
+const existing = fs.existsSync(existingPath)
+  ? JSON.parse(fs.readFileSync(existingPath, "utf8"))
+  : {};
+const priorClasses = Object.fromEntries(
+  (existing.items || []).filter((i) => i.target).map((i) => [i.target, i.class])
+);
+const classify = (file) => legacy[file]?.class || priorClasses[file] || "needs-review";
+
+// upstream-PR pipeline map (target file -> {pr, state}); drives the traceable self-cleaning.
+const prPath = path.join(NEXA, "upstream-prs.json");
+const prRaw = fs.existsSync(prPath) ? JSON.parse(fs.readFileSync(prPath, "utf8")) : {};
+const prMap = Object.fromEntries(Object.entries(prRaw).filter(([k]) => !k.startsWith("_")));
+const prFor = (file) => prMap[file] || null;
+
+const patches = listPatches().map((p) => {
+  const target = patchTarget(p);
+  return {
+    file: path.relative(NEXA, p),
+    layer: "patch",
+    class: classify(target),
+    target,
+    conflictRisk: "on-overlap",
+    upstreamPR: prFor(target),
+  };
+});
+const news = listNewFiles().map((n) => ({
+  file: `new/${n.dest}`,
+  layer: "new",
+  class: classify(n.dest),
+  target: n.dest,
+  conflictRisk: "none",
+  upstreamPR: prFor(n.dest),
+}));
+const tooling = [];
+const push = (rel, cls) => {
+  if (fs.existsSync(path.join(NEXA, rel)))
+    tooling.push({ file: rel, layer: "tooling", class: cls, conflictRisk: "none" });
+};
+["skill/nexa-overlay", "agent/nexa-overlay-maintainer.md"].forEach((f) => push(f, "nexa-specific"));
+[
+  "config/compression-disabled.json",
+  "deploy/disable-compression.mjs",
+  "check/native-claude-regressions.mjs",
+].forEach((f) => push(f, "nexa-specific"));
+
+const { sha, version } = baseVersion();
+const items = [...patches, ...news, ...tooling];
+const count = (pred) => items.filter(pred).length;
+
+const manifest = {
+  _comment:
+    "NexaLance OmniRoute child-theme overlay registry. layer: patch=surgical diff onto pristine upstream; " +
+    "new=net-new file copied in at build; tooling=overlay machinery. class: upstream-candidate=generic fix worth " +
+    "PRing to diegosouzapw/OmniRoute (Phase-2 shrinker); nexa-specific=stays in the overlay; needs-review=triage. " +
+    "Base stays byte-for-byte pristine; regenerate with `node nexa/gen-manifest.mjs`.",
+  upstreamBase: { sha, version },
+  productionBranch: "nexalance",
+  generatedFrom: "live nexa/ contents",
+  counts: {
+    total: items.length,
+    patches: patches.length,
+    new: news.length,
+    tooling: tooling.length,
+    upstreamCandidates: count((i) => i.class === "upstream-candidate"),
+    nexaSpecific: count((i) => i.class === "nexa-specific"),
+    needsReview: count((i) => i.class === "needs-review"),
+    pendingUpstreamPR: count((i) => i.upstreamPR && i.upstreamPR.state === "OPEN"),
+    mergedUpstreamPR: count((i) => i.upstreamPR && i.upstreamPR.state === "MERGED"),
+  },
+  items,
+};
+
+fs.writeFileSync(path.join(NEXA, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
+console.log(
+  `  ✓ wrote nexa/manifest.json — ${manifest.counts.total} items (${patches.length} patch, ${news.length} new, ${tooling.length} tooling)`
+);
+console.log(
+  `    class: ${manifest.counts.upstreamCandidates} upstream-candidate · ${manifest.counts.nexaSpecific} nexa-specific · ${manifest.counts.needsReview} needs-review`
+);
+console.log(
+  `    upstream pipeline: ${manifest.counts.mergedUpstreamPR} merged (deletable next release) · ${manifest.counts.pendingUpstreamPR} pending open PR`
+);

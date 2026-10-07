@@ -1,0 +1,134 @@
+diff --git a/src/sse/handlers/chat.ts b/src/sse/handlers/chat.ts
+index fe6c074ef..c6389afb0 100644
+--- a/src/sse/handlers/chat.ts
++++ b/src/sse/handlers/chat.ts
+@@ -1,3 +1,7 @@
++import { getNativeClaudeSessionId } from "@omniroute/open-sse/services/nativeClaudeSession.ts";
++import { isNativeClaudeThreadContinuation } from "@omniroute/open-sse/services/nativeClaudeThread.ts";
++import { getNativeClaudeThreadOwner } from "@/lib/db/nativeClaudeThreads";
++import { isClaudeCodeOriginatedHeaders } from "@omniroute/open-sse/config/codexIdentity.ts";
+ import { randomUUID } from "crypto";
+ import { resolveChatRequestBody } from "./requestBody";
+ import * as chatAdmission from "./chatAdmission.ts";
+@@ -1559,6 +1563,30 @@ async function handleSingleModelChat(
+     if (modelStr.startsWith(runtimeOptions.providerId + "/")) return resolvedProvider;
+     return runtimeOptions.providerId;
+   })();
++  const nativeThreadContinuation =
++    provider === "claude" &&
++    (isClaudeCodeOriginatedHeaders(clientRawRequest?.headers ?? {}) ||
++      clientRawRequest?.headers?.["x-app"] === "cli") &&
++    isNativeClaudeThreadContinuation(body);
++  const nativeThreadOwner = nativeThreadContinuation
++    ? getNativeClaudeThreadOwner(
++        getNativeClaudeSessionId(body, clientRawRequest?.headers),
++        body.thread?.previous_message_id
++      )
++    : null;
++  const threadReplayMessage =
++    'No thread state is available for the requested `previous_message_id` on an eligible owning account. Replay the full conversation with `thread: {"type": "create"}` to start a new Thread.';
++  const threadReplayResponse = () =>
++    new Response(
++      JSON.stringify({
++        type: "error",
++        error: {
++          type: "invalid_request_error",
++          message: threadReplayMessage,
++        },
++      }),
++      { status: 404, headers: { "Content-Type": "application/json" } }
++    );
+   const forceLiveComboTest = runtimeOptions.forceLiveComboTest === true;
+   const budgetRejection = rejectIfMeteredBudgetExceeded(apiKeyInfo?.id, provider, modelStr);
+   if (budgetRejection) return budgetRejection;
+@@ -1582,6 +1610,37 @@ async function handleSingleModelChat(
+     );
+   }
+ 
++  if (nativeThreadContinuation) {
++    // A sparse delta cannot be replayed on a sibling. Ask the native client for its
++    // full transcript; never manufacture a prompt or bypass the owner's eligibility.
++    if (
++      !nativeThreadOwner ||
++      (forcedConnectionId && forcedConnectionId !== nativeThreadOwner) ||
++      (effectiveAllowedConnections && !effectiveAllowedConnections.includes(nativeThreadOwner))
++    ) {
++      runtimeOptions.preselectedCredentials?.releaseOAuthSession?.();
++      const response = threadReplayResponse();
++      await recordGateRejection(
++        response.status,
++        provider,
++        model,
++        {
++          body,
++          modelStr,
++          clientRawRequest,
++          apiKeyInfo,
++          runtimeOptions,
++          telemetry,
++          comboName,
++          isCombo,
++        },
++        threadReplayMessage
++      );
++      return response;
++    }
++    effectiveAllowedConnections = [nativeThreadOwner];
++  }
++
+   const bypassReason = forceLiveComboTest
+     ? "combo live test"
+     : hasForcedConnection
+@@ -1679,6 +1738,13 @@ async function handleSingleModelChat(
+   const occupancySessionKey =
+     runtimeOptions.sessionAffinityKey ?? runtimeOptions.sessionId ?? `request:${randomUUID()}`;
+   let initialPreselectedCredentials = runtimeOptions.preselectedCredentials;
++  if (
++    nativeThreadContinuation &&
++    initialPreselectedCredentials?.connectionId !== nativeThreadOwner
++  ) {
++    initialPreselectedCredentials?.releaseOAuthSession?.();
++    initialPreselectedCredentials = null;
++  }
+   // ANTIGRAVITY_ACCOUNT_LEASE_ENABLED (#10011 re-land): off ⇒ every `agy.*` branch is inert
+   // and selection/dispatch behave exactly as before. `attempted` survives a loop restart.
+   const agy = agyLease.startAntigravityLeaseRequest(provider, runtimeOptions.correlationId);
+@@ -1739,6 +1805,23 @@ async function handleSingleModelChat(
+             );
+       preselectedCredentials = null;
+ 
++      if (
++        nativeThreadContinuation &&
++        (!credentials || credentials.connectionId !== nativeThreadOwner)
++      ) {
++        if (credentials && "releaseOAuthSession" in credentials)
++          credentials.releaseOAuthSession?.();
++        const response = threadReplayResponse();
++        await recordGateRejection(
++          response.status,
++          provider,
++          model,
++          rejectionScope,
++          threadReplayMessage
++        );
++        return response;
++      }
++
+       if (credentials && "leaseUnavailable" in credentials && credentials.leaseUnavailable) {
+         excludedConnectionIds.add(agyLease.trackAntigravityLeaseBusy(agy, credentials));
+         if (!hasForcedConnection) continue;
+@@ -2118,6 +2201,14 @@ async function handleSingleModelChat(
+         return successResponse;
+       }
+ 
++      if (
++        nativeThreadContinuation &&
++        (result.status === 400 || result.status === 404) &&
++        /\bthread\b/i.test(String(result.error || ""))
++      ) {
++        return withSelectedConnectionHeader(result.response, credentials.connectionId);
++      }
++
+       // A final hard-lease fence rejection is authoritative. It must never mutate
+       // connection health/cooldown state or fall through to ordinary account/model
+       // fallback, which could turn a stale lifecycle into unmanaged dispatch.

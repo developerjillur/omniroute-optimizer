@@ -1,0 +1,32 @@
+diff --git a/open-sse/utils/stream.ts b/open-sse/utils/stream.ts
+index d563cf7e6..ce905c64c 100644
+--- a/open-sse/utils/stream.ts
++++ b/open-sse/utils/stream.ts
+@@ -2889,7 +2889,7 @@ export function createSSEStream(options: StreamOptions = {}) {
+                   // reasoning-heavy stream (live incident 2026-09-04) -- see
+                   // providerPayloadCollector's own `format:` construction comment above.
+                   providerPayload: providerPayloadCollector.build(
+-                    sourceFormat === FORMATS.OPENAI_RESPONSES
++                    sourceFormat === FORMATS.OPENAI_RESPONSES || sourceFormat === FORMATS.CLAUDE
+                       ? providerPayloadCollector.getSummary()
+                       : { object: "chat.completion", ...responseBody },
+                     { includeEvents: false }
+@@ -3175,7 +3175,7 @@ export function createSSEStream(options: StreamOptions = {}) {
+                 // reasoning-heavy stream (live incident 2026-09-04) -- see
+                 // providerPayloadCollector's own `format:` construction comment above.
+                 providerPayload: providerPayloadCollector.build(
+-                  targetFormat === FORMATS.OPENAI_RESPONSES
++                  targetFormat === FORMATS.OPENAI_RESPONSES || targetFormat === FORMATS.CLAUDE
+                     ? providerPayloadCollector.getSummary()
+                     : { object: "chat.completion", ...responseBody },
+                   { includeEvents: false }
+@@ -3279,6 +3279,9 @@ export function createPassthroughStreamWithLogger(
+ ) {
+   return createSSEStream({
+     mode: STREAM_MODE.PASSTHROUGH,
++    // Passthrough provider events have the client's native format. Leaving
++    // this unset selects an OpenAI reducer and drops Claude usage details.
++    sourceFormat: clientResponseFormat ?? undefined,
+     provider,
+     reqLogger,
+     toolNameMap,

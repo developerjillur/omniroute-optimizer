@@ -1,0 +1,13 @@
+diff --git a/tests/unit/safe-outbound-fetch-dns-guard.test.ts b/tests/unit/safe-outbound-fetch-dns-guard.test.ts
+index 3c87b47ef..99ed527b7 100644
+--- a/tests/unit/safe-outbound-fetch-dns-guard.test.ts
++++ b/tests/unit/safe-outbound-fetch-dns-guard.test.ts
+@@ -205,7 +205,7 @@ test("with pinDns a lookup that fails refuses the request instead of connecting
+   await withListener(async (port, hits) => {
+     // The guard's lookup fails; the resolver an unpinned connection would use says loopback.
+     const code = await blockedBy(
+-      safeOutboundFetch(`http://internal.alias.test:${port}/`, {
++      safeOutboundFetch(`http://public.alias.test:${port}/`, {
+         guard: "public-only",
+         pinDns: true,
+         retry: false,

@@ -1,0 +1,86 @@
+diff --git a/next.config.mjs b/next.config.mjs
+index 834c7e078..e2f754390 100644
+--- a/next.config.mjs
++++ b/next.config.mjs
+@@ -15,10 +15,26 @@ import { shouldBuildStandalone } from "./scripts/build/backendOnlyPages.mjs";
+ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+ const distDir = process.env.NEXT_DIST_DIR || ".build/next";
+ const projectRoot = dirname(fileURLToPath(import.meta.url));
+-const scriptSrc =
+-  process.env.NODE_ENV === "development"
+-    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://static.cloudflareinsights.com"
+-    : "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://static.cloudflareinsights.com";
++const isProdBuild = process.env.NODE_ENV === "production";
++// Extra browser connect origins for non-loopback (LAN / Tailscale) deployments.
++// Prod ships a tight connect-src by default; operators reaching OmniRoute over a
++// LAN/Tailscale host opt their host in here (space-separated) instead of the app
++// shipping a blanket `https: ws: wss:` allowance to the world. (#5083)
++const extraConnectSrc = (process.env.OMNIROUTE_CSP_CONNECT_SRC || "").trim();
++// Dev keeps `'unsafe-eval'` for React Refresh / fast-refresh tooling. Prod drops it:
++// Next.js and React need no runtime eval, so removing it shrinks the XSS blast radius.
++// `'unsafe-inline'` is retained until a nonce/hash migration lands (tracked separately).
++const scriptSrc = isProdBuild
++  ? "script-src 'self' 'unsafe-inline' blob: https://static.cloudflareinsights.com"
++  : "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://static.cloudflareinsights.com";
++// Loopback origins are always allowed (the local standalone dashboard is served on
++// localhost and opens a same-host Live WS). Dev additionally allows the broad
++// `https: ws: wss:` schemes; prod does NOT — it stays loopback + opt-in extras.
++const loopbackConnect =
++  "'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*";
++const connectSrc = isProdBuild
++  ? `connect-src ${[loopbackConnect, extraConnectSrc].filter(Boolean).join(" ")}`
++  : `connect-src ${loopbackConnect} https: ws: wss:`;
+ const contentSecurityPolicy = [
+   "default-src 'self'",
+   "base-uri 'self'",
+@@ -30,11 +46,7 @@ const contentSecurityPolicy = [
+   "font-src 'self' https://fonts.gstatic.com data:",
+   "img-src 'self' data: blob: https:",
+   "media-src 'self' data: blob:",
+-  // `ws:` is permitted scheme-wide (mirroring the bare `wss:` already allowed) so the
+-  // dashboard can open `ws://<lan-or-tailscale-host>:*` to its own Live WS server when
+-  // OmniRoute is reached from a non-loopback host. Same-origin HTTP fetches stay covered
+-  // by `'self'`; the loopback origins remain listed explicitly for clarity. (#5083)
+-  "connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https: ws: wss:",
++  connectSrc,
+   "worker-src 'self' blob:",
+   "manifest-src 'self'",
+ ].join("; ");
+@@ -235,6 +247,13 @@ const nextConfig = {
+   // accept for image-bearing requests; tune via env if a deployment needs
+   // more.
+   experimental: {
++    // Local builds opt into bounded worker fanout through the managed build runner.
++    ...(process.env.NEXA_BUILD_WORKERS
++      ? {
++          cpus: Math.max(1, Math.min(2, Number(process.env.NEXA_BUILD_WORKERS) || 1)),
++          memoryBasedWorkersCount: false,
++        }
++      : {}),
+     serverActions: {
+       bodySizeLimit: process.env.OMNIROUTE_SERVER_ACTIONS_BODY_LIMIT || "50mb",
+     },
+@@ -394,6 +413,11 @@ const nextConfig = {
+     ignoreBuildErrors: true,
+   },
+   webpack(config, { dev, webpack }) {
++    if (!dev && process.env.NEXA_BUILD_WORKERS) {
++      // Isolated builds do not reuse caches; bound concurrent module work too.
++      config.parallelism = 1;
++      config.cache = false;
++    }
+     config.ignoreWarnings = [
+       ...(config.ignoreWarnings || []),
+       isNextIntlExtractorDynamicImportWarning,
+@@ -479,7 +503,10 @@ const nextConfig = {
+       // does the importing.
+       const replacements = [
+         [/^@\/mitm\/cert\/install$/, join(projectRoot, "src/mitm/cert/install.stub.ts")],
+-        [/^@\/lib\/zed-oauth\/keychain-reader$/, join(projectRoot, "src/lib/zed-oauth/keychain-reader.stub.ts")],
++        [
++          /^@\/lib\/zed-oauth\/keychain-reader$/,
++          join(projectRoot, "src/lib/zed-oauth/keychain-reader.stub.ts"),
++        ],
+         [/^@\/lib\/cloudSync$/, join(projectRoot, "src/lib/cloudSync.stub.ts")],
+         [
+           /^@\/lib\/services\/installers\/ninerouter$/,

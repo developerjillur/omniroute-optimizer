@@ -1,0 +1,14 @@
+diff --git a/src/app/api/cli-tools/hermes-agent-settings/route.ts b/src/app/api/cli-tools/hermes-agent-settings/route.ts
+index daf2fb0c3..9ca7b4538 100644
+--- a/src/app/api/cli-tools/hermes-agent-settings/route.ts
++++ b/src/app/api/cli-tools/hermes-agent-settings/route.ts
+@@ -31,6 +31,9 @@ const hermesAgentSettingsSchema = z.object({
+       z.object({
+         role: z.enum(hermesRoleIds),
+         model: z.string(),
++        // nexa: optional per-role reasoning effort (none|low|medium|high|xhigh) —
++        // written as extra_body.reasoning_effort on the role's auxiliary block.
++        effort: z.enum(["none", "low", "medium", "high", "xhigh"]).optional(),
+       })
+     )
+     .min(1, "selections must be a non-empty array of { role, model }"),

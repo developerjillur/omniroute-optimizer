@@ -1,0 +1,20 @@
+diff --git a/tests/unit/combo-strategies.test.ts b/tests/unit/combo-strategies.test.ts
+index ef8e270f2..9789c413d 100644
+--- a/tests/unit/combo-strategies.test.ts
++++ b/tests/unit/combo-strategies.test.ts
+@@ -432,10 +432,13 @@ test("reset-aware strategy avoids accounts near 5h exhaustion", async (t) => {
+ });
+ 
+ test("Antigravity aliases share one family-scoped cache key", () => {
+-  assert.equal(getQuotaScopedModelForProvider("agy", "gemini-3.7-flash-high"), "family:gemini");
++  assert.equal(
++    getQuotaScopedModelForProvider("agy", "gemini-3.7-flash-high"),
++    "family:gemini-flash"
++  );
+   assert.equal(
+     getQuotaScopedModelForProvider("antigravity", "gemini-3.7-flash-high"),
+-    "family:gemini"
++    "family:gemini-flash"
+   );
+ });
+ 

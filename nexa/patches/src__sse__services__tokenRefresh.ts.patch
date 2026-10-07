@@ -1,0 +1,12 @@
+diff --git a/src/sse/services/tokenRefresh.ts b/src/sse/services/tokenRefresh.ts
+index eaf344f62..5278ce8a7 100755
+--- a/src/sse/services/tokenRefresh.ts
++++ b/src/sse/services/tokenRefresh.ts
+@@ -171,6 +171,7 @@ export async function updateProviderCredentials(connectionId: string, newCredent
+ 
+     if (newCredentials.accessToken) {
+       updates.accessToken = newCredentials.accessToken;
++      updates.preserveHealthOnTokenRefresh = true;
+       // #6352: a successful refresh proves the connection is reachable and its
+       // refresh_token is valid again — clear any stale auth-failure state
+       // (testStatus/lastError*) left over from a prior expired/invalid refresh

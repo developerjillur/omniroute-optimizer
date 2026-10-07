@@ -1,0 +1,15 @@
+diff --git a/src/i18n/messages/pt-BR.json b/src/i18n/messages/pt-BR.json
+index 3d8c08e8b..e369d5b12 100644
+--- a/src/i18n/messages/pt-BR.json
++++ b/src/i18n/messages/pt-BR.json
+@@ -3117,6 +3117,10 @@
+     "other": "Outro",
+     "preview": "Visualização",
+     "refreshAll": "Atualizar tudo",
++    "hermesRoleMoaAdvisor1": "Consultor MoA 1",
++    "hermesRoleMoaAdvisor1Desc": "Consultor de referência 1 do painel MoA, sem ferramentas",
++    "hermesRoleMoaAdvisor2": "Consultor MoA 2",
++    "hermesRoleMoaAdvisor2Desc": "Consultor de referência 2 do painel MoA, sem ferramentas",
+     "hermesRoleDefault": "Padrão (principal)",
+     "hermesRoleDefaultDesc": "Modelo de conversa principal",
+     "hermesRoleDelegation": "Delegação (subagentes)",

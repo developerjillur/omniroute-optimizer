@@ -1,0 +1,20 @@
+diff --git a/src/lib/tokenHealthCheck.ts b/src/lib/tokenHealthCheck.ts
+index 368642f27..5dc32a743 100644
+--- a/src/lib/tokenHealthCheck.ts
++++ b/src/lib/tokenHealthCheck.ts
+@@ -971,6 +971,7 @@ export async function checkConnection(conn) {
+         const now = new Date().toISOString();
+         const updateData: ConnectionUpdate = {
+           accessToken: refreshResult.accessToken,
++          preserveHealthOnTokenRefresh: true,
+           lastHealthCheckAt: now,
+           testStatus: "active",
+           lastError: null,
+@@ -1173,6 +1174,7 @@ export async function checkConnection(conn) {
+       // No onPersist (e.g. no connectionId — token-hash dedup path). Write all fields.
+       const updateData: any = {
+         accessToken: result.accessToken,
++        preserveHealthOnTokenRefresh: true,
+         lastHealthCheckAt: now,
+         testStatus: "active",
+         lastError: null,

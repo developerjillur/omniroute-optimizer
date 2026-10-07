@@ -1,0 +1,13 @@
+diff --git a/tests/unit/combo/quota-weighted-strategy.test.ts b/tests/unit/combo/quota-weighted-strategy.test.ts
+index 3da2d0470..317079373 100644
+--- a/tests/unit/combo/quota-weighted-strategy.test.ts
++++ b/tests/unit/combo/quota-weighted-strategy.test.ts
+@@ -418,7 +418,7 @@ test("pinned hard-empty connection stays dropped", async () => {
+ test("family filter: gemini request ignores Claude-empty windows", async () => {
+   const provider = "agy";
+   const conn = `fam-${randomUUID()}`;
+-  assert.equal(getQuotaFetchScope(provider, "agy/gemini-3.8-flash-high"), "family:gemini");
++  assert.equal(getQuotaFetchScope(provider, "agy/gemini-3.8-flash-high"), "family:gemini-flash");
+   registerQuotaFetcher(provider, async (_id, connection) => {
+     const model = String(connection?.requestedModel || "");
+     assert.equal(model.includes("claude"), false, "gemini request must not fetch Claude snapshot");

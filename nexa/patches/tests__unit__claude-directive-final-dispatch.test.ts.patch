@@ -1,0 +1,13 @@
+diff --git a/tests/unit/claude-directive-final-dispatch.test.ts b/tests/unit/claude-directive-final-dispatch.test.ts
+index c1b3622c5..bf65df178 100644
+--- a/tests/unit/claude-directive-final-dispatch.test.ts
++++ b/tests/unit/claude-directive-final-dispatch.test.ts
+@@ -101,7 +101,7 @@ test("final Claude dispatch hoists a leading non-empty system message", async ()
+       {
+         type: "text",
+         text: "Escaped initial prompt.",
+-        cache_control: { type: "ephemeral", ttl: "1h" },
++        cache_control: { type: "ephemeral" },
+       },
+     ],
+     "existing and hoisted system prompts must retain their order and cache boundary"

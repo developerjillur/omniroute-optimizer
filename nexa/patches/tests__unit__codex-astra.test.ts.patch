@@ -1,0 +1,17 @@
+diff --git a/tests/unit/codex-astra.test.ts b/tests/unit/codex-astra.test.ts
+index e57169d2a..b3aa613da 100644
+--- a/tests/unit/codex-astra.test.ts
++++ b/tests/unit/codex-astra.test.ts
+@@ -36,8 +36,11 @@ test("Codex exposes Astra and its effort variants with live OAuth limits", () =>
+       assert.equal(model.supportsVision, true);
+       assert.equal(model.supportsXHighEffort, true);
+     }
++    assert.equal(models[0].id, "gpt-6.1-sol");
++    const astraStart = models.findIndex((model) => model.id === MODEL);
++    assert.ok(astraStart >= ids.length);
+     assert.deepEqual(
+-      models.slice(0, ids.length).map((model) => model.id),
++      models.slice(astraStart, astraStart + ids.length).map((model) => model.id),
+       ids
+     );
+   }

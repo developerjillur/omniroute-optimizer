@@ -1,0 +1,41 @@
+diff --git a/src/app/api/usage/cache-health/route.ts b/src/app/api/usage/cache-health/route.ts
+index dda8baa2e..b35dd5bcb 100644
+--- a/src/app/api/usage/cache-health/route.ts
++++ b/src/app/api/usage/cache-health/route.ts
+@@ -1,3 +1,5 @@
++import { nativeCacheAlerts, nativeApiEquivalent } from "@/lib/usage/nativeCacheHealth";
++import { getPricingForModel } from "@/lib/db/settings";
+ import { NextResponse } from "next/server";
+ import { z } from "zod";
+ 
+@@ -23,7 +25,29 @@ export async function GET(request: Request) {
+       );
+     }
+ 
+-    return NextResponse.json(buildCacheHealthResponse(parsed.data));
++    const summary = buildCacheHealthResponse(parsed.data);
++    const hourly =
++      parsed.data.range === "1h"
++        ? summary
++        : buildCacheHealthResponse({ ...parsed.data, range: "1h" });
++    const models = [];
++    for (const model of summary.native.models) {
++      const pricing = /claude-/.test(model.model)
++        ? await getPricingForModel("claude", model.model)
++        : null;
++      models.push({ ...model, apiEquivalent: nativeApiEquivalent(model, pricing) });
++    }
++    return NextResponse.json({
++      ...summary,
++      native: { ...summary.native, models },
++      nativeHourly: {
++        since: hourly.since,
++        truncated: hourly.truncated,
++        alerts: nativeCacheAlerts(hourly.native.models),
++      },
++      costBasis: "configured-api-price-equivalent",
++      weeklyPointEstimate: null,
++    });
+   } catch (error) {
+     // Never echo the error: the message can carry the DATA_DIR path and the
+     // SQL text. Details go to the server log, the caller gets a fixed string.

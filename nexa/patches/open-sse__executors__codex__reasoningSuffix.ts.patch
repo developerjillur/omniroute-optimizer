@@ -1,0 +1,20 @@
+diff --git a/open-sse/executors/codex/reasoningSuffix.ts b/open-sse/executors/codex/reasoningSuffix.ts
+index 627f2a339fb0c3ddd5d26c35056842684dd8e1a1..be7aa5883089be41a648e579e2925abc00296443 100644
+--- a/open-sse/executors/codex/reasoningSuffix.ts
++++ b/open-sse/executors/codex/reasoningSuffix.ts
+@@ -9,6 +9,7 @@
+ ] as const;
+ export type CodexEffortLevel = (typeof CODEX_EFFORT_ORDER)[number];
+ export const CODEX_MAX_ALIAS_MODELS = new Set([
++  "gpt-6.1-sol",
+   "gpt-5.6-sol",
+   "gpt-5.6-terra",
+   "gpt-5.6-luna",
+@@ -17,6 +18,7 @@
+   "gpt-6-luna",
+ ]);
+ export const CODEX_ULTRA_ALIAS_MODELS = new Set([
++  "gpt-6.1-sol",
+   "gpt-5.6-sol",
+   "gpt-5.6-terra",
+   "gpt-6-astra",

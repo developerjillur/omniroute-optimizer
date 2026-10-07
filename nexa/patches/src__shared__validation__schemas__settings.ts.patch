@@ -1,0 +1,18 @@
+--- a/src/shared/validation/schemas/settings.ts
++++ b/src/shared/validation/schemas/settings.ts
+@@ -39,6 +39,7 @@
+ export const requestQueueSettingsSchema = z
+   .object({
+     autoEnableApiKeyProviders: z.boolean().optional(),
++    globalConcurrentRequests: z.number().int().min(0).max(100_000).optional(),
+     requestsPerMinute: z.number().int().min(1).optional(),
+     minTimeBetweenRequestsMs: z.number().int().min(0).optional(),
+     concurrentRequests: z.number().int().min(1).optional(),
+@@ -120,6 +121,7 @@
+ // bounds the wire shape.
+ export const quotaPreflightSettingsSchema = z
+   .object({
++    cachedQuotaFilteringEnabled: z.boolean().optional(),
+     enabled: z.boolean().optional(),
+     defaultThresholdPercent: z.number().int().min(0).max(99).optional(),
+     warnThresholdPercent: z.number().int().min(0).max(100).optional(),

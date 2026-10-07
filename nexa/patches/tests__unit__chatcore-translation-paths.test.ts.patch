@@ -1,0 +1,58 @@
+diff --git a/tests/unit/chatcore-translation-paths.test.ts b/tests/unit/chatcore-translation-paths.test.ts
+index 23c4d1473..cc434725c 100644
+--- a/tests/unit/chatcore-translation-paths.test.ts
++++ b/tests/unit/chatcore-translation-paths.test.ts
+@@ -1442,7 +1442,6 @@ for (const model of ["claude-opus-5", "claude-fable-5", "claude-fable-5-1"]) {
+     );
+     assert.deepEqual(call.body.messages[2].content[0].cache_control, {
+       type: "ephemeral",
+-      ttl: "5m",
+     });
+     assert.equal(
+       call.body.system.some((block: { text?: string }) => block.text === "compact continuation"),
+@@ -1684,12 +1683,15 @@ test("chatCore preserves cache_control automatically for Claude Code single-mode
+   assert.deepEqual(call.body.system[2].cache_control, { type: "ephemeral", ttl: "5m" });
+   assert.deepEqual(call.body.messages[0].content[0].cache_control, {
+     type: "ephemeral",
+-    ttl: "5m",
++  });
++  assert.deepEqual(call.body.messages[1].content[0].cache_control, {
++    type: "ephemeral",
++    ttl: "10m",
+   });
+   // base.ts executor explicitly strips cache_control from tools for Claude Code clients
+   assert.equal(call.body.tools[0].cache_control, undefined);
+ });
+-test("chatCore advances a message cache breakpoint for native Claude Code requests", async () => {
++test("chatCore preserves the native client's message cache breakpoint without advancing it", async () => {
+   await settingsDb.updateSettings({ alwaysPreserveClientCache: "auto" });
+   invalidateCacheControlSettingsCache();
+ 
+@@ -1740,10 +1742,9 @@ test("chatCore advances a message cache breakpoint for native Claude Code reques
+     responseFormat: "claude",
+   });
+ 
+-  assert.deepEqual(call.body.messages[2].content[0].cache_control, {
+-    type: "ephemeral",
+-    ttl: "5m",
+-  });
++  assert.deepEqual(call.body.messages[0].content[0].cache_control, { type: "ephemeral" });
++  assert.equal(call.body.messages[1].content[0].cache_control, undefined);
++  assert.equal(call.body.messages[2].content[0].cache_control, undefined);
+   assert.equal(call.body.tools[0].cache_control, undefined);
+ });
+ test("chatCore auto cache policy becomes false for nondeterministic combos", async () => {
+@@ -1830,12 +1831,9 @@ test("chatCore disables raw Claude passthrough when cache preservation is off an
+     ),
+     true
+   );
+-  // Cache preservation is on for native Claude, so cache markers are intact. This PR:
+-  // an omitted TTL now defaults to "5m" once a "5m" boundary breakpoint (the system
+-  // block above) has already appeared, instead of always defaulting to "1h".
++  // Native implicit TTL stays implicit even after an explicit 5m system boundary.
+   assert.deepEqual(call.body.messages[0].content[0].cache_control, {
+     type: "ephemeral",
+-    ttl: "5m",
+   });
+   // Tools disable flag is applied
+   assert.equal("_disableToolPrefix" in call.body, false);

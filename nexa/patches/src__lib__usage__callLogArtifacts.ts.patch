@@ -1,0 +1,24 @@
+diff --git a/src/lib/usage/callLogArtifacts.ts b/src/lib/usage/callLogArtifacts.ts
+index a5659d914..629bfe0f0 100644
+--- a/src/lib/usage/callLogArtifacts.ts
++++ b/src/lib/usage/callLogArtifacts.ts
+@@ -80,6 +80,8 @@ export type CallLogArtifact = {
+       out: number;
+       cacheRead: number | null;
+       cacheWrite: number | null;
++      cacheWrite5m?: number | null;
++      cacheWrite1h?: number | null;
+       reasoning: number | null;
+       compressed: number | null;
+     };
+@@ -227,7 +229,9 @@ function buildSizeLimitStages(artifact: CallLogArtifact): Array<() => unknown> {
+   const omitBodies = <T extends object>(value: T, keepResponse = false) => ({
+     ...value,
+     requestBody: OMITTED_FOR_SIZE_LIMIT,
+-    responseBody: keepResponse ? (value as { responseBody: unknown }).responseBody : OMITTED_FOR_SIZE_LIMIT,
++    responseBody: keepResponse
++      ? (value as { responseBody: unknown }).responseBody
++      : OMITTED_FOR_SIZE_LIMIT,
+     error: preserveErrorForSizeLimit(artifact.error),
+   });
+ 

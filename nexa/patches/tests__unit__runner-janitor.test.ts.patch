@@ -1,0 +1,26 @@
+diff --git a/tests/unit/runner-janitor.test.ts b/tests/unit/runner-janitor.test.ts
+index 6e6aee107..571377f55 100644
+--- a/tests/unit/runner-janitor.test.ts
++++ b/tests/unit/runner-janitor.test.ts
+@@ -33,6 +33,11 @@ const HAVE_BUSY_TOOLS =
+ 
+ function fixture() {
+   const base = mkdtempSync(path.join(os.tmpdir(), "janitor-fixture-"));
++  const bin = path.join(base, "bin");
++  mkdirSync(bin);
++  // The Linux operations script expects GNU df. Keep disk thresholds deterministic
++  // on macOS too, without inspecting or modifying the user's real filesystem.
++  writeFileSync(path.join(bin, "df"), "#!/bin/sh\nprintf 'Use%%\\n40%%\\n'\n", { mode: 0o755 });
+   const old = new Date(Date.now() - 5 * HOUR);
+   const mk = (name: string, dir: boolean, when: Date | null) => {
+     const p = path.join(base, name);
+@@ -59,6 +64,9 @@ function run(args: string[], base: string, extraEnv: Record<string, string> = {}
+     stdio: ["ignore", "pipe", "pipe"],
+     env: {
+       ...process.env,
++      PATH: existsSync(path.join(base, "bin", "df"))
++        ? `${path.join(base, "bin")}${path.delimiter}${process.env.PATH || ""}`
++        : process.env.PATH,
+       JANITOR_TMP_BASES: base,
+       JANITOR_WORK_TEMP_BASES: "",
+       JANITOR_RUNNER_DIRS: path.join(base, "no-runners-here-*"),

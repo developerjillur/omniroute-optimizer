@@ -1,0 +1,16 @@
+diff --git a/tests/unit/provider-assets-generic-fallback.test.mjs b/tests/unit/provider-assets-generic-fallback.test.mjs
+index 412a3d2c7..16aa8e7c9 100644
+--- a/tests/unit/provider-assets-generic-fallback.test.mjs
++++ b/tests/unit/provider-assets-generic-fallback.test.mjs
+@@ -111,8 +111,11 @@ const retiredFilenamePattern = new RegExp(
+ );
+ 
+ const SKIPPED_DIRECTORY_NAMES = new Set([
++  ".build",
+   ".cache",
+   ".next",
++  ".source",
++  ".work",
+   "coverage",
+   "dist",
+   "dist-electron",

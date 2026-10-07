@@ -1,0 +1,76 @@
+diff --git a/src/lib/usage/cacheHealth.ts b/src/lib/usage/cacheHealth.ts
+index c9a52343f..800ccf6ef 100644
+--- a/src/lib/usage/cacheHealth.ts
++++ b/src/lib/usage/cacheHealth.ts
+@@ -1,3 +1,4 @@
++import { summarizeNativeCacheHealth, type NativeCacheModel } from "./nativeCacheHealth";
+ /**
+  * Prompt-cache health — turns the raw cache columns of `call_logs` into a
+  * summary an operator can act on.
+@@ -227,6 +228,11 @@ type CacheHealthDbRow = {
+   tokens_cache_read: number | null;
+   tokens_cache_creation: number | null;
+   timestamp: string | null;
++  tokens_in?: number | null;
++  tokens_out?: number | null;
++  tokens_cache_creation_5m?: number | null;
++  tokens_cache_creation_1h?: number | null;
++  first_request?: number | null;
+ };
+ 
+ export interface CacheHealthResponse extends CacheHealthSummary {
+@@ -234,6 +240,7 @@ export interface CacheHealthResponse extends CacheHealthSummary {
+   since: string;
+   /** True when the window held more calls than `MAX_ROWS` and only the newest were summarized. */
+   truncated: boolean;
++  native: { models: NativeCacheModel[] };
+ }
+ 
+ /**
+@@ -260,10 +267,25 @@ export function buildCacheHealthResponse(opts: {
+   }
+   params.push(MAX_ROWS + 1);
+ 
++  const columns = new Set(
++    (db.prepare("PRAGMA table_info(call_logs)").all() as { name: string }[]).map((c) => c.name)
++  );
++  const nativeColumns =
++    columns.has("native_cache_group_tag") &&
++    columns.has("tokens_cache_creation_5m") &&
++    columns.has("tokens_cache_creation_1h")
++      ? `c.tokens_cache_creation_5m, c.tokens_cache_creation_1h,
++       CASE WHEN c.native_cache_group_tag IS NULL THEN NULL WHEN EXISTS (
++         SELECT 1 FROM call_logs older
++         WHERE older.native_cache_group_tag = c.native_cache_group_tag AND older.model = c.model AND older.provider = c.provider
++           AND older.status = 200 AND (older.timestamp < c.timestamp OR (older.timestamp = c.timestamp AND older.id < c.id))
++       ) THEN 0 ELSE 1 END AS first_request`
++      : "NULL AS tokens_cache_creation_5m, NULL AS tokens_cache_creation_1h, NULL AS first_request";
+   const rows = db
+     .prepare(
+-      `SELECT model, requested_model, tokens_cache_read, tokens_cache_creation, timestamp
+-         FROM call_logs
++      `SELECT c.model, c.requested_model, c.tokens_cache_read, c.tokens_cache_creation, c.timestamp,
++              c.tokens_in, c.tokens_out, ${nativeColumns}
++         FROM call_logs c
+         WHERE timestamp >= ?
+           AND status = 200
+           AND (tokens_cache_read IS NOT NULL OR tokens_cache_creation IS NOT NULL)
+@@ -286,5 +308,17 @@ export function buildCacheHealthResponse(opts: {
+     }))
+   );
+ 
+-  return { ...summary, timeRange: opts.range, since, truncated };
++  const native = summarizeNativeCacheHealth(
++    rows.slice(0, MAX_ROWS).map((r) => ({
++      model: r.model || r.requested_model || "unknown",
++      inputTokens: r.tokens_in,
++      outputTokens: r.tokens_out,
++      cacheRead: r.tokens_cache_read,
++      cacheCreation: r.tokens_cache_creation,
++      cacheCreation5m: r.tokens_cache_creation_5m,
++      cacheCreation1h: r.tokens_cache_creation_1h,
++      firstRequest: r.first_request === 1 ? true : r.first_request === 0 ? false : null,
++    }))
++  );
++  return { ...summary, timeRange: opts.range, since, truncated, native };
+ }

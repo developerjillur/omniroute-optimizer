@@ -1,0 +1,14 @@
+diff --git a/open-sse/services/model.ts b/open-sse/services/model.ts
+index 3584b842ecb3324a1b3ef03dbff717fe0bc2a8b3..79a3d8d960db86ca007626c3674b70f24a351c9c 100644
+--- a/open-sse/services/model.ts
++++ b/open-sse/services/model.ts
+@@ -127,2 +127,9 @@
+ export const CODEX_NATIVE_UNPREFIXED_MODELS = new Set([
++  "gpt-6.1-sol",
++  "gpt-6.1-sol-ultra",
++  "gpt-6.1-sol-max",
++  "gpt-6.1-sol-xhigh",
++  "gpt-6.1-sol-high",
++  "gpt-6.1-sol-medium",
++  "gpt-6.1-sol-low",
+   "codex-auto-review",

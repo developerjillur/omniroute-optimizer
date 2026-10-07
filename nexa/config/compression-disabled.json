@@ -1,0 +1,61 @@
+{
+  "enabled": false,
+  "defaultMode": "off",
+  "autoTriggerMode": "off",
+  "autoTriggerTokens": 0,
+  "preserveSystemPrompt": true,
+  "preserveSystemPromptMode": "always",
+  "mcpDescriptionCompressionEnabled": false,
+  "comboOverrides": {},
+  "compressionComboId": null,
+  "activeComboId": null,
+  "stackedPipeline": [],
+  "engines": {
+    "session-dedup": { "enabled": false },
+    "ccr": { "enabled": false },
+    "lite": { "enabled": false },
+    "rtk": { "enabled": false },
+    "codex-responses": { "enabled": false },
+    "headroom": { "enabled": false },
+    "relevance": { "enabled": false },
+    "caveman": { "enabled": false },
+    "aggressive": { "enabled": false },
+    "llmlingua": { "enabled": false },
+    "ultra": { "enabled": false },
+    "omniglyph": { "enabled": false }
+  },
+  "cavemanConfig": { "enabled": false, "compressRoles": [] },
+  "cavemanOutputMode": { "enabled": false, "autoClarity": false },
+  "outputStyles": [],
+  "rtkConfig": {
+    "enabled": false,
+    "applyToToolResults": false,
+    "applyToCodeBlocks": false,
+    "applyToAssistantMessages": false,
+    "customFiltersEnabled": false,
+    "trustProjectFilters": false,
+    "enableRenderers": false,
+    "enableGrouping": false,
+    "stripCodeComments": false
+  },
+  "codexResponsesConfig": { "enabled": false },
+  "languageConfig": { "enabled": false },
+  "lite": { "compressToolResults": false },
+  "aggressive": {
+    "summarizerEnabled": false,
+    "toolStrategies": {
+      "fileContent": false,
+      "grepSearch": false,
+      "shellOutput": false,
+      "json": false,
+      "errorMessage": false
+    }
+  },
+  "ultra": { "enabled": false, "slmFallbackToAggressive": false },
+  "contextBudget": { "mode": "off" },
+  "contextEditing": { "enabled": false },
+  "omniglyph": { "profile": "passthrough" },
+  "liveZone": { "enabled": false },
+  "ultraEngine": "heuristic",
+  "ultraSlmPrewarm": false
+}

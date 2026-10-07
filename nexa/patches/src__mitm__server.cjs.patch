@@ -1,0 +1,345 @@
+diff --git a/src/mitm/server.cjs b/src/mitm/server.cjs
+index a36cae583..aabae74eb 100644
+--- a/src/mitm/server.cjs
++++ b/src/mitm/server.cjs
+@@ -5,6 +5,22 @@ const path = require("path");
+ const dns = require("dns");
+ const { promisify } = require("util");
+ const os = require("os");
++const zlib = require("node:zlib");
++function decodeChatBody(req, raw) {
++  if (!String(req.url || "").includes("/v1/messages")) return raw;
++  const encoding = String(req.headers["content-encoding"] || "identity").toLowerCase();
++  const options = { maxOutputLength: 64 * 1024 * 1024 };
++  try {
++    if (encoding === "gzip") return zlib.gunzipSync(raw, options);
++    if (encoding === "deflate") return zlib.inflateSync(raw, options);
++    if (encoding === "br") return zlib.brotliDecompressSync(raw, options);
++    if (encoding === "zstd" && zlib.zstdDecompressSync)
++      return zlib.zstdDecompressSync(raw, options);
++  } catch {
++    /* Preserve malformed or unsupported bodies for normal passthrough. */
++  }
++  return raw;
++}
+ 
+ // Resolve data directory — mirrors src/lib/dataPaths.ts logic.
+ // This file runs as a standalone CommonJS process and cannot import the ES module.
+@@ -87,6 +103,12 @@ function loadDynamicTargets() {
+ }
+ // T-A-F3: load dynamic targets at startup; antigravity baseline remains intact.
+ const _dynamicAdded = loadDynamicTargets();
++// Select the configured owner when multiple agents share Anthropic's API host.
++if (process.env.MITM_TARGET_AGENT && TARGET_HOSTS.has("api.anthropic.com")) {
++  if (["claude-code", "kiro"].includes(process.env.MITM_TARGET_AGENT)) {
++    TARGET_HOST_AGENT.set("api.anthropic.com", process.env.MITM_TARGET_AGENT);
++  }
++}
+ if (_dynamicAdded > 0) {
+   console.log(`[MITM] Loaded ${_dynamicAdded} additional host(s) from targets.json`);
+ }
+@@ -443,6 +465,7 @@ async function passthrough(req, res, bodyBuffer) {
+   // in controlled local environments where the target uses a self-signed cert.
+   const rejectUnauthorized = process.env.MITM_DISABLE_TLS_VERIFY !== "1";
+ 
++  let upstreamResponse;
+   const forwardReq = https.request(
+     {
+       hostname: targetIP,
+@@ -454,6 +477,13 @@ async function passthrough(req, res, bodyBuffer) {
+       rejectUnauthorized,
+     },
+     (forwardRes) => {
++      upstreamResponse = forwardRes;
++      forwardRes.on("error", () => res.destroy());
++      forwardRes.on("aborted", () => res.destroy());
++      if (res.destroyed) {
++        forwardRes.destroy();
++        return;
++      }
+       res.writeHead(forwardRes.statusCode, forwardRes.headers);
+       forwardRes.pipe(res);
+     }
+@@ -461,9 +491,23 @@ async function passthrough(req, res, bodyBuffer) {
+ 
+   forwardReq.on("error", (err) => {
+     console.error(`❌ Passthrough error: ${err.message}`);
+-    if (!res.headersSent) res.writeHead(502);
++    if (res.destroyed || res.writableEnded) return;
++    if (res.headersSent) {
++      res.destroy();
++      return;
++    }
++    res.writeHead(502);
+     res.end("Bad Gateway");
+   });
++  forwardReq.setTimeout(MITM_IDLE_TIMEOUT_MS, () => {
++    forwardReq.destroy(new Error("Passthrough idle timeout"));
++  });
++  res.once("close", () => {
++    if (!res.writableFinished) {
++      forwardReq.destroy();
++      upstreamResponse?.destroy();
++    }
++  });
+ 
+   if (bodyBuffer.length > 0) forwardReq.write(bodyBuffer);
+   forwardReq.end();
+@@ -562,9 +606,39 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
+     res.once("close", onDownstreamClose);
+     let reader = null;
+     try {
+-      const response = await fetch(forward.url, {
++      const forwardUrl = new URL(forward.url);
++      if (agentId === "claude-code") {
++        const nativeUrl = new URL(req.url, "https://api.anthropic.com");
++        if (nativeUrl.pathname === "/v1/messages/count_tokens")
++          forwardUrl.pathname = nativeUrl.pathname;
++        forwardUrl.search = nativeUrl.search;
++      }
++      const retainedHeaders = {};
++      const excludedHeaders = new Set([
++        "host",
++        "authorization",
++        "x-api-key",
++        "cookie",
++        "content-encoding",
++        "content-length",
++        "connection",
++        "transfer-encoding",
++        "accept-encoding",
++        "proxy-authorization",
++        "proxy-connection",
++        "keep-alive",
++        "te",
++        "trailer",
++        "upgrade",
++      ]);
++      for (const [name, value] of Object.entries(req.headers)) {
++        if (!excludedHeaders.has(name.toLowerCase()) && value !== undefined)
++          retainedHeaders[name] = value;
++      }
++      const response = await fetch(forwardUrl, {
+         method: "POST",
+         headers: {
++          ...retainedHeaders,
+           "Content-Type": "application/json",
+           Authorization: `Bearer ${API_KEY}`,
+           "x-omniroute-source": "agent-bridge",
+@@ -577,19 +651,35 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
+       captureStatus = response.status;
+       respHeaders = headersToObject(response.headers);
+ 
++      const clientHeaders = {};
++      const excludedResponseHeaders = new Set([
++        "connection",
++        "transfer-encoding",
++        "content-length",
++        "content-encoding",
++        "keep-alive",
++        "te",
++        "trailer",
++        "upgrade",
++        "set-cookie",
++      ]);
++      for (const [name, value] of response.headers.entries()) {
++        if (!excludedResponseHeaders.has(name.toLowerCase())) clientHeaders[name] = value;
++      }
++      clientHeaders["x-accel-buffering"] = "no";
++      res.writeHead(response.status, clientHeaders);
+       if (!response.ok) {
+-        const errText = await response.text().catch(() => "");
+-        respBody = errText.slice(0, INGEST_MAX_BODY);
+-        respSize = Buffer.byteLength(errText);
+-        throw new Error(`OmniRoute ${response.status}: ${errText}`);
++        const errorBytes = Buffer.from(await response.arrayBuffer());
++        respBody = errorBytes.toString("utf8").slice(0, INGEST_MAX_BODY);
++        respSize = errorBytes.length;
++        res.end(errorBytes);
++        return;
+       }
+ 
+-      res.writeHead(200, {
+-        "Content-Type": "text/event-stream",
+-        "Cache-Control": "no-cache",
+-        Connection: "keep-alive",
+-        "X-Accel-Buffering": "no",
+-      });
++      if (!response.body) {
++        res.end();
++        return;
++      }
+ 
+       reader = response.body.getReader();
+       const decoder = new TextDecoder();
+@@ -610,7 +700,7 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
+         // #14528: a slow client must drain before the next upstream read,
+         // otherwise the socket write queue grows without bound. A close
+         // during the wait is caught by the downstreamClosed check above.
+-        await writeBackpressureShim.writeWithBackpressure(res, text);
++        await writeBackpressureShim.writeWithBackpressure(res, value);
+       }
+     } finally {
+       res.off("close", onDownstreamClose);
+@@ -632,6 +722,13 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
+     // in the response body. Hard Rule #12 — sanitize before sending.
+     captureError = sanitizeErrorMessage(error && error.message);
+     console.error(`❌ ${error.message}`);
++    if (res.destroyed || res.writableEnded) return;
++    // A partial native response must stay a transport failure. Appending a
++    // different JSON protocol would disguise truncation as successful EOF.
++    if (res.headersSent) {
++      res.destroy();
++      return;
++    }
+     if (!res.headersSent) res.writeHead(500, { "Content-Type": "application/json" });
+     res.end(
+       JSON.stringify({
+@@ -673,12 +770,25 @@ async function startMitmServer() {
+   const sslOptions =
+     CERT_MODE === "root-ca" ? await loadRootCaSslOptions() : loadLegacySslOptions();
+ 
+-  const server = https.createServer(sslOptions, async (req, res) => {
++  const handleRequest = async (req, res) => {
++    if (req.method === "GET" && req.url === "/__omniroute_bridge_health") {
++      res.writeHead(200, { "Content-Type": "application/json" });
++      res.end(
++        JSON.stringify({
++          ok: true,
++          transportVersion: 1,
++          port: LOCAL_PORT,
++          targetAgent: process.env.MITM_TARGET_AGENT || null,
++        })
++      );
++      return;
++    }
+     stats.totalRequests++;
+     stats.lastRequestAt = new Date().toISOString();
+     writeStats();
+ 
+-    const bodyBuffer = await collectBodyRaw(req);
++    const rawBodyBuffer = await collectBodyRaw(req);
++    const bodyBuffer = decodeChatBody(req, rawBodyBuffer);
+     const host = String(req.headers.host || "")
+       .split(":")[0]
+       .toLowerCase();
+@@ -693,12 +803,12 @@ async function startMitmServer() {
+ 
+     if (req.headers["x-omniroute-source"] === "omniroute") {
+       vlog(1, `[MITM] → PASSTHROUGH (OmniRoute source loop)`);
+-      return passthrough(req, res, bodyBuffer);
++      return passthrough(req, res, rawBodyBuffer);
+     }
+ 
+     if (!TARGET_HOSTS.has(host)) {
+       vlog(1, `[MITM] → PASSTHROUGH (host ${host} not in target list)`);
+-      return passthrough(req, res, bodyBuffer);
++      return passthrough(req, res, rawBodyBuffer);
+     }
+ 
+     const agentId = TARGET_HOST_AGENT.get(host) || "antigravity";
+@@ -736,14 +846,14 @@ async function startMitmServer() {
+ 
+     if (!isChatRequest) {
+       vlog(1, `[MITM] → PASSTHROUGH (URL ${req.url} does not match chat patterns)`);
+-      return passthrough(req, res, bodyBuffer);
++      return passthrough(req, res, rawBodyBuffer);
+     }
+ 
+     const mappedOverride = getMappedOverride(model, agentId);
+ 
+     if (!mappedOverride) {
+       vlog(1, `[MITM] → PASSTHROUGH (model "${model}" has no MITM alias mapping)`);
+-      return passthrough(req, res, bodyBuffer);
++      return passthrough(req, res, rawBodyBuffer);
+     }
+ 
+     stats.interceptedRequests++;
+@@ -758,6 +868,28 @@ async function startMitmServer() {
+           : "")
+     );
+     return intercept(req, res, bodyBuffer, mappedOverride, model);
++  };
++
++  // EventEmitter does not consume an async listener's rejection. A single DNS,
++  // body-read or routing failure must not terminate every active agent stream.
++  const server = https.createServer(sslOptions, (req, res) => {
++    void handleRequest(req, res).catch((error) => {
++      console.error(`[MITM] Request failed: ${error && error.message}`);
++      if (res.destroyed || res.writableEnded) return;
++      if (res.headersSent) {
++        res.destroy();
++        return;
++      }
++      res.writeHead(502, { "Content-Type": "application/json" });
++      res.end(
++        JSON.stringify({
++          error: {
++            message: sanitizeErrorMessage("Agent Bridge could not complete the upstream request."),
++            type: "mitm_error",
++          },
++        })
++      );
++    });
+   });
+ 
+   // =========================================================================
+@@ -898,22 +1030,25 @@ async function startMitmServer() {
+   server.headersTimeout = MITM_IDLE_TIMEOUT_MS; // time allowed to send headers
+   server.keepAliveTimeout = MITM_IDLE_TIMEOUT_MS; // idle keep-alive window
+ 
+-  server.listen(LOCAL_PORT, () => {
++  server.listen(LOCAL_PORT, process.env.MITM_LOCAL_HOST || "127.0.0.1", () => {
+     stats.startedAt = new Date().toISOString();
+     writeStats();
+     console.log(`🚀 MITM ready on :${LOCAL_PORT} → ${ROUTER_URL}`);
+   });
+ 
++  const sockets = new Set();
+   server.on("connection", (socket) => {
+     // Guard against double-counting: a CONNECT "target" tunnel re-emits an
+     // already-counted socket into the TLS layer via emit("connection") above.
+     if (socket.__mitmCounted) return;
+     socket.__mitmCounted = true;
++    sockets.add(socket);
+     // Reap idle sockets so hung connections cannot exhaust fds (Gap 10).
+     socket.setTimeout(MITM_IDLE_TIMEOUT_MS, () => socket.destroy());
+     stats.activeConnections++;
+     writeStats();
+     socket.on("close", () => {
++      sockets.delete(socket);
+       stats.activeConnections = Math.max(0, stats.activeConnections - 1);
+       writeStats();
+     });
+@@ -930,12 +1065,25 @@ async function startMitmServer() {
+     process.exit(1);
+   });
+ 
+-  process.on("SIGTERM", () => {
+-    server.close(() => process.exit(0));
+-  });
+-  process.on("SIGINT", () => {
+-    server.close(() => process.exit(0));
+-  });
++  let stopping = false;
++  const shutdown = () => {
++    if (stopping) return;
++    stopping = true;
++    // Incomplete TLS handshakes and CONNECT tunnels can retain a live PID
++    // after the listening socket closes, blocking recovery after a restart.
++    const deadline = setTimeout(() => {
++      for (const socket of sockets) socket.destroy();
++      process.exit(0);
++    }, 1000);
++    deadline.unref();
++    server.close(() => {
++      clearTimeout(deadline);
++      process.exit(0);
++    });
++    server.closeIdleConnections?.();
++  };
++  process.once("SIGTERM", shutdown);
++  process.once("SIGINT", shutdown);
+ }
+ 
+ startMitmServer().catch((err) => {

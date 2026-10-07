@@ -1,0 +1,14 @@
+diff --git a/tests/unit/claude-fable-5-1.test.ts b/tests/unit/claude-fable-5-1.test.ts
+index b494db3d3..a54532749 100644
+--- a/tests/unit/claude-fable-5-1.test.ts
++++ b/tests/unit/claude-fable-5-1.test.ts
+@@ -78,7 +78,8 @@ test("Claude Fable 5.1 is registered only on verified launch surfaces", () => {
+   );
+   assert.equal(
+     getNextFamilyFallback(`claude/${MODEL_ID}`, new Set([`claude/${MODEL_ID}`])),
+-    "claude/claude-fable-5"
++    null,
++    "Claude exhaustion must not silently downgrade to an older model"
+   );
+ });
+ 

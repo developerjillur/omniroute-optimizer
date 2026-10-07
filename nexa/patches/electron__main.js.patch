@@ -1,0 +1,15 @@
+diff --git a/electron/main.js b/electron/main.js
+index 7daff0284..21027fff4 100644
+--- a/electron/main.js
++++ b/electron/main.js
+@@ -425,6 +425,10 @@ function createWindow({ showWhenReady = true } = {}) {
+       preload: path.join(__dirname, "preload.js"),
+       contextIsolation: true,
+       nodeIntegration: false,
++      // Enable Chromium's renderer sandbox. preload.js is sandbox-safe: it only
++      // require()s "electron" (contextBridge/ipcRenderer) + uses process.platform
++      // and DOM APIs — no Node core modules — so no preload refactor is needed.
++      sandbox: true,
+       webSecurity: true,
+       webviewTag: false,
+     },

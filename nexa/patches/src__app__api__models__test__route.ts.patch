@@ -1,0 +1,28 @@
+diff --git a/src/app/api/models/test/route.ts b/src/app/api/models/test/route.ts
+index b756b958f..6926250e6 100644
+--- a/src/app/api/models/test/route.ts
++++ b/src/app/api/models/test/route.ts
+@@ -71,6 +71,7 @@ export async function POST(request: Request) {
+           ? NVIDIA_SINGLE_TEST_TIMEOUT_MS
+           : DEFAULT_MODEL_TEST_TIMEOUT_MS,
+       streamChat: true,
++      signal: request.signal,
+     });
+ 
+     if (result.status === "ok") {
+@@ -78,6 +79,7 @@ export async function POST(request: Request) {
+         status: "ok",
+         latencyMs: result.latencyMs,
+         responseText: result.responseText,
++        selectedConnectionId: result.selectedConnectionId,
+       });
+     }
+ 
+@@ -86,6 +88,7 @@ export async function POST(request: Request) {
+       latencyMs: result.latencyMs,
+       error: result.error || "Unknown error",
+     };
++    if (result.selectedConnectionId) body.selectedConnectionId = result.selectedConnectionId;
+     if (result.statusCode !== undefined) body.statusCode = result.statusCode;
+     if (result.rateLimited) body.rateLimited = true;
+     if (result.retryAfter !== undefined) body.retryAfter = result.retryAfter;

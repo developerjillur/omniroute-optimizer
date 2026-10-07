@@ -1,0 +1,15 @@
+diff --git a/src/i18n/messages/vi.json b/src/i18n/messages/vi.json
+index b84f89747..fcc403561 100644
+--- a/src/i18n/messages/vi.json
++++ b/src/i18n/messages/vi.json
+@@ -3117,6 +3117,10 @@
+     "other": "Khác",
+     "preview": "Xem trước",
+     "refreshAll": "Làm mới tất cả",
++    "hermesRoleMoaAdvisor1": "Cố vấn MoA 1",
++    "hermesRoleMoaAdvisor1Desc": "Cố vấn tham chiếu 1 của hội đồng MoA, không dùng công cụ",
++    "hermesRoleMoaAdvisor2": "Cố vấn MoA 2",
++    "hermesRoleMoaAdvisor2Desc": "Cố vấn tham chiếu 2 của hội đồng MoA, không dùng công cụ",
+     "hermesRoleDefault": "Mặc định (chính)",
+     "hermesRoleDefaultDesc": "Mô hình hội thoại chính",
+     "hermesRoleDelegation": "Ủy quyền (tác nhân phụ)",

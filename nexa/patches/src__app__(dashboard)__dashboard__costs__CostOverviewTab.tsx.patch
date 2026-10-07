@@ -1,0 +1,205 @@
+diff --git a/src/app/(dashboard)/dashboard/costs/CostOverviewTab.tsx b/src/app/(dashboard)/dashboard/costs/CostOverviewTab.tsx
+index 80d3c976d..edfaca841 100644
+--- a/src/app/(dashboard)/dashboard/costs/CostOverviewTab.tsx
++++ b/src/app/(dashboard)/dashboard/costs/CostOverviewTab.tsx
+@@ -1,6 +1,6 @@
+ "use client";
+ 
+-import { useEffect, useMemo, useState } from "react";
++import { useMemo, useState } from "react";
+ import { useSearchParams } from "next/navigation";
+ import { useLocale, useTranslations } from "next-intl";
+ import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
+@@ -42,6 +42,7 @@ import { ApiKeyUsageLimitCard } from "./components/ApiKeyUsageLimitCard";
+ import { MetricCard } from "./components/MetricCard";
+ import { TopListCard } from "./components/TopListCard";
+ import { useApiKeyUsageLimits } from "./useApiKeyUsageLimits";
++import { useLiveCostRequest } from "./useLiveCostRequest";
+ 
+ interface UsageAnalyticsSummary {
+   totalCost: number;
+@@ -148,17 +149,6 @@ const EXPLORER_GROUP_OPTIONS: Array<{
+   { value: "serviceTier", labelKey: "groupServiceTier" },
+ ];
+ 
+-const CHART_COLORS = [
+-  "#10b981",
+-  "#06b6d4",
+-  "#f59e0b",
+-  "#8b5cf6",
+-  "#ef4444",
+-  "#14b8a6",
+-  "#6366f1",
+-  "#ec4899",
+-];
+-
+ const SHORT_WEEKDAY_INDEX: Record<string, number> = {
+   Sun: 0,
+   Mon: 1,
+@@ -322,6 +312,7 @@ function downloadFile(content: string, filename: string, mimeType: string) {
+ 
+ export default function CostOverviewTab() {
+   const t = useTranslations("costs");
++  const common = useTranslations("common");
+   const locale = useLocale();
+   const nodeMap = useProviderNodeMap();
+   const searchParams = useSearchParams();
+@@ -331,15 +322,29 @@ export default function CostOverviewTab() {
+   const apiKeyFilter = useMemo(() => selectedApiKeyIds.join(","), [selectedApiKeyIds]);
+   const currencyFormatter = useMemo(() => createCurrencyFormatter(locale), [locale]);
+   const [range, setRange] = useState<CostRange>(() => parseCostRange(searchParams.get("range")));
+-  const [analytics, setAnalytics] = useState<UsageAnalyticsPayload | null>(null);
+-  const [presetCosts, setPresetCosts] = useState<Record<"1d" | "7d" | "30d", number>>({
+-    "1d": 0,
+-    "7d": 0,
+-    "30d": 0,
+-  });
+-  const [loading, setLoading] = useState(true);
+-  const [summaryLoading, setSummaryLoading] = useState(true);
+-  const [error, setError] = useState<string | null>(null);
++  const analyticsUrl = useMemo(() => {
++    const params = new URLSearchParams({
++      range,
++      presets: "1d,7d,30d",
++      includeFlatRateEstimates: "true",
++    });
++    if (apiKeyFilter) params.set("apiKeyIds", apiKeyFilter);
++    return `/api/usage/analytics?${params.toString()}`;
++  }, [apiKeyFilter, range]);
++  const {
++    payload: analytics,
++    loading,
++    error,
++    refresh,
++    refreshing,
++    updatedAt,
++  } = useLiveCostRequest<UsageAnalyticsPayload>(analyticsUrl, t("overviewLoadFailed"));
++  const summaryLoading = loading;
++  const presetCosts = {
++    "1d": analytics?.presetSummaries?.["1d"]?.totalCost || 0,
++    "7d": analytics?.presetSummaries?.["7d"]?.totalCost || 0,
++    "30d": analytics?.presetSummaries?.["30d"]?.totalCost || 0,
++  };
+   const [explorerGroupBy, setExplorerGroupBy] = useState<CostExplorerGroupBy>(() =>
+     parseExplorerGroupBy(searchParams.get("groupBy"))
+   );
+@@ -353,52 +358,6 @@ export default function CostOverviewTab() {
+     save: saveApiKeyUsageLimits,
+   } = useApiKeyUsageLimits(selectedApiKeyId);
+ 
+-  useEffect(() => {
+-    let active = true;
+-
+-    async function loadRange() {
+-      try {
+-        setLoading(true);
+-        setSummaryLoading(true);
+-        const params = new URLSearchParams({
+-          range,
+-          presets: "1d,7d,30d",
+-          includeFlatRateEstimates: "true",
+-        });
+-        if (apiKeyFilter) params.set("apiKeyIds", apiKeyFilter);
+-        const response = await fetch(`/api/usage/analytics?${params.toString()}`);
+-        if (!response.ok) {
+-          throw new Error(t("overviewLoadFailed"));
+-        }
+-        const payload = (await response.json()) as UsageAnalyticsPayload;
+-        if (!active) return;
+-        setAnalytics(payload);
+-        if (payload.presetSummaries) {
+-          setPresetCosts({
+-            "1d": payload.presetSummaries["1d"]?.totalCost || 0,
+-            "7d": payload.presetSummaries["7d"]?.totalCost || 0,
+-            "30d": payload.presetSummaries["30d"]?.totalCost || 0,
+-          });
+-        }
+-        setError(null);
+-      } catch (loadError) {
+-        if (!active) return;
+-        setError(loadError instanceof Error ? loadError.message : t("overviewLoadFailed"));
+-      } finally {
+-        if (active) {
+-          setLoading(false);
+-          setSummaryLoading(false);
+-        }
+-      }
+-    }
+-
+-    void loadRange();
+-
+-    return () => {
+-      active = false;
+-    };
+-  }, [apiKeyFilter, range, t]);
+-
+   const selectedRangeLabel = t(
+     RANGE_OPTIONS.find((option) => option.value === range)?.labelKey || "range30d"
+   );
+@@ -503,6 +462,9 @@ export default function CostOverviewTab() {
+     return (
+       <Card className="p-6">
+         <EmptyState icon="payments" title={t("overviewTitle")} description={error} />
++        <button type="button" onClick={refresh} className="mt-3 text-sm text-primary">
++          {common("refresh")}
++        </button>
+       </Card>
+     );
+   }
+@@ -516,6 +478,16 @@ export default function CostOverviewTab() {
+             <p className="text-sm text-text-muted mt-1">{t("overviewDescription")}</p>
+           </div>
+           <div className="flex flex-wrap items-center gap-3">
++            <button
++              type="button"
++              onClick={refresh}
++              disabled={refreshing}
++              className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-text-muted hover:text-text-main rounded-lg border border-border/30 disabled:opacity-50"
++              aria-label={common("refresh")}
++            >
++              <span className="material-symbols-outlined text-sm">refresh</span>
++              {common("refresh")}
++            </button>
+             {summary.streak > 0 && (
+               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20">
+                 <span className="material-symbols-outlined text-amber-400 text-sm">
+@@ -567,6 +539,39 @@ export default function CostOverviewTab() {
+             />
+           </div>
+         </div>
++        <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-text-muted">
++          <span>{common("batchListAutoRefresh")}</span>
++          {updatedAt && (
++            <span>
++              {common("updatedAt")}: {new Date(updatedAt).toLocaleTimeString(locale)}
++            </span>
++          )}
++          {selectedApiKeyIds.length > 0 && (
++            <>
++              <span>
++                {t("groupApiKey")}:{" "}
++                {selectedApiKeyIds
++                  .map(
++                    (id) =>
++                      analytics?.byApiKey?.find((key) => key.apiKeyId === id)?.apiKeyName || id
++                  )
++                  .join(", ")}
++              </span>
++              <a
++                className="text-primary hover:underline"
++                href={`/dashboard/costs?${new URLSearchParams({ range, groupBy: explorerGroupBy })}`}
++                aria-label={`${common("all")} ${t("groupApiKey")}`}
++              >
++                {common("all")} {t("groupApiKey")}
++              </a>
++            </>
++          )}
++        </div>
++        {error && (
++          <p role="alert" className="mt-3 text-sm text-red-400">
++            {error}
++          </p>
++        )}
+       </Card>
+ 
+       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

@@ -1,0 +1,20 @@
+diff --git a/open-sse/services/claudeCodeCCH.ts b/open-sse/services/claudeCodeCCH.ts
+index 567de2cc1..069f7b70d 100644
+--- a/open-sse/services/claudeCodeCCH.ts
++++ b/open-sse/services/claudeCodeCCH.ts
+@@ -40,10 +40,13 @@ export async function computeCCH(bodyBytes: Uint8Array): Promise<string> {
+ 
+ export async function signRequestBody(bodyString: string): Promise<string> {
+   if (!CCH_PATTERN.test(bodyString)) return bodyString;
++  // Native clients already signed their body; local model/identity edits require
++  // signing the placeholder form again, never hashing a previous signature.
++  const unsigned = bodyString.replace(CCH_PATTERN, "cch=00000;");
+   const encoder = new TextEncoder();
+-  const bodyBytes = encoder.encode(bodyString);
++  const bodyBytes = encoder.encode(unsigned);
+   const token = await computeCCH(bodyBytes);
+-  return bodyString.replace(CCH_PATTERN, `cch=${token};`);
++  return unsigned.replace(CCH_PATTERN, `cch=${token};`);
+ }
+ 
+ export { CCH_PATTERN };

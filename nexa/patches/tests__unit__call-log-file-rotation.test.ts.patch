@@ -1,0 +1,47 @@
+diff --git a/tests/unit/call-log-file-rotation.test.ts b/tests/unit/call-log-file-rotation.test.ts
+index 4e5cf8036..305765840 100644
+--- a/tests/unit/call-log-file-rotation.test.ts
++++ b/tests/unit/call-log-file-rotation.test.ts
+@@ -359,7 +359,8 @@ test("overflow cleanup removes at most 100 artifacts and continues across calls"
+ 
+ test("orphan cleanup scans at most 100 candidates, resumes, and protects fresh files", () => {
+   assert.ok(CALL_LOGS_DIR);
+-  const dayDir = path.join(CALL_LOGS_DIR, "2026-04-04");
++  const baseDir = path.join(TEST_DATA_DIR, "bounded-orphans");
++  const dayDir = path.join(baseDir, "2026-04-04");
+   fs.mkdirSync(dayDir, { recursive: true });
+   const old = new Date(Date.now() - 10 * 60_000);
+   for (let i = 0; i < 205; i++) {
+@@ -367,16 +368,25 @@ test("orphan cleanup scans at most 100 candidates, resumes, and protects fresh f
+     fs.writeFileSync(file, "{}");
+     fs.utimesSync(file, old, old);
+   }
+-  assert.equal(cleanupOrphanCallLogFiles(CALL_LOGS_DIR, { maxCandidates: 100, minAgeMs: 0 }), 100);
+-  assert.equal(cleanupOrphanCallLogFiles(CALL_LOGS_DIR, { maxCandidates: 100, minAgeMs: 0 }), 100);
++  assert.equal(cleanupOrphanCallLogFiles(baseDir, { maxCandidates: 100, minAgeMs: 0 }), 100);
++  assert.equal(cleanupOrphanCallLogFiles(baseDir, { maxCandidates: 100, minAgeMs: 0 }), 100);
+ 
+   const freshFile = path.join(dayDir, "fresh.json");
+   fs.writeFileSync(freshFile, "{}");
+-  const third = cleanupOrphanCallLogFiles(CALL_LOGS_DIR, {
+-    maxCandidates: 100,
+-    minAgeMs: 5 * 60_000,
+-  });
+-  assert.equal(third, 5);
++  // Deleting entries can shift a live directory iterator on some filesystems.
++  // A bounded new sweep must find any remainder while retaining the fresh file.
++  let remainder = 0;
++  for (let pass = 0; pass < 3; pass++) {
++    const deleted = cleanupOrphanCallLogFiles(baseDir, {
++      maxCandidates: 100,
++      minAgeMs: 5 * 60_000,
++    });
++    assert.ok(deleted <= 100);
++    remainder += deleted;
++    assert.equal(fs.existsSync(freshFile), true);
++  }
++  assert.equal(remainder, 5);
++  assert.deepEqual(fs.readdirSync(dayDir), ["fresh.json"]);
+   assert.equal(fs.existsSync(freshFile), true);
+ });
+ 

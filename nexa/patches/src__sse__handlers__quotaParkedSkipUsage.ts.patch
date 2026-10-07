@@ -1,0 +1,22 @@
+diff --git a/src/sse/handlers/quotaParkedSkipUsage.ts b/src/sse/handlers/quotaParkedSkipUsage.ts
+index 164f4549b..bc0f330d0 100644
+--- a/src/sse/handlers/quotaParkedSkipUsage.ts
++++ b/src/sse/handlers/quotaParkedSkipUsage.ts
+@@ -83,14 +83,15 @@ export async function recordGateRejection(
+   status: number,
+   provider: string,
+   model: string,
+-  scope: ChatRejectionScope
++  scope: ChatRejectionScope,
++  error?: string
+ ): Promise<void> {
+   await recordSafely(
+     {
+       status,
+       model,
+       provider,
+-      error: `[${status}] Pipeline gate rejected`,
++      error: error ?? `[${status}] Pipeline gate rejected`,
+       ...chatRejectionAttribution(scope),
+     },
+     "gate rejection"

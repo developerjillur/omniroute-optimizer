@@ -1,8 +1,113 @@
 diff --git a/open-sse/utils/stream.ts b/open-sse/utils/stream.ts
-index d563cf7e6..ce905c64c 100644
+index d563cf7e6..00afe3775 100644
 --- a/open-sse/utils/stream.ts
 +++ b/open-sse/utils/stream.ts
-@@ -2889,7 +2889,7 @@ export function createSSEStream(options: StreamOptions = {}) {
+@@ -1,3 +1,4 @@
++import { isCompletedSilentSuggestion } from "./nativeSuggestion.ts";
+ import { translateResponse, initState } from "../translator/index.ts";
+ import { FORMATS } from "../translator/formats.ts";
+ import { appendRequestLog } from "@/lib/usageDb";
+@@ -129,6 +130,7 @@ type StreamLogger = {
+ };
+ 
+ type StreamCompletePayload = {
++  nativeSuggestionSilence?: boolean;
+   status: number;
+   usage: unknown;
+   /** Minimal response body for call log (streaming: usage + note; non-streaming not used) */
+@@ -162,6 +164,7 @@ type StreamCompletePayload = {
+ const DEFAULT_STREAM_BUFFER_BYTES = 16384;
+ 
+ type StreamOptions = {
++  nativeSuggestionRequest?: boolean;
+   mode?: string;
+   targetFormat?: string;
+   sourceFormat?: string;
+@@ -763,6 +766,7 @@ export function createSSEStream(options: StreamOptions = {}) {
+     requestToolIdentityMap = null,
+     streamBufferBytes = DEFAULT_STREAM_BUFFER_BYTES,
+     pendingRequestId = null,
++    nativeSuggestionRequest = false,
+   } = options;
+   // Request-body-size metric (for monitoring payload size distribution & correlation with TTFT).
+   // The size is JSON-serialised byte count; stored as a performance mark detail so monitoring
+@@ -989,8 +993,20 @@ export function createSSEStream(options: StreamOptions = {}) {
+   let streamTimedOut = false;
+   const claudeEmptyResponseLifecycle = createClaudeEmptyResponseLifecycle();
+   // #12398: `timing.firstByteAt` doubles as "any upstream chunk ever arrived".
++  let completedSilentSuggestion = false;
++  const collectProviderPayload = (payload: unknown) => {
++    providerPayloadCollector.push(payload);
++    const event = asRecord(payload);
++    if (nativeSuggestionRequest && targetFormat === FORMATS.OPENAI_RESPONSES &&
++        event.type === "response.completed") {
++      const response = asRecord(event.response);
++      completedSilentSuggestion = isCompletedSilentSuggestion({
++        ...response, status: response.status ?? "completed",
++      });
++    }
++  };
+   const shouldAbortClaudeStream = () =>
+-    clientExpectsClaudeStream &&
++    clientExpectsClaudeStream && !completedSilentSuggestion &&
+     shouldAbortEmptyClaudeStream(claudeEmptyResponseLifecycle, timing.firstByteAt !== null);
+   // `event:` framing is only part of the SSE protocol for OpenAI Responses API
+   // and Claude Messages API passthrough; a plain OpenAI Chat-Completions-format
+@@ -1190,7 +1206,7 @@ export function createSSEStream(options: StreamOptions = {}) {
+     }
+ 
+     if (
+-      sourceFormat === FORMATS.CLAUDE &&
++      sourceFormat === FORMATS.CLAUDE && !completedSilentSuggestion &&
+       shouldInjectClaudeEmptyResponseBeforeCurrentEvent(claudeEmptyResponseLifecycle, itemSanitized)
+     ) {
+       emitClaudeEmptyStreamErrorAndAbort(controller);
+@@ -1344,7 +1360,7 @@ export function createSSEStream(options: StreamOptions = {}) {
+   ): boolean => {
+     const failure = prepareTranslatedStreamFailure(payload);
+     if (!failure) return false;
+-    providerPayloadCollector.push(failure.providerPayload);
++    collectProviderPayload(failure.providerPayload);
+     const output = formatTranslatedStreamError(failure.record, sourceFormat);
+     reqLogger?.appendConvertedChunk?.(output);
+     forward(controller, encoder.encode(output));
+@@ -1494,7 +1510,7 @@ export function createSSEStream(options: StreamOptions = {}) {
+             if (trimmed.startsWith("data:")) {
+               const providerPayload = parsedPassthroughData ?? parseSSELine(trimmed);
+               if (providerPayload) {
+-                providerPayloadCollector.push(providerPayload);
++                collectProviderPayload(providerPayload);
+                 if ((providerPayload as { done?: unknown }).done === true) {
+                   continue;
+                 }
+@@ -2314,7 +2330,7 @@ export function createSSEStream(options: StreamOptions = {}) {
+             reasoningObserver.note(parsed, Date.now());
+ 
+           if (shouldDropResponsesCommentary && dropCommentary(parsed as JsonRecord)) continue;
+-          providerPayloadCollector.push(parsed);
++          collectProviderPayload(parsed);
+           if (parsed && parsed.done) {
+             continue;
+           }
+@@ -2551,7 +2567,7 @@ export function createSSEStream(options: StreamOptions = {}) {
+                 reqLogger?.appendConvertedChunk?.(output);
+                 forward(controller, encoder.encode(output));
+               },
+-              pushProviderPayload: (payload: unknown) => providerPayloadCollector.push(payload),
++              pushProviderPayload: (payload: unknown) => collectProviderPayload(payload),
+               pushClientPayload: (payload: unknown) => clientPayloadCollector.push(payload),
+               sanitizeUsagePayload: (payload: unknown) =>
+                 sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat),
+@@ -2617,7 +2633,7 @@ export function createSSEStream(options: StreamOptions = {}) {
+               }
+               let bufferedPayload = parseSSELine(bufferedLine);
+               if (bufferedPayload) {
+-                providerPayloadCollector.push(bufferedPayload);
++                collectProviderPayload(bufferedPayload);
+                 bufferedProjectedFailure = projectStreamFailureEvent(bufferedPayload);
+                 if (bufferedProjectedFailure) {
+                   bufferedPayload = bufferedProjectedFailure.publicPayload;
+@@ -2889,7 +2905,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                    // reasoning-heavy stream (live incident 2026-09-04) -- see
                    // providerPayloadCollector's own `format:` construction comment above.
                    providerPayload: providerPayloadCollector.build(
@@ -11,7 +116,33 @@ index d563cf7e6..ce905c64c 100644
                        ? providerPayloadCollector.getSummary()
                        : { object: "chat.completion", ...responseBody },
                      { includeEvents: false }
-@@ -3175,7 +3175,7 @@ export function createSSEStream(options: StreamOptions = {}) {
+@@ -2926,7 +2942,7 @@ export function createSSEStream(options: StreamOptions = {}) {
+             const parsed = parseSSELine(buffer.trim());
+             if (parsed && !parsed.done) {
+               if (emitTranslatedFailureAndAbort(controller, parsed)) return;
+-              providerPayloadCollector.push(parsed);
++              collectProviderPayload(parsed);
+               // Extract usage from remaining buffer — if the usage-bearing event
+               // (e.g. response.completed) is the last SSE line, it ends up here
+               // in the flush handler where extractUsage was not called.
+@@ -2999,7 +3015,7 @@ export function createSSEStream(options: StreamOptions = {}) {
+           // #9268: reject a translate-mode stream that forwarded no valuable chunk
+           // (all-empty `choices: []`) instead of completing with an empty 200.
+           if (
+-            mode === STREAM_MODE.TRANSLATE &&
++            mode === STREAM_MODE.TRANSLATE && !completedSilentSuggestion &&
+             rejectEmptyChoicesStream({
+               forwardedValuableChunk,
+               hasValidUsage: hasValidUsage(state?.usage),
+@@ -3159,6 +3175,7 @@ export function createSSEStream(options: StreamOptions = {}) {
+               };
+               onComplete({
+                 status: 200,
++                nativeSuggestionSilence: completedSilentSuggestion,
+                 usage: state?.usage,
+                 responseBody,
+                 ...timing.completionTiming(),
+@@ -3175,7 +3192,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                  // reasoning-heavy stream (live incident 2026-09-04) -- see
                  // providerPayloadCollector's own `format:` construction comment above.
                  providerPayload: providerPayloadCollector.build(
@@ -20,7 +151,25 @@ index d563cf7e6..ce905c64c 100644
                      ? providerPayloadCollector.getSummary()
                      : { object: "chat.completion", ...responseBody },
                    { includeEvents: false }
-@@ -3279,6 +3279,9 @@ export function createPassthroughStreamWithLogger(
+@@ -3240,7 +3257,8 @@ export function createSSETransformStreamWithLogger(
+   requestedThinking: boolean | undefined = undefined,
+   customToolNames: ReadonlySet<string> = new Set(),
+   requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null = null,
+-  streamBufferBytes: number = DEFAULT_STREAM_BUFFER_BYTES
++  streamBufferBytes: number = DEFAULT_STREAM_BUFFER_BYTES,
++  nativeSuggestionRequest = false
+ ) {
+   return createSSEStream({
+     mode: STREAM_MODE.TRANSLATE,
+@@ -3261,6 +3279,7 @@ export function createSSETransformStreamWithLogger(
+     customToolNames,
+     requestToolIdentityMap,
+     streamBufferBytes,
++    nativeSuggestionRequest,
+   });
+ }
+ 
+@@ -3279,6 +3298,9 @@ export function createPassthroughStreamWithLogger(
  ) {
    return createSSEStream({
      mode: STREAM_MODE.PASSTHROUGH,

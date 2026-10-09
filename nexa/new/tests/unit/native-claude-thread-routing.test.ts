@@ -57,9 +57,15 @@ test.after(async () => {
   core.resetDbInstance();
 });
 
-async function expectClientReplay(messageId: string, id: string, sid = session, apiKey?: string) {
+async function expectClientReplay(
+  messageId: string,
+  id: string,
+  sid = session,
+  apiKey?: string,
+  model = "claude/claude-sonnet-5-5"
+) {
   const body = {
-    model: "claude/claude-sonnet-5-5",
+    model,
     stream: false,
     thread: { type: "continue", previous_message_id: messageId },
     metadata: { user_id: JSON.stringify({ session_id: sid }) },
@@ -93,6 +99,11 @@ async function expectClientReplay(messageId: string, id: string, sid = session, 
     assert.equal(response.status, 404);
     const payload = await response.json();
     assert.equal(payload.error.type, "invalid_request_error");
+    assert.equal(
+      payload.error.details?.error_code,
+      "thread_not_found",
+      "native clients must recognize the response and replay tools plus the full transcript"
+    );
     assert.match(payload.error.message, /No thread state is available/);
     assert.match(payload.error.message, /Replay the full conversation/);
     assert.equal(dispatches, 0, "a sparse delta cannot be sent on any sibling account");
@@ -120,6 +131,23 @@ test("an unknown or cross-session Thread requests full replay without dispatch",
   owners.saveNativeClaudeThreadOwner(session, "msg_owned", accountA);
   await expectClientReplay("msg_missing", "native-thread-unknown");
   await expectClientReplay("msg_owned", "native-thread-cross-session", otherSession);
+});
+
+test("model switches cannot send a Claude Thread delta to GPT or GLM", async () => {
+  owners.saveNativeClaudeThreadOwner(session, "msg_claude_before_switch", accountA);
+  for (const [index, model] of [
+    "codex/gpt-6.1-sol",
+    "codex/gpt-6-astra",
+    "glmt/glm-5.3-max",
+  ].entries()) {
+    await expectClientReplay(
+      "msg_claude_before_switch",
+      `native-thread-model-switch-${index}`,
+      session,
+      undefined,
+      model
+    );
+  }
 });
 
 test("an expired Thread owner cannot cause a sparse sibling fallback", async () => {

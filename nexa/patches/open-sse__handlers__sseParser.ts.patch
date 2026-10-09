@@ -1,0 +1,13 @@
+diff --git a/open-sse/handlers/sseParser.ts b/open-sse/handlers/sseParser.ts
+index 49eaefc3c..5a7a1cc56 100644
+--- a/open-sse/handlers/sseParser.ts
++++ b/open-sse/handlers/sseParser.ts
+@@ -828,6 +828,8 @@ export function parseSSEToResponsesOutput(rawSSE, fallbackModel) {
+     }),
+     usage: picked.usage || null,
+     status: picked.status || statusFallback,
++    ...(picked.error != null ? { error: picked.error } : {}),
++    ...(picked.incomplete_details != null ? { incomplete_details: picked.incomplete_details } : {}),
+     created_at: picked.created_at || Math.floor(Date.now() / 1000),
+     metadata: picked.metadata || {},
+   };

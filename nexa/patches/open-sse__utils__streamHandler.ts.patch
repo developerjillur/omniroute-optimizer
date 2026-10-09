@@ -1,0 +1,63 @@
+diff --git a/open-sse/utils/streamHandler.ts b/open-sse/utils/streamHandler.ts
+index cef58650b..dbe0bfb3a 100644
+--- a/open-sse/utils/streamHandler.ts
++++ b/open-sse/utils/streamHandler.ts
+@@ -601,6 +601,7 @@ function resolveSilentCloseOutcome(input: {
+   clientTerminalSeen: boolean;
+   clientResponseFormat?: string | null;
+   contentWatcher: StreamContentWatcher;
++  allowEmptyCompletion?: boolean;
+ }): SilentCloseOutcome | null {
+   if (!input.bytesWereForwarded) return null;
+ 
+@@ -638,6 +639,8 @@ function resolveSilentCloseOutcome(input: {
+ 
+   const watcher = input.contentWatcher;
+   if (watcher.sawError()) return null;
++  // Only a verified optional suggestion completion may close without model text.
++  if (input.clientTerminalSeen && input.allowEmptyCompletion === true) return null;
+   if (watcher.sawSseFrame() && !watcher.sawContent() && !watcher.sawLegitEmptyTerminal()) {
+     return { kind: "error", reason: "Provider returned empty content" };
+   }
+@@ -648,7 +651,7 @@ function resolveSilentCloseOutcome(input: {
+ export function createDisconnectAwareStream(
+   transformStream,
+   streamController,
+-  options: { highWaterMark?: number } = {}
++  options: { highWaterMark?: number; allowEmptyCompletion?: () => boolean } = {}
+ ) {
+   const reader = transformStream.readable.getReader();
+   const writer = transformStream.writable.getWriter();
+@@ -747,6 +750,7 @@ export function createDisconnectAwareStream(
+               clientTerminalSeen,
+               clientResponseFormat: streamController.clientResponseFormat,
+               contentWatcher,
++              allowEmptyCompletion: options.allowEmptyCompletion?.() === true,
+             });
+ 
+             if (silentClose?.kind === "truncated") {
+@@ -886,6 +890,7 @@ export function pipeWithDisconnect(
+     stallTimeoutMs?: number;
+     activeTimeoutMs?: number;
+     contentStallTimeoutMs?: number;
++    allowEmptyCompletion?: () => boolean;
+     highWaterMark?: number;
+   } = {}
+ ) {
+@@ -907,7 +912,7 @@ export function pipeWithDisconnect(
+     return createDisconnectAwareStream(
+       { readable: transformedBody, writable: createNoopAbortWritable() },
+       streamController,
+-      { highWaterMark: opts.highWaterMark }
++      { highWaterMark: opts.highWaterMark, allowEmptyCompletion: opts.allowEmptyCompletion }
+     );
+   }
+ 
+@@ -1164,6 +1169,6 @@ export function pipeWithDisconnect(
+   return createDisconnectAwareStream(
+     { readable: transformedBody, writable: createNoopAbortWritable() },
+     wrappedController,
+-    { highWaterMark: opts.highWaterMark }
++    { highWaterMark: opts.highWaterMark, allowEmptyCompletion: opts.allowEmptyCompletion }
+   );
+ }

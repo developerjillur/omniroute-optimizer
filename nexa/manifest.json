@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 213,
-    "patches": 137,
-    "new": 71,
+    "total": 222,
+    "patches": 141,
+    "new": 76,
     "tooling": 5,
     "upstreamCandidates": 28,
-    "nexaSpecific": 76,
-    "needsReview": 109,
+    "nexaSpecific": 78,
+    "needsReview": 116,
     "pendingUpstreamPR": 12,
     "mergedUpstreamPR": 2
   },
@@ -226,10 +226,26 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/open-sse__handlers__chatCore__streamingPipeline.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/handlers/chatCore/streamingPipeline.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/open-sse__handlers__chatCore__upstreamBody.ts.patch",
       "layer": "patch",
       "class": "nexa-specific",
       "target": "open-sse/handlers/chatCore/upstreamBody.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__handlers__sseParser.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/handlers/sseParser.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -325,6 +341,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/open-sse__translator__request__claude-to-openai.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/translator/request/claude-to-openai.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/open-sse__utils__earlyStreamKeepalive.ts.patch",
       "layer": "patch",
       "class": "needs-review",
@@ -337,6 +361,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "open-sse/utils/stream.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__utils__streamHandler.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/utils/streamHandler.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -1193,6 +1225,22 @@
       "upstreamPR": null
     },
     {
+      "file": "new/open-sse/utils/nativeHostedSearch.ts",
+      "layer": "new",
+      "class": "nexa-specific",
+      "target": "open-sse/utils/nativeHostedSearch.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/open-sse/utils/nativeSuggestion.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "open-sse/utils/nativeSuggestion.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
       "file": "new/scripts/build/startupGuard.mjs",
       "layer": "new",
       "class": "needs-review",
@@ -1603,6 +1651,14 @@
       "upstreamPR": null
     },
     {
+      "file": "new/tests/unit/native-advisor-cross-provider.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/native-advisor-cross-provider.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
       "file": "new/tests/unit/native-cache-health.test.ts",
       "layer": "new",
       "class": "nexa-specific",
@@ -1647,6 +1703,22 @@
       "layer": "new",
       "class": "nexa-specific",
       "target": "tests/unit/native-claude-thread-routing.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/native-hosted-search-boundary.test.ts",
+      "layer": "new",
+      "class": "nexa-specific",
+      "target": "tests/unit/native-hosted-search-boundary.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/native-suggestion-empty-response.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/native-suggestion-empty-response.test.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },

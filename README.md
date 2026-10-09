@@ -8,18 +8,19 @@ Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। Om
 | --- | --- |
 | Source repository | `developerjillur/OmniRoute` |
 | Source branch | `nexalance` |
-| Source commit | `a535572e52f54d557391e57087bac9ef0e08e6bc` |
+| Source commit | `6e3dd8d503b7fde3718384c84bb058c6e570fe39` |
 | Upstream version | `3.8.51` |
 | Pristine upstream base | `c1e30b7676975feb298b49eff6ff58923c04b89e` |
-| `nexa/` tree SHA | `f70f3faadc15b6cfe28a8af84044072ec30ae9c3` |
-| Versioned overlay files | 283 |
+| `nexa/` tree SHA | `3d2902b5f69e91673d627fa51421341596fb80ae` |
+| Versioned overlay files | 292 |
 
-`nexa/`-এর সব 283টি file মূল source commit-এর সঙ্গে byte-for-byte মিলে। প্রতিটি file-এর path, size, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এর 213টি entry-তে 137টি patch, 71টি নতুন file এবং 5টি tooling entry আছে; অন্যান্য tracked file-এ deployment scripts, tests ও documentation রয়েছে।
+`nexa/`-এর সব 292টি file মূল source commit-এর সঙ্গে byte-for-byte মিলে। প্রতিটি file-এর path, size, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এর 222টি entry-তে 141টি patch, 76টি নতুন file এবং 5টি tooling entry আছে; অন্যান্য tracked file-এ deployment scripts, tests ও documentation রয়েছে।
 
 ## কী রয়েছে
 
 - Native Claude request, cache TTL, session/account continuity, sparse Thread continuation, effort ও streaming usage accounting-এর fixes এবং regression tests।
 - Compression বন্ধ করার configuration policy ও management script। Live policy প্রয়োগ আলাদা authenticated operation।
+- Model switch/restart-এর পরে native tools ও context replay সংরক্ষণ, valid silent prompt suggestion-কে অকারণে retry না করা, এবং cross-provider advisor/WebSearch সীমা স্পষ্টভাবে জানানোর fixes। Anthropic-hosted feature-এর সমান support এতে দাবি করা হচ্ছে না।
 - Cache-health diagnostics, quota-aware selection, quota refresh/deduplication এবং model catalog cache-এর fixes।
 - Google connection routing ও verification-state handling, native Agent Bridge TLS/DNS/lifecycle, CLI ও packaging-এর fixes।
 - Bounded build, isolated package smoke, database snapshot, deployment ও rollback scripts।

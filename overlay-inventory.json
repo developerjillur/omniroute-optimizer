@@ -2,12 +2,12 @@
   "repository": "developerjillur/omniroute-optimizer",
   "sourceRepository": "developerjillur/OmniRoute",
   "sourceBranch": "nexalance",
-  "sourceCommit": "a535572e52f54d557391e57087bac9ef0e08e6bc",
-  "sourceNexaTree": "f70f3faadc15b6cfe28a8af84044072ec30ae9c3",
+  "sourceCommit": "6e3dd8d503b7fde3718384c84bb058c6e570fe39",
+  "sourceNexaTree": "3d2902b5f69e91673d627fa51421341596fb80ae",
   "upstreamBase": "c1e30b7676975feb298b49eff6ff58923c04b89e",
   "upstreamVersion": "3.8.51",
-  "trackedNexaFiles": 283,
-  "totalNexaBytes": 1062213,
+  "trackedNexaFiles": 292,
+  "totalNexaBytes": 1106822,
   "files": [
     {
       "path": "nexa/.gitignore",
@@ -453,9 +453,9 @@
     {
       "path": "nexa/manifest.json",
       "mode": "100644",
-      "gitBlobSha": "0f72925e263eebdac8b52d28103bf66e9c4b6f0c",
-      "bytes": 55965,
-      "sha256": "0bcd43fee46ee376923d312b8661a22ba9a738a4366cc954f02348b102b86408"
+      "gitBlobSha": "c1c0a885bd677fb6e37bd0cf247eda03c4161bd8",
+      "bytes": 58260,
+      "sha256": "930a422738c55e83379413654fe39fa4537e734f15e34c2777128b87acc027b9"
     },
     {
       "path": "nexa/new/bin/cli/utils/packageMigrations.mjs",
@@ -498,6 +498,20 @@
       "gitBlobSha": "b2f1ccc710e9e0848e500b71e2b3917dc236999b",
       "bytes": 5141,
       "sha256": "4e053dd988dab09e1cda0b2fdfa10b7c1b6ab8914b9569a60e6ba25012a3e8fe"
+    },
+    {
+      "path": "nexa/new/open-sse/utils/nativeHostedSearch.ts",
+      "mode": "100644",
+      "gitBlobSha": "729563fa508271bfbc02986363c2387cead4cd3c",
+      "bytes": 1216,
+      "sha256": "4a144a68a2d645f1ce5f806512a33217bb63b7780d32dcbdd72db69374e5ce59"
+    },
+    {
+      "path": "nexa/new/open-sse/utils/nativeSuggestion.ts",
+      "mode": "100644",
+      "gitBlobSha": "89d8a8946eb6c2efac8991d16db6718f8c8e0bfa",
+      "bytes": 2611,
+      "sha256": "560d356acc433edf2b66f3952f70c8b04a030fdf1ce306836730e8e881d5613b"
     },
     {
       "path": "nexa/new/scripts/build/startupGuard.mjs",
@@ -843,6 +857,13 @@
       "sha256": "3ceb7d988797b26535c045c7044daa71d50b88abfe314ed1fbf74b64a4ab9934"
     },
     {
+      "path": "nexa/new/tests/unit/native-advisor-cross-provider.test.ts",
+      "mode": "100644",
+      "gitBlobSha": "78a493013a6af36f01522b8c67574fbffc5787e5",
+      "bytes": 5032,
+      "sha256": "4c0853bb23246582118755e5bea8da7350d04e0f252788057bece694c876d5c5"
+    },
+    {
       "path": "nexa/new/tests/unit/native-cache-health.test.ts",
       "mode": "100644",
       "gitBlobSha": "2f78596a1f078037457bf9c19ce9508032c9494a",
@@ -880,9 +901,23 @@
     {
       "path": "nexa/new/tests/unit/native-claude-thread-routing.test.ts",
       "mode": "100644",
-      "gitBlobSha": "177cfd7af495536f97f925dfce55f9f002d8e0f9",
-      "bytes": 6366,
-      "sha256": "99b610e189a01475fe7d412d36ca0b5c119d7b5f6c9f68aae7675c9d9f4f0f41"
+      "gitBlobSha": "33e4851e5bca7c498fd08fe7f771f05cdce37bc6",
+      "bytes": 7034,
+      "sha256": "c396f6ceca31b3e5d16ae30e822d0ae9d39c63452a7ada4ff427a0655ce60c0e"
+    },
+    {
+      "path": "nexa/new/tests/unit/native-hosted-search-boundary.test.ts",
+      "mode": "100644",
+      "gitBlobSha": "0d92cf60729be3efcf2445779f144afa9c42efee",
+      "bytes": 2283,
+      "sha256": "4d0d9ad124b35b12033fc85664fd279a2cecf730cc2042af90cadaf966ed0968"
+    },
+    {
+      "path": "nexa/new/tests/unit/native-suggestion-empty-response.test.ts",
+      "mode": "100644",
+      "gitBlobSha": "07fb3804b77eede60bfa48a7ed63a778c9f09a09",
+      "bytes": 9902,
+      "sha256": "b4ca4af42b6a43e5024561d9cee4f5cc5be0c97bec77ab81a6de10e51323c20e"
     },
     {
       "path": "nexa/new/tests/unit/nexa-google-account-health.test.ts",
@@ -1097,9 +1132,9 @@
     {
       "path": "nexa/patches/open-sse__handlers__chatCore.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "32eb8c5c99c05900dd2e645a5b1331fdf36baa38",
-      "bytes": 2570,
-      "sha256": "3d951322abe2f72d18a88d98e5e9c2799faaf0e7414cd0cb6cbe5402c12639e5"
+      "gitBlobSha": "2e2829a8ce467f56bfa23b7395aa892d5073fe2f",
+      "bytes": 7500,
+      "sha256": "e36eb5976e1c36e8e3c48ef0a6f1759f6182d0336887a444798211e5f07f7b8a"
     },
     {
       "path": "nexa/patches/open-sse__handlers__chatCore__attemptLogging.ts.patch",
@@ -1123,11 +1158,25 @@
       "sha256": "9a79bdebe20a8bd2314cb4ddd90d7ad78beca7c4730fbbb19f512c9e043d3f59"
     },
     {
+      "path": "nexa/patches/open-sse__handlers__chatCore__streamingPipeline.ts.patch",
+      "mode": "100644",
+      "gitBlobSha": "693810d4c8e31131ec6191e37cd720a641d30149",
+      "bytes": 1081,
+      "sha256": "829a302f133f109a16ef5d1339c664f8688372860651f1e40c65b1f07b0279ab"
+    },
+    {
       "path": "nexa/patches/open-sse__handlers__chatCore__upstreamBody.ts.patch",
       "mode": "100644",
       "gitBlobSha": "5037d40bfc002f5e3960b3e05916c0dbc5822094",
       "bytes": 2332,
       "sha256": "d7b204b951d85cd014221c31774a7377080fcbe996df5f26352bd7867a0a6d88"
+    },
+    {
+      "path": "nexa/patches/open-sse__handlers__sseParser.ts.patch",
+      "mode": "100644",
+      "gitBlobSha": "4483f764d66a0c7e52cfb24d3dc01a4e2009efc7",
+      "bytes": 639,
+      "sha256": "14741b44154da5d6d710cf35f09289537b0ee561ac32877144625506d055e4d2"
     },
     {
       "path": "nexa/patches/open-sse__mcp-server____tests____createComboTool.test.ts.patch",
@@ -1207,6 +1256,13 @@
       "sha256": "631f41d532641321a3699231166f88af41322059e65a4b98e663b13e81347d13"
     },
     {
+      "path": "nexa/patches/open-sse__translator__request__claude-to-openai.ts.patch",
+      "mode": "100644",
+      "gitBlobSha": "af9e529a20ae0f9cd6e05c40d08ae7d32f1f5034",
+      "bytes": 3590,
+      "sha256": "adf528dcbf9c8cd901821098d46910b6560d35fb6c6f69e76b8574c6267188eb"
+    },
+    {
       "path": "nexa/patches/open-sse__utils__earlyStreamKeepalive.ts.patch",
       "mode": "100644",
       "gitBlobSha": "56ba274f261bce3365f25d46a52d7b4dacbc3d24",
@@ -1216,9 +1272,16 @@
     {
       "path": "nexa/patches/open-sse__utils__stream.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "a52fb96929cf62bd5b3ee41f7a62e0a6fa7379f2",
-      "bytes": 1876,
-      "sha256": "e78424b50fd8d13ba53638fc631f6b20d133a57d44ab1c62654c001dd744db28"
+      "gitBlobSha": "9ede233c20d5171ef9fb8d4325202b7e3a836a70",
+      "bytes": 9417,
+      "sha256": "24c9efbc8a0b138fc41c4dae62d3435d7a0c8ba0354ed00f0434a6055172aec7"
+    },
+    {
+      "path": "nexa/patches/open-sse__utils__streamHandler.ts.patch",
+      "mode": "100644",
+      "gitBlobSha": "72ccf52b38a34f0bfa24cc4645c2ef7f00458ea3",
+      "bytes": 2655,
+      "sha256": "96d723246c2fbde059a9dd5c9d29d9980ecc8f71fa61b96e51efaeffeaed01b0"
     },
     {
       "path": "nexa/patches/public__openapi.yaml.patch",
@@ -1601,9 +1664,9 @@
     {
       "path": "nexa/patches/src__sse__handlers__chat.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "1b291a22055ff6ab0a7ed0fe60c3747331d264f8",
-      "bytes": 5519,
-      "sha256": "bb2a91c16bf5d86afd38b1ebf0951ed125cc7f089bd3c77f7b7e34fb0eaafe1a"
+      "gitBlobSha": "629aaf7f1e7f02c16f687898001682ff5b97949f",
+      "bytes": 5685,
+      "sha256": "07ebd27b4b421e0cd663578ba12af61278c286ab56327161bf21cf485fd4ba92"
     },
     {
       "path": "nexa/patches/src__sse__handlers__quotaParkedSkipUsage.ts.patch",

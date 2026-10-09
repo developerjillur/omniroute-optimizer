@@ -1,8 +1,25 @@
 diff --git a/open-sse/handlers/chatCore.ts b/open-sse/handlers/chatCore.ts
-index 3f48d582e..8da3ad5ea 100644
+index 3f48d582e..d0759ce61 100644
 --- a/open-sse/handlers/chatCore.ts
 +++ b/open-sse/handlers/chatCore.ts
-@@ -153,6 +153,7 @@ import { collectCustomToolNamesForSourceFormat } from "../translator/request/ope
+@@ -1,3 +1,8 @@
++import {
++  isNativeSuggestionRequest,
++  isCompletedSilentSuggestion,
++  isEmptyTranslatedSuggestion,
++} from "../utils/nativeSuggestion.ts";
+ import {
+   extractRequestToolMetadata,
+   resolveResponseToolNameMap,
+@@ -133,6 +138,7 @@ export {
+ };
+ import { resolveMemoryOwnerId, runMemoryExtractionGate } from "./chatCore/memoryExtraction.ts";
+ import { checkResourcePressureGuard } from "../utils/resourcePressure.ts";
++import { nativeHostedSearchFallbackError } from "../utils/nativeHostedSearch.ts";
+ import { normalizeHeaders } from "../utils/headers.ts";
+ import { resolveChatCoreRequestFormat } from "./chatCore/requestFormat.ts";
+ import { resolveChatCoreTargetFormat } from "./chatCore/targetFormat.ts";
+@@ -153,6 +159,7 @@ import { collectCustomToolNamesForSourceFormat } from "../translator/request/ope
  import { sanitizeKiroTools } from "../utils/kiroSanitizer.ts";
  import { splitMisplacedToolResults } from "../translator/helpers/claudeHelper.ts";
  import { ensureCacheControlOnLastUserMessage } from "../services/claudeCodeConstraints.ts";
@@ -10,7 +27,38 @@ index 3f48d582e..8da3ad5ea 100644
  import {
    createSSETransformStreamWithLogger,
    createPassthroughStreamWithLogger,
-@@ -2481,13 +2482,19 @@ async function handleChatCoreInner({
+@@ -752,6 +759,9 @@ async function handleChatCoreInner({
+     copilotCompatibleReasoning,
+     clientResponseFormat,
+   } = resolveChatCoreRequestFormat({ clientRawRequest, body, provider, userAgent });
++  const nativeSuggestionRequest =
++    clientResponseFormat === FORMATS.CLAUDE &&
++    isNativeSuggestionRequest(clientRawRequest?.body ?? body, clientRawRequest?.headers);
+   // ── Phase 9.2: Idempotency check ──
+   // Resolve the idempotency key once here and reuse it at the Phase 9.2 save site below,
+   // rather than re-deriving it. (#3821-review LEDGER-6)
+@@ -987,6 +997,20 @@ async function handleChatCoreInner({
+       interceptSearchOverride,
+     });
+   if (webSearchFallbackPlan.enabled) {
++    const nativeSearchError = nativeHostedSearchFallbackError(
++      body as Record<string, unknown>,
++      clientRawRequest?.headers,
++      sourceFormat
++    );
++    if (nativeSearchError) {
++      return createErrorResult(
++        HTTP_STATUS.BAD_REQUEST,
++        nativeSearchError,
++        null,
++        "NATIVE_HOSTED_SEARCH_UNSUPPORTED",
++        "unsupported_feature"
++      );
++    }
+     body = bodyWithWebSearchFallback as typeof body;
+     // Server-side web-search execution cannot be injected into an arbitrary
+     // client SSE stream (streaming interception is not implemented — #9725), so
+@@ -2481,13 +2505,19 @@ async function handleChatCoreInner({
        // payloads at high context (150+ msgs, 100+ tools). Fix: #1359.
        // Claude Code sends well-formed Messages API payloads — trust them
        // regardless of combo strategy or cache_control settings.
@@ -32,7 +80,7 @@ index 3f48d582e..8da3ad5ea 100644
          translatedBody.messages = redactPassthroughThinkingSignatures(
            translatedBody.messages,
            DEFAULT_THINKING_CLAUDE_SIGNATURE
-@@ -2498,7 +2505,10 @@ async function handleChatCoreInner({
+@@ -2498,7 +2528,10 @@ async function handleChatCoreInner({
  
        // Legacy models reject role:"system" messages. Supported models accept
        // them behind a beta, and hoisting them breaks the prompt cache prefix.
@@ -44,3 +92,62 @@ index 3f48d582e..8da3ad5ea 100644
          if (
            provider !== "claude" ||
            !shouldUseMidConversationSystem(translatedBody, effectiveModel)
+@@ -5565,7 +5598,15 @@ async function handleChatCoreInner({
+       // this check runs after translation + sanitization + tool-call execution to catch
+       // cases where a provider returns a structurally valid raw body that translates into
+       // choices:[] or output:[] with no usable content (Responses API shape included).
+-      const malformedTranslatedReason = detectMalformedNonStream(translatedResponse, provider);
++      const completedSilentSuggestion = nativeSuggestionRequest &&
++        isCompletedSilentSuggestion(responseBody) && isEmptyTranslatedSuggestion(translatedResponse);
++      if (completedSilentSuggestion) {
++        // Preserve the client's explicit option to remain silent; remove the translator placeholder.
++        translatedResponse = { ...translatedResponse, content: [] };
++      }
++      const malformedTranslatedReason = completedSilentSuggestion
++        ? null
++        : detectMalformedNonStream(translatedResponse, provider);
+       if (malformedTranslatedReason) {
+         const totalLatency = Date.now() - startTime;
+         const rawBytes = (() => {
+@@ -6019,11 +6060,13 @@ async function handleChatCoreInner({
+ 
+   let streamCompletionRecorded = false;
+   let streamFailureCompletionRecorded = false;
++  let allowNativeSuggestionClose = false;
+ 
+   // Callback to save call log when stream completes (include responseBody when provided by stream)
+   let streamTimingOriginOffsetMs: number | null = null; // startTime → StreamTiming start
+   const onStreamComplete = ({
+     status: streamStatus,
++    nativeSuggestionSilence = false,
+     usage: streamUsage,
+     responseBody: streamResponseBody,
+     providerPayload,
+@@ -6037,6 +6080,8 @@ async function handleChatCoreInner({
+   }) => {
+     const ttft = requestTtftMs(streamTimingOriginOffsetMs, firstOutputMs);
+     const normalizedStreamStatus = streamStatus || 200;
++    allowNativeSuggestionClose = nativeSuggestionRequest && nativeSuggestionSilence === true &&
++      normalizedStreamStatus === 200;
+     if (streamCompletionRecorded) return;
+     streamCompletionRecorded = true;
+     if (normalizedStreamStatus !== 200) {
+@@ -6366,7 +6411,9 @@ async function handleChatCoreInner({
+       }),
+       requestedThinking,
+       customToolNames,
+-      requestToolIdentityMap
++      requestToolIdentityMap,
++      undefined,
++      nativeSuggestionRequest
+     );
+   } else {
+     log?.debug?.("STREAM", `Standard passthrough mode`);
+@@ -6399,6 +6446,7 @@ async function handleChatCoreInner({
+       // that same patience for their first REAL content, not just their first
+       // lifecycle frame. See pipeWithDisconnect's own doc comment.
+       contentStallTimeoutMs: streamReadinessPolicy.timeoutMs,
++      allowEmptyCompletion: () => allowNativeSuggestionClose,
+     });
+     const clientFacingStream = wrapReadableStreamWithFinalize(
+       finalStream,

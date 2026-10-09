@@ -1,0 +1,24 @@
+diff --git a/open-sse/handlers/chatCore/streamingPipeline.ts b/open-sse/handlers/chatCore/streamingPipeline.ts
+index b75c96e11..afc3a8dda 100644
+--- a/open-sse/handlers/chatCore/streamingPipeline.ts
++++ b/open-sse/handlers/chatCore/streamingPipeline.ts
+@@ -75,6 +75,7 @@ export function assembleStreamingPipeline(
+      * request's pre-handoff readiness gate, so slow-first-content reasoning
+      * models keep the same generous budget in both phases. */
+     contentStallTimeoutMs?: number;
++    allowEmptyCompletion?: () => boolean;
+   },
+   deps: StreamingPipelineDeps = DEFAULT_DEPS
+ ) {
+@@ -90,7 +91,10 @@ export function assembleStreamingPipeline(
+     args.providerResponse,
+     args.transformStream,
+     args.streamController,
+-    { contentStallTimeoutMs: args.contentStallTimeoutMs }
++    {
++      contentStallTimeoutMs: args.contentStallTimeoutMs,
++      allowEmptyCompletion: args.allowEmptyCompletion,
++    }
+   );
+   if (typeof args.createPiiTransform === "function") {
+     piiStream = piiStream.pipeThrough((args.createPiiTransform as () => TransformStream)());

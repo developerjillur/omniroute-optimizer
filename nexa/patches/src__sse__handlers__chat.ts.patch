@@ -1,5 +1,5 @@
 diff --git a/src/sse/handlers/chat.ts b/src/sse/handlers/chat.ts
-index fe6c074ef..c6389afb0 100644
+index fe6c074ef..a10d51357 100644
 --- a/src/sse/handlers/chat.ts
 +++ b/src/sse/handlers/chat.ts
 @@ -1,3 +1,7 @@
@@ -10,21 +10,21 @@ index fe6c074ef..c6389afb0 100644
  import { randomUUID } from "crypto";
  import { resolveChatRequestBody } from "./requestBody";
  import * as chatAdmission from "./chatAdmission.ts";
-@@ -1559,6 +1563,30 @@ async function handleSingleModelChat(
+@@ -1559,6 +1563,31 @@ async function handleSingleModelChat(
      if (modelStr.startsWith(runtimeOptions.providerId + "/")) return resolvedProvider;
      return runtimeOptions.providerId;
    })();
 +  const nativeThreadContinuation =
-+    provider === "claude" &&
 +    (isClaudeCodeOriginatedHeaders(clientRawRequest?.headers ?? {}) ||
 +      clientRawRequest?.headers?.["x-app"] === "cli") &&
 +    isNativeClaudeThreadContinuation(body);
-+  const nativeThreadOwner = nativeThreadContinuation
-+    ? getNativeClaudeThreadOwner(
-+        getNativeClaudeSessionId(body, clientRawRequest?.headers),
-+        body.thread?.previous_message_id
-+      )
-+    : null;
++  const nativeThreadOwner =
++    nativeThreadContinuation && provider === "claude"
++      ? getNativeClaudeThreadOwner(
++          getNativeClaudeSessionId(body, clientRawRequest?.headers),
++          body.thread?.previous_message_id
++        )
++      : null;
 +  const threadReplayMessage =
 +    'No thread state is available for the requested `previous_message_id` on an eligible owning account. Replay the full conversation with `thread: {"type": "create"}` to start a new Thread.';
 +  const threadReplayResponse = () =>
@@ -34,6 +34,7 @@ index fe6c074ef..c6389afb0 100644
 +        error: {
 +          type: "invalid_request_error",
 +          message: threadReplayMessage,
++          details: { error_code: "thread_not_found" },
 +        },
 +      }),
 +      { status: 404, headers: { "Content-Type": "application/json" } }
@@ -41,14 +42,16 @@ index fe6c074ef..c6389afb0 100644
    const forceLiveComboTest = runtimeOptions.forceLiveComboTest === true;
    const budgetRejection = rejectIfMeteredBudgetExceeded(apiKeyInfo?.id, provider, modelStr);
    if (budgetRejection) return budgetRejection;
-@@ -1582,6 +1610,37 @@ async function handleSingleModelChat(
+@@ -1582,6 +1611,39 @@ async function handleSingleModelChat(
      );
    }
  
 +  if (nativeThreadContinuation) {
-+    // A sparse delta cannot be replayed on a sibling. Ask the native client for its
-+    // full transcript; never manufacture a prompt or bypass the owner's eligibility.
++    // Only the owning Anthropic account has this server-side Thread. Other
++    // providers need the client's full transcript, system and tools after a model
++    // switch; translating a sparse delta silently removes those capabilities.
 +    if (
++      provider !== "claude" ||
 +      !nativeThreadOwner ||
 +      (forcedConnectionId && forcedConnectionId !== nativeThreadOwner) ||
 +      (effectiveAllowedConnections && !effectiveAllowedConnections.includes(nativeThreadOwner))
@@ -79,7 +82,7 @@ index fe6c074ef..c6389afb0 100644
    const bypassReason = forceLiveComboTest
      ? "combo live test"
      : hasForcedConnection
-@@ -1679,6 +1738,13 @@ async function handleSingleModelChat(
+@@ -1679,6 +1741,13 @@ async function handleSingleModelChat(
    const occupancySessionKey =
      runtimeOptions.sessionAffinityKey ?? runtimeOptions.sessionId ?? `request:${randomUUID()}`;
    let initialPreselectedCredentials = runtimeOptions.preselectedCredentials;
@@ -93,7 +96,7 @@ index fe6c074ef..c6389afb0 100644
    // ANTIGRAVITY_ACCOUNT_LEASE_ENABLED (#10011 re-land): off ⇒ every `agy.*` branch is inert
    // and selection/dispatch behave exactly as before. `attempted` survives a loop restart.
    const agy = agyLease.startAntigravityLeaseRequest(provider, runtimeOptions.correlationId);
-@@ -1739,6 +1805,23 @@ async function handleSingleModelChat(
+@@ -1739,6 +1808,23 @@ async function handleSingleModelChat(
              );
        preselectedCredentials = null;
  
@@ -117,7 +120,7 @@ index fe6c074ef..c6389afb0 100644
        if (credentials && "leaseUnavailable" in credentials && credentials.leaseUnavailable) {
          excludedConnectionIds.add(agyLease.trackAntigravityLeaseBusy(agy, credentials));
          if (!hasForcedConnection) continue;
-@@ -2118,6 +2201,14 @@ async function handleSingleModelChat(
+@@ -2118,6 +2204,14 @@ async function handleSingleModelChat(
          return successResponse;
        }
  

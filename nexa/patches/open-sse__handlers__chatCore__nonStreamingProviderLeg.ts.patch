@@ -1,0 +1,94 @@
+diff --git a/open-sse/handlers/chatCore/nonStreamingProviderLeg.ts b/open-sse/handlers/chatCore/nonStreamingProviderLeg.ts
+index b9a0aeb36..266ae2eec 100644
+--- a/open-sse/handlers/chatCore/nonStreamingProviderLeg.ts
++++ b/open-sse/handlers/chatCore/nonStreamingProviderLeg.ts
+@@ -240,6 +240,60 @@ function parseRetryAfterMs(response: Response): number | null {
+   return null;
+ }
+ 
++function bufferedContextOverflow(
++  input: ProviderLegInput,
++  params: {
++    responseBody: Record<string, unknown>;
++    responsePayloadFormat: string;
++    model: string;
++    connectionId: string;
++    startMs: number;
++    startedAt: string;
++    upstreamResponse?: Response;
++  }
++): NonStreamingProviderLegResult | null {
++  // A Responses stream can fail after HTTP 200. Classify its error before the
++  // Claude translation discards it or an empty-output fallback replays it.
++  if (
++    params.responsePayloadFormat !== FORMATS.OPENAI_RESPONSES ||
++    !isJsonRecord(params.responseBody.error) ||
++    params.responseBody.error.code !== "context_length_exceeded"
++  ) {
++    return null;
++  }
++  const message =
++    "prompt is too long for the selected model's context window. " +
++    "Shorten the conversation or start a new session.";
++  const usage = extractUsage(params.responseBody, input.provider ?? "unknown");
++  const result = legError(
++    400,
++    message,
++    undefined,
++    null,
++    "context_length_exceeded",
++    "invalid_request_error",
++    { passthrough: input.sourceFormat === FORMATS.CLAUDE }
++  );
++  result.upstreamHeaders = params.upstreamResponse?.headers;
++  result.upstreamErrorBody = params.responseBody;
++  return {
++    kind: "error",
++    result,
++    usage,
++    receipt: buildReceipt(input, {
++      httpStatus: 400,
++      errorType: "context_length_exceeded",
++      usage,
++      termination: "provider_error",
++      latencyMs: Date.now() - params.startMs,
++      startedAt: params.startedAt,
++      endedAt: new Date().toISOString(),
++      connectionId: params.connectionId,
++      model: params.model,
++    }),
++  };
++}
++
+ function finishOk(
+   input: ProviderLegInput,
+   params: {
+@@ -262,6 +316,10 @@ function finishOk(
+     requestUrl?: string;
+   }
+ ): NonStreamingProviderLegResult {
++  // Recovery sends share the same failure boundary as the initial send.
++  const contextOverflow = bufferedContextOverflow(input, params);
++  if (contextOverflow) return contextOverflow;
++
+   // F-02: restore + sanitize + translate is the only success tail.
+   // Fallback/retry must not skip this with responseToolNameMap: null.
+   const restoreClaudeNames = params.sourceFormat === "claude" && params.targetFormat === "claude";
+@@ -859,6 +917,17 @@ export async function runNonStreamingProviderLeg(
+   const responsePayloadFormat = parsed.responsePayloadFormat;
+   const looksLikeSSE = parsed.looksLikeSSE;
+ 
++  const contextOverflow = bufferedContextOverflow(input, {
++    responseBody,
++    responsePayloadFormat,
++    model: currentModel,
++    connectionId: input.getCurrentConnectionId?.() ?? connectionId,
++    startMs,
++    startedAt,
++    upstreamResponse: providerResponse,
++  });
++  if (contextOverflow) return contextOverflow;
++
+   // -- ClinePass envelope unwrap + retry --------------------------------------
+   if (provider === "clinepass") {
+     let { body: unwrapped, error: envError } = unwrapClinepassEnvelope(responseBody, provider);

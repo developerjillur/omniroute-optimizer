@@ -4,9 +4,11 @@ import path from "node:path";
 import net from "node:net";
 import { spawn, execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
+import { smokeModel } from "./smoke-model.mjs";
 
 const [archive, destination] = process.argv.slice(2);
 if (!archive || !destination) throw Error("usage: smoke-package.mjs <archive> <new destination>");
+const inferenceModel = smokeModel();
 const root = path.resolve(destination);
 const reuse = process.argv.includes("--reuse");
 if (!reuse) fs.mkdirSync(root, { mode: 0o700 });
@@ -156,7 +158,7 @@ try {
     method: "POST",
     headers: { "anthropic-version": "2023-06-01" },
     body: {
-      model: "cc/claude-opus-5-5",
+      model: inferenceModel,
       max_tokens: 64,
       stream: false,
       output_config: { effort: "low" },
@@ -169,7 +171,9 @@ try {
     inferred.type !== "message" ||
     !inferred.content?.some((c) => c.text?.includes("ISOLATED_BRIDGE_OK"))
   )
-    throw Error(`Isolated Anthropic inference failed: HTTP ${inference.status}`);
+    throw Error(
+      `Isolated Anthropic inference for ${inferenceModel} failed: HTTP ${inference.status}`
+    );
   const cors = await fetch(base + "/api/settings", {
     headers: { Origin: "https://untrusted.invalid" },
     signal: AbortSignal.timeout(5000),
@@ -185,6 +189,7 @@ try {
     modelCatalog: true,
     nativeUsageSchema: true,
     anthropicInference: true,
+    inferenceModel,
     corsFailClosed: true,
     port,
     prefix,

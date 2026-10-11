@@ -50,13 +50,20 @@ if [ "$MODE" = update ]; then
     status ok "already running the newest verified build"; exit 0
   fi
 fi
-SHA="$(git rev-parse --short HEAD)"
+SOURCE_SHA="$(git rev-parse --short HEAD)"
+SHA="$SOURCE_SHA"
 VER="$(node -p 'require("./package.json").version')"
 OUTDIR="$BUILDS/$VER-$SHA"
 TGZ="$OUTDIR/omniroute-$VER.tgz"
 if [ -n "${NEXA_DEPLOY_ARTIFACT:-}" ]; then TGZ="$NEXA_DEPLOY_ARTIFACT"; fi
 if [ -f "$TGZ" ]; then
   node "$TOOLS/bridge-gate.mjs" package "$TGZ" || fail "Existing artifact rejected; live service untouched"
+  if [ -n "${NEXA_DEPLOY_ARTIFACT:-}" ]; then
+    SHA="$(tar -xOf "$TGZ" package/dist/BUILD_SHA)"
+    [[ "$SHA" =~ ^[0-9a-f]{7,40}$ ]] || fail "Artifact build identity is invalid; live service untouched"
+    OUTDIR="$BUILDS/$VER-$SHA"
+    say "Deploy tooling source $SOURCE_SHA; verified application artifact $SHA"
+  fi
 else
 node "$TOOLS/ensure-free-space.mjs" "$BUILDS" build || fail "Source build storage prerequisite failed; live service untouched"
 [ ! -e "$OUTDIR" ] || fail "Incomplete build destination exists; inspect it before retrying"
@@ -90,14 +97,14 @@ node nexa/restore.mjs
 git checkout upstream-main -- bin/cli/api-commands electron/package-lock.json
 fi
 mkdir -p "$OUTDIR"
-node "$TOOLS/bridge-gate.mjs" package "$TGZ" > "$OUTDIR/bridge-package-verification.json"
+node "$TOOLS/bridge-gate.mjs" package "$TGZ" > "$OUTDIR/bridge-package-verification-$STAMP.json"
 SMOKE_ROOT="$BUILDS/smoke-$STAMP"
 node "$TOOLS/ensure-free-space.mjs" "$BUILDS" install || fail "Isolated install storage prerequisite failed; live service untouched"
 node "$TOOLS/smoke-package.mjs" "$TGZ" "$SMOKE_ROOT" > "$OUTDIR/isolated-smoke-$STAMP.json" || fail "Isolated package smoke failed; live service untouched"
 if [ "$MODE" = build-only ]; then status ok "verified package built at $TGZ; live service untouched"; exit 0; fi
 cd "$REPO"
 BACKUP_DIR="$DATA_DIR/update-backups/$STAMP"
-python3 "$TOOLS/snapshot-local.py" "$BACKUP_DIR" > "$OUTDIR/private-backup-location.json"
+python3 "$TOOLS/snapshot-local.py" "$BACKUP_DIR" > "$OUTDIR/private-backup-location-$STAMP.json"
 PREV="$(cat "$BUILDS/current")"
 node "$TOOLS/bridge-gate.mjs" package "$PREV" --allow-prior-lifecycle || fail "Rollback package lacks Bridge fixes; establish a verified rollback package before deploying"
 status running "installing $VER ($SHA); verified rollback package preserved"

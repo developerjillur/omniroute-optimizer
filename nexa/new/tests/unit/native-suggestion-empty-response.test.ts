@@ -78,6 +78,12 @@ async function invoke(prompt: string, response: () => Response, native = true, s
         providerSpecificData: {},
       },
       log: { debug() {}, info() {}, warn() {}, error() {} },
+      onCredentialsRefreshed: undefined,
+      onRequestSuccess: undefined,
+      onStreamFailure: undefined,
+      onDisconnect: undefined,
+      connectionId: undefined,
+      comboName: undefined,
       clientRawRequest: {
         endpoint: "/v1/messages",
         body: structuredClone(body),
@@ -89,6 +95,7 @@ async function invoke(prompt: string, response: () => Response, native = true, s
       },
       userAgent: native ? "claude-cli/2.1.294" : "test-client",
     });
+    assert.ok(!(result instanceof Response), "the fixture must return a chat result wrapper");
     let payload, readError;
     try {
       payload = stream ? await result.response.text() : await result.response.json();

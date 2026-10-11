@@ -1,0 +1,83 @@
+diff --git a/open-sse/translator/helpers/schemaCoercion.ts b/open-sse/translator/helpers/schemaCoercion.ts
+index 60f7cc9a3..335b76433 100644
+--- a/open-sse/translator/helpers/schemaCoercion.ts
++++ b/open-sse/translator/helpers/schemaCoercion.ts
+@@ -36,6 +36,24 @@ function hasUnsupportedRegexLookaround(pattern: unknown): boolean {
+   return typeof pattern === "string" && REGEX_LOOKAROUND_PATTERN.test(pattern);
+ }
+ 
++function hasUnsupportedResponsesRegex(pattern: unknown): boolean {
++  if (typeof pattern !== "string") return false;
++  if (hasUnsupportedRegexLookaround(pattern)) return true;
++  // Responses validates Unicode scalar regexes. Native MCP schemas can contain
++  // lone-surrogate escapes (including a range excluding them), which are valid
++  // ECMAScript syntax but rejected by the upstream regex validator. Preserve
++  // the tool and its other constraints; its native runtime still validates input.
++  // An escaped literal backslash is not a Unicode escape.
++  if (/(^|[^\\])(?:\\\\)*\\u[dD][89a-fA-F][0-9a-fA-F]{2}/.test(pattern)) return true;
++  return Array.from(pattern).some((character) => {
++    const point = character.codePointAt(0)!;
++    return point >= 0xd800 && point <= 0xdfff;
++  });
++}
++
++const NATIVE_SCALAR_TEXT_PATTERN = "^[^\\x00-\\x09\\x0b-\\x1f\\x7f\\ud800-\\udfff]*$";
++const RESPONSES_SCALAR_TEXT_PATTERN = "^[^\\x00-\\x09\\x0b-\\x1f\\x7f]*$";
++
+ function isPlainObject(value: unknown): value is JsonRecord {
+   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+ }
+@@ -165,6 +183,7 @@ const REGEX_STRIP_OBJECT_MAP_FIELDS = [
+   "patternProperties",
+   "definitions",
+   "$defs",
++  "dependentSchemas",
+ ] as const;
+ 
+ // Sub-schema lists (each entry is itself walked recursively).
+@@ -178,7 +197,7 @@ function stripRegexFromObjectMap(record: JsonRecord): JsonRecord {
+ }
+ 
+ /**
+- * Strip regex `pattern` constraints that use lookaround (lookahead/lookbehind),
++ * Strip regex `pattern` constraints using lookaround or lone surrogates,
+  * which OpenAI/Codex's Responses API rejects outright with a 400
+  * ("Invalid JSON schema: regex lookaround is not supported."). Walks the same
+  * JSON Schema shape as `coerceSchemaNumericFields` (properties, items,
+@@ -192,7 +211,14 @@ export function stripUnsupportedRegexPatterns(schema: unknown): unknown {
+ 
+   const result: JsonRecord = { ...schema };
+ 
+-  if (hasUnsupportedRegexLookaround(result.pattern)) {
++  // A Unicode scalar transport cannot carry lone surrogates, so this known
++  // exclusion is redundant there. Retain the original control-character guard.
++  if (
++    typeof result.pattern === "string" &&
++    result.pattern.toLowerCase() === NATIVE_SCALAR_TEXT_PATTERN
++  ) {
++    result.pattern = RESPONSES_SCALAR_TEXT_PATTERN;
++  } else if (hasUnsupportedResponsesRegex(result.pattern)) {
+     delete result.pattern;
+   }
+ 
+@@ -216,8 +242,18 @@ export function stripUnsupportedRegexPatterns(schema: unknown): unknown {
+   if (result.additionalProperties && typeof result.additionalProperties === "object") {
+     result.additionalProperties = stripUnsupportedRegexPatterns(result.additionalProperties);
+   }
+-  if (isPlainObject(result.not)) {
+-    result.not = stripUnsupportedRegexPatterns(result.not);
++  for (const field of [
++    "not",
++    "if",
++    "then",
++    "else",
++    "contains",
++    "propertyNames",
++    "unevaluatedProperties",
++  ]) {
++    if (isPlainObject(result[field])) {
++      result[field] = stripUnsupportedRegexPatterns(result[field]);
++    }
+   }
+ 
+   return result;

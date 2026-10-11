@@ -1,5 +1,5 @@
 diff --git a/src/mitm/server.cjs b/src/mitm/server.cjs
-index a36cae583..aabae74eb 100644
+index a36cae583..f32e8a47a 100644
 --- a/src/mitm/server.cjs
 +++ b/src/mitm/server.cjs
 @@ -5,6 +5,22 @@ const path = require("path");
@@ -38,7 +38,15 @@ index a36cae583..aabae74eb 100644
  if (_dynamicAdded > 0) {
    console.log(`[MITM] Loaded ${_dynamicAdded} additional host(s) from targets.json`);
  }
-@@ -443,6 +465,7 @@ async function passthrough(req, res, bodyBuffer) {
+@@ -141,6 +163,7 @@ const forwardShim = require("./_internal/forwardTarget.cjs");
+ const aliasConfigShim = require("./_internal/aliasConfig.cjs");
+ const standaloneRoutingShim = require("./_internal/standaloneRouting.cjs");
+ const writeBackpressureShim = require("./_internal/writeBackpressure.cjs");
++const routerFetchShim = require("./_internal/routerFetch.cjs");
+ 
+ // Inspector capture (D4 fallback). The standalone proxy intercepts AgentBridge
+ // traffic inline (no MitmHandlerBase / agentBridgeHook), so it posts captured
+@@ -443,6 +466,7 @@ async function passthrough(req, res, bodyBuffer) {
    // in controlled local environments where the target uses a self-signed cert.
    const rejectUnauthorized = process.env.MITM_DISABLE_TLS_VERIFY !== "1";
  
@@ -46,7 +54,7 @@ index a36cae583..aabae74eb 100644
    const forwardReq = https.request(
      {
        hostname: targetIP,
-@@ -454,6 +477,13 @@ async function passthrough(req, res, bodyBuffer) {
+@@ -454,6 +478,13 @@ async function passthrough(req, res, bodyBuffer) {
        rejectUnauthorized,
      },
      (forwardRes) => {
@@ -60,7 +68,7 @@ index a36cae583..aabae74eb 100644
        res.writeHead(forwardRes.statusCode, forwardRes.headers);
        forwardRes.pipe(res);
      }
-@@ -461,9 +491,23 @@ async function passthrough(req, res, bodyBuffer) {
+@@ -461,9 +492,23 @@ async function passthrough(req, res, bodyBuffer) {
  
    forwardReq.on("error", (err) => {
      console.error(`❌ Passthrough error: ${err.message}`);
@@ -85,11 +93,17 @@ index a36cae583..aabae74eb 100644
  
    if (bodyBuffer.length > 0) forwardReq.write(bodyBuffer);
    forwardReq.end();
-@@ -562,9 +606,39 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
+@@ -562,34 +607,84 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
      res.once("close", onDownstreamClose);
      let reader = null;
      try {
 -      const response = await fetch(forward.url, {
+-        method: "POST",
+-        headers: {
+-          "Content-Type": "application/json",
+-          Authorization: `Bearer ${API_KEY}`,
+-          "x-omniroute-source": "agent-bridge",
+-          "x-omniroute-agent": agentId,
 +      const forwardUrl = new URL(forward.url);
 +      if (agentId === "claude-code") {
 +        const nativeUrl = new URL(req.url, "https://api.anthropic.com");
@@ -119,14 +133,26 @@ index a36cae583..aabae74eb 100644
 +        if (!excludedHeaders.has(name.toLowerCase()) && value !== undefined)
 +          retainedHeaders[name] = value;
 +      }
-+      const response = await fetch(forwardUrl, {
-         method: "POST",
-         headers: {
-+          ...retainedHeaders,
-           "Content-Type": "application/json",
-           Authorization: `Bearer ${API_KEY}`,
-           "x-omniroute-source": "agent-bridge",
-@@ -577,19 +651,35 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
++      const response = await routerFetchShim.fetchRouter(
++        forwardUrl,
++        {
++          method: "POST",
++          headers: {
++            ...retainedHeaders,
++            "Content-Type": "application/json",
++            Authorization: `Bearer ${API_KEY}`,
++            "x-omniroute-source": "agent-bridge",
++            "x-omniroute-agent": agentId,
++          },
++          body: JSON.stringify(body),
++          signal: upstreamAbort.signal,
+         },
+-        body: JSON.stringify(body),
+-        signal: upstreamAbort.signal,
+-      });
++        { buffered: body.stream !== true }
++      );
+ 
        captureStatus = response.status;
        respHeaders = headersToObject(response.headers);
  
@@ -172,7 +198,7 @@ index a36cae583..aabae74eb 100644
  
        reader = response.body.getReader();
        const decoder = new TextDecoder();
-@@ -610,7 +700,7 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
+@@ -610,7 +705,7 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
          // #14528: a slow client must drain before the next upstream read,
          // otherwise the socket write queue grows without bound. A close
          // during the wait is caught by the downstreamClosed check above.
@@ -181,10 +207,15 @@ index a36cae583..aabae74eb 100644
        }
      } finally {
        res.off("close", onDownstreamClose);
-@@ -632,6 +722,13 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
+@@ -631,13 +726,29 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
+     // Log the raw message locally (server console only) but never expose it
      // in the response body. Hard Rule #12 — sanitize before sending.
      captureError = sanitizeErrorMessage(error && error.message);
-     console.error(`❌ ${error.message}`);
+-    console.error(`❌ ${error.message}`);
+-    if (!res.headersSent) res.writeHead(500, { "Content-Type": "application/json" });
++    console.error(
++      `❌ ${error.message}${error?.cause ? ` cause=${error.cause?.cause?.code || error.cause?.code || error.cause?.name || "unknown"}` : ""}`
++    );
 +    if (res.destroyed || res.writableEnded) return;
 +    // A partial native response must stay a transport failure. Appending a
 +    // different JSON protocol would disguise truncation as successful EOF.
@@ -192,10 +223,24 @@ index a36cae583..aabae74eb 100644
 +      res.destroy();
 +      return;
 +    }
-     if (!res.headersSent) res.writeHead(500, { "Content-Type": "application/json" });
++    const transportFailure = ["agent_bridge_timeout", "agent_bridge_transport_error"].includes(
++      error?.code
++    );
++    if (!res.headersSent)
++      res.writeHead(transportFailure ? error.statusCode : 500, {
++        "Content-Type": "application/json",
++      });
      res.end(
        JSON.stringify({
-@@ -673,12 +770,25 @@ async function startMitmServer() {
+         error: {
+           message: captureError,
+-          type: "mitm_error",
++          type: transportFailure ? "api_error" : "mitm_error",
++          ...(transportFailure ? { code: error.code } : {}),
+         },
+       })
+     );
+@@ -673,12 +784,25 @@ async function startMitmServer() {
    const sslOptions =
      CERT_MODE === "root-ca" ? await loadRootCaSslOptions() : loadLegacySslOptions();
  
@@ -223,7 +268,7 @@ index a36cae583..aabae74eb 100644
      const host = String(req.headers.host || "")
        .split(":")[0]
        .toLowerCase();
-@@ -693,12 +803,12 @@ async function startMitmServer() {
+@@ -693,12 +817,12 @@ async function startMitmServer() {
  
      if (req.headers["x-omniroute-source"] === "omniroute") {
        vlog(1, `[MITM] → PASSTHROUGH (OmniRoute source loop)`);
@@ -238,7 +283,7 @@ index a36cae583..aabae74eb 100644
      }
  
      const agentId = TARGET_HOST_AGENT.get(host) || "antigravity";
-@@ -736,14 +846,14 @@ async function startMitmServer() {
+@@ -736,14 +860,14 @@ async function startMitmServer() {
  
      if (!isChatRequest) {
        vlog(1, `[MITM] → PASSTHROUGH (URL ${req.url} does not match chat patterns)`);
@@ -255,7 +300,7 @@ index a36cae583..aabae74eb 100644
      }
  
      stats.interceptedRequests++;
-@@ -758,6 +868,28 @@ async function startMitmServer() {
+@@ -758,6 +882,28 @@ async function startMitmServer() {
            : "")
      );
      return intercept(req, res, bodyBuffer, mappedOverride, model);
@@ -284,7 +329,7 @@ index a36cae583..aabae74eb 100644
    });
  
    // =========================================================================
-@@ -898,22 +1030,25 @@ async function startMitmServer() {
+@@ -898,22 +1044,25 @@ async function startMitmServer() {
    server.headersTimeout = MITM_IDLE_TIMEOUT_MS; // time allowed to send headers
    server.keepAliveTimeout = MITM_IDLE_TIMEOUT_MS; // idle keep-alive window
  
@@ -311,7 +356,7 @@ index a36cae583..aabae74eb 100644
        stats.activeConnections = Math.max(0, stats.activeConnections - 1);
        writeStats();
      });
-@@ -930,12 +1065,25 @@ async function startMitmServer() {
+@@ -930,12 +1079,25 @@ async function startMitmServer() {
      process.exit(1);
    });
  

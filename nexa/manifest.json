@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 222,
-    "patches": 141,
-    "new": 76,
+    "total": 230,
+    "patches": 144,
+    "new": 81,
     "tooling": 5,
     "upstreamCandidates": 28,
-    "nexaSpecific": 78,
-    "needsReview": 116,
+    "nexaSpecific": 82,
+    "needsReview": 120,
     "pendingUpstreamPR": 12,
     "mergedUpstreamPR": 2
   },
@@ -218,6 +218,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/open-sse__handlers__chatCore__nonStreamingProviderLeg.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/handlers/chatCore/nonStreamingProviderLeg.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/open-sse__handlers__chatCore__skipCredentialRefresh.ts.patch",
       "layer": "patch",
       "class": "needs-review",
@@ -341,10 +349,26 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/open-sse__translator__helpers__schemaCoercion.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "open-sse/translator/helpers/schemaCoercion.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/open-sse__translator__request__claude-to-openai.ts.patch",
       "layer": "patch",
       "class": "needs-review",
       "target": "open-sse/translator/request/claude-to-openai.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__translator__request__openai-responses__helpers.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/translator/request/openai-responses/helpers.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -1404,6 +1428,14 @@
       "upstreamPR": null
     },
     {
+      "file": "new/src/mitm/_internal/routerFetch.cjs",
+      "layer": "new",
+      "class": "nexa-specific",
+      "target": "src/mitm/_internal/routerFetch.cjs",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
       "file": "new/src/mitm/bootRecovery.ts",
       "layer": "new",
       "class": "nexa-specific",
@@ -1472,6 +1504,14 @@
         "pr": 15323,
         "state": "OPEN"
       }
+    },
+    {
+      "file": "new/tests/unit/agent-bridge-compaction-timeout.test.ts",
+      "layer": "new",
+      "class": "nexa-specific",
+      "target": "tests/unit/agent-bridge-compaction-timeout.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
     },
     {
       "file": "new/tests/unit/agent-bridge-compression-disabled.test.ts",
@@ -1627,6 +1667,14 @@
       "upstreamPR": null
     },
     {
+      "file": "new/tests/unit/codex-tool-unicode-pattern.test.ts",
+      "layer": "new",
+      "class": "nexa-specific",
+      "target": "tests/unit/codex-tool-unicode-pattern.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
       "file": "new/tests/unit/db/native-claude-usage-persistence.test.ts",
       "layer": "new",
       "class": "nexa-specific",
@@ -1647,6 +1695,14 @@
       "layer": "new",
       "class": "upstream-candidate",
       "target": "tests/unit/gpt-6-1-sol-support.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/gpt-selected-effort-passthrough.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/gpt-selected-effort-passthrough.test.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },
@@ -1703,6 +1759,14 @@
       "layer": "new",
       "class": "nexa-specific",
       "target": "tests/unit/native-claude-thread-routing.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/native-context-overflow-error.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/native-context-overflow-error.test.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },

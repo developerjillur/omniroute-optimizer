@@ -1,5 +1,5 @@
 diff --git a/open-sse/handlers/chatCore.ts b/open-sse/handlers/chatCore.ts
-index 3f48d582e..d0759ce61 100644
+index 3f48d582e..8cd46f01e 100644
 --- a/open-sse/handlers/chatCore.ts
 +++ b/open-sse/handlers/chatCore.ts
 @@ -1,3 +1,8 @@
@@ -92,7 +92,27 @@ index 3f48d582e..d0759ce61 100644
          if (
            provider !== "claude" ||
            !shouldUseMidConversationSystem(translatedBody, effectiveModel)
-@@ -5565,7 +5598,15 @@ async function handleChatCoreInner({
+@@ -5207,6 +5240,7 @@ async function handleChatCoreInner({
+           error: err.error || "Provider request failed",
+           providerRequest: finalBody || translatedBody,
+           providerResponse: isNetworkThrow ? undefined : err.response,
++          responseBody: sanitizeUpstreamDetails(errUpstreamBody) ?? undefined,
+           // On a client abort the client already disconnected before we got here, so this
+           // body is what we WOULD have sent, not what was delivered. The dashboard reads
+           // `clientResponse` as "what the client received", so logging it misleads —
+@@ -5214,7 +5248,10 @@ async function handleChatCoreInner({
+           // the leg-based path must keep doing so.
+           clientResponse: isLocalStreamLifecycleError(err.originalError)
+             ? undefined
+-            : buildErrorBody(err.status, err.error || "Provider request failed"),
++            : buildErrorBody(err.status, err.error || "Provider request failed", undefined, {
++                code: err.errorCode,
++                type: err.errorType,
++              }),
+           cacheSource: "upstream",
+         });
+         persistFailureUsage(err.status, err.errorCode || `upstream_${err.status}`);
+@@ -5565,7 +5602,15 @@ async function handleChatCoreInner({
        // this check runs after translation + sanitization + tool-call execution to catch
        // cases where a provider returns a structurally valid raw body that translates into
        // choices:[] or output:[] with no usable content (Responses API shape included).
@@ -109,7 +129,7 @@ index 3f48d582e..d0759ce61 100644
        if (malformedTranslatedReason) {
          const totalLatency = Date.now() - startTime;
          const rawBytes = (() => {
-@@ -6019,11 +6060,13 @@ async function handleChatCoreInner({
+@@ -6019,11 +6064,13 @@ async function handleChatCoreInner({
  
    let streamCompletionRecorded = false;
    let streamFailureCompletionRecorded = false;
@@ -123,7 +143,7 @@ index 3f48d582e..d0759ce61 100644
      usage: streamUsage,
      responseBody: streamResponseBody,
      providerPayload,
-@@ -6037,6 +6080,8 @@ async function handleChatCoreInner({
+@@ -6037,6 +6084,8 @@ async function handleChatCoreInner({
    }) => {
      const ttft = requestTtftMs(streamTimingOriginOffsetMs, firstOutputMs);
      const normalizedStreamStatus = streamStatus || 200;
@@ -132,7 +152,7 @@ index 3f48d582e..d0759ce61 100644
      if (streamCompletionRecorded) return;
      streamCompletionRecorded = true;
      if (normalizedStreamStatus !== 200) {
-@@ -6366,7 +6411,9 @@ async function handleChatCoreInner({
+@@ -6366,7 +6415,9 @@ async function handleChatCoreInner({
        }),
        requestedThinking,
        customToolNames,
@@ -143,7 +163,7 @@ index 3f48d582e..d0759ce61 100644
      );
    } else {
      log?.debug?.("STREAM", `Standard passthrough mode`);
-@@ -6399,6 +6446,7 @@ async function handleChatCoreInner({
+@@ -6399,6 +6450,7 @@ async function handleChatCoreInner({
        // that same patience for their first REAL content, not just their first
        // lifecycle frame. See pipeWithDisconnect's own doc comment.
        contentStallTimeoutMs: streamReadinessPolicy.timeoutMs,

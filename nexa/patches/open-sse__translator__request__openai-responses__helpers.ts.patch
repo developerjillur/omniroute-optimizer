@@ -1,0 +1,34 @@
+diff --git a/open-sse/translator/request/openai-responses/helpers.ts b/open-sse/translator/request/openai-responses/helpers.ts
+index 8065bddb3..d3f3614da 100644
+--- a/open-sse/translator/request/openai-responses/helpers.ts
++++ b/open-sse/translator/request/openai-responses/helpers.ts
+@@ -1,5 +1,10 @@
+ // Pure shared primitives for the OpenAI Responses <-> Chat Completions request
+-// translators. Extracted verbatim from openai-responses.ts (no host imports).
++// translators (no host imports).
++
++import {
++  getCodexAliasEffortCap,
++  splitCodexReasoningSuffix,
++} from "../../../executors/codex/reasoningSuffix.ts";
+ 
+ export type JsonRecord = Record<string, unknown>;
+ export const RESPONSES_STORE_MARKER = "_omnirouteResponsesStore";
+@@ -50,8 +55,6 @@ export function imageUrlToText(value: unknown): string {
+   return toString(record.url);
+ }
+ 
+-const CODEX_MAX_EFFORT_MODEL_PATTERN =
+-  /^(?:gpt-5\.6-(?:sol|terra|luna)|gpt-6-(?:astra|sol|luna))(?:-(?:none|low|medium|high|xhigh|max|ultra))?$/;
+ const KIRO_GPT_5_6_MODEL_PATTERN =
+   /^(?:kiro|kr)\/gpt-5\.6-(?:sol|terra|luna)(?:-(?:none|low|medium|high|xhigh|max))?$/;
+ 
+@@ -61,7 +64,7 @@ function supportsNativeMaxReasoningEffort(model: unknown): boolean {
+     .toLowerCase()
+     .replace(/^(?:codex|cx)\//, "");
+   return (
+-    CODEX_MAX_EFFORT_MODEL_PATTERN.test(normalizedModel) ||
++    getCodexAliasEffortCap(splitCodexReasoningSuffix(normalizedModel).baseModel) !== null ||
+     KIRO_GPT_5_6_MODEL_PATTERN.test(toString(model).trim().toLowerCase())
+   );
+ }

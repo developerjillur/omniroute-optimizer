@@ -1,0 +1,36 @@
+diff --git a/src/mitm/dns/dnsConfig.ts b/src/mitm/dns/dnsConfig.ts
+index 9630e5f29..d4d1d4fbd 100644
+--- a/src/mitm/dns/dnsConfig.ts
++++ b/src/mitm/dns/dnsConfig.ts
+@@ -136,6 +136,20 @@ function hasHostEntry(hostsContent: string, hostname: string): boolean {
+   });
+ }
+ 
++function hasLoopbackHostEntry(hostsContent: string, hostname: string): boolean {
++  return hostsContent.split(/\r?\n/).some((line) => {
++    const parts = line.split("#", 1)[0].trim().split(/\s+/);
++    return (parts[0] === "127.0.0.1" || parts[0] === "::1") && parts.slice(1).includes(hostname);
++  });
++}
++
++/** Stop must detect partial IPv4/IPv6 entries and fail if the hosts file cannot be read. */
++export function hasAnyDNSEntries(hosts: string[]): boolean {
++  if (hosts.length === 0) return false;
++  const content = fs.readFileSync(hostsFilePath(), "utf8");
++  return hosts.some((host) => hasLoopbackHostEntry(content, host));
++}
++
+ // ---------------------------------------------------------------------------
+ // Public API — parametrized (new)
+ // ---------------------------------------------------------------------------
+@@ -224,8 +238,8 @@ export async function removeDNSEntries(
+ ): Promise<void> {
+   if (process.env.OMNIROUTE_SKIP_DNS_WRITE === "1") return;
+   const commands = resolveCommandDependencies(deps);
+-  const hostsContent = readHostsFile();
+-  const presentHosts = hosts.filter((h) => hasHostEntry(hostsContent, h));
++  const hostsContent = fs.readFileSync(hostsFilePath(), "utf8");
++  const presentHosts = hosts.filter((h) => hasLoopbackHostEntry(hostsContent, h));
+ 
+   if (presentHosts.length === 0) return;
+ 

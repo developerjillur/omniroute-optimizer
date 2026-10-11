@@ -1,8 +1,8 @@
 diff --git a/open-sse/translator/request/claude-to-openai.ts b/open-sse/translator/request/claude-to-openai.ts
-index 753dead99..1dda85d46 100644
+index 753dead99..0c9c16607 100644
 --- a/open-sse/translator/request/claude-to-openai.ts
 +++ b/open-sse/translator/request/claude-to-openai.ts
-@@ -49,6 +49,21 @@ function isClaudeServerWebSearchTool(tool: unknown): tool is JsonRecord {
+@@ -49,6 +49,50 @@ function isClaudeServerWebSearchTool(tool: unknown): tool is JsonRecord {
    );
  }
  
@@ -10,6 +10,35 @@ index 753dead99..1dda85d46 100644
 +  if (!tool || typeof tool !== "object" || Array.isArray(tool)) return false;
 +  const record = tool as JsonRecord;
 +  return typeof record.type === "string" && /^advisor_\d{8}$/.test(record.type);
++}
++
++function isClaudeDeferredToolPlaceholder(tool: unknown): tool is JsonRecord {
++  if (!tool || typeof tool !== "object" || Array.isArray(tool)) return false;
++  const record = tool as JsonRecord;
++  const schema = record.input_schema;
++  if (!schema || typeof schema !== "object" || Array.isArray(schema)) return false;
++  const inputSchema = schema as JsonRecord;
++  const properties = inputSchema.properties;
++  if (!properties || typeof properties !== "object" || Array.isArray(properties)) return false;
++  return (
++    record.name === "DeferredToolPlaceholder" &&
++    record.defer_loading === true &&
++    record.description ===
++      "Reserved placeholder that keeps deferred tool loading active; never call this tool." &&
++    inputSchema.type === "object" &&
++    Object.keys(properties).length === 0 &&
++    (inputSchema.required === undefined ||
++      (Array.isArray(inputSchema.required) && inputSchema.required.length === 0))
++  );
++}
++
++function unsupportedDeferredPlaceholderChoice(): Error {
++  return Object.assign(
++    new Error(
++      "DeferredToolPlaceholder is a reserved native client sentinel, not an executable tool. Use ToolSearch or a loaded client tool."
++    ),
++    { statusCode: 400, errorType: "unsupported_feature" }
++  );
 +}
 +
 +function unsupportedAdvisorChoice(): Error {
@@ -24,16 +53,24 @@ index 753dead99..1dda85d46 100644
  function toStringArray(value: unknown): string[] {
    if (!Array.isArray(value)) return [];
    return value
-@@ -248,11 +263,18 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown
+@@ -248,11 +292,26 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown
    }
  
    const useNativeResponsesWebSearch = shouldUseNativeResponsesWebSearch(credentials);
 +  const omittedAdvisorNames = new Set<string>();
++  const omittedPlaceholderNames = new Set<string>();
  
    // Tools
    if (body.tools && Array.isArray(body.tools)) {
      const normalizedTools = body.tools
        .map((tool) => {
++        // The native client uses this sentinel to keep deferred discovery active.
++        // Non-Anthropic targets cannot honor defer_loading, so exposing it as a
++        // function turns a non-executable marker into a model-callable tool.
++        if (isClaudeDeferredToolPlaceholder(tool)) {
++          omittedPlaceholderNames.add(tool.name as string);
++          return null;
++        }
 +        // Advisor runs inside Anthropic's server. Advertising it as a function
 +        // would ask the client to execute a tool it does not implement.
 +        if (isClaudeServerAdvisorTool(tool)) {
@@ -43,29 +80,32 @@ index 753dead99..1dda85d46 100644
          if (useNativeResponsesWebSearch && isClaudeServerWebSearchTool(tool)) {
            return convertClaudeServerWebSearchTool(tool);
          }
-@@ -280,10 +302,17 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown
+@@ -280,10 +339,23 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown
  
    // Tool choice
    if (body.tool_choice) {
 -    result.tool_choice = convertToolChoice(
--      body.tool_choice,
--      useNativeResponsesWebSearch && hasClaudeServerWebSearchTool(body.tools)
--    );
++    const convertedToolChoice = convertToolChoice(
+       body.tool_choice,
+       useNativeResponsesWebSearch && hasClaudeServerWebSearchTool(body.tools)
+     );
++    const forcedPlaceholder =
++      body.tool_choice.type === "tool" && omittedPlaceholderNames.has(body.tool_choice.name);
++    const onlyPlaceholderRequired =
++      convertedToolChoice === "required" && omittedPlaceholderNames.size > 0 && !result.tools;
++    if (forcedPlaceholder || onlyPlaceholderRequired) throw unsupportedDeferredPlaceholderChoice();
 +    const forcedAdvisor =
 +      body.tool_choice.type === "tool" && omittedAdvisorNames.has(body.tool_choice.name);
 +    const onlyAdvisorRequired =
-+      body.tool_choice.type === "any" && omittedAdvisorNames.size > 0 && !result.tools;
++      convertedToolChoice === "required" && omittedAdvisorNames.size > 0 && !result.tools;
 +    if (forcedAdvisor || onlyAdvisorRequired) throw unsupportedAdvisorChoice();
-+    if (result.tools || omittedAdvisorNames.size === 0) {
-+      result.tool_choice = convertToolChoice(
-+        body.tool_choice,
-+        useNativeResponsesWebSearch && hasClaudeServerWebSearchTool(body.tools)
-+      );
++    if (result.tools || (omittedAdvisorNames.size === 0 && omittedPlaceholderNames.size === 0)) {
++      result.tool_choice = convertedToolChoice;
 +    }
    }
  
    // Reasoning effort: map Claude-side thinking controls to OpenAI reasoning_effort.
-@@ -467,6 +496,19 @@ function convertClaudeMessage(msg, preserveCacheControl = false) {
+@@ -467,6 +539,19 @@ function convertClaudeMessage(msg, preserveCacheControl = false) {
            }
            break;
  

@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 230,
-    "patches": 144,
-    "new": 81,
+    "total": 237,
+    "patches": 148,
+    "new": 84,
     "tooling": 5,
     "upstreamCandidates": 28,
     "nexaSpecific": 82,
-    "needsReview": 120,
+    "needsReview": 127,
     "pendingUpstreamPR": 12,
     "mergedUpstreamPR": 2
   },
@@ -485,6 +485,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/src__app__(dashboard)__dashboard__tools__agent-bridge__AgentBridgePageClient.tsx.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/app/(dashboard)/dashboard/tools/agent-bridge/AgentBridgePageClient.tsx",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/src__app__(dashboard)__dashboard__tools__agent-bridge__components__AgentCard.tsx.patch",
       "layer": "patch",
       "class": "nexa-specific",
@@ -776,6 +784,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/src__mitm__dns__dnsConfig.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/mitm/dns/dnsConfig.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/src__mitm__dns__provision.ts.patch",
       "layer": "patch",
       "class": "nexa-specific",
@@ -795,6 +811,14 @@
       }
     },
     {
+      "file": "patches/src__mitm__repair.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/mitm/repair.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/src__mitm__server.cjs.patch",
       "layer": "patch",
       "class": "upstream-candidate",
@@ -804,6 +828,14 @@
         "pr": 15323,
         "state": "OPEN"
       }
+    },
+    {
+      "file": "patches/src__mitm__stopDnsTeardown.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/mitm/stopDnsTeardown.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
     },
     {
       "file": "patches/src__shared__constants__codexClient.ts.patch",
@@ -1603,6 +1635,14 @@
       "upstreamPR": null
     },
     {
+      "file": "new/tests/unit/agent-bridge-stop-dns-failure.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/agent-bridge-stop-dns-failure.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
       "file": "new/tests/unit/agent-bridge-text-fidelity.test.ts",
       "layer": "new",
       "class": "nexa-specific",
@@ -1771,6 +1811,14 @@
       "upstreamPR": null
     },
     {
+      "file": "new/tests/unit/native-deferred-tool-placeholder.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/native-deferred-tool-placeholder.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
       "file": "new/tests/unit/native-hosted-search-boundary.test.ts",
       "layer": "new",
       "class": "nexa-specific",
@@ -1839,6 +1887,14 @@
       "layer": "new",
       "class": "nexa-specific",
       "target": "tests/unit/traffic-inspector-event-stream.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/ui/agent-bridge-stop-password.test.tsx",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/ui/agent-bridge-stop-password.test.tsx",
       "conflictRisk": "none",
       "upstreamPR": null
     },

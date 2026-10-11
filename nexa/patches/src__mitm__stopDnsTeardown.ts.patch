@@ -1,0 +1,23 @@
+diff --git a/src/mitm/stopDnsTeardown.ts b/src/mitm/stopDnsTeardown.ts
+index 2482b8816..ffb00236a 100644
+--- a/src/mitm/stopDnsTeardown.ts
++++ b/src/mitm/stopDnsTeardown.ts
+@@ -12,13 +12,11 @@ export type StopDnsDeps = {
+ export async function removeStopDnsEntries(deps: StopDnsDeps, sudoPassword: string): Promise<void> {
+   log.info("Removing DNS entries...");
+   await deps.removeDNSEntry(sudoPassword);
+-  try {
+-    const managed = deps.collectManagedHosts();
+-    if (managed.length > 0) {
+-      await deps.removeDNSEntries(managed, sudoPassword);
+-    }
+-  } catch (err) {
+-    log.error({ err }, "Failed to remove managed DNS entries during stop (continuing)");
++  // A normal Stop must keep the listener alive if managed hosts still point at it.
++  // Failed-start rollback remains best-effort in its separate wrapper below.
++  const managed = deps.collectManagedHosts();
++  if (managed.length > 0) {
++    await deps.removeDNSEntries(managed, sudoPassword);
+   }
+ }
+ 

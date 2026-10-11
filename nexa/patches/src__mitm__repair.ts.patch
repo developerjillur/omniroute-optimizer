@@ -1,0 +1,21 @@
+diff --git a/src/mitm/repair.ts b/src/mitm/repair.ts
+index 9dd3d4902..e99bc48cb 100644
+--- a/src/mitm/repair.ts
++++ b/src/mitm/repair.ts
+@@ -18,7 +18,7 @@ const log = createLogger("mitm-repair");
+  * nothing to "remove", but a host we forget to list leaks machine-wide.
+  * (Gap 8 — clean-stop DNS leak.)
+  */
+-export function collectManagedHosts(): string[] {
++export function collectManagedHosts(options: { requireCustomHosts?: boolean } = {}): string[] {
+   const hosts = new Set<string>();
+   for (const target of ALL_TARGETS) {
+     for (const h of target.hosts) hosts.add(h);
+@@ -29,6 +29,7 @@ export function collectManagedHosts(): string[] {
+   try {
+     for (const ch of listCustomHosts()) hosts.add(ch.host);
+   } catch (err) {
++    if (options.requireCustomHosts) throw err;
+     log.error({ err }, "collectManagedHosts: failed to read custom hosts (continuing)");
+   }
+   return [...hosts];

@@ -43,6 +43,15 @@ export function isCompletedSilentSuggestion(response: unknown): boolean {
     return false;
   return body.output.every((item) => {
     const message = record(item);
+    // A completed reasoning item with no summary contributes no visible output.
+    // Keep this exception narrower than ordinary reasoning-only task responses.
+    if (message?.type === "reasoning") {
+      return (
+        (message.status == null || message.status === "completed") &&
+        Array.isArray(message.summary) &&
+        message.summary.length === 0
+      );
+    }
     return (
       message?.type === "message" &&
       message.role === "assistant" &&

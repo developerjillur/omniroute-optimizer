@@ -1,0 +1,16 @@
+diff --git a/src/app/(dashboard)/dashboard/tools/agent-bridge/AgentBridgePageClient.tsx b/src/app/(dashboard)/dashboard/tools/agent-bridge/AgentBridgePageClient.tsx
+index 7f7294c98..2b44845c2 100644
+--- a/src/app/(dashboard)/dashboard/tools/agent-bridge/AgentBridgePageClient.tsx
++++ b/src/app/(dashboard)/dashboard/tools/agent-bridge/AgentBridgePageClient.tsx
+@@ -119,9 +119,9 @@ export default function AgentBridgePageClient({
+   const handleServerAction = useCallback(
+     async (action: "start" | "stop" | "restart" | "trust-cert" | "regenerate-cert") => {
+       setActionError(null);
+-      if (action === "trust-cert") {
++      if (action === "trust-cert" || action === "stop" || action === "restart") {
+         await runPrivileged(async (password) => {
+-          await postServerAction("trust-cert", password || undefined);
++          await postServerAction(action, password || undefined);
+         });
+         return;
+       }

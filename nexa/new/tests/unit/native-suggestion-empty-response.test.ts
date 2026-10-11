@@ -132,6 +132,46 @@ test("ordinary native requests still reject empty provider output", async () => 
   assert.equal(result.response.status, 502);
 });
 
+for (const stream of [false, true]) {
+  test(`completed optional suggestion may contain hidden reasoning without visible text (stream=${stream})`, async () => {
+    const response = () => {
+      const completed = {
+        id: "resp_silent_reasoning",
+        object: "response",
+        model: "gpt-6.1-sol",
+        status: "completed",
+        output: [
+          { id: "rs_silent", type: "reasoning", summary: [] },
+          {
+            id: "msg_silent_reasoning",
+            type: "message",
+            role: "assistant",
+            status: "completed",
+            content: [{ type: "output_text", text: "" }],
+          },
+        ],
+        usage: { input_tokens: 6, output_tokens: 1 },
+      };
+      return new Response(
+        `event: response.completed\ndata: ${JSON.stringify({ type: "response.completed", response: completed })}\n\ndata: [DONE]\n\n`,
+        { headers: { "Content-Type": "text/event-stream" } }
+      );
+    };
+    const { result, payload, calls, readError } = await invoke(suggestion, response, true, stream);
+    assert.equal(result.success, true);
+    assert.equal(result.response.status, 200);
+    assert.equal(readError, undefined);
+    assert.equal(calls.length, 1);
+    if (stream) {
+      assert.match(payload, /"type":"message_stop"/);
+      assert.doesNotMatch(payload, /"type":"error"|\(empty response\)/);
+    } else {
+      assert.deepEqual(payload.content, []);
+      assert.equal(payload.stop_reason, "end_turn");
+    }
+  });
+}
+
 test("optional suggestion does not accept a zero-byte upstream body", async () => {
   const { result } = await invoke(
     suggestion,

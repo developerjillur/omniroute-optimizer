@@ -227,6 +227,85 @@ test("native messages retain protocol, compressed bodies, status and selected ho
     });
   }
   await t.test(
+    "saved route changes and newly discovered connectors apply on the next request",
+    async () => {
+      mode = "json";
+      const newConnector = {
+        name: "mcp__new_connector__read_status",
+        description: "Read-only newly discovered connector fixture",
+        defer_loading: true,
+        input_schema: { type: "object", properties: { label: { type: "string" } } },
+      };
+      const nextTurn = {
+        ...payload,
+        stream: false,
+        tools: [...payload.tools, newConnector],
+        messages: [
+          ...payload.messages,
+          {
+            role: "assistant",
+            content: [
+              { type: "tool_use", id: "call_previous_gpt", name: "synthetic_tool", input: {} },
+            ],
+          },
+          {
+            role: "user",
+            content: [
+              {
+                type: "tool_result",
+                tool_use_id: "call_previous_gpt",
+                content: "previous tool result",
+              },
+            ],
+          },
+        ],
+      };
+      try {
+        for (const target of ["cx/gpt-6.1-sol", "claude/claude-sonnet-5-5", "glmt/glm-5.3-max"]) {
+          fs.writeFileSync(
+            path.join(root, "db.json"),
+            JSON.stringify({ mitmAlias: { "claude-code": { [model]: target } } })
+          );
+          const status = await new Promise<number | undefined>((resolve, reject) => {
+            const req = https.request(
+              {
+                hostname: "127.0.0.1",
+                port,
+                servername: "api.anthropic.com",
+                ca: fs.readFileSync(cert),
+                path: "/v1/messages?beta=true",
+                method: "POST",
+                headers: {
+                  host: "api.anthropic.com",
+                  authorization: "Bearer synthetic-native-token",
+                  "anthropic-beta": "synthetic-beta",
+                  "x-session-id": "synthetic-session",
+                },
+              },
+              (res) => {
+                res.resume();
+                res.on("end", () => resolve(res.statusCode));
+              }
+            );
+            req.on("error", reject);
+            req.end(JSON.stringify(nextTurn));
+          });
+          assert.equal(status, 200);
+          const forwarded = received.at(-1)!;
+          assert.equal(forwarded.url, "/v1/messages?beta=true");
+          assert.equal(forwarded.headers["x-session-id"], "synthetic-session");
+          assert.equal(forwarded.headers["anthropic-beta"], "synthetic-beta");
+          assert.deepEqual(forwarded.body, { ...nextTurn, model: target });
+        }
+      } finally {
+        fs.writeFileSync(
+          path.join(root, "db.json"),
+          JSON.stringify({ mitmAlias: { "claude-code": { [model]: model } } })
+        );
+      }
+    }
+  );
+  await t.test(
     "a failed passthrough DNS lookup returns 502 without killing other sessions",
     async () => {
       mode = "held-sse";

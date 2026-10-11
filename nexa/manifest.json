@@ -7,12 +7,12 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 237,
-    "patches": 148,
-    "new": 84,
+    "total": 240,
+    "patches": 149,
+    "new": 86,
     "tooling": 5,
     "upstreamCandidates": 28,
-    "nexaSpecific": 82,
+    "nexaSpecific": 85,
     "needsReview": 127,
     "pendingUpstreamPR": 12,
     "mergedUpstreamPR": 2
@@ -222,6 +222,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "open-sse/handlers/chatCore/nonStreamingProviderLeg.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__handlers__chatCore__passthroughHelpers.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "open-sse/handlers/chatCore/passthroughHelpers.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -1281,6 +1289,14 @@
       "upstreamPR": null
     },
     {
+      "file": "new/open-sse/utils/anthropicThinkingReplay.ts",
+      "layer": "new",
+      "class": "nexa-specific",
+      "target": "open-sse/utils/anthropicThinkingReplay.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
       "file": "new/open-sse/utils/nativeHostedSearch.ts",
       "layer": "new",
       "class": "nexa-specific",
@@ -1831,6 +1847,14 @@
       "layer": "new",
       "class": "needs-review",
       "target": "tests/unit/native-suggestion-empty-response.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/native-thinking-signature-switch.test.ts",
+      "layer": "new",
+      "class": "nexa-specific",
+      "target": "tests/unit/native-thinking-signature-switch.test.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },

@@ -16,6 +16,7 @@ const tests = [
   "native-claude-thread-executor.test.ts",
   "native-claude-thread-chatcore.test.ts",
   "native-claude-thread-routing.test.ts",
+  "native-thinking-signature-switch.test.ts",
   "native-claude-cache-identity.test.ts",
   "db/native-claude-usage-persistence.test.ts",
   "claude-usage-effort.test.ts",

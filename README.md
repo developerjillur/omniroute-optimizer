@@ -8,13 +8,13 @@ Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। Om
 | ----------------------- | ------------------------------------------ |
 | Source repository       | `developerjillur/OmniRoute`                |
 | Source branch           | `nexalance`                                |
-| Source commit           | `b03f80bca5656e397db13235edf5093039383882` |
+| Source commit           | `0c0d3b1d4aa8336f03261e80d75bcab3f53fd019` |
 | Upstream version        | `3.8.51`                                   |
 | Pristine upstream base  | `c1e30b7676975feb298b49eff6ff58923c04b89e` |
-| `nexa/` tree SHA        | `cf8ea53748c20e6d843928a5e95551693b880efd` |
-| Versioned overlay files | 310                                        |
+| `nexa/` tree SHA        | `6de575f468844841d0377598d03cc5dc48c34e75` |
+| Versioned overlay files | 314                                        |
 
-`nexa/`-এর সব 310টি file মূল source commit-এর সঙ্গে byte-for-byte মিলে। প্রতিটি file-এর path, size, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এর 237টি entry-তে 148টি patch, 84টি নতুন file এবং 5টি tooling entry আছে; অন্যান্য tracked file-এ deployment scripts, tests ও documentation রয়েছে।
+`nexa/`-এর সব 314টি file মূল source commit-এর সঙ্গে byte-for-byte মিলে। প্রতিটি file-এর path, size, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এর 240টি entry-তে 149টি patch, 86টি নতুন file এবং 5টি tooling entry আছে; অন্যান্য tracked file-এ deployment scripts, tests ও documentation রয়েছে।
 
 ## কী রয়েছে
 
@@ -26,7 +26,19 @@ Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। Om
 - Bounded build, isolated package smoke, database snapshot, deployment ও rollback scripts।
 - পূর্বের QA evidence, source validation notes এবং overlay পরিচালনার documentation।
 
-## সর্বশেষ সংরক্ষিত fixes — ২০২৬-১০-১১
+## সর্বশেষ release — ২০২৬-১০-১২
+
+Source ও deployed runtime `0c0d3b1d4`। GPT থেকে Claude-এ routing বদলানোর পরে unsigned বা rejected thinking history-এর `Invalid signature in thinking block` failure সংশোধিত হয়েছে। Native dispatch ও `count_tokens` boundary-তে অকার্যকর thinking suffix সরানো হয়; valid native signature, সাধারণ text, tool IDs/results, documents ও নির্বাচিত effort সংরক্ষিত থাকে। Named upstream rejection-এ একটি সীমিত recovery retry রয়েছে। Sparse Thread history restore হওয়ার পরেও একই সুরক্ষা চলে।
+
+- নতুন signature regression 15/15, related tests 376/376 ও MCP tests 493/493 PASS; core typecheck ও focused lint PASS। Full TypeScript ratchet `5826 ≤ 5830` PASS।
+- Full Next compilation ও 620 static pages PASS। Finder-এর `.DS_Store` metadata-তে packaging থেমেছিল; শুধু task-created metadata সরিয়ে completed Next output পুনর্ব্যবহার করে packaging/gates PASS হয়েছে। Next compilation পুনরায় চালানো হয়নি। প্রথম failed pipeline receipt-ও সংরক্ষিত।
+- Verified package দিয়ে production deploy, native TLS, health ও retained-data/rollback integrity PASS।
+- বাস্তব GPT → Claude pending tool cycle, valid signed replay, rejected signature, `count_tokens` এবং Claude → GPT পরীক্ষা PASS। VS Code CLI `2.1.296` ও Desktop bundled engine `2.1.295`-এ Read/Bash → model switch → `/compact` → resume → reverse switch PASS।
+- Native Claude app-এ Higgsfield model discovery, Higgsfield Bridge host/scene read এবং official Blender summary—চারটি read-only call PASS। দুই scene reader-ই একই saved scene-এ 442টি object পেয়েছে; saved file অপরিবর্তিত।
+
+Source ব্যাখ্যা: [NATIVE-THINKING-SIGNATURE-SWITCH-2026-10-11.md](nexa/docs/NATIVE-THINKING-SIGNATURE-SWITCH-2026-10-11.md)। Build/deployment, actual provider/effort traces ও real QA-এর সীমাসহ ফল: [RELEASE-2026-10-12-SIGNATURE-SWITCH.md](reports/RELEASE-2026-10-12-SIGNATURE-SWITCH.md)। এটি সব provider বা সব external connector-এর পূর্ণ parity দাবি নয়; user-এর giant conversation বা iPhone UI হুবহু replay করা হয়নি।
+
+## আগের সংরক্ষিত fixes — ২০২৬-১০-১১
 
 - Native deferred discovery marker-কে callable tool হিসেবে পাঠানো বন্ধ; আসল connector schema ও tool history সংরক্ষণ।
 - Bridge Stop/Restart-এ elevation prompt এবং verified DNS cleanup; hosts/custom inventory পড়া বা DNS cleanup ব্যর্থ হলে listener চালু থাকে। Partial IPv4/IPv6 entry-ও সরানো হয়।
@@ -39,9 +51,9 @@ Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। Om
 - Agent Bridge-এর paired `undici` fetch/dispatcher, bounded buffered deadline, streaming cancellation এবং পৃথক timeout/transport errors। এতে native `/compact`-এর reproduced transport failure সংশোধিত হয়েছে। Regression: [agent-bridge-compaction-timeout.test.ts](nexa/new/tests/unit/agent-bridge-compaction-timeout.test.ts)।
 - Isolated deployment smoke-এ actual selected provider/model নির্ধারণ ও শনাক্ত করা। Regression: [smoke-model.test.mjs](nexa/deploy/smoke-model.test.mjs)।
 
-বর্তমান source `b03f80bca`-এর full production build, 620 static pages, dashboard/CLI/package/Bridge এবং connector gates PASS। Full TypeScript ratchet-এ 5826 error ≤ 5830 baseline; এটি zero-error full typecheck নয়। Core typecheck ও focused lint PASS। Discovery/suggestion group 107, mapping group 18, DNS/Stop group 46 এবং UI group 18 PASS; group-গুলোর overlap আছে। Verified artifact দিয়ে local production deployment সম্পন্ন হয়েছে ২০২৬-১০-১১, ঢাকা সময় ২০:০১:২৬-এ; deployed runtime SHA `b03f80bca`। সম্পূর্ণ আগের runtime ও consistent database snapshot সংরক্ষিত ও যাচাইকৃত। বিস্তারিত: [RELEASE-2026-10-11.md](reports/RELEASE-2026-10-11.md)।
+আগের source `b03f80bca`-এর full production build, 620 static pages, dashboard/CLI/package/Bridge এবং connector gates PASS। Full TypeScript ratchet-এ 5826 error ≤ 5830 baseline; এটি zero-error full typecheck নয়। Core typecheck ও focused lint PASS। Discovery/suggestion group 107, mapping group 18, DNS/Stop group 46 এবং UI group 18 PASS; group-গুলোর overlap আছে। Verified artifact দিয়ে local production deployment সম্পন্ন হয়েছে ২০২৬-১০-১১, ঢাকা সময় ২০:০১:২৬-এ; deployed runtime SHA `b03f80bca`। সম্পূর্ণ আগের runtime ও consistent database snapshot সংরক্ষিত ও যাচাইকৃত। বিস্তারিত: [RELEASE-2026-10-11.md](reports/RELEASE-2026-10-11.md)।
 
-বর্তমান `b03f80bca` runtime-এ rejected Mixar schema, native deferred placeholder ও আসল ToolSearch-সহ trusted native TLS probe HTTP 200 পেয়েছে। Trace-এ actual target `codex/gpt-6.1-sol` এবং নির্বাচিত/upstream effort `low` → `low` যাচাইকৃত। VS Code/installed Claude Code `2.1.296` ও Claude Desktop bundled engine `2.1.295`-এ পৃথক real session-এর seed → `/compact` → resume PASS; compaction যথাক্রমে 23.223 ও 22.533 সেকেন্ড। প্রতিটিতে একটি compact boundary এবং summary/resumed response-এ আগের marker retained। Original giant conversation বা iPhone GUI হুবহু replay করা হয়নি; target model-এর প্রকৃত context limit এবং external upstream outages-এর সীমা থাকে।
+আগের `b03f80bca` release-এর QA-তে rejected Mixar schema, native deferred placeholder ও আসল ToolSearch-সহ trusted native TLS probe HTTP 200 পেয়েছে। Trace-এ actual target `codex/gpt-6.1-sol` এবং নির্বাচিত/upstream effort `low` → `low` যাচাইকৃত। VS Code/installed Claude Code `2.1.296` ও Claude Desktop bundled engine `2.1.295`-এ পৃথক real session-এর seed → `/compact` → resume PASS; compaction যথাক্রমে 23.223 ও 22.533 সেকেন্ড। প্রতিটিতে একটি compact boundary এবং summary/resumed response-এ আগের marker retained। Original giant conversation বা iPhone GUI হুবহু replay করা হয়নি; target model-এর প্রকৃত context limit এবং external upstream outages-এর সীমা থাকে।
 
 এই GitHub snapshot-এ application source, regression coverage ও সংক্ষিপ্ত release report সংরক্ষিত; private request logs, account inventory, credentials বা local database অন্তর্ভুক্ত নেই। Release-এর সফল package ও স্থানীয় detailed evidence আলাদাভাবে সংরক্ষিত আছে; publication-এর জন্য সফল build পুনরায় চালানো হয়নি।
 

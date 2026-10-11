@@ -2,12 +2,12 @@
   "repository": "developerjillur/omniroute-optimizer",
   "sourceRepository": "developerjillur/OmniRoute",
   "sourceBranch": "nexalance",
-  "sourceCommit": "b03f80bca5656e397db13235edf5093039383882",
-  "sourceNexaTree": "cf8ea53748c20e6d843928a5e95551693b880efd",
+  "sourceCommit": "0c0d3b1d4aa8336f03261e80d75bcab3f53fd019",
+  "sourceNexaTree": "6de575f468844841d0377598d03cc5dc48c34e75",
   "upstreamBase": "c1e30b7676975feb298b49eff6ff58923c04b89e",
   "upstreamVersion": "3.8.51",
-  "trackedNexaFiles": 310,
-  "totalNexaBytes": 1200905,
+  "trackedNexaFiles": 314,
+  "totalNexaBytes": 1223828,
   "files": [
     {
       "path": "nexa/.gitignore",
@@ -61,9 +61,9 @@
     {
       "path": "nexa/check/native-claude-regressions.mjs",
       "mode": "100644",
-      "gitBlobSha": "e4bdc17ec192d8a45713c2b69e73888e820e220a",
-      "bytes": 1627,
-      "sha256": "b833d4042d07f6a4b0035ca3d92b97fc3b401a15d1a71f7cbfea5368f904ca18"
+      "gitBlobSha": "9575428934bf2e5a7f85eb4103eb3b35ae5b9869",
+      "bytes": 1673,
+      "sha256": "63a76e960c17bcf283608b7e51d5e7ed1f97c4fa8cfaae1c450f5a8ae8bb5541"
     },
     {
       "path": "nexa/check/pristine-base.mjs",
@@ -444,6 +444,13 @@
       "sha256": "50acba16a922bb79b163a1527859479a64d965a805eec85400de499a8e851b2a"
     },
     {
+      "path": "nexa/docs/NATIVE-THINKING-SIGNATURE-SWITCH-2026-10-11.md",
+      "mode": "100644",
+      "gitBlobSha": "0012abe627b27cb1cc0f5554b1f622755b5ba6ee",
+      "bytes": 4138,
+      "sha256": "f229f3759c4d956e459d8425fc010f60d4764d97961796f1a6af01516ef21134"
+    },
+    {
       "path": "nexa/docs/NATIVE-THREAD-USAGE-2026-10-07.md",
       "mode": "100644",
       "gitBlobSha": "f3178418fcfeff2b12cd6e96e2656753664a6fc2",
@@ -474,9 +481,9 @@
     {
       "path": "nexa/manifest.json",
       "mode": "100644",
-      "gitBlobSha": "f0e736f40045844f5f3045ac9e71605ab0a489ca",
-      "bytes": 62202,
-      "sha256": "7bcd74a4343b519842ca5815f71748b32cbd82b0adcd7b0f33ef5ab96c71b4e1"
+      "gitBlobSha": "a3ec53f5038b714ef950f75af90f5cb2cdb26e25",
+      "bytes": 62995,
+      "sha256": "22329ba86f8e3b254ae725f5245e66eda2443c567973207cd2df3af789f5e127"
     },
     {
       "path": "nexa/new/bin/cli/utils/packageMigrations.mjs",
@@ -519,6 +526,13 @@
       "gitBlobSha": "b2f1ccc710e9e0848e500b71e2b3917dc236999b",
       "bytes": 5141,
       "sha256": "4e053dd988dab09e1cda0b2fdfa10b7c1b6ab8914b9569a60e6ba25012a3e8fe"
+    },
+    {
+      "path": "nexa/new/open-sse/utils/anthropicThinkingReplay.ts",
+      "mode": "100644",
+      "gitBlobSha": "1221e6ba8cdb3f96408f827385d1c7f87993573f",
+      "bytes": 3633,
+      "sha256": "d8a9de41308f9331291329ea3ac20b7e00e91c5db2ddd4698cd1739a0b23cca6"
     },
     {
       "path": "nexa/new/open-sse/utils/nativeHostedSearch.ts",
@@ -990,6 +1004,13 @@
       "sha256": "66606966c859f35d435c0976c680daae30616b5fffdc0e0004489537f28e1686"
     },
     {
+      "path": "nexa/new/tests/unit/native-thinking-signature-switch.test.ts",
+      "mode": "100644",
+      "gitBlobSha": "7a4760e41990cb75c7c2e5aea33fa2551020d2c4",
+      "bytes": 11051,
+      "sha256": "93b78d407a87f4c5a6794a87dfd6003f0c40c6ec7cdebf44b22be3ec5ab0148a"
+    },
+    {
       "path": "nexa/new/tests/unit/nexa-google-account-health.test.ts",
       "mode": "100644",
       "gitBlobSha": "aaf0c50ea5a2165573a875ad656663eaf8a0ff51",
@@ -1181,9 +1202,9 @@
     {
       "path": "nexa/patches/open-sse__executors__base.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "1e66b788b175a5b7832bbffc3ee7f541e766c271",
-      "bytes": 15448,
-      "sha256": "e3d5a8ed6a4db41d92dfb0834f4a6f5952e8035d8530353415f08b41142f4ad6"
+      "gitBlobSha": "3ef1ee40c6832a153680116940af08ea5a35edc0",
+      "bytes": 16047,
+      "sha256": "aa83497aefe31f14ea6186efef3f72ecd9c98db798e0ab268e3bf5d637a3b82e"
     },
     {
       "path": "nexa/patches/open-sse__executors__claudeIdentity.ts.patch",
@@ -1233,6 +1254,13 @@
       "gitBlobSha": "eebeb497653bd25c98d5a237a9bb2ca3303efd76",
       "bytes": 3391,
       "sha256": "cd6f44709a845cd604f2e521806552c915eb9a034843d14ac62b041116d674f9"
+    },
+    {
+      "path": "nexa/patches/open-sse__handlers__chatCore__passthroughHelpers.ts.patch",
+      "mode": "100644",
+      "gitBlobSha": "630af321f4997b653096d3b7ed0bc0ccc2419343",
+      "bytes": 2663,
+      "sha256": "40adb3e74e37349f418fc2a8100c88d4ba2232ae70c4ac70c454263ffde8d747"
     },
     {
       "path": "nexa/patches/open-sse__handlers__chatCore__skipCredentialRefresh.ts.patch",

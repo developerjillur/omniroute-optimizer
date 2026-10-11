@@ -1,0 +1,47 @@
+diff --git a/open-sse/handlers/chatCore/passthroughHelpers.ts b/open-sse/handlers/chatCore/passthroughHelpers.ts
+index acaf91e39..91cc6c1b0 100644
+--- a/open-sse/handlers/chatCore/passthroughHelpers.ts
++++ b/open-sse/handlers/chatCore/passthroughHelpers.ts
+@@ -1,3 +1,4 @@
++import { stripRejectedThinkingSuffix } from "../../utils/anthropicThinkingReplay.ts";
+ import { FORMATS } from "../../translator/formats.ts";
+ import { isVerifiedNativeCodexRequest } from "../../config/codexIdentity.ts";
+ import { isClaudeCodeCompatibleProvider } from "../../services/claudeCodeCompatible.ts";
+@@ -207,17 +208,24 @@ export function isAnthropicThinkingSignatureError({
+ 
+ /**
+  * Build a one-shot recovery body after Anthropic has explicitly rejected a
+- * thinking signature. Historical thinking blocks are omitted, but the complete
+- * active tool-use cycle is preserved verbatim: when the request ends in one or
++ * thinking signature. A named rejected block and all later thinking blocks are
++ * omitted, including within a pending tool cycle; tool calls/results stay intact.
++ * Without a named position, historical-only recovery protects the complete
++ * active tool-use cycle: when the request ends in one or
+  * more `user[tool_result]` turns, every paired assistant `tool_use` turn in that
+  * still-open cycle keeps its thinking blocks. A trailing unresolved assistant
+  * `tool_use` turn is protected as well.
+  *
+- * This helper is intentionally NOT used eagerly. Normal same-model requests must
++ * This recovery helper is not used eagerly. Normal same-model requests must
+  * retain their thinking history, cache shape, and current-model semantics.
+  * Returns the original body reference when no safe recovery change is possible.
+  */
+-export function stripHistoricalThinkingForSignatureRecovery<T>(body: T): T {
++export function stripHistoricalThinkingForSignatureRecovery<T>(
++  body: T,
++  rejectionMessage?: string | null
++): T {
++  const rejectedSuffix = stripRejectedThinkingSuffix(body, rejectionMessage);
++  if (rejectedSuffix !== null) return rejectedSuffix;
+   if (!body || typeof body !== "object" || Array.isArray(body)) return body;
+ 
+   const record = body as Record<string, unknown>;
+@@ -304,7 +312,7 @@ export async function executeWithAnthropicThinkingSignatureRecovery<T>(args: {
+     return { result: first, retried: false, recoveryBody: null };
+   }
+ 
+-  const recoveryBody = stripHistoricalThinkingForSignatureRecovery(args.body);
++  const recoveryBody = stripHistoricalThinkingForSignatureRecovery(args.body, failure.message);
+   if (recoveryBody === args.body) {
+     return { result: first, retried: false, recoveryBody: null };
+   }

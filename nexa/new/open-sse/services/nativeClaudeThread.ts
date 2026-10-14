@@ -1,5 +1,14 @@
 type Body = Record<string, unknown>;
 
+export function isNativeClaudeThreadReplayError(status: number, error: unknown): boolean {
+  return (
+    (status === 400 || status === 404) &&
+    /(?:no thread state (?:is available|was found)|request does not match the stored Thread)/i.test(
+      String(error ?? "")
+    )
+  );
+}
+
 function record(value: unknown): Body {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as Body) : {};
 }
@@ -82,7 +91,7 @@ function rootMessageIdPrefix(text: string): string | null {
   return null;
 }
 
-/** Observe only the message envelope, without teeing or retaining the response transcript. */
+/** Commit ownership after a complete response, without retaining the transcript. */
 export function observeNativeClaudeThreadResponse(
   response: Response,
   onMessage: (id: string) => void
@@ -93,8 +102,34 @@ export function observeNativeClaudeThreadResponse(
   let pending = "";
   let seenBytes = 0;
   let done = false;
+  let candidate: string | null = null;
+  let droppingFrame = false;
+  let jsonDepth = 0;
+  let jsonString = false;
+  let jsonEscape = false;
+  let jsonStarted = false;
+  let jsonInvalid = false;
+  const commit = () => {
+    if (done || !candidate) return;
+    done = true;
+    pending = "";
+    try {
+      onMessage(candidate);
+    } catch {
+      /* Persistence must not break a valid response. */
+    }
+  };
   const note = (value: unknown) => {
     const envelope = record(value);
+    if (sse && envelope.type === "error") {
+      candidate = null;
+      done = true;
+      return;
+    }
+    if (sse && envelope.type === "message_stop") {
+      commit();
+      return;
+    }
     const id =
       sse && envelope.type === "message_start"
         ? record(envelope.message).id
@@ -102,37 +137,46 @@ export function observeNativeClaudeThreadResponse(
           ? envelope.id
           : null;
     if (typeof id !== "string" || !/^msg_[A-Za-z0-9_-]{1,200}$/.test(id)) return;
-    done = true;
-    pending = "";
-    // Observability must never make a valid provider response fail.
-    try {
-      onMessage(id);
-    } catch {
-      /* The request remains usable if persistence is unavailable. */
-    }
+    candidate = id;
   };
   const stream = response.body.pipeThrough(
     new TransformStream<Uint8Array, Uint8Array>({
       transform(chunk, controller) {
         controller.enqueue(chunk);
         if (done) return;
-        const remaining = 64 * 1024 - seenBytes;
-        pending += decoder.decode(chunk.subarray(0, remaining), { stream: true });
+        const decoded = decoder.decode(chunk, { stream: true });
         seenBytes += chunk.byteLength;
         if (!sse) {
-          const id = rootMessageIdPrefix(pending);
-          if (id) note({ id });
-          if (seenBytes >= 64 * 1024) {
-            done = true;
-            pending = "";
+          if (pending.length < 64 * 1024) pending += decoded.slice(0, 64 * 1024 - pending.length);
+          if (!candidate) candidate = rootMessageIdPrefix(pending);
+          for (const ch of decoded) {
+            if (jsonString) {
+              if (jsonEscape) jsonEscape = false;
+              else if (ch === "\\") jsonEscape = true;
+              else if (ch === '"') jsonString = false;
+              continue;
+            }
+            if (!jsonStarted && !/\s/.test(ch)) {
+              jsonStarted = true;
+              if (ch !== "{") jsonInvalid = true;
+            } else if (jsonStarted && jsonDepth === 0 && !/\s/.test(ch)) jsonInvalid = true;
+            if (ch === '"') jsonString = true;
+            else if (ch === "{" || ch === "[") jsonDepth++;
+            else if (ch === "}" || ch === "]") jsonDepth--;
+            if (jsonDepth < 0 || jsonDepth > 256) jsonInvalid = true;
           }
           return;
         }
+        pending += decoded;
         pending = pending.replace(/\r\n/g, "\n");
         let boundary: number;
         while (!done && (boundary = pending.indexOf("\n\n")) !== -1) {
           const frame = pending.slice(0, boundary);
           pending = pending.slice(boundary + 2);
+          if (droppingFrame || frame.length > 64 * 1024) {
+            droppingFrame = false;
+            continue;
+          }
           const data = frame
             .split("\n")
             .filter((line) => line.startsWith("data:"))
@@ -145,10 +189,21 @@ export function observeNativeClaudeThreadResponse(
             /* Keep forwarding malformed or non-JSON frames. */
           }
         }
-        if (seenBytes >= 64 * 1024) {
-          done = true;
+        if (pending.length > 64 * 1024) {
           pending = "";
+          droppingFrame = true;
         }
+      },
+      flush() {
+        if (sse || done || jsonInvalid || jsonString || jsonDepth !== 0 || !jsonStarted) return;
+        if (seenBytes <= 64 * 1024) {
+          try {
+            note(JSON.parse(pending));
+          } catch {
+            return;
+          }
+        }
+        commit();
       },
     })
   );

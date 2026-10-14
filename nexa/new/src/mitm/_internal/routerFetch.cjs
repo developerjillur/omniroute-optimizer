@@ -4,21 +4,24 @@
 // differs between supported runtimes.
 const { Agent, fetch } = require("undici");
 
-// Stay below the native ingress's ten-minute idle window. Buffered native
-// compaction needs longer than fetch's implicit five-minute headers timeout,
-// while an abandoned request must still have a finite deadline.
+// Leave room for the backend's bounded 21-minute active stream budget.
+// The native ingress grants a 22-minute idle window only to this local backend.
 const configured = Number(process.env.MITM_ROUTER_TIMEOUT_MS);
-const timeoutMs =
-  Number.isInteger(configured) && configured >= 1000 && configured <= 540000 ? configured : 540000;
-let dispatcher;
+const isConfigured = Number.isInteger(configured) && configured >= 1000 && configured <= 1_290_000;
+const timeoutMs = isConfigured ? configured : 540000;
+const nativeBufferedTimeoutMs = isConfigured ? configured : 1_290_000;
+const dispatchers = new Map();
 
 function transportCode(error) {
   return error?.cause?.code || error?.code || "";
 }
 
-async function fetchRouter(url, options, { buffered = false } = {}) {
-  dispatcher ||= new Agent({ headersTimeout: timeoutMs, bodyTimeout: timeoutMs });
-  const deadline = buffered ? AbortSignal.timeout(timeoutMs) : undefined;
+async function fetchRouter(url, options, { buffered = false, nativeThinking = false } = {}) {
+  const budget = buffered && nativeThinking ? nativeBufferedTimeoutMs : timeoutMs;
+  if (!dispatchers.has(budget))
+    dispatchers.set(budget, new Agent({ headersTimeout: budget, bodyTimeout: budget }));
+  const dispatcher = dispatchers.get(budget);
+  const deadline = buffered ? AbortSignal.timeout(budget) : undefined;
   const signal = deadline
     ? options.signal
       ? AbortSignal.any([options.signal, deadline])
@@ -38,9 +41,10 @@ async function fetchRouter(url, options, { buffered = false } = {}) {
     );
     failure.statusCode = timedOut ? 504 : 502;
     failure.code = timedOut ? "agent_bridge_timeout" : "agent_bridge_transport_error";
+    if (timedOut) failure.retryable = false;
     failure.cause = error;
     throw failure;
   }
 }
 
-module.exports = { fetchRouter, timeoutMs };
+module.exports = { fetchRouter, timeoutMs, nativeBufferedTimeoutMs };

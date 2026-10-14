@@ -133,6 +133,65 @@ test("an unknown or cross-session Thread requests full replay without dispatch",
   await expectClientReplay("msg_owned", "native-thread-cross-session", otherSession);
 });
 
+test("forgetting a stale Thread owner is fenced to the matching session and connection", () => {
+  owners.saveNativeClaudeThreadOwner(session, "msg_stale_fence", accountA);
+  owners.saveNativeClaudeThreadOwner(otherSession, "msg_stale_fence", accountB);
+  assert.equal(owners.forgetNativeClaudeThreadOwner(session, "msg_stale_fence", accountB), false);
+  assert.equal(owners.getNativeClaudeThreadOwner(session, "msg_stale_fence"), accountA);
+  assert.equal(owners.forgetNativeClaudeThreadOwner(session, "msg_stale_fence", accountA), true);
+  assert.equal(owners.getNativeClaudeThreadOwner(session, "msg_stale_fence"), null);
+  assert.equal(owners.getNativeClaudeThreadOwner(otherSession, "msg_stale_fence"), accountB);
+});
+
+test("an upstream rejected Thread requests native replay without dispatching to a sibling", async () => {
+  owners.saveNativeClaudeThreadOwner(session, "msg_rejected_upstream", accountA);
+  const headers = {
+    "content-type": "application/json",
+    "x-app": "cli",
+    "anthropic-beta": "message-threads-2026-08-12,oauth-2025-04-20",
+  };
+  const body = {
+    model: "claude/claude-sonnet-5-5",
+    stream: false,
+    thread: { type: "continue", previous_message_id: "msg_rejected_upstream" },
+    metadata: { user_id: JSON.stringify({ session_id: session }) },
+    messages: [{ role: "user", content: "delta" }],
+  };
+  const originalFetch = globalThis.fetch;
+  let dispatches = 0;
+  globalThis.fetch = async () => {
+    dispatches++;
+    return new Response(
+      JSON.stringify({
+        type: "error",
+        error: {
+          type: "invalid_request_error",
+          message: "thread: the request does not match the stored Thread",
+        },
+      }),
+      { status: 400, headers: { "content-type": "application/json" } }
+    );
+  };
+  try {
+    const response = await handleChat(
+      new Request("http://localhost/v1/messages", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(body),
+      }),
+      { headers, endpoint: "/v1/messages" },
+      body,
+      "native-thread-rejected-upstream"
+    );
+    assert.equal(response.status, 404);
+    assert.equal((await response.json()).error.details.error_code, "thread_not_found");
+    assert.equal(dispatches, 1);
+    assert.equal(owners.getNativeClaudeThreadOwner(session, "msg_rejected_upstream"), null);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("model switches cannot send a Claude Thread delta to GPT or GLM", async () => {
   owners.saveNativeClaudeThreadOwner(session, "msg_claude_before_switch", accountA);
   for (const [index, model] of [

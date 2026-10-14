@@ -1,0 +1,97 @@
+diff --git a/config/quality/eslint-suppressions.json b/config/quality/eslint-suppressions.json
+index 7cd73e1edb34a47a262fa6d1641be71ba2e63666..84148a061f3399ecc59d797c08dc4df493ea4eb2 100644
+--- a/config/quality/eslint-suppressions.json
++++ b/config/quality/eslint-suppressions.json
+@@ -625,11 +625,6 @@
+       "count": 1
+     }
+   },
+-  "open-sse/translator/request/openai-to-cursor.ts": {
+-    "@typescript-eslint/no-unused-vars": {
+-      "count": 3
+-    }
+-  },
+   "open-sse/translator/request/openai-to-gemini.ts": {
+     "@typescript-eslint/no-unused-vars": {
+       "count": 5
+@@ -760,11 +755,6 @@
+       "count": 6
+     }
+   },
+-  "src/app/(dashboard)/dashboard/costs/CostOverviewTab.tsx": {
+-    "@typescript-eslint/no-unused-vars": {
+-      "count": 1
+-    }
+-  },
+   "src/app/(dashboard)/dashboard/costs/costExplorerUtils.ts": {
+     "no-restricted-syntax": {
+       "count": 1
+@@ -945,11 +935,6 @@
+       "count": 1
+     }
+   },
+-  "src/app/(dashboard)/dashboard/settings/components/SystemStorageTab.tsx": {
+-    "@typescript-eslint/no-unused-vars": {
+-      "count": 1
+-    }
+-  },
+   "src/app/(dashboard)/dashboard/tools/agent-bridge/components/AgentList.tsx": {
+     "no-restricted-syntax": {
+       "count": 3
+@@ -1228,11 +1213,6 @@
+       "count": 1
+     }
+   },
+-  "src/app/api/v1/vscode/[token]/combos/route.ts": {
+-    "@typescript-eslint/no-unused-vars": {
+-      "count": 1
+-    }
+-  },
+   "src/app/api/v1/vscode/[token]/models/route.ts": {
+     "no-restricted-syntax": {
+       "count": 1
+@@ -1243,11 +1223,6 @@
+       "count": 1
+     }
+   },
+-  "src/app/api/v1/vscode/raw/[token]/combos/route.ts": {
+-    "@typescript-eslint/no-unused-vars": {
+-      "count": 1
+-    }
+-  },
+   "src/app/login/page.tsx": {
+     "@typescript-eslint/no-unused-vars": {
+       "count": 3
+@@ -1546,11 +1521,6 @@
+       "count": 1
+     }
+   },
+-  "src/lib/oauth/providers/ghe-copilot.ts": {
+-    "@typescript-eslint/no-unused-vars": {
+-      "count": 1
+-    }
+-  },
+   "src/lib/oauth/providers/kiro.ts": {
+     "@typescript-eslint/no-unused-vars": {
+       "count": 3
+@@ -1726,7 +1696,7 @@
+   },
+   "src/mitm/manager.ts": {
+     "@typescript-eslint/no-unused-vars": {
+-      "count": 3
++      "count": 2
+     }
+   },
+   "src/server/ws/liveServer.ts": {
+@@ -3352,11 +3322,6 @@
+       "count": 4
+     }
+   },
+-  "tests/unit/cursor-agent-session.test.ts": {
+-    "@typescript-eslint/no-unused-vars": {
+-      "count": 1
+-    }
+-  },
+   "tests/unit/cursor-usage-fetcher.test.ts": {
+     "@typescript-eslint/no-explicit-any": {
+       "count": 1

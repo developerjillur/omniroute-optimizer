@@ -1,16 +1,17 @@
 diff --git a/open-sse/handlers/chatCore/streamingPipeline.ts b/open-sse/handlers/chatCore/streamingPipeline.ts
-index b75c96e11..afc3a8dda 100644
+index b75c96e11..60a65dc34 100644
 --- a/open-sse/handlers/chatCore/streamingPipeline.ts
 +++ b/open-sse/handlers/chatCore/streamingPipeline.ts
-@@ -75,6 +75,7 @@ export function assembleStreamingPipeline(
+@@ -75,6 +75,8 @@ export function assembleStreamingPipeline(
       * request's pre-handoff readiness gate, so slow-first-content reasoning
       * models keep the same generous budget in both phases. */
      contentStallTimeoutMs?: number;
 +    allowEmptyCompletion?: () => boolean;
++    allowAnthropicThinkingProgress?: boolean;
    },
    deps: StreamingPipelineDeps = DEFAULT_DEPS
  ) {
-@@ -90,7 +91,10 @@ export function assembleStreamingPipeline(
+@@ -90,7 +92,11 @@ export function assembleStreamingPipeline(
      args.providerResponse,
      args.transformStream,
      args.streamController,
@@ -18,6 +19,7 @@ index b75c96e11..afc3a8dda 100644
 +    {
 +      contentStallTimeoutMs: args.contentStallTimeoutMs,
 +      allowEmptyCompletion: args.allowEmptyCompletion,
++      allowAnthropicThinkingProgress: args.allowAnthropicThinkingProgress,
 +    }
    );
    if (typeof args.createPiiTransform === "function") {

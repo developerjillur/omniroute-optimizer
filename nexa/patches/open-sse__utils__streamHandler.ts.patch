@@ -1,8 +1,16 @@
 diff --git a/open-sse/utils/streamHandler.ts b/open-sse/utils/streamHandler.ts
-index cef58650b..dbe0bfb3a 100644
+index cef58650b..c77c24619 100644
 --- a/open-sse/utils/streamHandler.ts
 +++ b/open-sse/utils/streamHandler.ts
-@@ -601,6 +601,7 @@ function resolveSilentCloseOutcome(input: {
+@@ -6,6 +6,7 @@ import { PENDING_REQUEST_CLEARED_MARKER } from "./stream.ts";
+ import { createCompletedResponsesToolHandoffWatcher } from "./responsesToolHandoff.ts";
+ import { createStreamContentWatcher, type StreamContentWatcher } from "./streamReadiness.ts";
+ import { hasOpenReasoning } from "./emptyTurnRetry.ts";
++import { createAnthropicThinkingProgressWatcher } from "./anthropicStreamProgress.ts";
+ 
+ // Stream handler with disconnect detection - shared for all providers
+ 
+@@ -601,6 +602,7 @@ function resolveSilentCloseOutcome(input: {
    clientTerminalSeen: boolean;
    clientResponseFormat?: string | null;
    contentWatcher: StreamContentWatcher;
@@ -10,7 +18,7 @@ index cef58650b..dbe0bfb3a 100644
  }): SilentCloseOutcome | null {
    if (!input.bytesWereForwarded) return null;
  
-@@ -638,6 +639,8 @@ function resolveSilentCloseOutcome(input: {
+@@ -638,6 +640,8 @@ function resolveSilentCloseOutcome(input: {
  
    const watcher = input.contentWatcher;
    if (watcher.sawError()) return null;
@@ -19,7 +27,7 @@ index cef58650b..dbe0bfb3a 100644
    if (watcher.sawSseFrame() && !watcher.sawContent() && !watcher.sawLegitEmptyTerminal()) {
      return { kind: "error", reason: "Provider returned empty content" };
    }
-@@ -648,7 +651,7 @@ function resolveSilentCloseOutcome(input: {
+@@ -648,7 +652,7 @@ function resolveSilentCloseOutcome(input: {
  export function createDisconnectAwareStream(
    transformStream,
    streamController,
@@ -28,7 +36,7 @@ index cef58650b..dbe0bfb3a 100644
  ) {
    const reader = transformStream.readable.getReader();
    const writer = transformStream.writable.getWriter();
-@@ -747,6 +750,7 @@ export function createDisconnectAwareStream(
+@@ -747,6 +751,7 @@ export function createDisconnectAwareStream(
                clientTerminalSeen,
                clientResponseFormat: streamController.clientResponseFormat,
                contentWatcher,
@@ -36,15 +44,16 @@ index cef58650b..dbe0bfb3a 100644
              });
  
              if (silentClose?.kind === "truncated") {
-@@ -886,6 +890,7 @@ export function pipeWithDisconnect(
+@@ -886,6 +891,8 @@ export function pipeWithDisconnect(
      stallTimeoutMs?: number;
      activeTimeoutMs?: number;
      contentStallTimeoutMs?: number;
 +    allowEmptyCompletion?: () => boolean;
++    allowAnthropicThinkingProgress?: boolean;
      highWaterMark?: number;
    } = {}
  ) {
-@@ -907,7 +912,7 @@ export function pipeWithDisconnect(
+@@ -907,7 +914,7 @@ export function pipeWithDisconnect(
      return createDisconnectAwareStream(
        { readable: transformedBody, writable: createNoopAbortWritable() },
        streamController,
@@ -53,7 +62,30 @@ index cef58650b..dbe0bfb3a 100644
      );
    }
  
-@@ -1164,6 +1169,6 @@ export function pipeWithDisconnect(
+@@ -989,6 +996,9 @@ export function pipeWithDisconnect(
+   let contentStallTimer: ReturnType<typeof setTimeout> | null = null;
+   let contentStallFired = false;
+   const upstreamContentWatcher = createStreamContentWatcher();
++  const thinkingProgress = opts.allowAnthropicThinkingProgress
++    ? createAnthropicThinkingProgressWatcher()
++    : null;
+   const upstreamContentDecoder = new TextDecoder();
+   // Stall diagnostics: what the upstream had sent when the content watchdog
+   // trips. Counters live at this tap because it is the only point seeing raw
+@@ -1149,6 +1159,12 @@ export function pipeWithDisconnect(
+         noteStallText(decoded);
+         upstreamContentWatcher.note(decoded);
+         if (upstreamContentWatcher.sawContent()) clearContentStall();
++        else if (thinkingProgress?.note(decoded)) {
++          // Hidden reasoning emits empty thinking deltas. Give each validated
++          // progress event the same inactivity window; the active cap never resets.
++          clearContentStall();
++          armContentStall();
++        }
+       }
+       controller.enqueue(chunk);
+     },
+@@ -1164,6 +1180,6 @@ export function pipeWithDisconnect(
    return createDisconnectAwareStream(
      { readable: transformedBody, writable: createNoopAbortWritable() },
      wrappedController,

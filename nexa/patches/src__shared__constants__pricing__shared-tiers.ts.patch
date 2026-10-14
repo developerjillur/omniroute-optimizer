@@ -1,0 +1,24 @@
+diff --git a/src/shared/constants/pricing/shared-tiers.ts b/src/shared/constants/pricing/shared-tiers.ts
+index f6c0382ee..e570de829 100644
+--- a/src/shared/constants/pricing/shared-tiers.ts
++++ b/src/shared/constants/pricing/shared-tiers.ts
+@@ -3,6 +3,19 @@
+  */
+ // OpenAI API Standard; Codex Standard has the same dollar-equivalent rates.
+ // https://openai.com/index/gpt-6-astra/
++// https://developers.openai.com/api/docs/models/gpt-6.1-sol (2026-10-14).
++export const GPT_6_1_SOL_LONG_CONTEXT_THRESHOLD = 272_000;
++export const GPT_6_1_SOL_PRICING = {
++  input: 2.0,
++  output: 10.0,
++  cached: 0.1,
++  reasoning: 10.0,
++  cache_creation: 2.5,
++  long_context_threshold: GPT_6_1_SOL_LONG_CONTEXT_THRESHOLD,
++  long_context_input_multiplier: 2,
++  long_context_output_multiplier: 1.5,
++};
++
+ export const GPT_6_ASTRA_PRICING = {
+   input: 10.0,
+   output: 50.0,

@@ -1,0 +1,55 @@
+diff --git a/src/lib/usage/costCalculator.ts b/src/lib/usage/costCalculator.ts
+index 5774fc4b5..3e3ad53b0 100644
+--- a/src/lib/usage/costCalculator.ts
++++ b/src/lib/usage/costCalculator.ts
+@@ -35,6 +35,8 @@ export type CostCalculationOptions = {
+    * `provider` to be set.
+    */
+   flatRateAsZero?: boolean;
++  /** Aggregates must carry their original per-request context bucket. */
++  longContext?: boolean;
+ };
+ 
+ /**
+@@ -97,9 +99,12 @@ export function getCodexFastCostMultiplier(
+   // while still using the Responses API with service_tier="flex".
+   if (tier === "flex") return 0.5;
+ 
+-  if (tier !== "priority" && tier !== "fast") return 1;
+-
+   const modelKey = stripCodexEffortSuffix(normalizeModelName(String(model || "")).toLowerCase());
++  if (modelKey === "gpt-6.1-sol") {
++    if (tier === "ultrafast") return 6;
++    if (tier === "priority" || tier === "fast") return 2;
++  }
++  if (tier !== "priority" && tier !== "fast") return 1;
+   const compactModelKey = modelKey.replace(/-/g, "");
+   // Codex GPT-6 Fast is 2.5x Standard (https://developers.openai.com/codex/pricing).
+   if (
+@@ -146,14 +151,20 @@ export function computeCostFromPricing(
+   // per-token pricing rows exist only for estimation, so display surfaces opt in
+   // to show $0 instead of an inflated estimate (#5552).
+   if (options.flatRateAsZero && isFlatRateProvider(options.provider)) return 0;
+-  const inputPrice = toNumber(pricing.input, 0);
+-  const cachedPrice = toNumber(pricing.cached, inputPrice);
+-  const outputPrice = toNumber(pricing.output, 0);
+-  const reasoningPrice = toNumber(pricing.reasoning, outputPrice);
+-  const cacheCreationPrice = toNumber(pricing.cache_creation, inputPrice);
++  const inputTokens = tokens.input ?? tokens.prompt_tokens ?? tokens.input_tokens ?? 0;
++  const longContext =
++    options.longContext ?? inputTokens > toNumber(pricing.long_context_threshold, Infinity);
++  const inputMultiplier = longContext ? toNumber(pricing.long_context_input_multiplier, 1) : 1;
++  const outputMultiplier = longContext ? toNumber(pricing.long_context_output_multiplier, 1) : 1;
++  const inputPrice = toNumber(pricing.input, 0) * inputMultiplier;
++  const cachedPrice = toNumber(pricing.cached, toNumber(pricing.input, 0)) * inputMultiplier;
++  const outputPrice = toNumber(pricing.output, 0) * outputMultiplier;
++  const reasoningPrice =
++    toNumber(pricing.reasoning, toNumber(pricing.output, 0)) * outputMultiplier;
++  const cacheCreationPrice =
++    toNumber(pricing.cache_creation, toNumber(pricing.input, 0)) * inputMultiplier;
+ 
+   let cost = 0;
+-  const inputTokens = tokens.input ?? tokens.prompt_tokens ?? tokens.input_tokens ?? 0;
+   const cachedTokens =
+     tokens.cacheRead ?? tokens.cached_tokens ?? tokens.cache_read_input_tokens ?? 0;
+   const cacheCreationTokens = tokens.cacheCreation ?? tokens.cache_creation_input_tokens ?? 0;

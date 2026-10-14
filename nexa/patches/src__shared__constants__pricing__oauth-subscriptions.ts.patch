@@ -1,0 +1,26 @@
+diff --git a/src/shared/constants/pricing/oauth-subscriptions.ts b/src/shared/constants/pricing/oauth-subscriptions.ts
+index 84df7cf36..013290a04 100644
+--- a/src/shared/constants/pricing/oauth-subscriptions.ts
++++ b/src/shared/constants/pricing/oauth-subscriptions.ts
+@@ -3,6 +3,7 @@
+  * Pure data; merged by default-pricing.ts via spread (god-file decomposition; semantic split).
+  */
+ import {
++  GPT_6_1_SOL_PRICING,
+   GPT_6_ASTRA_PRICING,
+   CLAUDE_FABLE_5_1_PRICING,
+   CLAUDE_OPUS_5_PRICING,
+@@ -108,6 +109,13 @@ export const DEFAULT_PRICING_OAUTH = {
+     },
+   },
+   cx: {
++    "gpt-6.1-sol": GPT_6_1_SOL_PRICING,
++    "gpt-6.1-sol-ultra": GPT_6_1_SOL_PRICING,
++    "gpt-6.1-sol-max": GPT_6_1_SOL_PRICING,
++    "gpt-6.1-sol-xhigh": GPT_6_1_SOL_PRICING,
++    "gpt-6.1-sol-high": GPT_6_1_SOL_PRICING,
++    "gpt-6.1-sol-medium": GPT_6_1_SOL_PRICING,
++    "gpt-6.1-sol-low": GPT_6_1_SOL_PRICING,
+     "gpt-6-astra": GPT_6_ASTRA_CODEX_PRICING,
+     "gpt-6-astra-ultra": GPT_6_ASTRA_CODEX_PRICING,
+     "gpt-6-astra-max": GPT_6_ASTRA_CODEX_PRICING,

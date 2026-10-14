@@ -8,13 +8,13 @@ Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। Om
 | ----------------------- | ------------------------------------------ |
 | Source repository       | `developerjillur/OmniRoute`                |
 | Source branch           | `nexalance`                                |
-| Source commit           | `0c0d3b1d4aa8336f03261e80d75bcab3f53fd019` |
+| Source commit           | `2b4158371223293db12d3a6de00a9b22d44600fb` |
 | Upstream version        | `3.8.51`                                   |
 | Pristine upstream base  | `c1e30b7676975feb298b49eff6ff58923c04b89e` |
-| `nexa/` tree SHA        | `6de575f468844841d0377598d03cc5dc48c34e75` |
-| Versioned overlay files | 314                                        |
+| `nexa/` tree SHA        | `1bacd361751ca84dae89fbea0324fd8198f052b5` |
+| Versioned overlay files | 342                                        |
 
-`nexa/`-এর সব 314টি file মূল source commit-এর সঙ্গে byte-for-byte মিলে। প্রতিটি file-এর path, size, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এর 240টি entry-তে 149টি patch, 86টি নতুন file এবং 5টি tooling entry আছে; অন্যান্য tracked file-এ deployment scripts, tests ও documentation রয়েছে।
+`nexa/`-এর সব 342টি file মূল source commit-এর সঙ্গে byte-for-byte মিলে। প্রতিটি file-এর path, size, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এর 266টি entry-তে 166টি patch, 95টি নতুন file এবং 5টি tooling entry আছে; অন্যান্য tracked file-এ deployment scripts, tests ও documentation রয়েছে।
 
 ## কী রয়েছে
 
@@ -26,7 +26,21 @@ Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। Om
 - Bounded build, isolated package smoke, database snapshot, deployment ও rollback scripts।
 - পূর্বের QA evidence, source validation notes এবং overlay পরিচালনার documentation।
 
-## সর্বশেষ release — ২০২৬-১০-১২
+## সর্বশেষ release — ২০২৬-১০-১৪
+
+Source ও deployed runtime `2b4158371`। Native Artifact reconnect/creation, streaming progress, bounded timeout/Thread recovery, GPT-6.1 Sol pricing এবং native usage/transport accounting-এর fixes এই snapshot-এ রয়েছে।
+
+- Strict applicability 166/166, native 131/131, related usage/analytics/stream/transport 284/284, unchanged deployment 22/22, core typecheck ও full ESLint PASS। Full TypeScript ratchet `5806 ≤ 5830` PASS; upstream type backlog শূন্য হয়নি।
+- Full dashboard-এর 620 static pages, CLI generation, package validation ও strict Bridge gates PASS। সফল package পুনর্ব্যবহার করে isolated Anthropic smoke এবং active-request drain-এর পরে runtime promotion সম্পূর্ণ। Previous runtime, consistent DB snapshot, provider/API-key IDs ও historical usage retained।
+- Installed native ingress committed bytes-এর সঙ্গে exact match; native HTTPS/TLS health PASS। GPT-6.1 Sol-এর exact historical cutoff/dimension baseline-এ 19,951 rows-এর `$1583.4206430` API-equivalent estimate মিলে; এটি subscription invoice নয়।
+- নতুন native app QA-তে Artifact create/publish/read, follow-up edit ও reopen; ordinary Read ও Context7 read-only documentation connector PASS। Normal interactive Claude Code Read/Edit/Read ও saved-session resume PASS; Thread continuation ও restart-এর full-history create trace retained।
+- GPT-এর ছোট forced-Read tool fidelity probe HTTP 200 এবং exact `Read` tool-use দিয়ে PASS। Broad normal CLI Read এখনও unresolved; focused CLI GPT/GLM/return-Claude regression ও automatic comment-reply test pending, তাই full QA incomplete। API-key mode-এ native client-এর hosted connector availability-কে full native parity বলা হয়নি।
+- ব্যবহারকারী live functionality কাজ করছে বলে জানিয়েছেন। পরে চলমান research chat-এ পাঁচটি পুরোনো Artifact-এর comment-monitor resume notice আবার দেখা গেছে; সেগুলোর ২৫–২৮ সেপ্টেম্বরের host logs-ও আছে। Installed client-এর generic recovery notice থেকে specific inner failure বা extra generation প্রমাণিত হয় না। Natural publish-এর পরে armed record পাওয়া গেলেও automatic replies বা স্থায়ী monitor recovery এখনও যাচাই হয়নি।
+- Usage accounting ও unsafe ambiguous POST replay-এর source defects corrected। Historical direct-native equivalent-workload billing baseline ও কিছু retained artifacts অনুপস্থিত; 9টি account transition unresolved। Blanket zero-extra-usage guarantee দেওয়া হয়নি।
+
+বিস্তারিত: [native Artifact ও pricing validation](nexa/docs/NATIVE-ARTIFACT-RECOVERY-AND-GPT61-PRICING-2026-10-14.md) এবং [usage audit](nexa/docs/USAGE-AUDIT-2026-10-14.md)। Private request logs, database, credentials ও runtime archives এই repository-তে নেই।
+
+## পূর্বের release — ২০২৬-১০-১২
 
 Source ও deployed runtime `0c0d3b1d4`। GPT থেকে Claude-এ routing বদলানোর পরে unsigned বা rejected thinking history-এর `Invalid signature in thinking block` failure সংশোধিত হয়েছে। Native dispatch ও `count_tokens` boundary-তে অকার্যকর thinking suffix সরানো হয়; valid native signature, সাধারণ text, tool IDs/results, documents ও নির্বাচিত effort সংরক্ষিত থাকে। Named upstream rejection-এ একটি সীমিত recovery retry রয়েছে। Sparse Thread history restore হওয়ার পরেও একই সুরক্ষা চলে।
 

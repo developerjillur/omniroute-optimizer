@@ -1,0 +1,23 @@
+diff --git a/src/app/api/usage/analytics/route.ts b/src/app/api/usage/analytics/route.ts
+index 56a799d41..013fcc047 100644
+--- a/src/app/api/usage/analytics/route.ts
++++ b/src/app/api/usage/analytics/route.ts
+@@ -248,7 +248,9 @@ function computeUsageRowCost(
+   const provider = toStringValue(row.provider);
+   const model = toStringValue(row.model);
+   if (!provider || !model) return 0;
+-  const serviceTier = normalizeServiceTier(row.serviceTier ?? row.service_tier);
++  const serviceTier = toStringValue(row.serviceTier ?? row.service_tier, "standard")
++    .trim()
++    .toLowerCase();
+   const isAggregated = toNumber(row.isAggregated ?? row.is_aggregated) > 0;
+   const storedCost = toNumber(row.storedCost ?? row.stored_cost);
+ 
+@@ -283,6 +285,7 @@ function computeUsageRowCost(
+       model,
+       serviceTier,
+       flatRateAsZero,
++      longContext: toNumber(row.longContext) === 1,
+     }
+   );
+ }

@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 240,
-    "patches": 149,
-    "new": 86,
+    "total": 266,
+    "patches": 166,
+    "new": 95,
     "tooling": 5,
     "upstreamCandidates": 28,
-    "nexaSpecific": 85,
-    "needsReview": 127,
+    "nexaSpecific": 99,
+    "needsReview": 139,
     "pendingUpstreamPR": 12,
     "mergedUpstreamPR": 2
   },
@@ -82,6 +82,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "bin/omniroute.mjs",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/config__quality__eslint-suppressions.json.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "config/quality/eslint-suppressions.json",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -266,6 +274,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/open-sse__handlers__usageExtractor.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "open-sse/handlers/usageExtractor.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/open-sse__mcp-server____tests____createComboTool.test.ts.patch",
       "layer": "patch",
       "class": "needs-review",
@@ -381,6 +397,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/open-sse__translator__response__claude-to-openai.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "open-sse/translator/response/claude-to-openai.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/open-sse__utils__earlyStreamKeepalive.ts.patch",
       "layer": "patch",
       "class": "needs-review",
@@ -389,9 +413,17 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/open-sse__utils__proxyFetch.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "open-sse/utils/proxyFetch.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/open-sse__utils__stream.ts.patch",
       "layer": "patch",
-      "class": "needs-review",
+      "class": "nexa-specific",
       "target": "open-sse/utils/stream.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
@@ -401,6 +433,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "open-sse/utils/streamHandler.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__utils__usageTracking.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "open-sse/utils/usageTracking.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -581,6 +621,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/src__app__api__usage__analytics__route.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/app/api/usage/analytics/route.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/src__app__api__usage__cache-health__route.ts.patch",
       "layer": "patch",
       "class": "nexa-specific",
@@ -712,6 +760,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/src__lib__db__usageAnalytics.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/lib/db/usageAnalytics.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/src__lib__guardrails__registry.ts.patch",
       "layer": "patch",
       "class": "needs-review",
@@ -768,6 +824,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/src__lib__usage__callContentProvenance.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "src/lib/usage/callContentProvenance.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/src__lib__usage__callLogArtifacts.ts.patch",
       "layer": "patch",
       "class": "nexa-specific",
@@ -784,10 +848,34 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/src__lib__usage__costCalculator.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/lib/usage/costCalculator.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/src__lib__usage__providerLimits.ts.patch",
       "layer": "patch",
       "class": "needs-review",
       "target": "src/lib/usage/providerLimits.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/src__lib__usage__providerWindowCosts.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "src/lib/usage/providerWindowCosts.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/src__lib__usage__usageStats.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/lib/usage/usageStats.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -850,6 +938,30 @@
       "layer": "patch",
       "class": "upstream-candidate",
       "target": "src/shared/constants/codexClient.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/src__shared__constants__pricing__frontier-labs.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/shared/constants/pricing/frontier-labs.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/src__shared__constants__pricing__oauth-subscriptions.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/shared/constants/pricing/oauth-subscriptions.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/src__shared__constants__pricing__shared-tiers.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/shared/constants/pricing/shared-tiers.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -1169,6 +1281,22 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/tests__unit__proxyfetch-direct-response-start-flat-retry-budget-13703.test.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "tests/unit/proxyfetch-direct-response-start-flat-retry-budget-13703.test.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/tests__unit__proxyfetch-direct-response-start-timeout-10214.test.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "tests/unit/proxyfetch-direct-response-start-timeout-10214.test.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/tests__unit__reasoning-routing.test.ts.patch",
       "layer": "patch",
       "class": "needs-review",
@@ -1205,6 +1333,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "tests/unit/security/cloudsync-signature-fail-open-13679.test.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/tests__unit__translator-resp-claude-to-openai.test.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "tests/unit/translator-resp-claude-to-openai.test.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -1289,10 +1425,26 @@
       "upstreamPR": null
     },
     {
+      "file": "new/open-sse/utils/anthropicStreamProgress.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "open-sse/utils/anthropicStreamProgress.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
       "file": "new/open-sse/utils/anthropicThinkingReplay.ts",
       "layer": "new",
       "class": "nexa-specific",
       "target": "open-sse/utils/anthropicThinkingReplay.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/open-sse/utils/anthropicUsage.ts",
+      "layer": "new",
+      "class": "nexa-specific",
+      "target": "open-sse/utils/anthropicUsage.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },
@@ -1476,6 +1628,14 @@
       "upstreamPR": null
     },
     {
+      "file": "new/src/mitm/_internal/anthropicBuffered.cjs",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "src/mitm/_internal/anthropicBuffered.cjs",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
       "file": "new/src/mitm/_internal/routerFetch.cjs",
       "layer": "new",
       "class": "nexa-specific",
@@ -1596,6 +1756,14 @@
       "layer": "new",
       "class": "needs-review",
       "target": "tests/unit/agent-bridge-limit-settings.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/agent-bridge-native-buffered.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/agent-bridge-native-buffered.test.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },
@@ -1747,6 +1915,22 @@
       "upstreamPR": null
     },
     {
+      "file": "new/tests/unit/gpt-6-1-sol-pricing-analytics.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/gpt-6-1-sol-pricing-analytics.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/gpt-6-1-sol-pricing.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/gpt-6-1-sol-pricing.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
       "file": "new/tests/unit/gpt-6-1-sol-support.test.ts",
       "layer": "new",
       "class": "upstream-candidate",
@@ -1763,10 +1947,26 @@
       "upstreamPR": null
     },
     {
+      "file": "new/tests/unit/inference-transport-no-replay.test.ts",
+      "layer": "new",
+      "class": "nexa-specific",
+      "target": "tests/unit/inference-transport-no-replay.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
       "file": "new/tests/unit/native-advisor-cross-provider.test.ts",
       "layer": "new",
       "class": "needs-review",
       "target": "tests/unit/native-advisor-cross-provider.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/native-artifact-recovery.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/native-artifact-recovery.test.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },
@@ -1855,6 +2055,14 @@
       "layer": "new",
       "class": "nexa-specific",
       "target": "tests/unit/native-thinking-signature-switch.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/native-usage-fidelity.test.ts",
+      "layer": "new",
+      "class": "nexa-specific",
+      "target": "tests/unit/native-usage-fidelity.test.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },

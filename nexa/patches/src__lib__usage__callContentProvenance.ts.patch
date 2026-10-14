@@ -1,0 +1,148 @@
+diff --git a/src/lib/usage/callContentProvenance.ts b/src/lib/usage/callContentProvenance.ts
+index ebdbad9ecc5767b7f1a1653d5d471d7f26a2c060..4314467f75130943acf7504b6f7340c873aae153 100644
+--- a/src/lib/usage/callContentProvenance.ts
++++ b/src/lib/usage/callContentProvenance.ts
+@@ -24,17 +24,20 @@
+ ] as const;
+ 
+ export function hasTokenCount(tokens: unknown): boolean {
+-  if (!tokens || typeof tokens !== "object" || Array.isArray(tokens)) return false;
++  if (!tokens || typeof tokens !== "object" || Array.isArray(tokens))
++    return false;
+   const record = tokens as Record<string, unknown>;
+   for (const field of TOKEN_FIELDS) {
+     const value = record[field];
+-    if (typeof value === "number" && Number.isFinite(value) && value > 0) return true;
++    if (typeof value === "number" && Number.isFinite(value) && value > 0)
++      return true;
+   }
+   return false;
+ }
+ 
+ export function isOwnEstimatedUsage(tokens: unknown): boolean {
+-  if (!tokens || typeof tokens !== "object" || Array.isArray(tokens)) return false;
++  if (!tokens || typeof tokens !== "object" || Array.isArray(tokens))
++    return false;
+   return (tokens as Record<string, unknown>).estimated === true;
+ }
+ 
+@@ -44,7 +47,8 @@
+   isSuccess: boolean;
+ }): UsageProvenance | null {
+   if (!options.isSuccess) return null;
+-  if (options.usageEstimated || isOwnEstimatedUsage(options.tokens)) return "estimated";
++  if (options.usageEstimated || isOwnEstimatedUsage(options.tokens))
++    return "estimated";
+   if (hasTokenCount(options.tokens)) return "reported";
+   return "absent";
+ }
+@@ -61,10 +65,15 @@
+   "search",
+ ]);
+ 
+-const NON_TEXT_PATH_PATTERN = /\/v1\/(audio|images|videos)\/|audio|images|realtime|websocket/i;
++const NON_TEXT_PATH_PATTERN =
++  /\/v1\/(audio|images|videos)\/|audio|images|realtime|websocket/i;
+ 
+ export function isNonTextRequest(requestType: unknown, path: unknown): boolean {
+-  if (typeof requestType === "string" && NON_TEXT_REQUEST_TYPES.has(requestType)) return true;
++  if (
++    typeof requestType === "string" &&
++    NON_TEXT_REQUEST_TYPES.has(requestType)
++  )
++    return true;
+   if (typeof path === "string" && NON_TEXT_PATH_PATTERN.test(path)) return true;
+   return false;
+ }
+@@ -106,21 +115,35 @@
+   return false;
+ }
+ 
+-const TOOL_CALL_TYPES = new Set(["tool_call", "function_call", "custom_tool_call", "tool_use"]);
++const TOOL_CALL_TYPES = new Set([
++  "tool_call",
++  "function_call",
++  "custom_tool_call",
++  "tool_use",
++  "server_tool_use",
++  "mcp_tool_use",
++]);
+ 
+ const MEDIA_KEY = /audio|image|video|data|base64|url/i;
+ 
+ // One chat choice: true/false when measurable, "media" for non-text output,
+ // null when the shape says nothing.
+-function choiceContent(choiceRecord: Record<string, unknown>): boolean | "media" | null {
+-  const message = asRecord(choiceRecord.message) ?? asRecord(choiceRecord.delta);
++function choiceContent(
++  choiceRecord: Record<string, unknown>,
++): boolean | "media" | null {
++  const message =
++    asRecord(choiceRecord.message) ?? asRecord(choiceRecord.delta);
+   if (!message) {
+     if (hasNonBlankText(choiceRecord.text)) return true;
+-    return "finish_reason" in choiceRecord || "text" in choiceRecord ? false : null;
++    return "finish_reason" in choiceRecord || "text" in choiceRecord
++      ? false
++      : null;
+   }
+   const result = messageHasContent(message);
+   if (result !== null) return result;
+-  return Object.keys(message).some((key) => MEDIA_KEY.test(key)) ? "media" : null;
++  return Object.keys(message).some((key) => MEDIA_KEY.test(key))
++    ? "media"
++    : null;
+ }
+ 
+ function choicesContent(choices: unknown[]): boolean | null {
+@@ -143,7 +166,11 @@
+   for (const block of content) {
+     const blockRecord = asRecord(block);
+     if (!blockRecord) continue;
+-    if (hasNonBlankText(blockRecord.text) || blockRecord.type === "tool_use") return true;
++    if (
++      hasNonBlankText(blockRecord.text) ||
++      TOOL_CALL_TYPES.has(blockRecord.type as string)
++    )
++      return true;
+     if (typeof blockRecord.type === "string") seen = true;
+   }
+   return seen ? false : null;
+@@ -154,15 +181,19 @@
+     const partRecord = asRecord(part);
+     return (
+       partRecord !== null &&
+-      (hasNonBlankText(partRecord.text) || TOOL_CALL_TYPES.has(partRecord.type as string))
++      (hasNonBlankText(partRecord.text) ||
++        TOOL_CALL_TYPES.has(partRecord.type as string))
+     );
+   });
+ }
+ 
+-function outputItemContent(itemRecord: Record<string, unknown>): boolean | null {
++function outputItemContent(
++  itemRecord: Record<string, unknown>,
++): boolean | null {
+   if (TOOL_CALL_TYPES.has(itemRecord.type as string)) return true;
+   const content = itemRecord.content;
+-  if (typeof content === "string") return content.trim().length > 0 ? true : null;
++  if (typeof content === "string")
++    return content.trim().length > 0 ? true : null;
+   if (Array.isArray(content)) return partsContent(content);
+   return "type" in itemRecord ? false : null;
+ }
+@@ -191,10 +222,12 @@
+   const body = asRecord(clientBody);
+   if (!body) return null;
+   if (Array.isArray(body.choices)) return choicesContent(body.choices);
+-  if ([body.content, body.text, body.output_text].some(hasNonBlankText)) return true;
++  if ([body.content, body.text, body.output_text].some(hasNonBlankText))
++    return true;
+   const claude = claudeBlocksContent(body.content);
+   if (claude === true) return true;
+-  if (hasToolCalls(body.tool_calls) || (body.function_call ?? null) !== null) return true;
++  if (hasToolCalls(body.tool_calls) || (body.function_call ?? null) !== null)
++    return true;
+   const responses = responsesOutputContent(body.output);
+   if (responses !== null) return responses;
+   return claude;

@@ -10,6 +10,12 @@ if (fs.lstatSync(scratch).isSymbolicLink())
 
 // Preserve native cache/TTL coverage and the sparse-thread, usage and quota regressions.
 const tests = [
+  "native-usage-fidelity.test.ts",
+  "inference-transport-no-replay.test.ts",
+  "native-artifact-recovery.test.ts",
+  "agent-bridge-native-buffered.test.ts",
+  "gpt-6-1-sol-pricing.test.ts",
+  "gpt-6-1-sol-pricing-analytics.test.ts",
   "agent-bridge-native-cache-continuity.test.ts",
   "agent-bridge-thread-cache.test.ts",
   "native-claude-thread-protocol.test.ts",

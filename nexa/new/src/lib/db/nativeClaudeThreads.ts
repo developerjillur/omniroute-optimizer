@@ -78,6 +78,25 @@ export function getNativeClaudeThreadOwner(
   return getOwnerRecord(sessionId, messageId, now)?.connectionId ?? null;
 }
 
+/** A rejected upstream Thread must be replayed, never retried on a sibling account. */
+export function forgetNativeClaudeThreadOwner(
+  sessionId: string | null,
+  messageId: unknown,
+  connectionId: string
+): boolean {
+  if (!sessionId || typeof messageId !== "string" || !connectionId) return false;
+  try {
+    const result = getDbInstance()
+      .prepare(
+        "DELETE FROM key_value WHERE namespace = ? AND key = ? AND CASE WHEN json_valid(value) THEN json_extract(value, '$.connectionId') = ? ELSE 0 END"
+      )
+      .run(NAMESPACE, key(sessionId, messageId), connectionId);
+    return result.changes > 0;
+  } catch {
+    return false;
+  }
+}
+
 export function getNativeClaudeThreadCacheGroup(
   sessionId: string | null,
   messageId: unknown

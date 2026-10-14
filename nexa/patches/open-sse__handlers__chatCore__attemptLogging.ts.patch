@@ -1,9 +1,10 @@
 diff --git a/open-sse/handlers/chatCore/attemptLogging.ts b/open-sse/handlers/chatCore/attemptLogging.ts
-index f07d0507e..1bee6e4ca 100644
+index f07d0507eb1c922da64b2af7501f8a32b9be7371..01c8a521239cedd37914f795942b1f66f3d4f349 100644
 --- a/open-sse/handlers/chatCore/attemptLogging.ts
 +++ b/open-sse/handlers/chatCore/attemptLogging.ts
-@@ -1,3 +1,8 @@
+@@ -1,3 +1,9 @@
 +import { createHash } from "node:crypto";
++import { getAnthropicMeteredUsage } from "../../utils/anthropicUsage.ts";
 +import { getNativeClaudeSessionId } from "../../services/nativeClaudeSession.ts";
 +import { readCacheCreationTtl } from "@/lib/usage/claudeUsageDetails";
 +import { nativeClaudeCacheGroup } from "../../services/nativeClaudeCacheIdentity.ts";
@@ -11,29 +12,365 @@ index f07d0507e..1bee6e4ca 100644
  /**
   * chatCore per-attempt logging persistence (Quality Gate v2 / Fase 9 — chatCore god-file
   * decomposition, #3501).
-@@ -278,7 +283,7 @@ export type PersistAttemptLogsContext = {
+@@ -14,7 +20,10 @@
+ import { logAuditEvent } from "@/lib/compliance";
+ import { emit } from "@/lib/events/eventBus";
+ import { maybeLogToolCallSpecViolation } from "./toolCallSpecViolationAudit.ts";
+-import type { RequestCompletedPayload, RequestFailedPayload } from "@/lib/events/types";
++import type {
++  RequestCompletedPayload,
++  RequestFailedPayload,
++} from "@/lib/events/types";
+ import { saveCallLog } from "@/lib/usageDb";
+ import type { VideoBridgeLogRedactionEntry } from "@/lib/guardrails/videoBridge";
+ import { FORMATS } from "../../translator/formats.ts";
+@@ -25,7 +34,9 @@
+ import { attachLogMeta } from "./cacheUsageMeta.ts";
+ import { readAddedWait } from "../../utils/proxyFetch.ts";
+ 
+-const OMITTED_VIDEO_TRANSCRIPT_REQUEST = { _omniroute_omitted: "video-transcript" };
++const OMITTED_VIDEO_TRANSCRIPT_REQUEST = {
++  _omniroute_omitted: "video-transcript",
++};
+ 
+ interface VideoLogCloneState {
+   source: Record<string, unknown>;
+@@ -40,7 +51,7 @@
+   messageIndex: number,
+   originalContainer: unknown[],
+   originalMessage: Record<string, unknown>,
+-  originalContent: unknown
++  originalContent: unknown,
+ ): Record<string, unknown> {
+   if (!state.rootClone) state.rootClone = { ...state.source };
+   let containerClone = state.containers.get(container);
+@@ -53,7 +64,8 @@
+   let messageClone = state.messages.get(messageKey);
+   if (!messageClone) {
+     messageClone = { ...originalMessage };
+-    if (Array.isArray(originalContent)) messageClone.content = [...originalContent];
++    if (Array.isArray(originalContent))
++      messageClone.content = [...originalContent];
+     state.messages.set(messageKey, messageClone);
+     containerClone[messageIndex] = messageClone;
+   }
+@@ -105,7 +117,7 @@
+ export function applyVideoBridgeLogRedaction(
+   body: unknown,
+   redaction: VideoBridgeLogRedactionEntry[] | null | undefined,
+-  failClosedOnMiss = false
++  failClosedOnMiss = false,
+ ): unknown {
+   if (!redaction || redaction.length === 0) {
+     return failClosedOnMiss ? OMITTED_VIDEO_TRANSCRIPT_REQUEST : body;
+@@ -140,10 +152,15 @@
+     // check, at zero extra cost.
+     const expectedPartType = container === "input" ? "input_text" : "text";
+ 
+-    for (let messageIndex = 0; messageIndex < originalContainer.length; messageIndex++) {
++    for (
++      let messageIndex = 0;
++      messageIndex < originalContainer.length;
++      messageIndex++
++    ) {
+       const originalMessage = originalContainer[messageIndex];
+       if (!originalMessage || typeof originalMessage !== "object") continue;
+-      const originalContent = (originalMessage as Record<string, unknown>).content;
++      const originalContent = (originalMessage as Record<string, unknown>)
++        .content;
+ 
+       // Derived-prompt dispatches (pipeline-strategy stages, smart-auto-pipeline,
+       // context-handoff summaries — #12430 item 4) embed the transcript as a
+@@ -163,7 +180,7 @@
+           messageIndex,
+           originalContainer,
+           originalMessage as Record<string, unknown>,
+-          originalContent
++          originalContent,
+         );
+ 
+         // Re-read from the (possibly already-cloned) message so a second
+@@ -173,7 +190,9 @@
+         // needs no regex and is safe. replaceAll (not replace): a stage/summary
+         // prompt can quote the transcript back more than once.
+         const currentText =
+-          typeof messageClone.content === "string" ? messageClone.content : originalContent;
++          typeof messageClone.content === "string"
++            ? messageClone.content
++            : originalContent;
+         messageClone.content = currentText.replaceAll(fullText, redactedText);
+         redacted = true;
+         matchedEntry = true;
+@@ -197,7 +216,7 @@
+           messageIndex,
+           originalContainer,
+           originalMessage as Record<string, unknown>,
+-          originalContent
++          originalContent,
+         );
+ 
+         const contentClone = messageClone.content as unknown[];
+@@ -206,7 +225,8 @@
+         matchedEntry = true;
+       }
+     }
+-    if (failClosedOnMiss && !matchedEntry) return OMITTED_VIDEO_TRANSCRIPT_REQUEST;
++    if (failClosedOnMiss && !matchedEntry)
++      return OMITTED_VIDEO_TRANSCRIPT_REQUEST;
+   }
+ 
+   return redacted && cloneState.rootClone ? cloneState.rootClone : body;
+@@ -224,7 +244,10 @@
+  * summary under `.summary` (see createStructuredSSECollector in
+  * streamPayloadCollector.ts) -- check both shapes rather than assuming one.
+  */
+-export function extractResponsesId(sourceFormat: unknown, clientResponse: unknown): string | null {
++export function extractResponsesId(
++  sourceFormat: unknown,
++  clientResponse: unknown,
++): string | null {
+   if (sourceFormat !== FORMATS.OPENAI_RESPONSES) return null;
+   if (!clientResponse || typeof clientResponse !== "object") return null;
+   const record = clientResponse as { id?: unknown; summary?: unknown };
+@@ -236,6 +259,29 @@
+     if (typeof summaryId === "string" && summaryId.length > 0) return summaryId;
+   }
+   return null;
++}
++
++/** Native message IDs support exact session/usage correlation without storing content. */
++export function extractNativeMessageId(
++  sourceFormat: unknown,
++  clientResponse: unknown,
++): string | null {
++  if (
++    sourceFormat !== FORMATS.CLAUDE ||
++    !clientResponse ||
++    typeof clientResponse !== "object"
++  )
++    return null;
++  const envelope = clientResponse as Record<string, unknown>;
++  const body =
++    envelope.summary && typeof envelope.summary === "object"
++      ? (envelope.summary as Record<string, unknown>)
++      : envelope;
++  return body.type === "message" &&
++    typeof body.id === "string" &&
++    /^msg_[A-Za-z0-9_-]{1,192}$/.test(body.id)
++    ? body.id
++    : null;
+ }
+ 
+ export type PersistAttemptLogsArgs = {
+@@ -276,9 +322,13 @@
+   model: string | null | undefined;
+   skillRequestId: string;
    detailedLoggingEnabled: boolean;
-   reqLogger: { getPipelinePayloads?: () => Record<string, unknown> | undefined } | null | undefined;
+-  reqLogger: { getPipelinePayloads?: () => Record<string, unknown> | undefined } | null | undefined;
++  reqLogger:
++    | { getPipelinePayloads?: () => Record<string, unknown> | undefined }
++    | null
++    | undefined;
    pendingRequestId: unknown;
 -  clientRawRequest: { endpoint?: string } | null | undefined;
-+  clientRawRequest: { endpoint?: string; headers?: Record<string, string> } | null | undefined;
++  clientRawRequest:
++    { endpoint?: string; headers?: Record<string, string> } | null | undefined;
    requestedModel: unknown;
    credentials: { connectionId?: string } | null | undefined;
    startTime: number;
-@@ -562,7 +567,30 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
+@@ -318,15 +368,18 @@
+ };
+ 
+ function toConnectionId(value: unknown): string | null {
+-  return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
++  return typeof value === "string" && value.trim().length > 0
++    ? value.trim()
++    : null;
+ }
+ 
+ function buildAccountRotationMeta(
+   provider: string | null | undefined,
+   initialConnectionId: string | null,
+-  finalConnectionId: string | null
++  finalConnectionId: string | null,
+ ) {
+-  if (provider !== "codex" || !initialConnectionId || !finalConnectionId) return null;
++  if (provider !== "codex" || !initialConnectionId || !finalConnectionId)
++    return null;
+   if (initialConnectionId === finalConnectionId) return null;
+ 
+   return {
+@@ -356,15 +409,26 @@
+ }):
+   | { name: "request.completed"; payload: RequestCompletedPayload }
+   | { name: "request.failed"; payload: RequestFailedPayload } {
+-  const { traceId, status, error, model, provider, comboName, tokens, latencyMs } = input;
+-  const succeeded = typeof status === "number" && status >= 200 && status < 400 && !error;
+-  const resolvedComboName = typeof comboName === "string" && comboName ? comboName : undefined;
++  const {
++    traceId,
++    status,
++    error,
++    model,
++    provider,
++    comboName,
++    tokens,
++    latencyMs,
++  } = input;
++  const succeeded =
++    typeof status === "number" && status >= 200 && status < 400 && !error;
++  const resolvedComboName =
++    typeof comboName === "string" && comboName ? comboName : undefined;
+   if (succeeded) {
+-    const tokenBag = (tokens && typeof tokens === "object" ? tokens : {}) as Record<
+-      string,
+-      unknown
+-    >;
+-    const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
++    const tokenBag = (
++      tokens && typeof tokens === "object" ? tokens : {}
++    ) as Record<string, unknown>;
++    const num = (v: unknown) =>
++      typeof v === "number" && Number.isFinite(v) ? v : 0;
+     return {
+       name: "request.completed",
+       payload: {
+@@ -372,8 +436,14 @@
+         status: "success",
+         model: model || "unknown",
+         provider: provider || "unknown",
+-        tokensInput: num(tokenBag.input ?? tokenBag.prompt_tokens ?? tokenBag.inputTokens),
+-        tokensOutput: num(tokenBag.output ?? tokenBag.completion_tokens ?? tokenBag.outputTokens),
++        tokensInput: num(
++          tokenBag.input ?? tokenBag.prompt_tokens ?? tokenBag.inputTokens,
++        ),
++        tokensOutput: num(
++          tokenBag.output ??
++            tokenBag.completion_tokens ??
++            tokenBag.outputTokens,
++        ),
+         latencyMs,
+         comboName: resolvedComboName,
+       },
+@@ -394,7 +464,10 @@
+   };
+ }
+ 
+-export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAttemptLogsContext) {
++export function persistAttemptLogs(
++  args: PersistAttemptLogsArgs,
++  ctx: PersistAttemptLogsContext,
++) {
+   const {
+     status,
+     tokens,
+@@ -436,11 +509,12 @@
+     videoContentRemoved,
+   } = ctx;
+   const initialConnectionId = toConnectionId(connectionId);
+-  const finalConnectionId = toConnectionId(credentials?.connectionId) || initialConnectionId;
++  const finalConnectionId =
++    toConnectionId(credentials?.connectionId) || initialConnectionId;
+   const accountRotationMeta = buildAccountRotationMeta(
+     provider,
+     initialConnectionId,
+-    finalConnectionId
++    finalConnectionId,
+   );
+ 
+   // The upstream response can quote a video transcript in arbitrary prose,
+@@ -450,7 +524,7 @@
+   const redactedRequest = applyVideoBridgeLogRedaction(
+     body,
+     videoBridgeLogRedaction,
+-    videoContentRemoved
++    videoContentRemoved,
+   );
+   // The observed signal and its per-part shadow normally arrive together.
+   // If the shadow is missing or even one entry fails to match after request
+@@ -463,14 +537,22 @@
+   const retainedResponse = videoContentRemoved
+     ? { _omniroute_omitted: "video-transcript" }
+     : responseBody;
+-  const retainedError = videoContentRemoved && error ? "[omitted: video transcript]" : error;
+-
+-  const providerWarnings = extractProviderWarnings(providerResponse, clientResponse, responseBody);
++  const retainedError =
++    videoContentRemoved && error ? "[omitted: video transcript]" : error;
++
++  const providerWarnings = extractProviderWarnings(
++    providerResponse,
++    clientResponse,
++    responseBody,
++  );
+   if (providerWarnings.length > 0) {
+     logAuditEvent({
+       action: "provider.warning",
+       actor: "system",
+-      target: [provider, finalConnectionId].filter(Boolean).join(":") || provider || model,
++      target:
++        [provider, finalConnectionId].filter(Boolean).join(":") ||
++        provider ||
++        model,
+       resourceType: "provider_warning",
+       status: "warning",
+       requestId: skillRequestId,
+@@ -520,13 +602,22 @@
+ 
+   if (pipelinePayloads) {
+     if (providerRequest !== undefined && !pipelinePayloads.providerRequest) {
+-      pipelinePayloads.providerRequest = providerRequest as Record<string, unknown>;
++      pipelinePayloads.providerRequest = providerRequest as Record<
++        string,
++        unknown
++      >;
+     }
+     if (providerResponse !== undefined && !pipelinePayloads.providerResponse) {
+-      pipelinePayloads.providerResponse = providerResponse as Record<string, unknown>;
++      pipelinePayloads.providerResponse = providerResponse as Record<
++        string,
++        unknown
++      >;
+     }
+     if (clientResponse !== undefined) {
+-      pipelinePayloads.clientResponse = clientResponse as Record<string, unknown>;
++      pipelinePayloads.clientResponse = clientResponse as Record<
++        string,
++        unknown
++      >;
+     }
+     if (retainedError) {
+       pipelinePayloads.error = {
+@@ -545,7 +636,8 @@
+       const earlyClientBytes = takeEarlyKeepaliveBytes(correlationId);
+       if (earlyClientBytes.length > 0) {
+         const existingStreamChunks =
+-          (pipelinePayloads.streamChunks as { client?: string[] } | undefined) ?? {};
++          (pipelinePayloads.streamChunks as
++            { client?: string[] } | undefined) ?? {};
+         pipelinePayloads.streamChunks = {
+           ...existingStreamChunks,
+           client: [...earlyClientBytes, ...(existingStreamChunks.client ?? [])],
+@@ -562,7 +654,38 @@
    // capture sink by the executor. Fail-soft: null outside a capture or when
    // nothing was published — the row stores NULL (no wait), never throws.
    const addedWait = readAddedWait();
 +  const nativeSessionId =
-+    provider === "claude" ? getNativeClaudeSessionId(body, ctx.clientRawRequest?.headers) : null;
++    provider === "claude"
++      ? getNativeClaudeSessionId(body, ctx.clientRawRequest?.headers)
++      : null;
 +  const nativeSessionTag = nativeSessionId
 +    ? createHash("sha256").update(nativeSessionId).digest("hex")
 +    : null;
-+  const nativeBody = body && typeof body === "object" ? (body as Record<string, unknown>) : {};
++  const nativeBody =
++    body && typeof body === "object" ? (body as Record<string, unknown>) : {};
 +  const nativeThread = nativeBody.thread as Record<string, unknown> | undefined;
 +  const nativeCacheGroupTag =
 +    nativeThread?.type === "continue"
-+      ? getNativeClaudeThreadCacheGroup(nativeSessionId, nativeThread.previous_message_id)
++      ? getNativeClaudeThreadCacheGroup(
++          nativeSessionId,
++          nativeThread.previous_message_id,
++        )
 +      : nativeClaudeCacheGroup(body, nativeSessionId);
 +  const providerEnvelope =
 +    providerResponse && typeof providerResponse === "object"
@@ -43,7 +380,9 @@ index f07d0507e..1bee6e4ca 100644
 +    providerEnvelope.summary && typeof providerEnvelope.summary === "object"
 +      ? (providerEnvelope.summary as Record<string, unknown>)
 +      : providerEnvelope;
-+  const cacheTtl = readCacheCreationTtl(providerSummary.usage);
++  const cacheTtl = readCacheCreationTtl(
++    getAnthropicMeteredUsage(providerSummary.usage),
++  );
    saveCallLog({
 +    nativeSessionTag,
 +    nativeCacheGroupTag,
@@ -51,3 +390,85 @@ index f07d0507e..1bee6e4ca 100644
      pendingRequestId: ctx.pendingRequestId,
      method: "POST",
      path: clientRawRequest?.endpoint || "/v1/chat/completions",
+@@ -572,11 +695,15 @@
+     provider,
+     connectionId: finalConnectionId || undefined,
+     duration: Date.now() - startTime,
+-    ttftMs: typeof ttft === "number" && Number.isFinite(ttft) && ttft >= 0 ? ttft : null,
++    ttftMs:
++      typeof ttft === "number" && Number.isFinite(ttft) && ttft >= 0
++        ? ttft
++        : null,
+     tokens: tokens || {},
+     // Estimated-token flag, computed here where tokens still carry the marker
+     // (it does not survive spreads or JSON round-trips to the sink).
+-    usageEstimated: args.usageEstimated ?? (isEstimatedUsage(tokens) ? true : null),
++    usageEstimated:
++      args.usageEstimated ?? (isEstimatedUsage(tokens) ? true : null),
+     // Encrypted-reasoning observation: stream-side flag plus duration, and
+     // the two request bodies so the sink can read effort values
+     // (requested from the client body, upstream from the post-strip body).
+@@ -584,26 +711,32 @@
+     clientRequestBody: body ?? null,
+     upstreamRequestBody: providerRequest ?? null,
+     requestBody: cloneBoundedChatLogPayload(
+-      attachLogMeta(truncateForLog(retainedRequest as Record<string, unknown>), {
+-        ...accountRotationMeta,
+-        claudePromptCache: claudeCacheMeta,
+-      })
++      attachLogMeta(
++        truncateForLog(retainedRequest as Record<string, unknown>),
++        {
++          ...accountRotationMeta,
++          claudePromptCache: claudeCacheMeta,
++        },
++      ),
+     ),
+     responseBody: cloneBoundedChatLogPayload(
+-      attachLogMeta(truncateForLog(retainedResponse as Record<string, unknown>), {
+-        ...accountRotationMeta,
+-        claudePromptCache: claudeCacheMeta
+-          ? {
+-              applied: claudeCacheMeta.applied,
+-              totalBreakpoints: claudeCacheMeta.totalBreakpoints,
+-              anthropicBeta: claudeCacheMeta.anthropicBeta,
+-            }
+-          : null,
+-        claudePromptCacheUsage: claudeCacheUsageMeta,
+-        // Operators can tell estimated token counts (and the cost derived from them)
+-        // apart from provider-reported ones. Log-only: billing is unchanged.
+-        usageEstimated: isEstimatedUsage(tokens) ? true : null,
+-      })
++      attachLogMeta(
++        truncateForLog(retainedResponse as Record<string, unknown>),
++        {
++          ...accountRotationMeta,
++          claudePromptCache: claudeCacheMeta
++            ? {
++                applied: claudeCacheMeta.applied,
++                totalBreakpoints: claudeCacheMeta.totalBreakpoints,
++                anthropicBeta: claudeCacheMeta.anthropicBeta,
++              }
++            : null,
++          claudePromptCacheUsage: claudeCacheUsageMeta,
++          // Operators can tell estimated token counts (and the cost derived from them)
++          // apart from provider-reported ones. Log-only: billing is unchanged.
++          usageEstimated: isEstimatedUsage(tokens) ? true : null,
++        },
++      ),
+     ),
+     error: retainedError || null,
+     sourceFormat,
+@@ -620,7 +753,11 @@
+     correlationId: correlationId || traceId,
+     modelPinned: modelPinned || false,
+     sessionTag: sessionTag || null,
+-    responseId: extractResponsesId(sourceFormat, clientResponse),
++    responseId:
++      extractResponsesId(sourceFormat, clientResponse) ??
++      (status >= 200 && status < 300
++        ? extractNativeMessageId(sourceFormat, clientResponse)
++        : null),
+     videoContentRemoved: videoContentRemoved || false,
+     addedWaitMs: addedWait?.ms ?? null,
+     addedWaitCause: addedWait?.cause ?? null,

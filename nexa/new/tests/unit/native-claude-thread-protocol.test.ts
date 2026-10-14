@@ -90,7 +90,7 @@ test("SSE ownership observation forwards exact bytes and handles split frames", 
   const chunks = [
     "event: message_sta",
     'rt\ndata: {"type":"message_start","message":{"id":"msg_owned"}}\n',
-    "\nevent: message_delta\ndata: {}\n\n",
+    '\nevent: message_delta\ndata: {}\n\nevent: message_stop\ndata: {"type":"message_stop"}\n\n',
   ];
   const observed: string[] = [];
   const response = observeNativeClaudeThreadResponse(
@@ -135,7 +135,9 @@ test("non-streaming ownership uses only an Anthropic message id", async () => {
 
 test("a large first SSE chunk still records its small message-start envelope", async () => {
   const body =
-    'data: {"type":"message_start","message":{"id":"msg_large"}}\n\n' + "x".repeat(70_000);
+    'data: {"type":"message_start","message":{"id":"msg_large"}}\n\n' +
+    "x".repeat(70_000) +
+    '\n\ndata: {"type":"message_stop"}\n\n';
   const ids: string[] = [];
   assert.equal(
     await observeNativeClaudeThreadResponse(

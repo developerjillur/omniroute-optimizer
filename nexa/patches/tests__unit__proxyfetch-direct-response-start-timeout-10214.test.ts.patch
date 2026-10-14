@@ -1,0 +1,154 @@
+diff --git a/tests/unit/proxyfetch-direct-response-start-timeout-10214.test.ts b/tests/unit/proxyfetch-direct-response-start-timeout-10214.test.ts
+index 343423ca1bb4e0b7eb0c1627fcf6175ca652b502..45ba5e705930a4a4e0ec6c2b5fa3accfd21da126 100644
+--- a/tests/unit/proxyfetch-direct-response-start-timeout-10214.test.ts
++++ b/tests/unit/proxyfetch-direct-response-start-timeout-10214.test.ts
+@@ -28,7 +28,10 @@
+ import { test } from "node:test";
+ import assert from "node:assert/strict";
+ import { proxyFetch } from "../../open-sse/utils/proxyFetch.ts";
+-import { getDefaultDispatcher, getRetryDispatcher } from "../../open-sse/utils/proxyDispatcher.ts";
++import {
++  getDefaultDispatcher,
++  getRetryDispatcher,
++} from "../../open-sse/utils/proxyDispatcher.ts";
+ 
+ const DIRECT_RESPONSE_START_TIMEOUT_CODE = "DIRECT_RESPONSE_START_TIMEOUT";
+ 
+@@ -40,14 +43,20 @@
+ }): (input: RequestInfo | URL, init?: RequestInit) => Promise<Response> {
+   return (input, init) => {
+     capture.calls++;
+-    capture.dispatchers.push((init as { dispatcher?: unknown } | undefined)?.dispatcher);
++    capture.dispatchers.push(
++      (init as { dispatcher?: unknown } | undefined)?.dispatcher,
++    );
+     return new Promise<Response>((_, reject) => {
+       const signal = init?.signal;
+       signal?.addEventListener(
+         "abort",
+         () =>
+-          reject(signal.reason instanceof Error ? signal.reason : new Error(String(signal.reason))),
+-        { once: true }
++          reject(
++            signal.reason instanceof Error
++              ? signal.reason
++              : new Error(String(signal.reason)),
++          ),
++        { once: true },
+       );
+       // never resolve — the upstream accepted the connection but sends nothing
+     });
+@@ -64,13 +73,22 @@
+ test("#10214 a response-start timeout on the pooled attempt retries on the FRESH no-keep-alive dispatcher", async () => {
+   const capture = { calls: 0, dispatchers: [] as unknown[] };
+ 
+-  const mockUndici = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
++  const mockUndici = async (
++    input: RequestInfo | URL,
++    init?: RequestInit,
++  ): Promise<Response> => {
+     capture.calls++;
+-    capture.dispatchers.push((init as { dispatcher?: unknown } | undefined)?.dispatcher);
++    capture.dispatchers.push(
++      (init as { dispatcher?: unknown } | undefined)?.dispatcher,
++    );
+     if (capture.calls === 1) {
+       // First attempt hits a silently-dead pooled socket — hang, no error.
+       return new Promise<Response>((_, reject) => {
+-        init?.signal?.addEventListener("abort", () => reject(init.signal!.reason), { once: true });
++        init?.signal?.addEventListener(
++          "abort",
++          () => reject(init.signal!.reason),
++          { once: true },
++        );
+       });
+     }
+     return new Response("ok", { status: 200 });
+@@ -81,12 +99,16 @@
+   const res = await withFastTimeout(() =>
+     proxyFetch(
+       "https://opencode.ai/zen/go/v1/chat/completions",
+-      { method: "POST" },
+-      { undiciFetch: mockUndici, nativeFetch: mockNative }
+-    )
++      { method: "GET" },
++      { undiciFetch: mockUndici, nativeFetch: mockNative },
++    ),
+   );
+ 
+-  assert.equal(capture.calls, 2, "pooled attempt times out and must retry once");
++  assert.equal(
++    capture.calls,
++    2,
++    "pooled attempt times out and must retry once",
++  );
+   assert.equal(await res.text(), "ok");
+   // The regression guard: attempt 0 used the pooled keep-alive dispatcher; the
+   // retry used the fresh no-keep-alive dispatcher — a DIFFERENT instance, so the
+@@ -94,12 +116,12 @@
+   assert.equal(
+     capture.dispatchers[0],
+     getDefaultDispatcher(),
+-    "first attempt must use the pooled default dispatcher"
++    "first attempt must use the pooled default dispatcher",
+   );
+   assert.equal(
+     capture.dispatchers[1],
+     getRetryDispatcher(),
+-    "timeout retry must use the fresh no-keep-alive dispatcher"
++    "timeout retry must use the fresh no-keep-alive dispatcher",
+   );
+   assert.notEqual(capture.dispatchers[0], capture.dispatchers[1]);
+ });
+@@ -114,18 +136,18 @@
+     withFastTimeout(() =>
+       proxyFetch(
+         "https://opencode.ai/zen/go/v1/chat/completions",
+-        { method: "POST" },
+-        { undiciFetch: mockUndici, nativeFetch: mockNative }
+-      )
++        { method: "GET" },
++        { undiciFetch: mockUndici, nativeFetch: mockNative },
++      ),
+     ),
+     (err: unknown) => {
+       assert.equal(
+         (err as { code?: unknown }).code,
+         DIRECT_RESPONSE_START_TIMEOUT_CODE,
+-        "final failure must be the classified direct response-start timeout"
++        "final failure must be the classified direct response-start timeout",
+       );
+       return true;
+-    }
++    },
+   );
+   assert.equal(capture.calls, 2, "both attempts must have been made");
+   assert.equal(capture.dispatchers[0], getDefaultDispatcher());
+@@ -134,9 +156,14 @@
+ 
+ test("#10214 a healthy fast response is untouched by the bound (single attempt, no retry)", async () => {
+   const capture = { calls: 0, dispatchers: [] as unknown[] };
+-  const mockUndici = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
++  const mockUndici = async (
++    input: RequestInfo | URL,
++    init?: RequestInit,
++  ): Promise<Response> => {
+     capture.calls++;
+-    capture.dispatchers.push((init as { dispatcher?: unknown } | undefined)?.dispatcher);
++    capture.dispatchers.push(
++      (init as { dispatcher?: unknown } | undefined)?.dispatcher,
++    );
+     return new Response("ok", { status: 200 });
+   };
+ 
+@@ -144,8 +171,8 @@
+     proxyFetch(
+       "https://opencode.ai/zen/go/v1/chat/completions",
+       { method: "POST" },
+-      { undiciFetch: mockUndici }
+-    )
++      { undiciFetch: mockUndici },
++    ),
+   );
+ 
+   assert.equal(capture.calls, 1, "healthy request must not retry");

@@ -81,6 +81,7 @@ export function createIngress({
   publicPort = 443,
   localRouterHost = "127.0.0.2",
   localRouterPort = 443,
+  nativeIdleTimeoutMs = 1_320_000,
 } = {}) {
   return net.createServer({ allowHalfOpen: true }, (client) => {
     let upstream;
@@ -99,7 +100,7 @@ export function createIngress({
     const connect = (host, port, mayFallback) => {
       if (closed) return;
       upstream = net.connect({ host, port, allowHalfOpen: true });
-      upstream.setTimeout(600_000, drop);
+      upstream.setTimeout(mayFallback ? nativeIdleTimeoutMs : 600_000, drop);
       const timer = setTimeout(() => upstream.destroy(new Error("Connect timeout")), 5_000);
       upstream.once("connect", () => {
         clearTimeout(timer);

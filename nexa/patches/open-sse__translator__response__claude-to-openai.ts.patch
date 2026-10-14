@@ -1,0 +1,253 @@
+diff --git a/open-sse/translator/response/claude-to-openai.ts b/open-sse/translator/response/claude-to-openai.ts
+index f0bc81872109217bcfeff206c1ec8b9739367fb3..a85a1dbeb56691f53b183940a872141cf14a37c0 100644
+--- a/open-sse/translator/response/claude-to-openai.ts
++++ b/open-sse/translator/response/claude-to-openai.ts
+@@ -1,6 +1,14 @@
+ import { register } from "../registry.ts";
+ import { FORMATS } from "../formats.ts";
+-import { initThinkState, applyThinkTag, flushThinkBuffer } from "../../utils/thinkTagParser.ts";
++import {
++  mergeAnthropicUsage,
++  normalizeAnthropicUsage,
++} from "../../utils/anthropicUsage.ts";
++import {
++  initThinkState,
++  applyThinkTag,
++  flushThinkBuffer,
++} from "../../utils/thinkTagParser.ts";
+ 
+ type OpenAIUsage = {
+   prompt_tokens: number;
+@@ -52,40 +60,11 @@
+       // shouldParseTextualReasoningTags) so it strips <think> markup out of
+       // delta.content and re-emits it as delta.reasoning_content.
+       state.thinkState = initThinkState(true, state.provider, state.model);
+-      const startUsage = chunk.message?.usage;
+-      if (startUsage && typeof startUsage === "object") {
+-        const inputTokens =
+-          typeof startUsage.input_tokens === "number"
+-            ? startUsage.input_tokens
+-            : typeof startUsage.prompt_tokens === "number"
+-              ? startUsage.prompt_tokens
+-              : 0;
+-        const outputTokens =
+-          typeof startUsage.output_tokens === "number"
+-            ? startUsage.output_tokens
+-            : typeof startUsage.completion_tokens === "number"
+-              ? startUsage.completion_tokens
+-              : 0;
+-        const cacheRead =
+-          typeof startUsage.cache_read_input_tokens === "number"
+-            ? startUsage.cache_read_input_tokens
+-            : 0;
+-        const cacheCreation =
+-          typeof startUsage.cache_creation_input_tokens === "number"
+-            ? startUsage.cache_creation_input_tokens
+-            : 0;
+-        if (inputTokens > 0 || outputTokens > 0 || cacheRead > 0 || cacheCreation > 0) {
+-          const billableInputTokens = inputTokens + cacheRead;
+-          state.usage = {
+-            prompt_tokens: billableInputTokens,
+-            completion_tokens: outputTokens,
+-            input_tokens: billableInputTokens,
+-            output_tokens: outputTokens,
+-          };
+-          if (cacheRead > 0) state.usage.cache_read_input_tokens = cacheRead;
+-          if (cacheCreation > 0) state.usage.cache_creation_input_tokens = cacheCreation;
+-        }
+-      }
++      state.nativeAnthropicUsage = mergeAnthropicUsage(
++        null,
++        chunk.message?.usage,
++      );
++      state.usage = normalizeAnthropicUsage(state.nativeAnthropicUsage);
+       results.push(createChunk(state, { role: "assistant" }));
+       break;
+     }
+@@ -139,7 +118,11 @@
+         };
+         if (state.thinkState) applyThinkTag(state.thinkState, textDelta);
+         if (textDelta.reasoning_content) {
+-          results.push(createChunk(state, { reasoning_content: textDelta.reasoning_content }));
++          results.push(
++            createChunk(state, {
++              reasoning_content: textDelta.reasoning_content,
++            }),
++          );
+         }
+         if (textDelta.content) {
+           results.push(createChunk(state, { content: textDelta.content }));
+@@ -160,7 +143,7 @@
+                   function: { arguments: delta.partial_json },
+                 },
+               ],
+-            })
++            }),
+           );
+         }
+       }
+@@ -175,7 +158,9 @@
+       if (state.thinkState?.active) {
+         const flushed = flushThinkBuffer(state.thinkState);
+         if (flushed.reasoningDelta) {
+-          results.push(createChunk(state, { reasoning_content: flushed.reasoningDelta }));
++          results.push(
++            createChunk(state, { reasoning_content: flushed.reasoningDelta }),
++          );
+         }
+         if (flushed.contentDelta) {
+           results.push(createChunk(state, { content: flushed.contentDelta }));
+@@ -199,76 +184,18 @@
+     }
+ 
+     case "message_delta": {
+-      // Extract usage from message_delta event (Claude native format)
+-      // Normalize to OpenAI format (prompt_tokens/completion_tokens) for consistent logging
+       if (chunk.usage && typeof chunk.usage === "object") {
+-        const previousUsage = state.usage && typeof state.usage === "object" ? state.usage : {};
+-        const previousInputTokens =
+-          typeof previousUsage.input_tokens === "number"
+-            ? previousUsage.input_tokens
+-            : typeof previousUsage.prompt_tokens === "number"
+-              ? previousUsage.prompt_tokens
+-              : 0;
+-        const previousCacheReadTokens =
+-          typeof previousUsage.cache_read_input_tokens === "number"
+-            ? previousUsage.cache_read_input_tokens
+-            : 0;
+-        const previousCacheCreationTokens =
+-          typeof previousUsage.cache_creation_input_tokens === "number"
+-            ? previousUsage.cache_creation_input_tokens
+-            : 0;
+-        const inputTokens =
+-          typeof chunk.usage.input_tokens === "number" ? chunk.usage.input_tokens : 0;
+-        const outputTokens =
+-          typeof chunk.usage.output_tokens === "number" ? chunk.usage.output_tokens : 0;
+-        const thinkingTokens =
+-          typeof chunk.usage.output_tokens_details?.thinking_tokens === "number"
+-            ? chunk.usage.output_tokens_details.thinking_tokens
+-            : undefined;
+-        const cacheReadTokens =
+-          typeof chunk.usage.cache_read_input_tokens === "number"
+-            ? chunk.usage.cache_read_input_tokens
+-            : 0;
+-        const cacheCreationTokens =
+-          typeof chunk.usage.cache_creation_input_tokens === "number"
+-            ? chunk.usage.cache_creation_input_tokens
+-            : 0;
+-
+-        // Use OpenAI format keys for consistent logging in stream.js
+-        // Issue #1426: Include cache_read tokens in prompt_tokens so cached input
+-        // is visible to downstream billing systems.
+-        // Issue #2215: Exclude cache_creation_input_tokens from prompt_tokens —
+-        // Anthropic's cache-creation pads short prompts up to a 1024-token
+-        // minimum, so a 2-token "hi" can be reported as ~2008 prompt_tokens and
+-        // inflate downstream billing ~250x. cache_creation is still exposed
+-        // separately via prompt_tokens_details.cache_creation_tokens below.
+-        const billableInputTokens =
+-          inputTokens > 0 || cacheReadTokens > 0 || cacheCreationTokens > 0
+-            ? inputTokens + cacheReadTokens
+-            : previousInputTokens;
+-        state.usage = {
+-          prompt_tokens: billableInputTokens,
+-          completion_tokens: outputTokens,
+-          input_tokens: billableInputTokens,
+-          output_tokens: outputTokens,
+-        };
+-
+-        // Anthropic includes thinking in output_tokens. Surface the separately
+-        // reported portion without adding it to completion_tokens a second time.
+-        if (thinkingTokens !== undefined) {
+-          state.usage.reasoning_tokens = thinkingTokens;
+-          state.usage.completion_tokens_details = { reasoning_tokens: thinkingTokens };
+-          state.usage.output_tokens_details = { thinking_tokens: thinkingTokens };
+-        }
+-
+-        // Store cache tokens if present (needed for prompt_tokens_details in final chunk)
+-        const effectiveCacheReadTokens = cacheReadTokens || previousCacheReadTokens;
+-        const effectiveCacheCreationTokens = cacheCreationTokens || previousCacheCreationTokens;
+-        if (effectiveCacheReadTokens > 0) {
+-          state.usage.cache_read_input_tokens = effectiveCacheReadTokens;
+-        }
+-        if (effectiveCacheCreationTokens > 0) {
+-          state.usage.cache_creation_input_tokens = effectiveCacheCreationTokens;
++        state.nativeAnthropicUsage = mergeAnthropicUsage(
++          state.nativeAnthropicUsage,
++          chunk.usage,
++        );
++        state.usage = normalizeAnthropicUsage(state.nativeAnthropicUsage);
++        const reasoning = state.usage.reasoning_tokens;
++        if (typeof reasoning === "number") {
++          state.usage.completion_tokens_details = {
++            reasoning_tokens: reasoning,
++          };
++          state.usage.output_tokens_details = { thinking_tokens: reasoning };
+         }
+       }
+ 
+@@ -316,10 +243,11 @@
+           const inputTokens = state.usage.input_tokens || 0;
+           const outputTokens = state.usage.output_tokens || 0;
+           const cachedTokens = state.usage.cache_read_input_tokens || 0;
+-          const cacheCreationTokens = state.usage.cache_creation_input_tokens || 0;
+-
+-          // prompt_tokens = input_tokens (input + cache_read, per #2215 —
+-          // cache_creation is exposed separately in prompt_tokens_details below).
++          const cacheCreationTokens =
++            state.usage.cache_creation_input_tokens || 0;
++
++          // Internal input_tokens is the inclusive input count; cache details
++          // identify its read/write portions without adding them a second time.
+           // completion_tokens = output_tokens
+           // total_tokens = prompt_tokens + completion_tokens
+           const promptTokens = inputTokens;
+@@ -344,10 +272,12 @@
+           if (cachedTokens > 0 || cacheCreationTokens > 0) {
+             finalChunk.usage.prompt_tokens_details = {};
+             if (cachedTokens > 0) {
+-              finalChunk.usage.prompt_tokens_details.cached_tokens = cachedTokens;
++              finalChunk.usage.prompt_tokens_details.cached_tokens =
++                cachedTokens;
+             }
+             if (cacheCreationTokens > 0) {
+-              finalChunk.usage.prompt_tokens_details.cache_creation_tokens = cacheCreationTokens;
++              finalChunk.usage.prompt_tokens_details.cache_creation_tokens =
++                cacheCreationTokens;
+             }
+           }
+         }
+@@ -361,16 +291,20 @@
+     case "message_stop": {
+       if (!state.finishReasonSent) {
+         const finishReason =
+-          state.finishReason || (state.toolCalls?.size > 0 ? "tool_calls" : "stop");
++          state.finishReason ||
++          (state.toolCalls?.size > 0 ? "tool_calls" : "stop");
+         const cachedTokens = state.usage?.cache_read_input_tokens || 0;
+-        const cacheCreationTokens = state.usage?.cache_creation_input_tokens || 0;
++        const cacheCreationTokens =
++          state.usage?.cache_creation_input_tokens || 0;
+         const usageObj =
+           state.usage && typeof state.usage === "object"
+             ? {
+                 usage: {
+                   prompt_tokens: state.usage.input_tokens || 0,
+                   completion_tokens: state.usage.output_tokens || 0,
+-                  total_tokens: (state.usage.input_tokens || 0) + (state.usage.output_tokens || 0),
++                  total_tokens:
++                    (state.usage.input_tokens || 0) +
++                    (state.usage.output_tokens || 0),
+                   ...(typeof state.usage.reasoning_tokens === "number"
+                     ? {
+                         reasoning_tokens: state.usage.reasoning_tokens,
+@@ -382,7 +316,9 @@
+                   ...(cachedTokens > 0 || cacheCreationTokens > 0
+                     ? {
+                         prompt_tokens_details: {
+-                          ...(cachedTokens > 0 ? { cached_tokens: cachedTokens } : {}),
++                          ...(cachedTokens > 0
++                            ? { cached_tokens: cachedTokens }
++                            : {}),
+                           ...(cacheCreationTokens > 0
+                             ? { cache_creation_tokens: cacheCreationTokens }
+                             : {}),

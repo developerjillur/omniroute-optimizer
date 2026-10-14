@@ -1,0 +1,195 @@
+diff --git a/src/lib/db/usageAnalytics.ts b/src/lib/db/usageAnalytics.ts
+index cb654bc0f..929454086 100644
+--- a/src/lib/db/usageAnalytics.ts
++++ b/src/lib/db/usageAnalytics.ts
+@@ -10,6 +10,16 @@
+  */
+ 
+ import { getDbInstance } from "./core";
++import { GPT_6_1_SOL_LONG_CONTEXT_THRESHOLD } from "@/shared/constants/pricing/shared-tiers";
++
++// Partition this model by each request, never by a summed day/model token total.
++function pricingContextBucket(prefix = "", aggregated = true): string {
++  return `CASE WHEN ${prefix}tokens_input > ${GPT_6_1_SOL_LONG_CONTEXT_THRESHOLD}
++    AND LOWER(${prefix}model) LIKE '%gpt-6.1-sol%'
++    ${aggregated ? `AND ${prefix}is_aggregated = 0` : ""}
++    THEN 1 ELSE 0 END`;
++}
++
+ import type { AnalyticsParams } from "./usageAnalytics/sources";
+ 
+ export { buildUnifiedSource, buildPresetUnifiedSource } from "./usageAnalytics/sources";
+@@ -116,6 +126,7 @@ export function getDailyUsage(unifiedSource: string, params: AnalyticsParams): D
+ // ---------------------------------------------------------------------------
+ 
+ export interface DailyCostRow {
++  longContext?: number;
+   date: string;
+   provider: string;
+   model: string;
+@@ -142,6 +153,7 @@ export function getDailyCostRows(unifiedSource: string, params: AnalyticsParams)
+         LOWER(provider) as provider,
+         LOWER(model) as model,
+         COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
++        ${pricingContextBucket("", true)} as longContext,
+         COALESCE(SUM(tokens_input), 0) as promptTokens,
+         COALESCE(SUM(tokens_output), 0) as completionTokens,
+         COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
+@@ -150,7 +162,7 @@ export function getDailyCostRows(unifiedSource: string, params: AnalyticsParams)
+         COALESCE(SUM(stored_cost), 0.0) as storedCost,
+         MAX(is_aggregated) as isAggregated
+       FROM ${unifiedSource} AS _u
+-      GROUP BY DATE(timestamp), LOWER(provider), LOWER(model), serviceTier
++      GROUP BY DATE(timestamp), LOWER(provider), LOWER(model), serviceTier, longContext
+       ORDER BY date ASC
+     `
+     )
+@@ -192,6 +204,7 @@ export function getHeatmapRows(heatmapConditions: string[], params: AnalyticsPar
+ // ---------------------------------------------------------------------------
+ 
+ export interface ModelUsageRow {
++  longContext?: number;
+   model: string;
+   provider: string;
+   serviceTier: string;
+@@ -221,6 +234,7 @@ export function getModelUsageRows(unifiedSource: string, params: AnalyticsParams
+         LOWER(model) as model,
+         LOWER(provider) as provider,
+         COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
++        ${pricingContextBucket("", true)} as longContext,
+         COALESCE(SUM(requests), 0) as requests,
+         COALESCE(SUM(tokens_input), 0) as promptTokens,
+         COALESCE(SUM(tokens_output), 0) as completionTokens,
+@@ -237,7 +251,7 @@ export function getModelUsageRows(unifiedSource: string, params: AnalyticsParams
+       -- Keep cost inputs separated by day. Historical provider rows do not
+       -- always use one cache-token convention, and computeCostFromPricing's
+       -- non-cached-input clamp is intentionally non-linear across those rows.
+-      GROUP BY DATE(timestamp), LOWER(model), LOWER(provider), serviceTier
++      GROUP BY DATE(timestamp), LOWER(model), LOWER(provider), serviceTier, longContext
+       ORDER BY requests DESC
+     `
+     )
+@@ -247,6 +261,7 @@ export function getModelUsageRows(unifiedSource: string, params: AnalyticsParams
+ // ---------------------------------------------------------------------------
+ 
+ export interface ProviderCostRow {
++  longContext?: number;
+   provider: string;
+   model: string;
+   serviceTier: string;
+@@ -274,6 +289,7 @@ export function getProviderCostRows(
+         LOWER(provider) as provider,
+         LOWER(model) as model,
+         COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
++        ${pricingContextBucket("", true)} as longContext,
+         COALESCE(SUM(tokens_input), 0) as promptTokens,
+         COALESCE(SUM(tokens_output), 0) as completionTokens,
+         COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
+@@ -282,7 +298,7 @@ export function getProviderCostRows(
+         COALESCE(SUM(stored_cost), 0.0) as storedCost,
+         MAX(is_aggregated) as isAggregated
+       FROM ${unifiedSource} AS _u
+-      GROUP BY DATE(timestamp), LOWER(provider), LOWER(model), serviceTier
++      GROUP BY DATE(timestamp), LOWER(provider), LOWER(model), serviceTier, longContext
+     `
+     )
+     .all(params) as ProviderCostRow[];
+@@ -330,6 +346,7 @@ export function getProviderUsageRows(
+ // ---------------------------------------------------------------------------
+ 
+ export interface AccountCostRow {
++  longContext?: number;
+   accountKey: string;
+   provider: string;
+   model: string;
+@@ -376,13 +393,14 @@ export function getAccountCostRows(whereClause: string, params: AnalyticsParams)
+         LOWER(account_events.provider) as provider,
+         LOWER(account_events.model) as model,
+         COALESCE(NULLIF(account_events.service_tier, ''), 'standard') as serviceTier,
++        ${pricingContextBucket("account_events.", false)} as longContext,
+         COALESCE(SUM(account_events.tokens_input), 0) as promptTokens,
+         COALESCE(SUM(account_events.tokens_output), 0) as completionTokens,
+         COALESCE(SUM(account_events.tokens_cache_read), 0) as cacheReadTokens,
+         COALESCE(SUM(account_events.tokens_cache_creation), 0) as cacheCreationTokens,
+         COALESCE(SUM(account_events.tokens_reasoning), 0) as reasoningTokens
+       FROM account_events
+-      GROUP BY DATE(account_events.timestamp), accountKey, LOWER(account_events.provider), LOWER(account_events.model), serviceTier
++      GROUP BY DATE(account_events.timestamp), accountKey, LOWER(account_events.provider), LOWER(account_events.model), serviceTier, longContext
+     `
+     )
+     .all(params) as AccountCostRow[];
+@@ -489,6 +507,7 @@ export function getAccountUsageRows(
+ // ---------------------------------------------------------------------------
+ 
+ export interface ApiKeyUsageRow {
++  longContext?: number;
+   apiKeyId: string | null;
+   apiKeyGroupKey: string;
+   provider: string;
+@@ -523,6 +542,7 @@ export function getApiKeyUsageRows(
+         LOWER(provider) as provider,
+         LOWER(model) as model,
+         COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
++        ${pricingContextBucket("", false)} as longContext,
+         COUNT(*) as requests,
+         COALESCE(SUM(tokens_input), 0) as promptTokens,
+         COALESCE(SUM(tokens_output), 0) as completionTokens,
+@@ -532,7 +552,7 @@ export function getApiKeyUsageRows(
+         COALESCE(SUM(tokens_input + tokens_output), 0) as totalTokens
+       FROM usage_history
+       ${apiKeyWhereClause}
+-      GROUP BY DATE(timestamp), COALESCE(NULLIF(api_key_id, ''), NULLIF(api_key_name, ''), 'unknown'), NULLIF(api_key_id, ''), LOWER(provider), LOWER(model), serviceTier
++      GROUP BY DATE(timestamp), COALESCE(NULLIF(api_key_id, ''), NULLIF(api_key_name, ''), 'unknown'), NULLIF(api_key_id, ''), LOWER(provider), LOWER(model), serviceTier, longContext
+     `
+     )
+     .all(params) as ApiKeyUsageRow[];
+@@ -541,6 +561,7 @@ export function getApiKeyUsageRows(
+ // ---------------------------------------------------------------------------
+ 
+ export interface ServiceTierUsageRow {
++  longContext?: number;
+   serviceTier: string;
+   provider: string;
+   model: string;
+@@ -568,6 +589,7 @@ export function getServiceTierUsageRows(
+       `
+       SELECT
+         COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
++        ${pricingContextBucket("", true)} as longContext,
+         LOWER(provider) as provider,
+         LOWER(model) as model,
+         COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
+@@ -581,7 +603,7 @@ export function getServiceTierUsageRows(
+         COALESCE(SUM(stored_cost), 0.0) as storedCost,
+         MAX(is_aggregated) as isAggregated
+       FROM ${unifiedSource} AS _u
+-      GROUP BY DATE(timestamp), serviceTier, LOWER(provider), LOWER(model)
++      GROUP BY DATE(timestamp), serviceTier, LOWER(provider), LOWER(model), longContext
+     `
+     )
+     .all(params) as ServiceTierUsageRow[];
+@@ -668,6 +690,7 @@ export function getWeeklyPatternRows(
+ // ---------------------------------------------------------------------------
+ 
+ export interface PresetCostModelRow {
++  longContext?: number;
+   model: string;
+   provider: string;
+   serviceTier: string;
+@@ -696,6 +719,7 @@ export function getPresetCostModelRows(
+         LOWER(model) as model,
+         LOWER(provider) as provider,
+         COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
++        ${pricingContextBucket("", true)} as longContext,
+         COALESCE(SUM(tokens_input), 0) as promptTokens,
+         COALESCE(SUM(tokens_output), 0) as completionTokens,
+         COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
+@@ -704,7 +728,7 @@ export function getPresetCostModelRows(
+         COALESCE(SUM(stored_cost), 0.0) as storedCost,
+         MAX(is_aggregated) as isAggregated
+       FROM ${presetUnifiedSource} AS _pu
+-      GROUP BY DATE(timestamp), LOWER(model), LOWER(provider), serviceTier
++      GROUP BY DATE(timestamp), LOWER(model), LOWER(provider), serviceTier, longContext
+     `
+     )
+     .all(params) as PresetCostModelRow[];

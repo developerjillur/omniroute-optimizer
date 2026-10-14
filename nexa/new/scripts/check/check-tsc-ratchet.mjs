@@ -41,8 +41,18 @@ function measure() {
   if (!fs.existsSync(compiler)) return { skip: true, reason: "tsc-absent" };
   const res = spawnSync(
     process.execPath,
-    // Favor collection over heap growth for the repository's full-scope compiler.
-    ["--optimize-for-size", "--max-semi-space-size=8", compiler, "--noEmit", "-p", "tsconfig.json"],
+    // This gate measures the complete project once; it does not need a retained build cache.
+    // Favor collection over heap growth without changing the files or checks being measured.
+    [
+      "--optimize-for-size",
+      "--max-semi-space-size=8",
+      compiler,
+      "--noEmit",
+      "--incremental",
+      "false",
+      "-p",
+      "tsconfig.json",
+    ],
     { cwd: ROOT, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 }
   );
   if (res.error || res.status === null) {
@@ -76,7 +86,9 @@ log(`[tsc-ratchet] measured=${measured} baseline=${baseline ?? "none"}`);
 
 if (UPDATE) {
   if (baseline !== null && measured > baseline) {
-    log(`[tsc-ratchet] refusing --update: measured ${measured} > baseline ${baseline} (never widen).`);
+    log(
+      `[tsc-ratchet] refusing --update: measured ${measured} > baseline ${baseline} (never widen).`
+    );
     process.exit(1);
   }
   fs.writeFileSync(

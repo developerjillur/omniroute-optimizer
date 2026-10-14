@@ -40,6 +40,15 @@ export function verifyPackage(archive, { allowPriorLifecycle = false } = {}) {
   const dist = read("package/dist/src/mitm/server.cjs");
   if (!source.equals(dist) || !inspectServerContract(source.toString()))
     throw new Error("Archive lacks the verified native Bridge transport contract");
+  if (source.toString().includes("anthropicBufferedShim")) {
+    for (const rel of [
+      "src/mitm/_internal/anthropicBuffered.cjs",
+      "src/mitm/_internal/routerFetch.cjs",
+    ]) {
+      if (!read(`package/${rel}`).equals(read(`package/dist/${rel}`)))
+        throw new Error(`Archive has an inconsistent native buffered helper: ${rel}`);
+    }
+  }
   for (const member of [
     "package/src/mitm/runtimeState.ts",
     "package/src/mitm/bootRecovery.ts",

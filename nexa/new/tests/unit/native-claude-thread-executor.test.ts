@@ -41,7 +41,7 @@ test("actual executor preserves create/continuation fields, beta and owning acco
   globalThis.fetch = async (_url, init: RequestInit = {}) => {
     sent.push({ body: JSON.parse(String(init.body)), headers: new Headers(init.headers) });
     return new Response(
-      `event: message_start\ndata: {"type":"message_start","message":{"id":"msg_turn_${sent.length}"}}\n\n`,
+      `event: message_start\ndata: {"type":"message_start","message":{"id":"msg_turn_${sent.length}"}}\n\nevent: message_delta\ndata: {"type":"message_delta","delta":{"stop_reason":"end_turn"}}\n\nevent: message_stop\ndata: {"type":"message_stop"}\n\n`,
       { headers: { "content-type": "text/event-stream" } }
     );
   };
@@ -101,6 +101,11 @@ test("actual executor preserves create/continuation fields, beta and owning acco
         clientHeaders: { "x-app": "cli", "anthropic-beta": beta },
       });
       assert.ok(!(result instanceof Response));
+      assert.equal(
+        owners.getNativeClaudeThreadOwner(session, `msg_turn_${sent.length}`),
+        null,
+        "ownership waits until the completed response is consumed"
+      );
       await result.response.text();
     }
   } finally {

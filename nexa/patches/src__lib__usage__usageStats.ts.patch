@@ -1,0 +1,141 @@
+diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
+index 833eb6ef3..1efda3040 100644
+--- a/src/lib/usage/usageStats.ts
++++ b/src/lib/usage/usageStats.ts
+@@ -15,6 +15,7 @@ import { calculateCost } from "./costCalculator";
+ import { isFlatRateProvider } from "./flatRateProviders";
+ import { getRawDataCutoffDate, isAggregationEnabled } from "./aggregateHistory";
+ import { toNumber } from "@/shared/utils/numeric";
++import { GPT_6_1_SOL_LONG_CONTEXT_THRESHOLD } from "@/shared/constants/pricing/shared-tiers";
+ 
+ type JsonRecord = Record<string, unknown>;
+ type UsageBucket = {
+@@ -50,6 +51,9 @@ function toStringOrEmpty(value: unknown): string {
+   return typeof value === "string" ? value : "";
+ }
+ 
++const pricingContextBucket = `CASE WHEN tokens_input > ${GPT_6_1_SOL_LONG_CONTEXT_THRESHOLD}
++  AND LOWER(model) LIKE '%gpt-6.1-sol%' THEN 1 ELSE 0 END`;
++
+ function buildUsageSourceSql(aggregationEnabled: boolean) {
+   if (!aggregationEnabled) {
+     return `
+@@ -70,6 +74,7 @@ function buildUsageSourceSql(aggregationEnabled: boolean) {
+         COALESCE(tokens_cache_read, 0) as cost_tokens_cache_read,
+         COALESCE(tokens_cache_creation, 0) as cost_tokens_cache_creation,
+         COALESCE(tokens_reasoning, 0) as cost_tokens_reasoning,
++        ${pricingContextBucket} as long_context,
+         0.0 as stored_cost,
+         COALESCE(service_tier, 'standard') as service_tier,
+         1 as request_count
+@@ -95,6 +100,7 @@ function buildUsageSourceSql(aggregationEnabled: boolean) {
+       COALESCE(tokens_cache_read, 0) as cost_tokens_cache_read,
+       COALESCE(tokens_cache_creation, 0) as cost_tokens_cache_creation,
+       COALESCE(tokens_reasoning, 0) as cost_tokens_reasoning,
++      ${pricingContextBucket} as long_context,
+       0.0 as stored_cost,
+       COALESCE(service_tier, 'standard') as service_tier,
+       1 as request_count
+@@ -120,6 +126,7 @@ function buildUsageSourceSql(aggregationEnabled: boolean) {
+       0 as cost_tokens_cache_read,
+       0 as cost_tokens_cache_creation,
+       0 as cost_tokens_reasoning,
++      0 as long_context,
+       COALESCE(total_cost, 0.0) as stored_cost,
+       'standard' as service_tier,
+       COALESCE(total_requests, 0) as request_count
+@@ -159,7 +166,7 @@ async function calculateAggregateCost(row: JsonRecord): Promise<number> {
+       cacheCreation: toNumber(row.cost_tokens_cache_creation ?? row.tokens_cache_creation),
+       reasoning: toNumber(row.cost_tokens_reasoning ?? row.tokens_reasoning),
+     },
+-    { provider, serviceTier, flatRateAsZero: true }
++    { provider, serviceTier, flatRateAsZero: true, longContext: toNumber(row.long_context) === 1 }
+   );
+   // daily_usage_summary stores API-equivalent value so the dedicated costs
+   // view can preserve history. This legacy stats surface keeps billed-cost
+@@ -235,7 +242,7 @@ export async function getConnectionSpendUsdSinceAdded(
+   const db = getDbInstance();
+   const rows = db
+     .prepare(
+-      `SELECT model,
++      `SELECT model, ${pricingContextBucket} as long_context,
+           COALESCE(SUM(tokens_input), 0) AS input,
+           COALESCE(SUM(tokens_output), 0) AS output,
+           COALESCE(SUM(tokens_cache_read), 0) AS cacheRead,
+@@ -244,10 +251,11 @@ export async function getConnectionSpendUsdSinceAdded(
+           COUNT(*) AS requests
+        FROM usage_history
+        WHERE connection_id = ? AND provider = ? AND success = 1
+-       GROUP BY model`
++       GROUP BY model, long_context`
+     )
+     .all(connectionId, provider) as Array<{
+     model?: string;
++    long_context?: number;
+     input?: number;
+     output?: number;
+     cacheRead?: number;
+@@ -272,6 +280,7 @@ export async function getConnectionSpendUsdSinceAdded(
+       provider,
+       model,
+       flatRateAsZero: true,
++      longContext: Number(row.long_context) === 1,
+     });
+   }
+ 
+@@ -384,9 +393,9 @@ export async function getUsageStats() {
+     .prepare(
+       `
+         WITH usage_source AS (${sourceSql})
+-        SELECT provider, model, service_tier, ${AGGREGATE_FIELDS}
++        SELECT provider, model, service_tier, long_context, ${AGGREGATE_FIELDS}
+         FROM usage_source
+-        GROUP BY provider, model, service_tier
++        GROUP BY provider, model, service_tier, long_context
+       `
+     )
+     .all(...sourceParams) as unknown[];
+@@ -440,10 +449,10 @@ export async function getUsageStats() {
+     .prepare(
+       `
+         WITH usage_source AS (${sourceSql})
+-        SELECT provider, model, connection_id, service_tier, ${AGGREGATE_FIELDS}
++        SELECT provider, model, connection_id, service_tier, long_context, ${AGGREGATE_FIELDS}
+         FROM usage_source
+         WHERE connection_id IS NOT NULL AND connection_id != ''
+-        GROUP BY provider, model, connection_id, service_tier
++        GROUP BY provider, model, connection_id, service_tier, long_context
+       `
+     )
+     .all(...sourceParams) as unknown[];
+@@ -493,11 +502,11 @@ export async function getUsageStats() {
+     .prepare(
+       `
+         WITH usage_source AS (${sourceSql})
+-        SELECT provider, model, api_key_id, api_key_name, service_tier, ${AGGREGATE_FIELDS}
++        SELECT provider, model, api_key_id, api_key_name, service_tier, long_context, ${AGGREGATE_FIELDS}
+         FROM usage_source
+         WHERE (api_key_id IS NOT NULL AND api_key_id != '')
+            OR (api_key_name IS NOT NULL AND api_key_name != '')
+-        GROUP BY provider, model, api_key_id, api_key_name, service_tier
++        GROUP BY provider, model, api_key_id, api_key_name, service_tier, long_context
+       `
+     )
+     .all(...sourceParams) as unknown[];
+@@ -551,6 +560,7 @@ export async function getUsageStats() {
+           provider,
+           model,
+           COALESCE(service_tier, 'standard') as service_tier,
++          ${pricingContextBucket} as long_context,
+           COUNT(*) as request_count,
+           COALESCE(SUM(tokens_input), 0) as tokens_input,
+           COALESCE(SUM(tokens_output), 0) as tokens_output,
+@@ -559,7 +569,7 @@ export async function getUsageStats() {
+           COALESCE(SUM(tokens_reasoning), 0) as tokens_reasoning
+         FROM usage_history
+         WHERE timestamp >= ? AND timestamp <= ?
+-        GROUP BY minute, provider, model, service_tier
++        GROUP BY minute, provider, model, service_tier, long_context
+       `
+     )
+     .all(tenMinutesAgo.toISOString(), now.toISOString()) as unknown[];

@@ -2,6 +2,16 @@
 
 Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। OmniRoute-এর pristine upstream source অপরিবর্তিত রেখে custom পরিবর্তনগুলো `nexa/` folder-এ রাখা হয়েছে।
 
+## Handoff ও বর্তমান অবস্থা — ২০২৬-১০-১৭
+
+সব handoff, setup guide, investigation, QA ও restore note [সম্পূর্ণ handoff index](docs/handoffs/README.md)-এ আছে। ৫১টি historical document-এর public copy, current handoff, migration verification এবং content-hash manifest এক জায়গায় পাওয়া যায়।
+
+- [বর্তমান handoff](docs/handoffs/CURRENT-STATUS-2026-10-17.md): GPT/GLM/return-Claude focused CLI QA PASS; native Artifact automatic comment/reconnect QA এখনও অসম্পূর্ণ।
+- [Disk migration verification](docs/handoffs/POST-MIGRATION-VERIFICATION-2026-10-17.md): নতুন boot disk-এ source/pristine/free-space/deploy-path checks এবং 59টি Node + 2টি database test PASS; একটি case স্পষ্টভাবে বাদ দেওয়া হয়েছিল। নতুন build বা deploy হয়নি।
+- `omniroute-build-deployment` automation PAUSED; owner-এর স্পষ্ট নির্দেশ ছাড়া resume নয়।
+
+Historical documents-এর পুরোনো status-এর পরে পাওয়া ফল current handoff-এ দেওয়া আছে। Private identifiers/references সরানো হয়েছে; T7-এর originals, raw evidence ও rollback files এই publication পরিবর্তন করে না।
+
 ## সংরক্ষিত source
 
 | বিষয়                    | মান                                        |
@@ -34,7 +44,7 @@ Source ও deployed runtime `2b4158371`। Native Artifact reconnect/creation, s
 - Full dashboard-এর 620 static pages, CLI generation, package validation ও strict Bridge gates PASS। সফল package পুনর্ব্যবহার করে isolated Anthropic smoke এবং active-request drain-এর পরে runtime promotion সম্পূর্ণ। Previous runtime, consistent DB snapshot, provider/API-key IDs ও historical usage retained।
 - Installed native ingress committed bytes-এর সঙ্গে exact match; native HTTPS/TLS health PASS। GPT-6.1 Sol-এর exact historical cutoff/dimension baseline-এ 19,951 rows-এর `$1583.4206430` API-equivalent estimate মিলে; এটি subscription invoice নয়।
 - নতুন native app QA-তে Artifact create/publish/read, follow-up edit ও reopen; ordinary Read ও Context7 read-only documentation connector PASS। Normal interactive Claude Code Read/Edit/Read ও saved-session resume PASS; Thread continuation ও restart-এর full-history create trace retained।
-- GPT-এর ছোট forced-Read tool fidelity probe HTTP 200 এবং exact `Read` tool-use দিয়ে PASS। Broad normal CLI Read এখনও unresolved; focused CLI GPT/GLM/return-Claude regression ও automatic comment-reply test pending, তাই full QA incomplete। API-key mode-এ native client-এর hosted connector availability-কে full native parity বলা হয়নি।
+- GPT-এর ছোট forced-Read tool fidelity probe PASS। পরে focused normal CLI GPT/GLM/return-Claude-এ actual Read, fixture result, exact final ও provider evidence PASS হয়েছে। GPT sequence resource interruption-এর পরে saved tool result থেকে resume করে সম্পূর্ণ হয়েছে। Automatic Artifact comment-reply/reconnect test এখনও অসম্পূর্ণ, তাই full native QA incomplete। API-key mode-এ native client-এর hosted connector availability-কে full native parity বলা হয়নি।
 - ব্যবহারকারী live functionality কাজ করছে বলে জানিয়েছেন। পরে চলমান research chat-এ পাঁচটি পুরোনো Artifact-এর comment-monitor resume notice আবার দেখা গেছে; সেগুলোর ২৫–২৮ সেপ্টেম্বরের host logs-ও আছে। Installed client-এর generic recovery notice থেকে specific inner failure বা extra generation প্রমাণিত হয় না। Natural publish-এর পরে armed record পাওয়া গেলেও automatic replies বা স্থায়ী monitor recovery এখনও যাচাই হয়নি।
 - Usage accounting ও unsafe ambiguous POST replay-এর source defects corrected। Historical direct-native equivalent-workload billing baseline ও কিছু retained artifacts অনুপস্থিত; 9টি account transition unresolved। Blanket zero-extra-usage guarantee দেওয়া হয়নি।
 
@@ -92,6 +102,6 @@ Application-এ পরিবর্তন শুধু overlay apply-এর স�
 
 ## Scope ও license
 
-এখানে tracked `nexa/` source আছে। Live database, API keys, OAuth credentials, secret environment, certificate private keys, runtime prefixes, build archives এবং local task caches অন্তর্ভুক্ত নেই। Account state ও production settings source snapshot থেকে পুনরুদ্ধার করা যাবে না।
+এখানে tracked `nexa/` source এবং reviewed public handoff/report copies আছে। Live database, API keys, OAuth credentials, secret environment, certificate private keys, runtime prefixes, build archives এবং local task caches অন্তর্ভুক্ত নেই। Account state ও production settings source snapshot থেকে পুনরুদ্ধার করা যাবে না।
 
 OmniRoute-derived code-এর মূল MIT license [LICENSE](LICENSE)-এ অক্ষত রাখা হয়েছে; বিস্তারিত [NOTICE.md](NOTICE.md)-এ।

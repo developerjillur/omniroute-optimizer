@@ -1,0 +1,677 @@
+{
+  "publication_date": "2026-10-17",
+  "source_collection": "Local-OmniRoute-Setup",
+  "source_snapshot": "2b4158371223293db12d3a6de00a9b22d44600fb",
+  "document_count": 51,
+  "explicit_handoff_count": 11,
+  "policy": {
+    "historical_status_preserved": true,
+    "local_originals_modified": false,
+    "private_identifiers_redacted": true,
+    "private_evidence_files_included": false,
+    "source_code_modified": false
+  },
+  "excluded_documents": [
+    {
+      "source_document": "sample.md",
+      "reason": "Empty file; no handoff content"
+    },
+    {
+      "source_document": "Ami OmniRoute ta setup korchi kebol matr.md",
+      "reason": "Personal setup request; no implementation or handoff record"
+    },
+    {
+      "source_document": "releases/v3.8.51/CHANGELOG-v3.8.51.md",
+      "reason": "Upstream release changelog; existing upstream references retained"
+    }
+  ],
+  "publication_edit_counts": {
+    "document_links_rebased": 99,
+    "private_client_names": 7,
+    "markdown_whitespace_normalized": 61,
+    "private_conversation_links": 4,
+    "unpublished_local_links": 398,
+    "overlay_links_rebased": 12,
+    "private_emails": 2,
+    "private_identifiers": 273,
+    "upstream_links_pinned": 304
+  },
+  "documents": [
+    {
+      "source_document": "AGENT-BRIDGE-CONNECTION-FIX-HANDOFF-2026-10-02.md",
+      "published_document": "docs/handoffs/history/AGENT-BRIDGE-CONNECTION-FIX-HANDOFF-2026-10-02.md",
+      "title": "Agent Bridge connection repair: বাংলা handoff",
+      "source_bytes": 26565,
+      "source_sha256": "695ff9d30eacd2634974823b4c91cfdf51456ef55bc90ad2a4923b9fcf5d8a8f",
+      "published_bytes": 27377,
+      "published_sha256": "d994af0c828a27ef2e72103dccc8bebf6a42d5114da27a3d0c79efbf0bbcbb81",
+      "publication_edits": {
+        "document_links_rebased": 1,
+        "private_client_names": 1,
+        "markdown_whitespace_normalized": 7
+      }
+    },
+    {
+      "source_document": "AGENT-BRIDGE-CONNECTION-FIX-PRD-2026-10-02.md",
+      "published_document": "docs/handoffs/history/AGENT-BRIDGE-CONNECTION-FIX-PRD-2026-10-02.md",
+      "title": "Agent Bridge connection repair: PRD ও acceptance record",
+      "source_bytes": 6795,
+      "source_sha256": "8490aa42b5c9e90277232db4b4a3a3ab7a1a1561a8eaa4a9e5a8218e6b4c486a",
+      "published_bytes": 7606,
+      "published_sha256": "a1a219ab0a80ee6e32079b3366be0e564d10b33b1da9364607ebc23c6ce76adc",
+      "publication_edits": {
+        "markdown_whitespace_normalized": 2
+      }
+    },
+    {
+      "source_document": "AGENT-BRIDGE-DURABILITY-HANDOFF-2026-10-02.md",
+      "published_document": "docs/handoffs/history/AGENT-BRIDGE-DURABILITY-HANDOFF-2026-10-02.md",
+      "title": "Agent Bridge স্থায়ী setup ও update handoff",
+      "source_bytes": 21113,
+      "source_sha256": "292d6844bf524835641d4c178a7d4a2a75f5c3c0f709372cd6ec102752166460",
+      "published_bytes": 21735,
+      "published_sha256": "2fcd44e580915040e830cbd4916be33500125a468ed2c133d1160fdc873b3e50",
+      "publication_edits": {
+        "document_links_rebased": 1,
+        "markdown_whitespace_normalized": 2
+      }
+    },
+    {
+      "source_document": "AGENT-BRIDGE-FULL-QA-HANDOFF-2026-10-02.md",
+      "published_document": "docs/handoffs/history/AGENT-BRIDGE-FULL-QA-HANDOFF-2026-10-02.md",
+      "title": "Final production overlay সংযোজন: ২০২৬-১০-০২",
+      "source_bytes": 36763,
+      "source_sha256": "8ef189ede3a75bf1d01db14bddd053848df9156c7097b5271d1ef2dd111d7616",
+      "published_bytes": 37450,
+      "published_sha256": "cbda9e99ded1dfa094974bb7cc2dc7078a858b1f53438574f554ff67ef71a138",
+      "publication_edits": {
+        "document_links_rebased": 1,
+        "markdown_whitespace_normalized": 3
+      }
+    },
+    {
+      "source_document": "AGENT-BRIDGE-FULL-QA-PRD-2026-10-02.md",
+      "published_document": "docs/handoffs/history/AGENT-BRIDGE-FULL-QA-PRD-2026-10-02.md",
+      "title": "Agent Bridge QA ও durability PRD",
+      "source_bytes": 6300,
+      "source_sha256": "16e5a32fb1021d81505b67a2f0901a0a1ad6e09f621e1898976410753f277c23",
+      "published_bytes": 7111,
+      "published_sha256": "062946ffd9b5f7b510f3e6db38465fde8caa9cce76bdbb9c69a67f5d923cf3ad",
+      "publication_edits": {
+        "markdown_whitespace_normalized": 2
+      }
+    },
+    {
+      "source_document": "AGENT-BRIDGE-LOCAL-COEXISTENCE-DNS-HANDOFF-2026-10-02.md",
+      "published_document": "docs/handoffs/history/AGENT-BRIDGE-LOCAL-COEXISTENCE-DNS-HANDOFF-2026-10-02.md",
+      "title": "Agent Bridge ও Local coexistence: DNS follow-up",
+      "source_bytes": 7419,
+      "source_sha256": "3d64dfd622b66f4545992d29072dcd4e1ad1c55393ebe22c912658a421276c79",
+      "published_bytes": 8205,
+      "published_sha256": "e4546466b9bc2a3cb2e89cb8e925a71e2264869e02cd4e8df2e904e269dddc8f",
+      "publication_edits": {
+        "document_links_rebased": 1
+      }
+    },
+    {
+      "source_document": "AGENT-BRIDGE-NATIVE-DNS-RECOVERY-VERIFIED-2026-10-02.md",
+      "published_document": "docs/handoffs/history/AGENT-BRIDGE-NATIVE-DNS-RECOVERY-VERIFIED-2026-10-02.md",
+      "title": "Agent Bridge: Native DNS recovery verified",
+      "source_bytes": 6187,
+      "source_sha256": "1b98f31e824d5f20ab76896080f574f041d9e823d78af0184ccf86a34d52776a",
+      "published_bytes": 6926,
+      "published_sha256": "c4cd1ca5f4b8c5467dd6a1cf604bdebe642ff0cb40a4484246fa6de1ba95ef8d",
+      "publication_edits": {
+        "private_conversation_links": 3
+      }
+    },
+    {
+      "source_document": "AGENT-BRIDGE-UPDATE-PRD-BN-2026-10-02.md",
+      "published_document": "docs/handoffs/history/AGENT-BRIDGE-UPDATE-PRD-BN-2026-10-02.md",
+      "title": "Agent Bridge update durability — PRD",
+      "source_bytes": 5842,
+      "source_sha256": "90a45d42bc84bdbdac9347d7074d915beef663051e69d5bf69aac3acbdf8083a",
+      "published_bytes": 6651,
+      "published_sha256": "42905e03eab48e8c1b9a0326cc2d92c3a554575094dac909ecd004862ba51ee0",
+      "publication_edits": {
+        "markdown_whitespace_normalized": 1
+      }
+    },
+    {
+      "source_document": "CODEX-AGENT-BRIDGE-SETUP-HANDOFF-2026-10-02.md",
+      "published_document": "docs/handoffs/history/CODEX-AGENT-BRIDGE-SETUP-HANDOFF-2026-10-02.md",
+      "title": "OmniRoute Agent Bridge setup handoff",
+      "source_bytes": 35424,
+      "source_sha256": "422df996aad0372ff355315eae0e9ff2920dbdd755ad872f2975050c630b2040",
+      "published_bytes": 35961,
+      "published_sha256": "46d480eb50c13fc10998e93dba1d23ed878ec5c1ad1cce29797c8f292b5cd1c2",
+      "publication_edits": {
+        "document_links_rebased": 1,
+        "markdown_whitespace_normalized": 4
+      }
+    },
+    {
+      "source_document": "HANDOFF-OMNIROUTE-2026-10-02-NATIVE-QUALITY-AND-BUILD-BUDGET.md",
+      "published_document": "docs/handoffs/history/HANDOFF-OMNIROUTE-2026-10-02-NATIVE-QUALITY-AND-BUILD-BUDGET.md",
+      "title": "OmniRoute native quality and build budget handoff",
+      "source_bytes": 14538,
+      "source_sha256": "697996e1dcd747c9192ed8d6ca5c856e37cf8422fc8eb3357617fb2aa61c2fa1",
+      "published_bytes": 15156,
+      "published_sha256": "709daacc4643e3af6c16311a5b5ac1a53330d27d6320584408111911fe6badf6",
+      "publication_edits": {
+        "document_links_rebased": 2,
+        "markdown_whitespace_normalized": 1
+      }
+    },
+    {
+      "source_document": "HANDOFF-OMNIROUTE-2026-10-02.md",
+      "published_document": "docs/handoffs/history/HANDOFF-OMNIROUTE-2026-10-02.md",
+      "title": "সর্বশেষ হ্যান্ডঅফ: 2026-10-06",
+      "source_bytes": 189210,
+      "source_sha256": "5d8cc0ecc047aa88bff3d3e02d9a26f368e0168a32468bb904abfc098fdd0105",
+      "published_bytes": 188745,
+      "published_sha256": "780fb56e7e538bfc2dbf1c7f216efddeda29a4a283dcb801d4dd065e4e7dac05",
+      "publication_edits": {
+        "document_links_rebased": 30,
+        "private_client_names": 6,
+        "markdown_whitespace_normalized": 3,
+        "private_conversation_links": 1,
+        "unpublished_local_links": 32,
+        "overlay_links_rebased": 2,
+        "private_emails": 2,
+        "private_identifiers": 38
+      }
+    },
+    {
+      "source_document": "HANDOFF-OMNIROUTE-2026-10-03-CODING-QUALITY.md",
+      "published_document": "docs/handoffs/history/HANDOFF-OMNIROUTE-2026-10-03-CODING-QUALITY.md",
+      "title": "OmniRoute coding quality, context ebong long-session configuration",
+      "source_bytes": 14121,
+      "source_sha256": "507f46bb4a292d512e307cd002fd2c25f44f14ee580fda3113e6610c045d09ff",
+      "published_bytes": 14892,
+      "published_sha256": "d59860fae89bed0e39f3c5333b990f1f42f5a4791db0d78175e0dd73c78b1900",
+      "publication_edits": {
+        "document_links_rebased": 2,
+        "markdown_whitespace_normalized": 3
+      }
+    },
+    {
+      "source_document": "HANDOFF-OMNIROUTE-2026-10-03-CONSOLIDATED.md",
+      "published_document": "docs/handoffs/history/HANDOFF-OMNIROUTE-2026-10-03-CONSOLIDATED.md",
+      "title": "সর্বশেষ হ্যান্ডঅফ নির্দেশনা: 2026-10-06",
+      "source_bytes": 188846,
+      "source_sha256": "b715b1272121219ccb014a21d35157d26024b3a7def1cd216027db7a807f9ce5",
+      "published_bytes": 186659,
+      "published_sha256": "4e99fd889b73f22f8f5e5467bb07a460822d1f9e8de687e100b33059386e98a1",
+      "publication_edits": {
+        "document_links_rebased": 36,
+        "markdown_whitespace_normalized": 2,
+        "unpublished_local_links": 26,
+        "overlay_links_rebased": 1,
+        "private_identifiers": 44
+      }
+    },
+    {
+      "source_document": "HANDOFF-OMNIROUTE-2026-10-03-QUOTA-RECOVERY.md",
+      "published_document": "docs/handoffs/history/HANDOFF-OMNIROUTE-2026-10-03-QUOTA-RECOVERY.md",
+      "title": "OmniRoute Agent Bridge: quota recovery, native verification, deployment",
+      "source_bytes": 15867,
+      "source_sha256": "007bf09a780a29311d8f0f6fd0876588852c961149ab78675b09c5cc9176d42f",
+      "published_bytes": 16575,
+      "published_sha256": "4e78c512ed082380c8111961308cc7923beb5c658d9906981b0a1083b15d6aba",
+      "publication_edits": {
+        "document_links_rebased": 2,
+        "private_identifiers": 1
+      }
+    },
+    {
+      "source_document": "HANDOFF-OMNIROUTE-2026-10-04-CLAUDE-QUOTA-RECOVERY.md",
+      "published_document": "docs/handoffs/history/HANDOFF-OMNIROUTE-2026-10-04-CLAUDE-QUOTA-RECOVERY.md",
+      "title": "OmniRoute Claude quota recovery: live setup ebong verification",
+      "source_bytes": 20496,
+      "source_sha256": "12251fa1331dccd2a26af7f0a50118830041113668d779b4c790856f2c025bd1",
+      "published_bytes": 21010,
+      "published_sha256": "3dc1ca2df8aaf08db1641e10d432f8cf5798987e780d3d3f236468600c536569",
+      "publication_edits": {
+        "unpublished_local_links": 3
+      }
+    },
+    {
+      "source_document": "OMNIROUTE-AGENT-BRIDGE-BANGLA-2026-10-02.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-AGENT-BRIDGE-BANGLA-2026-10-02.md",
+      "title": "OmniRoute Agent Bridge: বিস্তারিত গবেষণা ও লোকাল যাচাই",
+      "source_bytes": 37002,
+      "source_sha256": "3fa9df5f850fb81ce1f0dde2b5911787feaae67e80ca13ec9f3826bf8242ddf7",
+      "published_bytes": 37809,
+      "published_sha256": "f757033fef5d8f2f8ea9c6c2ad6b32f614ba08291c368aa83208ae314c08647f",
+      "publication_edits": {}
+    },
+    {
+      "source_document": "OMNIROUTE-ANTIGRAVITY-AGY-IMAGE-GENERATION-RESEARCH-2026-10-03.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-ANTIGRAVITY-AGY-IMAGE-GENERATION-RESEARCH-2026-10-03.md",
+      "title": "OmniRoute diye Antigravity / agy image generation: live research ar experiment",
+      "source_bytes": 38212,
+      "source_sha256": "0367e5eba36d215bda8a5af1038529b651d8ffea3ef5e6686838966219670b14",
+      "published_bytes": 34958,
+      "published_sha256": "344ecb4a7b21eba79e06199c75c5bf5fd2d14b643715325299e27d8b2c60f133",
+      "publication_edits": {
+        "document_links_rebased": 1,
+        "markdown_whitespace_normalized": 3,
+        "unpublished_local_links": 72
+      }
+    },
+    {
+      "source_document": "OMNIROUTE-CLAUDE-NATIVE-PARITY-BANGLA-2026-10-02.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-CLAUDE-NATIVE-PARITY-BANGLA-2026-10-02.md",
+      "title": "OmniRoute দিয়ে native Claude: account, quality, scheduled task ও routine যাচাই",
+      "source_bytes": 39514,
+      "source_sha256": "a3a8e60898657cf11756b7646789fcd28276ecb08e7452cd0975306ca0d10d0f",
+      "published_bytes": 39667,
+      "published_sha256": "18a47ce42d269efcdc76a210c043e14dfb3f1db3af565226e81e6ef8ef66df08",
+      "publication_edits": {
+        "document_links_rebased": 4,
+        "markdown_whitespace_normalized": 3,
+        "unpublished_local_links": 9
+      }
+    },
+    {
+      "source_document": "OMNIROUTE-CLAUDE-QUOTA-AND-CLEANUP-2026-10-06.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-CLAUDE-QUOTA-AND-CLEANUP-2026-10-06.md",
+      "title": "OmniRoute: Claude quota, account pool, Cost Analyzer ও নিরাপদ cleanup",
+      "source_bytes": 22055,
+      "source_sha256": "ec61e97cd459c9c0f89a47af81584ac7a3158a3453c064343bde6f3add430086",
+      "published_bytes": 22716,
+      "published_sha256": "9b86a929f6e2faf44d373e505c89da887e0986bc0938de620f822fa7b02fdf2d",
+      "publication_edits": {
+        "document_links_rebased": 1,
+        "unpublished_local_links": 2,
+        "private_identifiers": 1
+      }
+    },
+    {
+      "source_document": "OMNIROUTE-CLAUDE-SETUP-TEST-BANGLA-2026-10-02.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-CLAUDE-SETUP-TEST-BANGLA-2026-10-02.md",
+      "title": "OmniRoute দিয়ে native Claude Code: setup ও বাস্তব পরীক্ষার রিপোর্ট",
+      "source_bytes": 28248,
+      "source_sha256": "c3208f0eaf59907afed29f4bb2785ef80221cb8e33be87f44706a251fd4b2152",
+      "published_bytes": 28883,
+      "published_sha256": "a78459f951fa48a58d90ba5aa1281137a42dcc3a3cab349729223455f3cac5a1",
+      "publication_edits": {
+        "markdown_whitespace_normalized": 8,
+        "unpublished_local_links": 1
+      }
+    },
+    {
+      "source_document": "OMNIROUTE-CODEX-IMAGEGEN-EXPERIMENT-2026-10-03.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-CODEX-IMAGEGEN-EXPERIMENT-2026-10-03.md",
+      "title": "OmniRoute API key diye Codex image generation: verified experiment",
+      "source_bytes": 28366,
+      "source_sha256": "9a51872de1ce4958ac5a77c2a647a7040e87ce12d76fa410d5b1f39f62686885",
+      "published_bytes": 28228,
+      "published_sha256": "0393c191ba89641ae5d8d9bf8fb791c75a66918e1e093431f7162dcf8f330e2c",
+      "publication_edits": {
+        "unpublished_local_links": 19
+      }
+    },
+    {
+      "source_document": "OMNIROUTE-DOCUMENT-MAP-2026-10-02.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-DOCUMENT-MAP-2026-10-02.md",
+      "title": "OmniRoute document map",
+      "source_bytes": 56734,
+      "source_sha256": "dfb9b42d1eca0f02e310299768313a10f173563dafd0dd7038de7a4646702af3",
+      "published_bytes": 60311,
+      "published_sha256": "2c154a4d92cfa17e4ac2bef670e6cd526f0ba8a0de7f8f7dac521312505eeaab",
+      "publication_edits": {
+        "document_links_rebased": 1,
+        "unpublished_local_links": 6,
+        "overlay_links_rebased": 1,
+        "upstream_links_pinned": 298
+      }
+    },
+    {
+      "source_document": "OMNIROUTE-EXISTING-CLAUDE-ACCOUNT-BRIDGE-BANGLA-2026-10-02.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-EXISTING-CLAUDE-ACCOUNT-BRIDGE-BANGLA-2026-10-02.md",
+      "title": "বিদ্যমান Claude account রেখে Agent Bridge ব্যবহার: যাচাই ও বর্তমান setup",
+      "source_bytes": 28505,
+      "source_sha256": "8e05fa82ae6b719fa6a72c443c0231ddf32c312b2fad757389f6f86e142fd0dd",
+      "published_bytes": 28872,
+      "published_sha256": "cf5533be18501872e8e2d90a2a3cb2ae72430969f74259c665c0ab373ba592bb",
+      "publication_edits": {
+        "document_links_rebased": 1,
+        "markdown_whitespace_normalized": 2,
+        "unpublished_local_links": 8
+      }
+    },
+    {
+      "source_document": "OMNIROUTE-FLASH-LOW-ACCOUNT-TEST-2026-10-06.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-FLASH-LOW-ACCOUNT-TEST-2026-10-06.md",
+      "title": "Gemini 3.8 Flash Low: পুনরায় connected account পরীক্ষার রিপোর্ট",
+      "source_bytes": 50198,
+      "source_sha256": "a63708d9c4148a690926fe8dcf4a7e2e5f743ba1aee4c9fb8014d628255ab7d4",
+      "published_bytes": 50658,
+      "published_sha256": "b814aefd7078e796f73d95ae82e5456539802abf84076f172dfc24c204b6de27",
+      "publication_edits": {
+        "document_links_rebased": 1,
+        "unpublished_local_links": 4,
+        "private_identifiers": 48
+      }
+    },
+    {
+      "source_document": "OMNIROUTE-GOOGLE-ACCOUNT-HEALTH-2026-10-06.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-GOOGLE-ACCOUNT-HEALTH-2026-10-06.md",
+      "title": "OmniRoute: Google account verification, Gemini quota ও token refresh",
+      "source_bytes": 65375,
+      "source_sha256": "be2406c7d25344c52b39c77323b0c493322223af56b9f55605cf1a5afd294e20",
+      "published_bytes": 64937,
+      "published_sha256": "65f758846fb9bd5fa389492600e78052618c638adb9efea26673d03028f148b1",
+      "publication_edits": {
+        "document_links_rebased": 4,
+        "unpublished_local_links": 12,
+        "overlay_links_rebased": 4,
+        "private_identifiers": 35
+      }
+    },
+    {
+      "source_document": "OMNIROUTE-GOOGLE-VERIFICATION-BUILD-2026-10-06.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-GOOGLE-VERIFICATION-BUILD-2026-10-06.md",
+      "title": "OmniRoute Google verification, routing ও production build: 2026-10-06",
+      "source_bytes": 58780,
+      "source_sha256": "a58309c06cb9d441c07ea94ea682df2a44d435154234a24dacd8d500a611507b",
+      "published_bytes": 58802,
+      "published_sha256": "df046fe3e53ded28b972937f5f4b188a6923e27097a122052393659049e0fb35",
+      "publication_edits": {
+        "unpublished_local_links": 5,
+        "overlay_links_rebased": 4,
+        "private_identifiers": 49
+      }
+    },
+    {
+      "source_document": "OMNIROUTE-GPT-6.1-SOL-SUPPORT-2026-10-04.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-GPT-6.1-SOL-SUPPORT-2026-10-04.md",
+      "title": "OmniRoute GPT 6.1 Sol support: setup, QA ar handoff",
+      "source_bytes": 12647,
+      "source_sha256": "7303a1c4d02eb3b44078449ffe645a8a7c7c32ec11584ba650764452565c1bd1",
+      "published_bytes": 13236,
+      "published_sha256": "d0dbe90a6663043672f680b07b0f6da4791e885563db3f8b0003502a95dd18b4",
+      "publication_edits": {
+        "private_identifiers": 3
+      }
+    },
+    {
+      "source_document": "OMNIROUTE-GPT-EMPTY-RESPONSE-ROOT-CAUSE-2026-10-10.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-GPT-EMPTY-RESPONSE-ROOT-CAUSE-2026-10-10.md",
+      "title": "GPT routing-এ Claude Code-এর misleading 502: নিশ্চিত কারণ",
+      "source_bytes": 25970,
+      "source_sha256": "b784f79216773b997e6fc56830bad5f0f0312de8a666b253e548a14fa83da757",
+      "published_bytes": 26367,
+      "published_sha256": "871ed492ea4f23e09d9e9f3f36b0d079e063cd9eeb3fdbc2ace94d4a1573a2c8",
+      "publication_edits": {
+        "markdown_whitespace_normalized": 3,
+        "unpublished_local_links": 4,
+        "private_identifiers": 1
+      }
+    },
+    {
+      "source_document": "OMNIROUTE-GPT-SELECTED-EFFORT-FIX-2026-10-10.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-GPT-SELECTED-EFFORT-FIX-2026-10-10.md",
+      "title": "OmniRoute: GPT selected effort সংশোধন",
+      "source_bytes": 24643,
+      "source_sha256": "350d9f6268e0bd004d08fed877c52075ad04773e35a670019f471f33adaf506f",
+      "published_bytes": 25304,
+      "published_sha256": "b73434ed919b22f18c153ac3f4e5e7d373693572004fd50e28bc28cd2ded123e",
+      "publication_edits": {
+        "markdown_whitespace_normalized": 3
+      }
+    },
+    {
+      "source_document": "OMNIROUTE-IMAGE-GENERATION-COMPLETE-RESEARCH-2026-10-03.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-IMAGE-GENERATION-COMPLETE-RESEARCH-2026-10-03.md",
+      "title": "OmniRoute image generation: complete research, experiments ar creation references",
+      "source_bytes": 45903,
+      "source_sha256": "919f1bca06f4607e5ec6f93e2d4570fb78eb83e57c139eb33830a679e03f815b",
+      "published_bytes": 43134,
+      "published_sha256": "ad228b0256e341608c228a8cb2cdacb6e73e48f944793b5050fba842e71cbb71",
+      "publication_edits": {
+        "document_links_rebased": 2,
+        "markdown_whitespace_normalized": 2,
+        "unpublished_local_links": 84,
+        "upstream_links_pinned": 6
+      }
+    },
+    {
+      "source_document": "OMNIROUTE-NATIVE-ARTIFACT-RECOVERY-2026-10-14.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-NATIVE-ARTIFACT-RECOVERY-2026-10-14.md",
+      "title": "Native Artifacts, thinking progress, Thread recovery ও GPT-6.1 Sol pricing",
+      "source_bytes": 36542,
+      "source_sha256": "bdfb93610fd80ef00175ff212aeb5a1b823e1bea8913ba888bb4957fe816fa60",
+      "published_bytes": 37028,
+      "published_sha256": "8c4350ad53a83c99970f3703a08775d2102a99e9a9e8f05cf20b32b1f72a6d08",
+      "publication_edits": {
+        "private_identifiers": 1
+      }
+    },
+    {
+      "source_document": "OMNIROUTE-NATIVE-COMPACTION-ROOT-CAUSE-2026-10-11.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-NATIVE-COMPACTION-ROOT-CAUSE-2026-10-11.md",
+      "title": "OmniRoute native `/compact` ব্যর্থতা — ২০২৬-১০-১১",
+      "source_bytes": 24227,
+      "source_sha256": "06b5094f624e823fb4cd6a01385dbfc8c4778bce9a2221c328922f7bbf12fae8",
+      "published_bytes": 24861,
+      "published_sha256": "2a31d26786f0eab2ab943be42a950739c1740e746baa1350cc7309f2b17cc8db",
+      "publication_edits": {}
+    },
+    {
+      "source_document": "OMNIROUTE-NATIVE-CONNECTORS-QA-2026-10-11.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-NATIVE-CONNECTORS-QA-2026-10-11.md",
+      "title": "Native connector পরীক্ষা ও discovery সংশোধন — ২০২৬-১০-১১",
+      "source_bytes": 34308,
+      "source_sha256": "65dcdc50791c6f9e99a63b9a2411bdf3aee408629d0a929a8802037bcb14ee76",
+      "published_bytes": 34989,
+      "published_sha256": "7c90778bc64ee0bb686b049a77c1c367f82deb0c36aadc353c9cbe78a1afd2ed",
+      "publication_edits": {
+        "document_links_rebased": 1
+      }
+    },
+    {
+      "source_document": "OMNIROUTE-NATIVE-MODEL-SWITCH-TOOLS-FIX-2026-10-09.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-NATIVE-MODEL-SWITCH-TOOLS-FIX-2026-10-09.md",
+      "title": "OmniRoute native model switch ও tool continuity — ২০২৬-১০-০৯",
+      "source_bytes": 25719,
+      "source_sha256": "0236243a5e39af67eaede254d0e9e6cfb0ef1b26660acaf881048391176b7b68",
+      "published_bytes": 26197,
+      "published_sha256": "3dfaf00ae7053b64c760bf3e2abf0f6d32a295b1ae61f8faf83e708847e777bb",
+      "publication_edits": {
+        "document_links_rebased": 2,
+        "unpublished_local_links": 1
+      }
+    },
+    {
+      "source_document": "OMNIROUTE-NATIVE-THINKING-SIGNATURE-2026-10-12.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-NATIVE-THINKING-SIGNATURE-2026-10-12.md",
+      "title": "Native thinking signature ও model-switch release — ২০২৬-১০-১২",
+      "source_bytes": 16101,
+      "source_sha256": "339a4cb830f82f6ca4ede1fc732a89c27924ca83bdc7ba2a97c6f892273a25e9",
+      "published_bytes": 16761,
+      "published_sha256": "95c3e13b6c6d5792d2f5c005f0ce9a2978e2daf9028e785c2b6d6170cf9ca369",
+      "publication_edits": {}
+    },
+    {
+      "source_document": "OMNIROUTE-NATIVE-TOOLS-INTEGRATIONS-QA-2026-10-09.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-NATIVE-TOOLS-INTEGRATIONS-QA-2026-10-09.md",
+      "title": "Claude Code CLI ও Claude native app — tools, integrations ও Skills QA",
+      "source_bytes": 75269,
+      "source_sha256": "f3032062b3b21f8d761739900a6fc1f9e8d363d36f14d8d161977e58b570153d",
+      "published_bytes": 73599,
+      "published_sha256": "6e99332d6b3b679223903a87776bf9f9caf0d2b2fec158ea0ba1621199de17be",
+      "publication_edits": {
+        "unpublished_local_links": 43
+      }
+    },
+    {
+      "source_document": "OMNIROUTE-REVIEW-2026-10-02.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-REVIEW-2026-10-02.md",
+      "title": "OmniRoute local setup: detailed review ar practical guide",
+      "source_bytes": 28623,
+      "source_sha256": "3469b53beb451d4d5253b28e98687e6a0aa4e903c66c4b8ab97b181afbaea24f",
+      "published_bytes": 29194,
+      "published_sha256": "7207a1dccdca9d559ba1914d50e79b4429e596061d27f2ad13a5eabd38bc55d4",
+      "publication_edits": {}
+    },
+    {
+      "source_document": "OMNIROUTE-REVIEW-BANGLA-2026-10-02.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-REVIEW-BANGLA-2026-10-02.md",
+      "title": "OmniRoute লোকাল সেটআপ: বিস্তারিত পর্যালোচনা ও ব্যবহারিক নির্দেশিকা",
+      "source_bytes": 44456,
+      "source_sha256": "316a98399a5768e697eab9f5d0be864a8633e4bdf96c61488893884e95109bd8",
+      "published_bytes": 45027,
+      "published_sha256": "b7c12d892d74c4df74b3ecb3716b0be415b040c360853b0c6537a76919bd775d",
+      "publication_edits": {}
+    },
+    {
+      "source_document": "OMNIROUTE-STORAGE-CLEANUP-2026-10-13.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-STORAGE-CLEANUP-2026-10-13.md",
+      "title": "OmniRoute storage cleanup — ২০২৬-১০-১৩",
+      "source_bytes": 12228,
+      "source_sha256": "94af847db06b3b5ad4d502fef85d30ff435a751caa4e0929e6513d4018381dff",
+      "published_bytes": 12269,
+      "published_sha256": "fca0951cce9b38a3363db3a6579f7d43d037963868e39a3b7e2cefd0ac0427de",
+      "publication_edits": {}
+    },
+    {
+      "source_document": "OMNIROUTE-TOKEN-USAGE-INVESTIGATION-2026-10-07.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-TOKEN-USAGE-INVESTIGATION-2026-10-07.md",
+      "title": "OmniRoute দিয়ে Claude usage বেড়ে যাওয়ার পূর্ণ তদন্ত",
+      "source_bytes": 78887,
+      "source_sha256": "ac5a429c16259274ccc7af67b21d55086e7eba8c7432acb3071a6d058bd5a3d8",
+      "published_bytes": 78856,
+      "published_sha256": "166f18f451c7ce094bfbf549365ba23ba956bd35f675c57c71bd525e5dee471e",
+      "publication_edits": {
+        "markdown_whitespace_normalized": 5,
+        "unpublished_local_links": 48,
+        "private_identifiers": 42
+      }
+    },
+    {
+      "source_document": "OMNIROUTE-USAGE-AUDIT-2026-10-14.md",
+      "published_document": "docs/handoffs/history/OMNIROUTE-USAGE-AUDIT-2026-10-14.md",
+      "title": "Native usage audit — 2026-10-14",
+      "source_bytes": 27766,
+      "source_sha256": "223f08fd5b585ddb6fdba3c51bfbc4354d7ff0537449bcdd9042ef5aa0475968",
+      "published_bytes": 28411,
+      "published_sha256": "1b5a0ae45a64bdd560bc2de61505ec761532a94428bedea89f72f009d9a7afc9",
+      "publication_edits": {}
+    },
+    {
+      "source_document": "README.md",
+      "published_document": "docs/handoffs/history/README.md",
+      "title": "OmniRoute লোকাল সেটআপ (NexaLance)",
+      "source_bytes": 28205,
+      "source_sha256": "df702b0964b9bf759c4a39fff557570e8e8e03d3b66564b5fb8b98923bd17077",
+      "published_bytes": 29012,
+      "published_sha256": "82ac3e16cabe312e9425124d5aab73111ace91165ce5fc7ccd711565cbaf73b0",
+      "publication_edits": {
+        "document_links_rebased": 3
+      }
+    },
+    {
+      "source_document": "REPORT-FABLE-USAGE-INVESTIGATION-2026-10-05.md",
+      "published_document": "docs/handoffs/history/REPORT-FABLE-USAGE-INVESTIGATION-2026-10-05.md",
+      "title": "Fable usage investigation",
+      "source_bytes": 9097,
+      "source_sha256": "1cce559b99fab2589073e9ff6dbb07ff75badc367c10c052c4eedf2c6aa9cd73",
+      "published_bytes": 9832,
+      "published_sha256": "ab3a6850c756a4f5a030896be0979b22bed49b3d9eb6fc91b02f04c7a035025b",
+      "publication_edits": {
+        "markdown_whitespace_normalized": 2,
+        "private_identifiers": 1
+      }
+    },
+    {
+      "source_document": "backup/omniroute-production-deploy-2026-10-06/DEPLOYMENT-RESUME-2026-10-06.md",
+      "published_document": "docs/handoffs/history/backup/omniroute-production-deploy-2026-10-06/DEPLOYMENT-RESUME-2026-10-06.md",
+      "title": "2026-10-06 deployment প্রস্তুতি: resume ও recovery",
+      "source_bytes": 3763,
+      "source_sha256": "f7e0babe0f95a3f45e5d8592d5d42883530aaece186e4e85eb2276c565a146cd",
+      "published_bytes": 4555,
+      "published_sha256": "19c137c889b1af23d0a4af5fd3381317c4917442e3517f5c95cd7d94dbbf8dbf",
+      "publication_edits": {
+        "document_links_rebased": 1
+      }
+    },
+    {
+      "source_document": "backup/omniroute-worktrees-2026-10-06-092216/RESTORE-FINAL.md",
+      "published_document": "docs/handoffs/history/backup/omniroute-worktrees-2026-10-06-092216/RESTORE-FINAL.md",
+      "title": "OmniRoute development checkout backup",
+      "source_bytes": 6237,
+      "source_sha256": "86a5202d451227e64dea709308a8622da9f59f2dde8acaa0d1b5645ca616340a",
+      "published_bytes": 6830,
+      "published_sha256": "b0afefedee81766e89d9bb31c563396ae25cdacc020a1c0aeb7c0c414afaad0e",
+      "publication_edits": {}
+    },
+    {
+      "source_document": "backup/omniroute-worktrees-2026-10-06-092216/RESTORE-QUOTA-COST-UPDATE-2026-10-06.md",
+      "published_document": "docs/handoffs/history/backup/omniroute-worktrees-2026-10-06-092216/RESTORE-QUOTA-COST-UPDATE-2026-10-06.md",
+      "title": "Quota/Cost source update recovery",
+      "source_bytes": 4267,
+      "source_sha256": "a19c36a821e4a541819d0ec9eb3f1c86b5d4e012a81190e0e3bcd39c4c7179d6",
+      "published_bytes": 4982,
+      "published_sha256": "6dfcc9cad87215f0abbed820cdce92cea37c9f728e8d6fc27f3477555cc8fdb5",
+      "publication_edits": {}
+    },
+    {
+      "source_document": "backup/omniroute-worktrees-2026-10-06-092216/RESTORE.md",
+      "published_document": "docs/handoffs/history/backup/omniroute-worktrees-2026-10-06-092216/RESTORE.md",
+      "title": "OmniRoute development checkout backup",
+      "source_bytes": 4605,
+      "source_sha256": "e6307d95b9948d6602d85b3f52932c518e8f73f69a054279371e7700a93a4358",
+      "published_bytes": 5197,
+      "published_sha256": "ac4c24647cee8219e3ca9026a02c87faab27b072e6efb75ae8136385c3ed8318",
+      "publication_edits": {}
+    },
+    {
+      "source_document": "evidence/image-model-matrix-2026-10-03/report-addendum.md",
+      "published_document": "docs/handoffs/history/evidence/image-model-matrix-2026-10-03/report-addendum.md",
+      "title": "Ei second round-e 12-ti requested model combination ar 1-ti invalid-model control diye real generation kora hoyeche. Sob request successful PNG return koreche. Kintu 13-ti completed response-i image tool-er model `gpt-image-2-codex` boleche. Ei connected Codex route diye GPT Image 2.5 Sunburst ba Flare select kora verified hoyni.",
+      "source_bytes": 15491,
+      "source_sha256": "f21aab3316d54b52b2f42fd293398ab753f0f2c284e6c38d58a0b6dedb0f7310",
+      "published_bytes": 16155,
+      "published_sha256": "dd5057c2e2c3597d8240af675b6f20ca635f6cd60fe03e0417fa53193be147f7",
+      "publication_edits": {
+        "unpublished_local_links": 4
+      }
+    },
+    {
+      "source_document": "reports/claude-code-gpt-routing-audit-2026-10-09/REPORT.md",
+      "published_document": "docs/handoffs/history/reports/claude-code-gpt-routing-audit-2026-10-09/REPORT.md",
+      "title": "Claude Code → OmniRoute target routing audit — 2026-10-09",
+      "source_bytes": 8598,
+      "source_sha256": "b6844f0d9658c09543ab46688f70ddd93a5f601be11d7d0d383a8942d9d9e22f",
+      "published_bytes": 9390,
+      "published_sha256": "7789860f3c3610b8185aac2b3eb22a9eb6c2e5ee21e0eb88b12091a43c9890bf",
+      "publication_edits": {}
+    },
+    {
+      "source_document": "reports/glm-model-audit-2026-10-09/REPORT.md",
+      "published_document": "docs/handoffs/history/reports/glm-model-audit-2026-10-09/REPORT.md",
+      "title": "OmniRoute GLM model ও max-thinking live audit — ২০২৬-১০-০৯",
+      "source_bytes": 18669,
+      "source_sha256": "cc915faf2884b8b23bca92157309f75088f0a1ed0cd1fc1e4afb44fc1e60f4a1",
+      "published_bytes": 20209,
+      "published_sha256": "7767889c33d0f070adec122bf671f9f2f08f8c613d24bffd1204d78b87fc21b0",
+      "publication_edits": {
+        "unpublished_local_links": 15,
+        "private_identifiers": 9
+      }
+    },
+    {
+      "source_document": "reports/omniroute-storage-cleanup-2026-10-09/REPORT.md",
+      "published_document": "docs/handoffs/history/reports/omniroute-storage-cleanup-2026-10-09/REPORT.md",
+      "title": "OmniRoute storage cleanup — 2026-10-09",
+      "source_bytes": 9513,
+      "source_sha256": "d371f6608ddf472f25a954e0c6da6560c92fa0164d0d9aca45b19b32d259f755",
+      "published_bytes": 9780,
+      "published_sha256": "661cd742455493a7f84dccb85ca2c5a29c0e62dc0050ad98e97aeb55a0b97579",
+      "publication_edits": {}
+    }
+  ]
+}

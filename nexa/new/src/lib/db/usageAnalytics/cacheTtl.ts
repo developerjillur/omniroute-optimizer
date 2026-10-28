@@ -15,13 +15,16 @@ export function withCacheTtlColumns(source: string, params: Record<string, unkno
   const optionalColumns = [...TTL_COLUMNS, ...Object.keys(COST_COLUMNS)];
   try {
     // LIMIT 0 resolves columns without scanning rows, including on lazy adapters.
-    db.prepare(`SELECT ${optionalColumns.join(", ")} FROM ${source} AS cache_ttl_source LIMIT 0`).all(
-      params
-    );
+    db.prepare(
+      `SELECT ${optionalColumns.join(", ")} FROM ${source} AS cache_ttl_source LIMIT 0`
+    ).all(params);
     return source;
   } catch (error) {
     const message = String((error as Error).message);
-    if (!/no such column/i.test(message) || !optionalColumns.some((column) => message.includes(column)))
+    if (
+      !/no such column/i.test(message) ||
+      !optionalColumns.some((column) => message.includes(column))
+    )
       throw error;
   }
   const missing = optionalColumns.filter((column) => {

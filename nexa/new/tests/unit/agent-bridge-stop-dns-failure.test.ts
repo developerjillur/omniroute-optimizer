@@ -99,8 +99,12 @@ for (const missingPassword of [true, false]) {
     writeBridgeIntent(dir, true);
     manager.__setServerProcessForTest(child as unknown as ChildProcess, process.pid);
     const deps = {
-      removeDNSEntry: async () => { dnsWrites++; },
-      removeDNSEntries: async () => { dnsWrites++; },
+      removeDNSEntry: async () => {
+        dnsWrites++;
+      },
+      removeDNSEntries: async () => {
+        dnsWrites++;
+      },
       collectManagedHosts: () => ["synthetic-claude.example.test"],
       hasManagedDnsEntries: () => true,
       canRunPrivilegedMitmSteps: () => !missingPassword,

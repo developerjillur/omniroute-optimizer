@@ -1,0 +1,778 @@
+{
+  "version": "3.8.51",
+  "commit": "c1e30b7676975feb298b49eff6ff58923c04b89e",
+  "files": [
+    {
+      "filename": "001_initial_schema.sql",
+      "gitBlob": "d366cde3c8f4863db6369da6eb5112b516cead93"
+    },
+    {
+      "filename": "002_mcp_a2a_tables.sql",
+      "gitBlob": "4ace15d4c9d2e2202e5b8f50dc0101d2b48375eb"
+    },
+    {
+      "filename": "003_provider_node_custom_paths.sql",
+      "gitBlob": "8ba79c7c09ef4cbfc83e6b2492ccf2a89b30b17f"
+    },
+    {
+      "filename": "004_proxy_registry.sql",
+      "gitBlob": "62cdd566a71a1c0da9392c8bbba09c7d3c33cb69"
+    },
+    {
+      "filename": "005_combo_agent_fields.sql",
+      "gitBlob": "cf84b1ebf05e750e3c86ff7663f4baad91b38271"
+    },
+    {
+      "filename": "006_detailed_request_logs.sql",
+      "gitBlob": "b1952c3792e891e20d612b16945533035e675642"
+    },
+    {
+      "filename": "007_search_request_type.sql",
+      "gitBlob": "3917771df83458f5cf89e46b67acb7947bb40ef0"
+    },
+    {
+      "filename": "008_registered_keys.sql",
+      "gitBlob": "7cd2b76ded9d3378e346d88bb942eefddaff89c2"
+    },
+    {
+      "filename": "009_requested_model.sql",
+      "gitBlob": "95b82ff4991515a28dc2967b89d48a52c85b6873"
+    },
+    {
+      "filename": "010_model_combo_mappings.sql",
+      "gitBlob": "08b4b822280e953b5c0ff2e6c7ad8613fba59914"
+    },
+    {
+      "filename": "011_webhooks.sql",
+      "gitBlob": "ef6ed3b7e7d29b190861d477408fa57c0c2ed5d2"
+    },
+    {
+      "filename": "012_fix_token_input_cache_tokens.sql",
+      "gitBlob": "20a687751765b6b15bcc307417c48a5cc45f00af"
+    },
+    {
+      "filename": "013_quota_snapshots.sql",
+      "gitBlob": "0843b42cdeb866235e097615dd9ed272ed4bdeb9"
+    },
+    {
+      "filename": "014_unified_log_artifacts.sql",
+      "gitBlob": "9f98ba72207dfdfad5802842d365209b5ea61115"
+    },
+    {
+      "filename": "015_create_memories.sql",
+      "gitBlob": "e98b0943918f3eafb1d62822735ac7ac4807edf6"
+    },
+    {
+      "filename": "016_create_skills.sql",
+      "gitBlob": "f765efb284282b788492899b6c1b9d7446f851ea"
+    },
+    {
+      "filename": "017_version_manager_upstream_proxy.sql",
+      "gitBlob": "337e7d9d7aa4b6663284aa649f3ed41976014ad2"
+    },
+    {
+      "filename": "018_call_logs_detailed_tokens.sql",
+      "gitBlob": "46cd0d2dcea4f8077feb6fca10ffd9efe3a3c01b"
+    },
+    {
+      "filename": "019_context_handoffs.sql",
+      "gitBlob": "86ec995a11e4be2db6c98389774fc4875b758533"
+    },
+    {
+      "filename": "020_combo_sort_order.sql",
+      "gitBlob": "4f07e4781dbd0b7c6ea0cdbe705e6a9eb0052ee8"
+    },
+    {
+      "filename": "021_combo_call_log_targets.sql",
+      "gitBlob": "665434ab28f4e87a5f2f082baf46106a6684565a"
+    },
+    {
+      "filename": "022_add_memory_fts5.sql",
+      "gitBlob": "8042a130805cf391e199376bfef93bdef189a985"
+    },
+    {
+      "filename": "023_fix_memory_fts_uuid.sql",
+      "gitBlob": "c1140366572980f4bbbd02e96749b2536730893a"
+    },
+    {
+      "filename": "024_create_sync_tokens.sql",
+      "gitBlob": "afc5745319ac1053f983a8909ef6fcf89458a016"
+    },
+    {
+      "filename": "025_call_logs_summary_storage.sql",
+      "gitBlob": "194b106e94f81265eaa5c4873eda25068170a6d2"
+    },
+    {
+      "filename": "027_skill_mode_and_metadata.sql",
+      "gitBlob": "523acdea48a899e9f434315027c1799da5d376b6"
+    },
+    {
+      "filename": "028_create_files_and_batches.sql",
+      "gitBlob": "99c6ad962088279301ab02755210a22fc7da3061"
+    },
+    {
+      "filename": "029_provider_connection_max_concurrent.sql",
+      "gitBlob": "344e3105b921e15d2e5341cacdd6397796547cba"
+    },
+    {
+      "filename": "030_create_eval_runs.sql",
+      "gitBlob": "e66b3a31efb34487700c6d6d8e2df5524c37b1a7"
+    },
+    {
+      "filename": "031_create_eval_suites.sql",
+      "gitBlob": "1237f1d47842bf37d7e27a468541b201464c8fa7"
+    },
+    {
+      "filename": "032_apikey_lifecycle.sql",
+      "gitBlob": "112e5f66d4b01c83ae9d1a07ac533ab4df23f4ed"
+    },
+    {
+      "filename": "033_create_reasoning_cache.sql",
+      "gitBlob": "697428432551af7af9bb459622549ff085f67ee4"
+    },
+    {
+      "filename": "034_compression_settings.sql",
+      "gitBlob": "1a63062c32cdff2ffe637dde591cc4d05c7ba95e"
+    },
+    {
+      "filename": "035_standard_compression_config.sql",
+      "gitBlob": "f18cbe00b7def7c3a2b99008864d35bbfa1de098"
+    },
+    {
+      "filename": "036_aggressive_compression.sql",
+      "gitBlob": "bd9bf23647e1e98668a7fab5dda26625b8fe7502"
+    },
+    {
+      "filename": "037_ultra_compression.sql",
+      "gitBlob": "b8ce4dfa173d4472dd240d49ecb8c23dae43124f"
+    },
+    {
+      "filename": "038_compression_analytics.sql",
+      "gitBlob": "eff5aadb16c314f52e1b032545ce4e1e2a2d665f"
+    },
+    {
+      "filename": "039_compression_cache_stats.sql",
+      "gitBlob": "1b227f1c9d287ff9df0ebfec181be7ebcddda854"
+    },
+    {
+      "filename": "040_oneproxy_proxy_fields.sql",
+      "gitBlob": "464b9ca24211650736de85b95c17858b8f338684"
+    },
+    {
+      "filename": "041_compression_receipts.sql",
+      "gitBlob": "5e4c4a9ee3774cce08225ac991737d2eb919a8f7"
+    },
+    {
+      "filename": "042_compression_combos.sql",
+      "gitBlob": "1358124c0b2a7062785c29095bf78a1986f420dc"
+    },
+    {
+      "filename": "043_default_compression_combo_pipeline.sql",
+      "gitBlob": "f0c60cda980028765d4a8f397933ab13889b2c38"
+    },
+    {
+      "filename": "044_usage_history_api_key_backfill.sql",
+      "gitBlob": "870ea285bf0ac0081bc0dff4e95c8d17adfab4d7"
+    },
+    {
+      "filename": "045_compression_tokens.sql",
+      "gitBlob": "e45cb59f286afe3f62ea0b9cb5673f9f44716fb0"
+    },
+    {
+      "filename": "046_database_settings.sql",
+      "gitBlob": "6fb9864390a5c9305253750f7633a81fcbcde94c"
+    },
+    {
+      "filename": "047_aggregation_tables.sql",
+      "gitBlob": "c7e4fb0bcd425ec8e5338a2c0827efb95d259953"
+    },
+    {
+      "filename": "048_summary_indexes.sql",
+      "gitBlob": "d016001cfaa2274115f4e62b0e9dc7616524ad02"
+    },
+    {
+      "filename": "049_compression_analytics_indexes.sql",
+      "gitBlob": "21a7fc1ff423657d1f4c212f944bf4780d354caa"
+    },
+    {
+      "filename": "050_session_account_affinity.sql",
+      "gitBlob": "5a93707fb312aecbf85e70129c0498558ef000f0"
+    },
+    {
+      "filename": "051_hot_path_db_indexes.sql",
+      "gitBlob": "f342c841f1277edc7c5a9eeadd07522d33b1a045"
+    },
+    {
+      "filename": "052_api_key_combo_throttle.sql",
+      "gitBlob": "f3dfafffcc938285d0d444b8dc18570fe0afed74"
+    },
+    {
+      "filename": "053_remove_status_from_files.sql",
+      "gitBlob": "5d2c8a570bc6690bc37dbe4a54cf0b95db55bdec"
+    },
+    {
+      "filename": "054_usage_history_service_tier.sql",
+      "gitBlob": "0f18aea384916fbb268092ce74f1b01fd05373fb"
+    },
+    {
+      "filename": "056_mcp_accessibility_compression.sql",
+      "gitBlob": "3dd2e3bc425a603aaede2c1d3e198168c64cb457"
+    },
+    {
+      "filename": "057_provider_connection_quota_window_thresholds.sql",
+      "gitBlob": "01823dbf58631a750b57daa972d711af6256ae96"
+    },
+    {
+      "filename": "058_command_code_auth_sessions.sql",
+      "gitBlob": "f1e927443f267d71802f9f384d8f8f7f0cdb245b"
+    },
+    {
+      "filename": "059_manifest_routing.sql",
+      "gitBlob": "4e504a7c1c2ec26c0b120e46eb651d90248ea41c"
+    },
+    {
+      "filename": "060_create_gamification.sql",
+      "gitBlob": "21bcbcec974e6e8658c756d42fda23e5ae864bd8"
+    },
+    {
+      "filename": "061_cloud_agent_credentials.sql",
+      "gitBlob": "c6d3bdd3fbcb20b254361d0a913a2a5ee84a44fa"
+    },
+    {
+      "filename": "062_usage_history_combo_strategy.sql",
+      "gitBlob": "23479d06fe595d0030c8cc3bfd17b3d15701c8ca"
+    },
+    {
+      "filename": "063_add_last_model_to_handoffs.sql",
+      "gitBlob": "e1b213d3d3522362b836f37e0652545629127df2"
+    },
+    {
+      "filename": "064_create_session_model_history.sql",
+      "gitBlob": "0f8543eaaaa1c1eb94a40db732803766432b6f33"
+    },
+    {
+      "filename": "065_middleware_hooks.sql",
+      "gitBlob": "10554f2c3681501b36c35aa81a392973f2d693a6"
+    },
+    {
+      "filename": "066_api_key_groups.sql",
+      "gitBlob": "55c5959429e6f8a52f0a73b40c240d89cb1e3ea4"
+    },
+    {
+      "filename": "067_relay_proxies.sql",
+      "gitBlob": "7e33003a83911768f622d2a7cf15b89f97ab7253"
+    },
+    {
+      "filename": "068_free_proxies.sql",
+      "gitBlob": "9dbdbaadabac8de9f113955d1f48a534245cba41"
+    },
+    {
+      "filename": "069_webhook_deliveries.sql",
+      "gitBlob": "1e343d296dcd77258ba2412e9e9a2c1cc6b2d5be"
+    },
+    {
+      "filename": "070_webhooks_kind_metadata.sql",
+      "gitBlob": "75e4c1936b92fba601016a5096b342543746843a"
+    },
+    {
+      "filename": "071_services.sql",
+      "gitBlob": "b37b01c9073df32a00e55197bce91192bd73daf6"
+    },
+    {
+      "filename": "072_free_proxies_fk.sql",
+      "gitBlob": "e37ce7a161cbb312393782b9fe64b9bb8bf22240"
+    },
+    {
+      "filename": "073_per_model_token_limits.sql",
+      "gitBlob": "e64360f4aa50778157fc21a62334bb3808962eed"
+    },
+    {
+      "filename": "074_discovery_results.sql",
+      "gitBlob": "f72b46c5ccafdd7bc9e47b5d5a1e5f00dbb0f926"
+    },
+    {
+      "filename": "075_api_key_self_service_usage_scopes.sql",
+      "gitBlob": "586e5c5f2c36757339c7178336f4ddcb3a818cbd"
+    },
+    {
+      "filename": "076_create_plugins.sql",
+      "gitBlob": "c4bf8e3f030817ff8ecd00d15dd6d3fe91b1410d"
+    },
+    {
+      "filename": "077_api_key_stream_default_mode.sql",
+      "gitBlob": "0c8ffff0e4168aeb50e2c5aa10b2f6f9f4a74176"
+    },
+    {
+      "filename": "078_quota_consumption.sql",
+      "gitBlob": "71fb2cbafb842d1aa759a169137bff4da5ef4d2a"
+    },
+    {
+      "filename": "079_provider_plans.sql",
+      "gitBlob": "eb39ed29ab44ca8b953816af5c85bc5c69fa8511"
+    },
+    {
+      "filename": "080_agent_bridge.sql",
+      "gitBlob": "a04ba633ca6e2de3e12bdc01c2a103690656443c"
+    },
+    {
+      "filename": "081_inspector_custom_hosts.sql",
+      "gitBlob": "3870ed02106aeff6397cf17fd249711a575bfd6d"
+    },
+    {
+      "filename": "082_inspector_sessions.sql",
+      "gitBlob": "15e038e3f9af316bf33b6ce0110c03deb367b39f"
+    },
+    {
+      "filename": "083_memory_vec.sql",
+      "gitBlob": "ab7204f5d9cd5fbaeddab7e6742eb063950f8a49"
+    },
+    {
+      "filename": "084_playground_presets.sql",
+      "gitBlob": "979d31c9b2541e9019e3c39aba32fae407b1eda6"
+    },
+    {
+      "filename": "085_quota_pools.sql",
+      "gitBlob": "d5fb173f4a766e36464a352973097ad6339bd28c"
+    },
+    {
+      "filename": "086_api_key_allowed_quotas.sql",
+      "gitBlob": "21e85399f38fc5c52f3aab384e143a876f96d7a0"
+    },
+    {
+      "filename": "087_quota_pool_connections.sql",
+      "gitBlob": "e823ff68dba29f6538ac55c31bda7521ad847aee"
+    },
+    {
+      "filename": "088_quota_groups.sql",
+      "gitBlob": "c69a3bcfba4721c508f560606df696b6c59204e7"
+    },
+    {
+      "filename": "089_add_disable_non_public_to_api_keys.sql",
+      "gitBlob": "06fe10dd1a9536e938e903d265d03018d07c8443"
+    },
+    {
+      "filename": "090_plugin_metrics.sql",
+      "gitBlob": "03e94dfe4fe8f56d583535304ee0cfb1a4a472ea"
+    },
+    {
+      "filename": "091_plugin_analytics.sql",
+      "gitBlob": "b84a9d1d7057bdb9532b384049f5bc22eb606f0c"
+    },
+    {
+      "filename": "092_api_key_context_sources.sql",
+      "gitBlob": "c5df007ab8ed152be6fb8c9758f49e82cdad0a88"
+    },
+    {
+      "filename": "093_proxy_enable_toggles.sql",
+      "gitBlob": "4ac2d0465985fa3fda4a405d44e8067764ba85e1"
+    },
+    {
+      "filename": "094_per_key_proxy_toggles.sql",
+      "gitBlob": "acbb43a5a545a71ea8bf5592c267bf5a848d6358"
+    },
+    {
+      "filename": "095_provider_node_custom_headers.sql",
+      "gitBlob": "b2952eafb2b9bd851fe9c4d7f3d004bd69d4fb6a"
+    },
+    {
+      "filename": "096_sync_context_cache_protection.sql",
+      "gitBlob": "542adcf2aee382aa86ef0a2f4ac2c07a7c45ce74"
+    },
+    {
+      "filename": "097_model_intelligence.sql",
+      "gitBlob": "686e2cb4536a952f234f1c45d7f920f9afdd8c1a"
+    },
+    {
+      "filename": "098_clear_semantic_cache_for_key_isolation.sql",
+      "gitBlob": "92e0570305bda8c499c6dc20bb90b00019810d95"
+    },
+    {
+      "filename": "099_proxy_family.sql",
+      "gitBlob": "3364b008cc35fb512abee6b1a7aa648ad5c52b21"
+    },
+    {
+      "filename": "100_cli_access_tokens.sql",
+      "gitBlob": "3626ee1cb78b415d3840eed0d1b302272e87083e"
+    },
+    {
+      "filename": "101_api_key_usage_limits.sql",
+      "gitBlob": "2d2d271f3e453c10168d7e85fc91af0bfd5bd315"
+    },
+    {
+      "filename": "102_compression_engines_map.sql",
+      "gitBlob": "72feb2e98f5764fe231090ed89c2503b8ef72f1c"
+    },
+    {
+      "filename": "103_strip_legacy_combo_config_keys.sql",
+      "gitBlob": "7a702dd1221c5962c73943a6b9d39b33deeb0645"
+    },
+    {
+      "filename": "104_normalize_database_cache_size.sql",
+      "gitBlob": "2c24afe8d0ac8b7e3a84a7aa06e5f143c7a123c5"
+    },
+    {
+      "filename": "105_usage_history_endpoint.sql",
+      "gitBlob": "55a459b1383e9dc4ca9c18267c2ac5eedba58ef5"
+    },
+    {
+      "filename": "106_quota_allocation_model_caps.sql",
+      "gitBlob": "6a96a04f8b49a5e181644cf3c31cf21e6e848dc6"
+    },
+    {
+      "filename": "107_quota_combos_quota_share_strategy.sql",
+      "gitBlob": "3f16eb0deb27c7a733d439fac1c8b45426d3048c"
+    },
+    {
+      "filename": "108_provider_quota_reset_events.sql",
+      "gitBlob": "2565cf074a358b3a95605919fbc56250ae09695f"
+    },
+    {
+      "filename": "109_call_logs_correlation_id.sql",
+      "gitBlob": "e053f9b845d00ce58e017bf575ae0bef7a0edaab"
+    },
+    {
+      "filename": "110_model_context_overrides.sql",
+      "gitBlob": "313e3ae6955cd99e9f2dc43a2304ad77ce6aefb7"
+    },
+    {
+      "filename": "111_memory_typed_decay.sql",
+      "gitBlob": "dd8fd93badd5d2d8dd16b12400a096fe0598e673"
+    },
+    {
+      "filename": "112_batch_item_checkpoints.sql",
+      "gitBlob": "e93917f2427c9832cf906a4dc5c8f2179b97dbfa"
+    },
+    {
+      "filename": "113_provider_node_icon_url.sql",
+      "gitBlob": "51737ca8ee33b9a504cfb01fa497ab063fde3691"
+    },
+    {
+      "filename": "114_mux_service_seed.sql",
+      "gitBlob": "eabd381f03d6b057dcdbc14e32ef3bf9d70a38ca"
+    },
+    {
+      "filename": "115_bifrost_service.sql",
+      "gitBlob": "b4a3f1bb0211afd978a574adeb833959653732e6"
+    },
+    {
+      "filename": "116_call_logs_reasoning_source.sql",
+      "gitBlob": "8cd507985cb9f2da48310b19218b05289f6b7837"
+    },
+    {
+      "filename": "117_proxy_pool_rotation.sql",
+      "gitBlob": "edd1426072443be75bc2949da607134274e34b7b"
+    },
+    {
+      "filename": "118_provider_param_filters.sql",
+      "gitBlob": "b5f17702d8c8d2676dffc9d52bdcf0f61697de4f"
+    },
+    {
+      "filename": "119_model_capability_overrides.sql",
+      "gitBlob": "5ab9614f850b7e5f1d37ef3c0a3b71602b0e5205"
+    },
+    {
+      "filename": "120_interception_rules.sql",
+      "gitBlob": "7e7e1593be37d853d178233454a308d0dd0bb45a"
+    },
+    {
+      "filename": "122_free_proxy_sync_errors.sql",
+      "gitBlob": "ee98c70e260f88c951d78843335565b6932f0ec8"
+    },
+    {
+      "filename": "123_quota_auto_ping.sql",
+      "gitBlob": "3ef7982e73bf33091a6c1c97f733bd0151f33721"
+    },
+    {
+      "filename": "124_generic_session_affinity_ttl.sql",
+      "gitBlob": "d559289c631cb1371450b3a0ff965e001dc51f55"
+    },
+    {
+      "filename": "125_provider_connection_quota_visibility.sql",
+      "gitBlob": "26bf92df36a96d165e59f3cf7b8669ee4efb974e"
+    },
+    {
+      "filename": "126_reasoning_routing_rules.sql",
+      "gitBlob": "d7b4d6791d5ead171461328da8d0eee1454c761d"
+    },
+    {
+      "filename": "127_usage_history_account_identity.sql",
+      "gitBlob": "c456c9260ddc862e451b1f976ca08b7484f8c422"
+    },
+    {
+      "filename": "128_auto_candidate_overrides.sql",
+      "gitBlob": "c6262f25348b67e4ff313ec885bfbb0ae472ed18"
+    },
+    {
+      "filename": "129_usage_history_codex_strong_identity.sql",
+      "gitBlob": "0d55660b11ce8a967de76eb836960f25dedb0b6a"
+    },
+    {
+      "filename": "130_remove_unregistered_qwen_data.sql",
+      "gitBlob": "f32f694b6f0f52aabf329c3591199a0731858b2c"
+    },
+    {
+      "filename": "131_proxy_subscriptions.sql",
+      "gitBlob": "5461e857ee20a031a1da0e5aab06cc367cbaf4f0"
+    },
+    {
+      "filename": "132_proxy_subscriptions_meta.sql",
+      "gitBlob": "cb2a1f700a2e168679b597db1b3823f2a98dc5d7"
+    },
+    {
+      "filename": "133_call_logs_session_tag.sql",
+      "gitBlob": "13408b1b53aa34f03514da5f1bb66453628db294"
+    },
+    {
+      "filename": "134_proxy_logs_egress_ip.sql",
+      "gitBlob": "a98544a280ce69e499d5b299967ced36c582b6e4"
+    },
+    {
+      "filename": "135_migrate_model_capability_max_token.sql",
+      "gitBlob": "be8fbecfda927947e81d49e9082113df1cf692c4"
+    },
+    {
+      "filename": "136_radar_cache_settings.sql",
+      "gitBlob": "42bcec9d5eaee10fff4905c7a015bbb8af8f9a7e"
+    },
+    {
+      "filename": "137_auto_restart_adopted.sql",
+      "gitBlob": "f4177ed350d12fc54192ef6c80e71967ee10f5c3"
+    },
+    {
+      "filename": "138_dario_fallback_backend.sql",
+      "gitBlob": "8dc6f28f73abe9f68bddc02bfc4635a6bddff753"
+    },
+    {
+      "filename": "139_ccr_blocks.sql",
+      "gitBlob": "a1dd4b87cb7bb85857e145df36aae0c71c6b10ff"
+    },
+    {
+      "filename": "140_connection_runtime_state.sql",
+      "gitBlob": "e196b78a6f8141d0df2edf2a80e6dcfd57a95467"
+    },
+    {
+      "filename": "141_modality_bridge_settings.sql",
+      "gitBlob": "651f08d5b6d46f8828d59b7836f0dd4b19ad1566"
+    },
+    {
+      "filename": "142_radar_referrals_cache.sql",
+      "gitBlob": "4608894d70284dfa840e18c6a9c990ae8b619e1d"
+    },
+    {
+      "filename": "143_api_key_cache_default_mode.sql",
+      "gitBlob": "b239a330bc39a3b4cf44bd4ca6b4cfed45fbe19b"
+    },
+    {
+      "filename": "144_radar_offers_cache.sql",
+      "gitBlob": "d01861b02e0ce9ca807e0d95bca2a06c445c2414"
+    },
+    {
+      "filename": "145_radar_intel_cache.sql",
+      "gitBlob": "63b4201a8cbee08bf58f5663512e2195091b9d3d"
+    },
+    {
+      "filename": "146_job_registry.sql",
+      "gitBlob": "e948d2ee9e6e47c86c9d8035909f422eee25c07d"
+    },
+    {
+      "filename": "147_api_keys_model_access_mode.sql",
+      "gitBlob": "af86ca5a7355e6ed17fec78508fed07b17c5169b"
+    },
+    {
+      "filename": "148_provider_quota_state.sql",
+      "gitBlob": "12ad9ecdb09fc893f30b9d203e7664435ffffee6"
+    },
+    {
+      "filename": "149_api_key_combo_access.sql",
+      "gitBlob": "8ad76e1ff5206cfe19c8b0056b58a7294f3eb11c"
+    },
+    {
+      "filename": "150_api_key_compression_enabled.sql",
+      "gitBlob": "54fcf824be2c0fad366128048cd60562f8a515a8"
+    },
+    {
+      "filename": "151_windsurf_to_devin_desktop.sql",
+      "gitBlob": "1ad84e67f4cb4b05b86385637354b6a22751cec9"
+    },
+    {
+      "filename": "152_remove_puter_provider.sql",
+      "gitBlob": "9319a2f96141781466d3c88d60988dd86c1f98a4"
+    },
+    {
+      "filename": "153_radar_local_model_state.sql",
+      "gitBlob": "6ed680f50fd56bafcc85ea7bee8635f3c98317b4"
+    },
+    {
+      "filename": "154_call_logs_response_id.sql",
+      "gitBlob": "c03f117037515de90aecc04a1ba4112287c0e68a"
+    },
+    {
+      "filename": "155_agentic_conversations.sql",
+      "gitBlob": "ac41b97982f59a090dd71682255b4ece5ad3560b"
+    },
+    {
+      "filename": "156_conversation_turn_nodes.sql",
+      "gitBlob": "5de781bb5e61480074f5a5fa986bf684a1296538"
+    },
+    {
+      "filename": "157_exclusive_connection_leases.sql",
+      "gitBlob": "1d9786bd03585170420e8130dc34673b130602a9"
+    },
+    {
+      "filename": "158_call_logs_error_type.sql",
+      "gitBlob": "6aa0bc99567dc7435ee5b5d9c91fd915dcfddcce"
+    },
+    {
+      "filename": "159_remove_mimocode_provider.sql",
+      "gitBlob": "1775d31333693637f954ff013ecae43f85d668d4"
+    },
+    {
+      "filename": "160_rename_freepik_to_magnific.sql",
+      "gitBlob": "3c38e20e39fe7e5fd49a3b45f5063cea763669d9"
+    },
+    {
+      "filename": "161_config_audit_log.sql",
+      "gitBlob": "0aad91ace28e493d54954731481eb4ad413a97fd"
+    },
+    {
+      "filename": "162_remove_hackclub_provider.sql",
+      "gitBlob": "4dd20904e96ef04fe480887f885a2acf5cb62f50"
+    },
+    {
+      "filename": "163_radar_feed_cache_generated_at.sql",
+      "gitBlob": "d3b7459206b9f7ef9cb8712aff8e1bd1daa13d9b"
+    },
+    {
+      "filename": "164_retire_microsoft_designer_web.sql",
+      "gitBlob": "1c59b8f3a790f16c1972eda2d461967247f7d38b"
+    },
+    {
+      "filename": "165_retire_felo_web.sql",
+      "gitBlob": "40d8732e2e0c0de662eb6a0ab5f5ccd94ca75fe7"
+    },
+    {
+      "filename": "166_retire_gpl_derived_providers.sql",
+      "gitBlob": "cbe167c8a88f86ece98ce871a5760f3c2b41aed0"
+    },
+    {
+      "filename": "167_retire_qwen_web.sql",
+      "gitBlob": "996f66d98889b7fd3ed2d2248a317c14c934ec37"
+    },
+    {
+      "filename": "168_retire_chatgpt_web.sql",
+      "gitBlob": "4b7bdc19ddc6982c1bf33218550aca1bf72f5ae0"
+    },
+    {
+      "filename": "169_model_capabilities.sql",
+      "gitBlob": "4692d012aa585f2c2535305af600626f5a8d2742"
+    },
+    {
+      "filename": "170_log_export_destinations.sql",
+      "gitBlob": "2a454f4a6fb9dcae677b49988ee8ec1f7c229e5d"
+    },
+    {
+      "filename": "171_restore_chatgpt_web_cleanroom.sql",
+      "gitBlob": "fe9d1d377b0b00d09c20b3b6b6e85fd9fa1ec854"
+    },
+    {
+      "filename": "172_provider_node_daily_quota_reset.sql",
+      "gitBlob": "969df2e0fb7e5aa55d7d8b81e927bcfb1a8bd638"
+    },
+    {
+      "filename": "173_call_logs_video_content_removed.sql",
+      "gitBlob": "f6c244e323f38220e549be9ebc0e49031d6ec819"
+    },
+    {
+      "filename": "174_server_tool_executions.sql",
+      "gitBlob": "fb371e0ef92405ddc26e41a48e3b840e776f06ca"
+    },
+    {
+      "filename": "175_call_logs_provider_stats_indexes.sql",
+      "gitBlob": "b6a8a7b5d1f69e5e6865b748ed3b539f4dfd3648"
+    },
+    {
+      "filename": "176_xp_action_counts.sql",
+      "gitBlob": "5b2acd9b4e7b1e3c57b0f0989e6b37d533d65505"
+    },
+    {
+      "filename": "177_provider_connection_synced_models_at.sql",
+      "gitBlob": "f6323011d5863f09a2fa06955f2965ad73274061"
+    },
+    {
+      "filename": "178_memory_fts_au_conditional.sql",
+      "gitBlob": "b96313e3324fcad6a5482ec8c0cef13dc8d44135"
+    },
+    {
+      "filename": "179_proxy_logs_upstream_status.sql",
+      "gitBlob": "15318312ef78825baa60aac0de7946d6a87a00f9"
+    },
+    {
+      "filename": "180_openwa_service_seed.sql",
+      "gitBlob": "aa625e9372509e4e5615f65314642ac7101de687"
+    },
+    {
+      "filename": "181_proxy_logs_proxy_name.sql",
+      "gitBlob": "96d923767061a73958459b752fdb25b9045fff9d"
+    },
+    {
+      "filename": "182_request_cost_ledger_and_key_quota.sql",
+      "gitBlob": "07143792f617b07e4d227b36920b43b69b3d0c1a"
+    },
+    {
+      "filename": "183_proxy_logs_rotation_account.sql",
+      "gitBlob": "04c18d38f94a6e32a6e0dd048fec64115a71c584"
+    },
+    {
+      "filename": "184_proxy_logs_correlation_id.sql",
+      "gitBlob": "002295ff8ad9b3545189cfc825097d6b31e14732"
+    },
+    {
+      "filename": "185_usage_history_cpa_auth_index.sql",
+      "gitBlob": "fa9017b723f57f2bea3846f68a34a7be74421ff2"
+    },
+    {
+      "filename": "186_conversation_turn_nodes_last_seen_index.sql",
+      "gitBlob": "58ba78fa57ce042665b8938ead23d0aa7e4bed74"
+    },
+    {
+      "filename": "187_proxy_logs_attempts.sql",
+      "gitBlob": "eb48269aecf1cf0f9c79799e586d2104122a011e"
+    },
+    {
+      "filename": "188_call_logs_reasoning_encrypted.sql",
+      "gitBlob": "e3c171e7ded8d0e6b09f8bca1ad321159ce6de80"
+    },
+    {
+      "filename": "189_quota_schedules.sql",
+      "gitBlob": "b7c2c38399516d17d9ecd8c3fa3519f3f631749b"
+    },
+    {
+      "filename": "190_call_logs_content_provenance.sql",
+      "gitBlob": "6ec8c2510762b1653733b950ea02560f6cf2640b"
+    },
+    {
+      "filename": "191_call_logs_resilience_actions.sql",
+      "gitBlob": "bb231e17cc29f3aaa072903b95a85e7e1e7a5eaa"
+    },
+    {
+      "filename": "192_call_logs_added_wait.sql",
+      "gitBlob": "6983ffa635c0a4dc9142b740f06f7bf58a435518"
+    },
+    {
+      "filename": "193_proxy_subscription_selector_control.sql",
+      "gitBlob": "b9a3a5e45e30e5158f78ab196bb48cf031e46f98"
+    },
+    {
+      "filename": "194_proxy_logs_attempt_timing.sql",
+      "gitBlob": "bc706e50f0ad4c69443c1e82df8cd628a5af55d3"
+    },
+    {
+      "filename": "195_call_logs_ttft_ms.sql",
+      "gitBlob": "beb5b8d363b50b7622e5e8a1395e816da1f9b7d3"
+    },
+    {
+      "filename": "196_token_limits_unique_per_window.sql",
+      "gitBlob": "1eefa55204fdae22de6ffa7450e7eda9e6805b5d"
+    }
+  ]
+}

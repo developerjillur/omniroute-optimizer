@@ -87,7 +87,6 @@ test("keeps root-only fixtures compatible when i18n is absent", async () => {
   );
 });
 
-
 test("translated README rows retain module counts, markup and numeral style", async () => {
   const { root, syncMigrationDocCounts } = await fixture({ count: 211 });
   for (const [locale, old, expected] of [
@@ -98,10 +97,15 @@ test("translated README rows retain module counts, markup and numeral style", as
     const directory = path.join(root, "docs/i18n", locale);
     fs.mkdirSync(directory);
     const row = `<tr><td>Database</td><td>better-sqlite3 (SQLite, WAL) — <b data-year="1999">147</b> modules, ${old}</td></tr>`;
-    fs.writeFileSync(path.join(directory, "README.md"), `# ${locale}\n${row}\nOther 209 claims stay unchanged.\n`);
+    fs.writeFileSync(
+      path.join(directory, "README.md"),
+      `# ${locale}\n${row}\nOther 209 claims stay unchanged.\n`
+    );
     syncMigrationDocCounts();
-    assert.equal(fs.readFileSync(path.join(directory, "README.md"), "utf8"),
-      `# ${locale}\n${row.replace(old, expected)}\nOther 209 claims stay unchanged.\n`);
+    assert.equal(
+      fs.readFileSync(path.join(directory, "README.md"), "utf8"),
+      `# ${locale}\n${row.replace(old, expected)}\nOther 209 claims stay unchanged.\n`
+    );
   }
   assert.deepEqual(syncMigrationDocCounts(), []);
 });

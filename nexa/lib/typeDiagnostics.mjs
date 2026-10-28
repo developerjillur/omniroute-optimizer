@@ -10,8 +10,11 @@ export function parseTypeDiagnostics(output, readSourceLine) {
     assert.equal(typeof source, "string", `Missing compiler source: ${file}:${row}`);
     records.push({ file, row: Number(row), column: Number(column), code, message, source });
   }
-  assert.equal(records.length, (output.match(/error TS\d+:/g) || []).length,
-    "global/configuration compiler errors require review");
+  assert.equal(
+    records.length,
+    (output.match(/error TS\d+:/g) || []).length,
+    "global/configuration compiler errors require review"
+  );
   return records;
 }
 
@@ -37,7 +40,11 @@ export function compareTypeDiagnostics(before, after) {
     const oldMessages = [...new Set(old.map((record) => record.message))].sort();
     const messages = [...new Set(records.map((record) => record.message))].sort();
     if (old.length && JSON.stringify(oldMessages) !== JSON.stringify(messages)) {
-      changedMessages.push({ identity: JSON.parse(identity), before: oldMessages, after: messages });
+      changedMessages.push({
+        identity: JSON.parse(identity),
+        before: oldMessages,
+        after: messages,
+      });
     }
   }
   return { pristine: before.length, applied: after.length, added, changedMessages };

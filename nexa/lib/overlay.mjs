@@ -159,19 +159,24 @@ export function checkPatches() {
 // ---- apply / restore -------------------------------------------------------
 
 function syncTranslatedMigrationRow(content, count, relative) {
-  const rows = [...content.matchAll(/<tr\b[^>]*>[\s\S]*?<\/tr>/g)]
-    .filter(([row]) => row.includes("better-sqlite3"));
+  const rows = [...content.matchAll(/<tr\b[^>]*>[\s\S]*?<\/tr>/g)].filter(([row]) =>
+    row.includes("better-sqlite3")
+  );
   if (rows.length !== 1) throw Error(`Expected one database row: ${relative}`);
   const [row] = rows[0];
   const tail = row.match(/—([\s\S]*?)<\/td>/);
   if (!tail) throw Error(`Expected database counts after em dash: ${relative}`);
-  const numbers = [...tail[1].matchAll(/<[^>]*>|[0-9٠-٩۰-۹]+/g)]
-    .filter(([token]) => !token.startsWith("<"));
+  const numbers = [...tail[1].matchAll(/<[^>]*>|[0-9٠-٩۰-۹]+/g)].filter(
+    ([token]) => !token.startsWith("<")
+  );
   if (numbers.length !== 2) throw Error(`Expected module and migration counts: ${relative}`);
   const number = numbers[1];
   const first = number[0].charCodeAt(0);
-  const zero = first >= 0x660 && first <= 0x669 ? 0x660 : first >= 0x6f0 && first <= 0x6f9 ? 0x6f0 : 0x30;
-  const translated = String(count).replace(/\d/g, (digit) => String.fromCharCode(zero + Number(digit)));
+  const zero =
+    first >= 0x660 && first <= 0x669 ? 0x660 : first >= 0x6f0 && first <= 0x6f9 ? 0x6f0 : 0x30;
+  const translated = String(count).replace(/\d/g, (digit) =>
+    String.fromCharCode(zero + Number(digit))
+  );
   const position = tail.index + 1 + number.index;
   const updated = row.slice(0, position) + translated + row.slice(position + number[0].length);
   return content.slice(0, rows[0].index) + updated + content.slice(rows[0].index + row.length);
@@ -206,9 +211,10 @@ export function syncMigrationDocCounts() {
     const file = path.join(REPO, rel);
     if (fs.lstatSync(file).isSymbolicLink()) throw Error(`Unsafe documentation path: ${rel}`);
     const before = fs.readFileSync(file, "utf8");
-    const after = rel.startsWith("docs/i18n/") && rel.endsWith("/README.md")
-      ? syncTranslatedMigrationRow(before, count, rel)
-      : before.replace(/\d+\+? ((?:versioned )?(?:SQL )?migrations?\b)/gi, `${count} $1`);
+    const after =
+      rel.startsWith("docs/i18n/") && rel.endsWith("/README.md")
+        ? syncTranslatedMigrationRow(before, count, rel)
+        : before.replace(/\d+\+? ((?:versioned )?(?:SQL )?migrations?\b)/gi, `${count} $1`);
     if (before !== after) {
       fs.writeFileSync(file, after);
       changed.push(rel);

@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 312,
+    "total": 313,
     "patches": 187,
-    "new": 119,
+    "new": 120,
     "tooling": 6,
     "upstreamCandidates": 28,
     "nexaSpecific": 99,
-    "needsReview": 185,
+    "needsReview": 186,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
   },
@@ -2193,6 +2193,14 @@
       "layer": "new",
       "class": "nexa-specific",
       "target": "tests/unit/db/native-claude-usage-persistence.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/db/native-upgrade-history-preservation.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/db/native-upgrade-history-preservation.test.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },

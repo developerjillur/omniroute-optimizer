@@ -398,7 +398,7 @@
       "target": "open-sse/utils/stream.ts",
       "patch": "open-sse__utils__stream.ts.patch",
       "disposition": "ported",
-      "candidateSha256": "e5f8e3d087c58a6151b7cc8f8d50e989033fc11fccdc45d8111228c837a35cd7",
+      "candidateSha256": "49dcb8c28702113b020b39f7d97657d453a097620934566dc6187c20e586edf4",
       "baselinePatchSha256": "9a04396e302b2ceea7f1a6cddc9c3c4d881f6b0e44224b313e9422272b9388f0"
     },
     {
@@ -1739,6 +1739,62 @@
       "atUtc": "2026-10-28T05:44:57.433536+00:00",
       "target": "tests/unit/catalog-updates-v3x.test.ts",
       "decision": "Resolve the contradictory unknown-price assertion against existing configured native Sol estimates; assert the retained rates."
+    }
+  ],
+  "validationAttempts": [
+    {
+      "sourceCommit": "b3c3d5a5906f9bc50381b1689070cd150ab9ace4",
+      "runUrl": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/40639840969",
+      "accepted": false,
+      "node26": {
+        "native": {
+          "pass": 156,
+          "tests": 157
+        },
+        "extended": {
+          "pass": 171,
+          "tests": 171
+        },
+        "stream": {
+          "pass": 392,
+          "tests": 392
+        },
+        "migrations": {
+          "pass": 10,
+          "tests": 10
+        },
+        "compatibility": {
+          "pass": 1166,
+          "tests": 1168
+        },
+        "tooling": {
+          "pass": 35,
+          "tests": 35
+        }
+      },
+      "node24Migrations": {
+        "pass": 6,
+        "tests": 6
+      },
+      "coreTypecheck": "pass",
+      "lint": "pass",
+      "docsAll": "pass",
+      "fullTypes": {
+        "pristine": 6572,
+        "applied": 6529,
+        "ceiling": 5830,
+        "ceilingRaised": false
+      },
+      "cacheCostRedAccepted": false,
+      "cacheCostRedReason": "The fixture inspected only message_stop after message_delta had already emitted the terminal usage. Its undefined-usage assertion is not the intended cache-marker regression.",
+      "remainingWork": [
+        "strict thinking-only native empty-content boundary",
+        "collect all translated usage frames and prove the targeted cache-marker assertion",
+        "complete effort test reporting",
+        "compiler comparison fixture working directory",
+        "committed formatting",
+        "full historical-schema preservation fixture"
+      ]
     }
   ]
 }

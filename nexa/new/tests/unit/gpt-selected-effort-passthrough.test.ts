@@ -1,4 +1,4 @@
-import test from "node:test";
+import runTest from "node:test";
 import assert from "node:assert/strict";
 
 import { codexProvider } from "../../open-sse/config/providers/registry/codex/index.ts";
@@ -14,6 +14,15 @@ import { openaiToOpenAIResponsesRequest } from "../../open-sse/translator/reques
 import { resetDbInstance } from "../../src/lib/db/core.ts";
 
 type JsonRecord = Record<string, unknown>;
+let registeredCases = 0;
+let executedCases = 0;
+function test(name: string, run: () => unknown) {
+  registeredCases++;
+  return runTest(name, async () => {
+    executedCases++;
+    await run();
+  });
+}
 type InputFormat = "claude" | "chat" | "responses";
 
 const basicEfforts = ["low", "medium", "high", "xhigh"];
@@ -68,7 +77,11 @@ function wireBody(model: string, effort: string, format: InputFormat): JsonRecor
   return sanitized as JsonRecord;
 }
 
-test.after(() => resetDbInstance());
+runTest.after(() => {
+  resetDbInstance();
+  assert.equal(executedCases, registeredCases, "every registered native effort case must execute");
+  console.log(`NEXA_EFFORT_COVERAGE_COMPLETE cases=${registeredCases}`);
+});
 
 for (const [model, efforts] of Object.entries(supportedEfforts)) {
   for (const effort of efforts) {
@@ -121,7 +134,6 @@ test("legacy and unverified models retain their existing safety ceilings", () =>
     assert.equal(normalizeResponsesReasoningEffort("max", model), "max");
   }
 });
-
 
 test("other providers retain upstream literal max behavior for unknown models", () => {
   const body = { reasoning: { effort: "max" } };

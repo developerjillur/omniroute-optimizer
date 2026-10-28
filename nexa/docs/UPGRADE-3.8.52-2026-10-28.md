@@ -79,3 +79,29 @@ TypeScript comparison-এ একই file, diagnostic code, source statement ও 
 Inferred union-এর message বদলালে আগের ও পরের message review artifact-এ থাকে।
 নতুন statement/code/column, বেশি occurrences, global compiler error বা অসমাপ্ত
 compiler run inherited baseline হিসেবে গ্রহণ করা হয় না। Absolute ceiling বাড়ানো হয়নি।
+
+## পূর্ণ পুরোনো schema থেকে synthetic upgrade
+
+চারটি colliding migration-এর focused test ছাড়াও পুরোনো pinned v3.8.51-এর
+১৯৩টি SQL file এবং দুই native SQL file নিয়ে একটি পূর্ণ history-preservation
+fixture প্রস্তুত আছে। নতুন runtime data ব্যবহার না করে এই fixture-এ credential
+bytes, API key, combo JSON, settings, usage/cache TTL, call-log metadata, memory
+content/search এবং Artifact file hash যাচাই হবে। Ledger timestamps সংরক্ষণ ও
+দ্বিতীয় run-এর mutation-free আচরণও পরীক্ষা হবে। এই lane-এর ফল এখনও pending।
+
+## দ্বিতীয় বিস্তৃত measurement
+
+Source `b3c3d5a5906f9bc50381b1689070cd150ab9ace4`-এর run
+`40639840969`-এ core typecheck, full lint, docs-all, ১৭১/১৭১ extended,
+৩৯২/৩৯২ stream, ১০/১০ migration এবং Node 24-এর ৬/৬ focused migration case পাস।
+Native suite ১৫৬/১৫৭; broad compatibility ১১৬৬/১১৬৮। এটি rejected attempt।
+Cache-cost baseline-এর প্রথম fixture শুধু message_stop-এর return দেখেছিল,
+যেখানে terminal usage ইতিমধ্যেই message_delta-তে বেরিয়েছিল; ওই assertion
+প্রকৃত marker regression-এর RED proof হিসেবে গ্রহণ করা হয়নি। সংশোধিত fixture
+সব emitted frame সংগ্রহ করে এবং RED verifier নির্দিষ্ট inclusive marker-এর
+assertion পর্যন্ত পৌঁছানো বাধ্যতামূলক করে।
+
+পূর্ণ compiler measurement ৬,৫২৯; pristine ৬,৫৭২। সংরক্ষিত source statement/code/column
+তুলনায় নতুন identity পাওয়া যায়নি; CI comparison-এর working-directory error
+সংশোধন করা হয়েছে এবং পরের CI-তে সেটি পুনরায় যাচাই আবশ্যক। বর্তমান ceiling
+৫,৮৩০ অপরিবর্তিত এবং release এখনও blocked।

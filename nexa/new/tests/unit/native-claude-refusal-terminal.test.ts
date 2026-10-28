@@ -204,6 +204,20 @@ test("nested refusal-looking metadata cannot exempt an empty end_turn", async ()
   assert.match(result.text, /Provider returned empty content/);
 });
 
+for (const visible of [false,true]) {
+  test(`${visible ? "visible" : "empty"} native text blocks retain the empty-response boundary`, async () => {
+    const parts: Record<string,unknown>[] = events("end_turn",false);
+    parts.splice(1,0,
+      {type:"content_block_start",index:0,content_block:{type:"text",text:""}},
+      ...(visible ? [{type:"content_block_delta",index:0,delta:{type:"text_delta",text:"fixture-visible"}}] : []),
+      {type:"content_block_stop",index:0});
+    const result = await wrap(parts.map(frame).join(""));
+    assert.equal(result.failures,visible ? 0 : 1);
+    if (visible) assert.match(result.text,/fixture-visible/);
+    else assert.match(result.text,/Provider returned empty content/);
+  });
+}
+
 test("an unrelated OpenAI stream cannot use an Anthropic refusal exemption", async () => {
   const result = await wrap(events().map(frame).join(""), FORMATS.OPENAI);
   assert.equal(result.failures, 1);

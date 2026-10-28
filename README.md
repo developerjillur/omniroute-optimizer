@@ -36,9 +36,9 @@ Historical documents-এর পুরোনো status-এর পরে পাও
 | Reference overlay commit         | `72230a52a548b9fdc8dda0495c893f5193e5d64d` |
 | Pristine upstream base           | `ad6f33f66bda34eba98645d3bfdabbde294bc843` |
 | Upstream version                 | `3.8.52`                                   |
-| Managed overlay files            | 429                                        |
+| Managed overlay files            | 441                                        |
 
-বর্তমান `nexa/`-তে reference overlay-এর সঙ্গে নতুন reliability fixes আছে; তাই সব file reference commit-এর হুবহু copy—এমন দাবি করা হচ্ছে না। প্রতিটি managed file-এর byte count, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এ 315টি entry: 188টি active patch, 121টি নতুন application/test file ও 6টি tooling entry। ৬টি retired patch মূল path-এ সংরক্ষিত। অতিরিক্ত deployment, overlay tests ও documentation-ও inventory-তে রয়েছে।
+বর্তমান `nexa/`-তে reference overlay-এর সঙ্গে নতুন reliability fixes আছে; তাই সব file reference commit-এর হুবহু copy—এমন দাবি করা হচ্ছে না। প্রতিটি managed file-এর byte count, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এ 316টি entry: 189টি active patch, 121টি নতুন application/test file ও 6টি tooling entry। ৬টি retired patch মূল path-এ সংরক্ষিত। অতিরিক্ত deployment, overlay tests ও documentation-ও inventory-তে রয়েছে।
 
 ## কী রয়েছে
 
@@ -95,7 +95,7 @@ Source ব্যাখ্যা: [NATIVE-THINKING-SIGNATURE-SWITCH-2026-10-11.md
 
 এই GitHub snapshot-এ application source, regression coverage ও সংক্ষিপ্ত release report সংরক্ষিত; private request logs, account inventory, credentials বা local database অন্তর্ভুক্ত নেই। Release-এর সফল package ও স্থানীয় detailed evidence আলাদাভাবে সংরক্ষিত আছে; publication-এর জন্য সফল build পুনরায় চালানো হয়নি।
 
-মূল layout ও tooling: [nexa/README.md](nexa/README.md)। Deployment ও rollback: [nexa/deploy/README.md](nexa/deploy/README.md)। Native Thread ও usage fixes-এর evidence: [nexa/docs/NATIVE-THREAD-USAGE-2026-10-07.md](nexa/docs/NATIVE-THREAD-USAGE-2026-10-07.md)।
+মূল layout ও tooling: [nexa/README.md](nexa/README.md)। Deployment ও rollback: [nexa/deploy/README.md](nexa/deploy/README.md)। স্বতন্ত্র cloud gateway-এর build, configuration isolation, OAuth ও backup: [NexaOmni cloud runbook](nexa/cloud/README.md)। Native Thread ও usage fixes-এর evidence: [nexa/docs/NATIVE-THREAD-USAGE-2026-10-07.md](nexa/docs/NATIVE-THREAD-USAGE-2026-10-07.md)।
 
 ## ব্যবহার
 

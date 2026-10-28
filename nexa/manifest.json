@@ -7,12 +7,12 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 315,
-    "patches": 188,
+    "total": 316,
+    "patches": 189,
     "new": 121,
     "tooling": 6,
     "upstreamCandidates": 28,
-    "nexaSpecific": 99,
+    "nexaSpecific": 100,
     "needsReview": 188,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
@@ -1439,6 +1439,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "tests/unit/mitm-server-cjs-backpressure-14528.test.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/tests__unit__mitm-unexpected-child-exit.test.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "tests/unit/mitm-unexpected-child-exit.test.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },

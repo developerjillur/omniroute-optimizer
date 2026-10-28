@@ -94,6 +94,7 @@ test("restart preserves model-specific quota without parking other Claude models
 
 test("known global walls retain the latest reset with bounded slow polling", () => {
   const now = Date.now();
+  mock.method(Date, "now", () => now);
   const sessionReset = now + 600000;
   const weeklyReset = now + 86400000;
   quota.setQuotaCache("schedule", "claude", {

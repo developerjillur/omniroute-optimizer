@@ -1,0 +1,9 @@
+[Unit]
+Description=NexaOmni consistent private backup
+[Service]
+Type=oneshot
+UMask=0077
+ExecStart=/usr/bin/python3 /opt/nexaomni/backup.py
+Nice=10
+MemoryMax=256M
+NoNewPrivileges=true

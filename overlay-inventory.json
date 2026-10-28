@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
-  "trackedNexaFiles": 429,
-  "totalNexaBytes": 1889464,
+  "trackedNexaFiles": 441,
+  "totalNexaBytes": 1917338,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -72,6 +72,76 @@
       "gitBlobSha": "e171e750718a1177e22ac13fe2e08e9cab372f94",
       "bytes": 1067,
       "sha256": "45e4d76c2f6deaaa901d76a7893573097d50b8216bb32502f3af0cfa24a2d0bd"
+    },
+    {
+      "path": "nexa/cloud/Dockerfile",
+      "mode": "100644",
+      "gitBlobSha": "addbf9fedc9b1692414ec9059b716164b8c79836",
+      "bytes": 613,
+      "sha256": "7a313f382effc32c2d917b4832df8ccd654679f66073ae64bcb68e375c44e8ce"
+    },
+    {
+      "path": "nexa/cloud/README.md",
+      "mode": "100644",
+      "gitBlobSha": "d3141b666845e7a7e652fa1f9e9991f2ece38620",
+      "bytes": 7132,
+      "sha256": "88a510e6f03fbfe4848fb18d42cbb73df8f0e06e714b8661ac76ddfa24b9c545"
+    },
+    {
+      "path": "nexa/cloud/backup.py",
+      "mode": "100644",
+      "gitBlobSha": "4a5f74d63cde6dfe0bbda2c9895c5b61968fe179",
+      "bytes": 1709,
+      "sha256": "c1d75a19491282293cc00931e0ae731aff0c01e9a62c1b0cd96b0c3f6301dd01"
+    },
+    {
+      "path": "nexa/cloud/build.sh",
+      "mode": "100644",
+      "gitBlobSha": "4e43c7f5c14d358c8fdb12270f4da44c3fffc5ec",
+      "bytes": 387,
+      "sha256": "1adff6fc10ea0d4a132fe8c962cb71f6f553ffc6e39ac3344ee8fbeeb773c3b4"
+    },
+    {
+      "path": "nexa/cloud/compose.yaml",
+      "mode": "100644",
+      "gitBlobSha": "5375eebdde278bf1a364c51f7d308773af2581d6",
+      "bytes": 1212,
+      "sha256": "2e4e802a6fadceb0464327c465267e4da5cd4cc7c2b88c8fd64b70cf2c55e839"
+    },
+    {
+      "path": "nexa/cloud/nexaomni-backup.service",
+      "mode": "100644",
+      "gitBlobSha": "dc1976f64979c5b6ef9cfd798f1a343d698e85d5",
+      "bytes": 183,
+      "sha256": "6456dbf8d56cc0660c6444bf5de22aa7ae494d9ff23f08e94851f21792328e94"
+    },
+    {
+      "path": "nexa/cloud/nexaomni-backup.timer",
+      "mode": "100644",
+      "gitBlobSha": "5a339c31253ccc0a55fe2d04726f2e6ffd341976",
+      "bytes": 160,
+      "sha256": "ab1ae958259da60936d51ad52a5baacb6d1c33ff67466907cf4f09be7f0b08ec"
+    },
+    {
+      "path": "nexa/cloud/prepare-config.py",
+      "mode": "100644",
+      "gitBlobSha": "e13f42eb97de5fd0e9782eb8098b522a8c7b7edb",
+      "bytes": 4523,
+      "sha256": "b1139610ced4b373941e13987b66c99c61377d823751756543f4f40e7fbc2588"
+    },
+    {
+      "path": "nexa/cloud/smoke.py",
+      "mode": "100644",
+      "gitBlobSha": "3f05484a4619e3e8ed941e4228ebae3afdc95081",
+      "bytes": 4707,
+      "sha256": "3830c5f3029ddafd3141fb0605223b4c71b46f8ef25a5480d93f409e16c0e681"
+    },
+    {
+      "path": "nexa/cloud/watch-build.py",
+      "mode": "100644",
+      "gitBlobSha": "b41a2e2ccd342a1961cd878eefc720c34a7267e1",
+      "bytes": 1669,
+      "sha256": "e4cbbd5c093482c574614a8101d109fb8e26d86c11a0753c0dcfc041b50586d7"
     },
     {
       "path": "nexa/config/README.md",
@@ -552,9 +622,9 @@
     {
       "path": "nexa/manifest.json",
       "mode": "100644",
-      "gitBlobSha": "42504d31db37fb3c887e04780c6b59d9f6ad90fc",
-      "bytes": 81935,
-      "sha256": "17998dbf3772f744e330495e64f2088dc8571250b2f38fcafe29ed64df4e6030"
+      "gitBlobSha": "35a55acfdf97676b79dba1c43605276a7b4f962d",
+      "bytes": 82210,
+      "sha256": "6832335aecee07b6cdd71925447211ceae8e5f10706395a89fab0e356b6f726d"
     },
     {
       "path": "nexa/new/bin/cli/utils/packageMigrations.mjs",
@@ -951,9 +1021,9 @@
     {
       "path": "nexa/new/tests/unit/agent-bridge-quota-recovery.test.ts",
       "mode": "100644",
-      "gitBlobSha": "127aa4a58d7a7e22387b7f65a20481b89420ba8a",
-      "bytes": 18088,
-      "sha256": "ed4f81b0a96ec9de4f41e88da6e24794d837f58ab9e0df78eb980124d4bb6ee1"
+      "gitBlobSha": "f75016b8aea859ab99a7ca6b722ce9977249407c",
+      "bytes": 18127,
+      "sha256": "1016be1e4ca03df21f0bc4edc355ad291531dc2e8327c77ff755ee3fd615d0bf"
     },
     {
       "path": "nexa/new/tests/unit/agent-bridge-resilience.test.ts",
@@ -2657,6 +2727,13 @@
       "sha256": "d7345793f6c17825c45c8d8e15d87cc984a1f0d9361ca1e9d68593200bef55f8"
     },
     {
+      "path": "nexa/patches/tests__unit__mitm-unexpected-child-exit.test.ts.patch",
+      "mode": "100644",
+      "gitBlobSha": "14ec9d57920af7a2068c2431092e208c2c186019",
+      "bytes": 1109,
+      "sha256": "06045683e266f79d99a73b0fdd6a56130de5cfe0eba54e577ac36d071178a3c5"
+    },
+    {
       "path": "nexa/patches/tests__unit__model-family-fallback-notation.test.ts.patch",
       "mode": "100644",
       "gitBlobSha": "1005bcb4e374bdea6c2d83973b811abcc52bad48",
@@ -2935,6 +3012,13 @@
       "gitBlobSha": "7b90e97ab22b924715f0952405ab5da3cc89a8bf",
       "bytes": 1592,
       "sha256": "d9afb77424f1985a1c930b0893091989f8f3028906675cae8ac2cec76293621a"
+    },
+    {
+      "path": "nexa/tests/test_cloud_config.py",
+      "mode": "100644",
+      "gitBlobSha": "6cb2e81d4c08afe2e2a7ab9ea7d64dbd3f111fb5",
+      "bytes": 4156,
+      "sha256": "992ac5a077abfbc1a9878911a41a9253bc38b198af89b2aa9b45ed1041440ed7"
     },
     {
       "path": "nexa/tests/test_database_rollback.py",

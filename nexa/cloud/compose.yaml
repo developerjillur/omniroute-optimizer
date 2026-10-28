@@ -1,0 +1,35 @@
+name: nexaomni
+services:
+  gateway:
+    image: nexaomni:3.8.52-614c46c
+    container_name: nexaomni-gateway
+    restart: unless-stopped
+    init: true
+    env_file: /opt/nexaomni/private/runtime.env
+    volumes:
+      - /opt/nexaomni/data:/app/data
+    ports:
+      - "127.0.0.1:18128:20128"
+    mem_limit: 3g
+    cpus: 3
+    pids_limit: 256
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: "3"}
+    networks: [dokploy-network]
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: dokploy-network
+      traefik.http.routers.nexaomni-http.rule: Host(`nexaomni.nexaconnect.cloud`)
+      traefik.http.routers.nexaomni-http.entrypoints: web
+      traefik.http.routers.nexaomni-http.middlewares: nexaomni-https
+      traefik.http.middlewares.nexaomni-https.redirectscheme.scheme: https
+      traefik.http.routers.nexaomni.rule: Host(`nexaomni.nexaconnect.cloud`)
+      traefik.http.routers.nexaomni.entrypoints: websecure
+      traefik.http.routers.nexaomni.tls.certresolver: letsencrypt
+      traefik.http.services.nexaomni.loadbalancer.server.port: "20128"
+networks:
+  dokploy-network:
+    external: true

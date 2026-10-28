@@ -1,0 +1,31 @@
+name: Cloud deployment checks
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "nexa/cloud/**"
+      - "nexa/tests/test_cloud_config.py"
+      - "nexa/patches/tests__unit__mitm-unexpected-child-exit.test.ts.patch"
+      - "nexa/manifest.json"
+      - "overlay-inventory.json"
+      - ".github/workflows/cloud-deployment.yml"
+permissions:
+  contents: read
+jobs:
+  configuration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24.15.0"
+      - name: Verify configuration isolation and source integrity
+        run: |
+          python3 nexa/tests/test_cloud_config.py
+          python3 -m py_compile nexa/cloud/*.py
+          bash -n nexa/cloud/build.sh
+          node nexa/tests/verify-source-inventory.mjs
+          node --test nexa/tests/overlay-inventory.test.mjs nexa/tests/overlay-base-version.test.mjs
+          docker compose -f nexa/cloud/compose.yaml config --no-env-resolution --quiet
+          git diff --check

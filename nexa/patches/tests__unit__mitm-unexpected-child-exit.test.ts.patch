@@ -1,0 +1,33 @@
+diff --git a/tests/unit/mitm-unexpected-child-exit.test.ts b/tests/unit/mitm-unexpected-child-exit.test.ts
+index 1a39a0a9fd1d0dc637fbb918d9a87f098d34baa6..e513616f87e320c1d161049389a18b7a73c3f635 100644
+--- a/tests/unit/mitm-unexpected-child-exit.test.ts
++++ b/tests/unit/mitm-unexpected-child-exit.test.ts
+@@ -20,6 +20,7 @@
+ import os from "node:os";
+ import path from "node:path";
+ import type { ChildProcess } from "node:child_process";
++import { EventEmitter } from "node:events";
+ 
+ const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-mitm-child-exit-"));
+ process.env.DATA_DIR = TEST_DATA_DIR;
+@@ -61,13 +62,17 @@
+ }
+ 
+ function fakeChild(): ChildProcess {
+-  const proc = {
++  const proc = Object.assign(new EventEmitter(), {
+     killed: false,
+-    kill() {
++    exitCode: null as number | null,
++    signalCode: null as NodeJS.Signals | null,
++    kill(signal: NodeJS.Signals = "SIGTERM") {
+       proc.killed = true;
++      proc.signalCode = signal;
++      proc.emit("exit", null, signal);
+       return true;
+     },
+-  };
++  });
+   return proc as unknown as ChildProcess;
+ }
+ 

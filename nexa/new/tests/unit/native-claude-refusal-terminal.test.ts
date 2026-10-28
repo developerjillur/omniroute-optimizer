@@ -198,18 +198,18 @@ test("refusal does not exempt an upstream close before message_stop", async () =
 
 test("an actual native max_tokens terminal preserves an opaque-thinking truncation", async () => {
   const result = await wrap(events("max_tokens").map(frame).join(""));
-  assert.equal(result.failures,0);
-  assert.match(result.text,/"stop_reason":"max_tokens"/);
-  assert.doesNotMatch(result.text,/Provider returned empty content/);
+  assert.equal(result.failures, 0);
+  assert.match(result.text, /"stop_reason":"max_tokens"/);
+  assert.doesNotMatch(result.text, /Provider returned empty content/);
 });
 
 test("nested message_stop metadata cannot complete a native refusal", async () => {
-  const parts: Record<string,unknown>[] = events();
+  const parts: Record<string, unknown>[] = events();
   parts.pop();
-  parts[0].metadata = {type:"message_stop"};
+  parts[0].metadata = { type: "message_stop" };
   const result = await wrap(parts.map(frame).join(""));
-  assert.equal(result.failures,1);
-  assert.doesNotMatch(result.text,/"stop_reason":"max_tokens"/);
+  assert.equal(result.failures, 1);
+  assert.doesNotMatch(result.text, /"stop_reason":"max_tokens"/);
 });
 
 test("nested refusal-looking metadata cannot exempt an empty end_turn", async () => {

@@ -56,26 +56,39 @@ function measure() {
       "--noEmit",
       "--incremental",
       "false",
+      "--pretty",
+      "false",
       "-p",
       "tsconfig.json",
     ],
-    { cwd: ROOT, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 }
+    { cwd: ROOT, encoding: "utf8", maxBuffer: 64 * 1024 * 1024, timeout: 8 * 60_000 }
   );
   // Preserve one measurement's diagnostics without replacing an earlier receipt.
   if (diagnosticsPath) {
     fs.writeFileSync(
       diagnosticsPath,
       JSON.stringify({ status: res.status, signal: res.signal, error: res.error?.code }) +
-        "\n" + (res.stdout || "") + (res.stderr || ""),
+        "\n" +
+        (res.stdout || "") +
+        (res.stderr || ""),
       { flag: "wx" }
     );
   }
   if (res.error || res.status === null) {
     return { skip: true, reason: res.error ? `tsc-${res.error.code}` : `tsc-signal-${res.signal}` };
   }
-  // tsc exits non-zero when there are errors; that is expected — we parse stdout.
-  const count = countTscErrors(`${res.stdout || ""}${res.stderr || ""}`);
-  if (res.status !== 0 && count === 0) return { skip: true, reason: `tsc-exit-${res.status}` };
+  // The pinned compiler completes this noEmit measurement with status 0 or 2.
+  // Partial diagnostics from an abnormal exit cannot authorize a release budget.
+  if (res.status !== 0 && res.status !== 2) {
+    return { skip: true, reason: `tsc-exit-${res.status}` };
+  }
+  const output = `${res.stdout || ""}${res.stderr || ""}`;
+  const count = countTscErrors(output);
+  const located = (output.match(/^.+\(\d+,\d+\): error TS\d+:/gm) || []).length;
+  if (located !== count) return { skip: true, reason: "tsc-global-diagnostics" };
+  if ((res.status === 0 && count !== 0) || (res.status === 2 && count === 0)) {
+    return { skip: true, reason: `tsc-exit-${res.status}` };
+  }
   return { skip: false, count };
 }
 
@@ -91,7 +104,7 @@ function readBaselineRecord() {
 const result = measure();
 if (result.skip) {
   process.stdout.write(`tscErrors=SKIP reason=${result.reason}\n`);
-  process.exit(RATCHET ? 75 : 0); // production must reject an unmeasured gate
+  process.exit(RATCHET || UPDATE ? 75 : 0); // production must reject an unmeasured gate
 }
 
 const measured = result.count;

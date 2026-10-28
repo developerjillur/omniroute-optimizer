@@ -51,10 +51,18 @@ function tap(name, expectedFailure = false, allowedSkips = []) {
   };
 }
 
-const historyCase = "the complete v3.8.51 schema upgrades with native history, credentials, settings and artifact references intact";
-for (const name of ["upgrade-migrations.tap","production-migrations.tap","upgrade-compatibility.tap"]) {
-  const output = fs.readFileSync(path.join(directory,name),"utf8");
-  assert.ok(output.split("\n").some((line) => /^ok \d+ - /.test(line) && line.endsWith(historyCase)),`${name}: full historical bootstrap and migration must complete`);
+const historyCase =
+  "the complete v3.8.51 schema upgrades with native history, credentials, settings and artifact references intact";
+for (const name of [
+  "upgrade-migrations.tap",
+  "production-migrations.tap",
+  "upgrade-compatibility.tap",
+]) {
+  const output = fs.readFileSync(path.join(directory, name), "utf8");
+  assert.ok(
+    output.split("\n").some((line) => /^ok \d+ - /.test(line) && line.endsWith(historyCase)),
+    `${name}: full historical bootstrap and migration must complete`
+  );
 }
 const compilerData = fs.readFileSync(path.join(directory, "tsc-diagnostics.log"), "utf8");
 const compiler = JSON.parse(compilerData.split("\n")[0]);

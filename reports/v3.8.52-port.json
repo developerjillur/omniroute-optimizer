@@ -1837,6 +1837,129 @@
       "extendedSuiteStatus": "reported 157 passing cases, but 14 previously reported trailing cases are absent; not accepted as complete coverage",
       "remainingNativeIssue": "outer wrapper still counted an opaque thinking signature as output",
       "privateRuntimeDataUsed": false
+    },
+    {
+      "sourceCommit": "a00f615a1ba20a61592ad98023f9e4c7f922fb4a",
+      "runUrl": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/40646262083",
+      "accepted": false,
+      "counts": {
+        "tooling-node24.tap": {
+          "tests": 41,
+          "pass": 40,
+          "fail": 1,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "tooling-node26.tap": {
+          "tests": 41,
+          "pass": 41,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-production.tap": {
+          "tests": 162,
+          "pass": 162,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "production-migrations.tap": {
+          "tests": 7,
+          "pass": 6,
+          "fail": 1,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "stream-green.tap": {
+          "tests": 392,
+          "pass": 392,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "effort-primary.tap": {
+          "tests": 102,
+          "pass": 102,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-extended.tap": {
+          "tests": 171,
+          "pass": 171,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "upgrade-migrations.tap": {
+          "tests": 11,
+          "pass": 10,
+          "fail": 1,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "effort-production.tap": {
+          "tests": 102,
+          "pass": 102,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-green.tap": {
+          "tests": 161,
+          "pass": 161,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "upgrade-compatibility.tap": {
+          "tests": 1180,
+          "pass": 1179,
+          "fail": 1,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-red.tap": {
+          "tests": 25,
+          "pass": 9,
+          "fail": 16,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "deployment-helpers.tap": {
+          "tests": 59,
+          "pass": 58,
+          "fail": 0,
+          "skipped": 1,
+          "cancelled": 0
+        },
+        "cache-cost-red.tap": {
+          "tests": 1,
+          "pass": 0,
+          "fail": 1,
+          "skipped": 0,
+          "cancelled": 0
+        }
+      },
+      "fullTypes": {
+        "pristine": 6572,
+        "applied": 6531,
+        "newIdentities": 2,
+        "ceiling": 6529,
+        "cause": "Duplicate fixture bootstrap variable; fix required, no budget increase."
+      },
+      "nativeBoundaryFixesVerified": true,
+      "extendedComplete": true,
+      "historyFixtureStatus": "import rejected: duplicate tables declaration in synthetic bootstrap fixture",
+      "remainingWork": [
+        "remove duplicate bootstrap declaration without changing preservation assertions",
+        "commit reviewed formatting",
+        "reject partial abnormal compiler diagnostics and global configuration errors"
+      ],
+      "fullBuild": false,
+      "deployment": false,
+      "privateRuntimeDataUsed": false
     }
   ],
   "compilerBudgetReconciliation": {

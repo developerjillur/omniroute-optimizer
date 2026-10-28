@@ -19,7 +19,12 @@ test("the complete v3.8.51 schema upgrades with native history, credentials, set
   fs.mkdirSync(oldDirectory);
   const manifest = JSON.parse(
     fs.readFileSync("nexa/tests/fixtures/previous-migrations-v3.8.51.json", "utf8")
-  ) as { version: string; commit: string; bootstrap: {filename:string;gitBlob:string}[]; files: { filename: string; gitBlob: string }[] };
+  ) as {
+    version: string;
+    commit: string;
+    bootstrap: { filename: string; gitBlob: string }[];
+    files: { filename: string; gitBlob: string }[];
+  };
   assert.equal(manifest.version, "3.8.51");
   assert.equal(manifest.commit, "c1e30b7676975feb298b49eff6ff58923c04b89e");
   assert.equal(manifest.files.length, 193);
@@ -51,29 +56,43 @@ test("the complete v3.8.51 schema upgrades with native history, credentials, set
   const db = createBetterSqliteAdapter(raw);
   try {
     // Match the pinned release's tables -> healers -> indexes startup sequence.
-    const previousSources = new Map<string,string>();
-    assert.deepEqual(manifest.bootstrap.map((entry) => entry.filename).sort(),["core.ts","schemaColumns.ts"]);
-    for (const {filename,gitBlob} of manifest.bootstrap) {
-      const content = fs.readFileSync(path.join(previousDirectory,"..",filename));
-      assert.equal(createHash("sha1").update(`blob ${content.length}\0`).update(content).digest("hex"),gitBlob,`previous bootstrap: ${filename}`);
-      previousSources.set(filename,content.toString("utf8"));
+    const previousSources = new Map<string, string>();
+    assert.deepEqual(manifest.bootstrap.map((entry) => entry.filename).sort(), [
+      "core.ts",
+      "schemaColumns.ts",
+    ]);
+    for (const { filename, gitBlob } of manifest.bootstrap) {
+      const content = fs.readFileSync(path.join(previousDirectory, "..", filename));
+      assert.equal(
+        createHash("sha1").update(`blob ${content.length}\0`).update(content).digest("hex"),
+        gitBlob,
+        `previous bootstrap: ${filename}`
+      );
+      previousSources.set(filename, content.toString("utf8"));
     }
     const schema = previousSources.get("core.ts")?.match(/const SCHEMA_SQL = `([\s\S]*?)`;/)?.[1];
-    assert.ok(schema && !schema.includes("${") && !schema.includes(String.fromCharCode(92)),"the old schema must be a static SQL literal");
-    const tables: string[] = [];
-    const indexes: string[] = [];
+    assert.ok(
+      schema && !schema.includes("${") && !schema.includes(String.fromCharCode(92)),
+      "the old schema must be a static SQL literal"
+    );
+    const bootstrapTables: string[] = [];
+    const bootstrapIndexes: string[] = [];
     for (const rawStatement of schema.split(";")) {
       const statement = rawStatement.trim();
       if (!statement) continue;
-      const sql = statement.replace(/^(?:[ \t]*--[^\n]*\n)+/,"").trimStart();
-      (/^CREATE\s+(?:UNIQUE\s+)?INDEX\b/i.test(sql) ? indexes : tables).push(`${statement};`);
+      const sql = statement.replace(/^(?:[ \t]*--[^\n]*\n)+/, "").trimStart();
+      (/^CREATE\s+(?:UNIQUE\s+)?INDEX\b/i.test(sql) ? bootstrapIndexes : bootstrapTables).push(
+        `${statement};`
+      );
     }
-    raw.exec(tables.join("\n"));
-    const healers = await import(pathToFileURL(path.join(previousDirectory,"..","schemaColumns.ts")).href);
+    raw.exec(bootstrapTables.join("\n"));
+    const healers = await import(
+      pathToFileURL(path.join(previousDirectory, "..", "schemaColumns.ts")).href
+    );
     healers.ensureProviderConnectionsColumns(db);
     healers.ensureUsageHistoryColumns(db);
     healers.ensureCallLogsColumns(db);
-    raw.exec(indexes.join("\n"));
+    raw.exec(bootstrapIndexes.join("\n"));
     raw.exec(`CREATE TABLE IF NOT EXISTS _omniroute_migrations(version TEXT PRIMARY KEY,name TEXT NOT NULL,applied_at TEXT NOT NULL DEFAULT(datetime('now')));
       INSERT OR IGNORE INTO _omniroute_migrations(version,name) VALUES ('001','initial_schema');`);
     process.env.OMNIROUTE_MIGRATIONS_DIR = oldDirectory;

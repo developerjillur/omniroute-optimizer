@@ -126,3 +126,20 @@ Native wrapper-এ opaque thinking/signature progress হিসেবে গণ�
 metadata terminal হতে পারে না। সত্যিকারের `max_tokens` truncation অক্ষত থাকে।
 কয়েকটি trailing case report-এ না পাওয়ায় CI থেকে forced worker exit বাদ দেওয়া
 হয়েছে; bounded timeout থাকছে, এবং অসমাপ্ত report গ্রহণ করা হবে না।
+
+## Native boundary ও সম্পূর্ণ broad report
+
+Source `a00f615a1ba20a61592ad98023f9e4c7f922fb4a`-এর run `40646262083`-এ
+native ১৬১/১৬১, production Node native ১৬২/১৬২, extended ১৭১/১৭১, stream
+৩৯২/৩৯২ এবং দুই Node-এর effort ১০২/১০২ পাস। Forced exit ছাড়াই broad report-এ
+১,১৮০টি case শেষ হয়েছে; একমাত্র failing file historical-schema fixture, যেখানে
+bootstrap table list ও preserved table list-এর একই variable name ছিল। এই
+setup error-কে migration regression বা acceptance ধরা হয়নি। Compiler comparison
+ওই দুই নতুন declaration diagnostic ধরেছে এবং ৬,৫৩১ count অনুমোদিত ৬,৫২৯ ceiling
+অতিক্রম করায় gate আটকে দিয়েছে। নামের collision ঠিক করা হয়েছে; পরের exact-source
+run-এ সম্পূর্ণ fixture ও compiler পুনরায় পাস করতে হবে।
+
+Ratchet এখন abnormal compiler exit-এর partial diagnostic, global/configuration
+error ও inconsistent exit status গ্রহণ করে না। Unmeasured standalone `--update`-ও
+ব্যর্থ হয়। Raw diagnostic এবং version budget history অক্ষত রেখে এই failure modes-এর
+পৃথক negative tests রাখা হয়েছে।

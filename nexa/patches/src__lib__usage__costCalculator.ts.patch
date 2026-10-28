@@ -1,5 +1,5 @@
 diff --git a/src/lib/usage/costCalculator.ts b/src/lib/usage/costCalculator.ts
-index 3b72f21d9bd89980d2564f32325deb38d6c6c912..f6820e6a12bc804e04f48534b401b0af8e1ed014 100644
+index 3b72f21d9bd89980d2564f32325deb38d6c6c912..75b48c894982508805c7aea556f6f2eed4b36194 100644
 --- a/src/lib/usage/costCalculator.ts
 +++ b/src/lib/usage/costCalculator.ts
 @@ -11,6 +11,7 @@
@@ -64,16 +64,16 @@ index 3b72f21d9bd89980d2564f32325deb38d6c6c912..f6820e6a12bc804e04f48534b401b0af
 -  const outputPrice = toNumber(rates.output, 0);
 -  const reasoningPrice = toNumber(rates.reasoning, outputPrice);
 -  const cacheCreationPrice = toNumber(rates.cache_creation, inputPrice);
-+  const rates = applyLongContextTier(pricing, inputTokens, options.longContext);
++  const rates = applyLongContextTier(pricing, inputTokens, Number.isFinite(Number(pricing.long_context_threshold)) ? options.longContext : undefined);
 +  const legacyLongContext = !pricing.long_context &&
 +    (options.longContext ?? inputTokens > toNumber(pricing.long_context_threshold, Infinity));
 +  const inputMultiplier = legacyLongContext ? toNumber(pricing.long_context_input_multiplier, 1) : 1;
 +  const outputMultiplier = legacyLongContext ? toNumber(pricing.long_context_output_multiplier, 1) : 1;
 +  const inputPrice = toNumber(rates.input, 0) * inputMultiplier;
-+  const cachedPrice = toNumber(rates.cached, inputPrice) * inputMultiplier;
++  const cachedPrice = toNumber(rates.cached, toNumber(rates.input, 0)) * inputMultiplier;
 +  const outputPrice = toNumber(rates.output, 0) * outputMultiplier;
-+  const reasoningPrice = toNumber(rates.reasoning, outputPrice) * outputMultiplier;
-+  const cacheCreationPrice = toNumber(rates.cache_creation, inputPrice) * inputMultiplier;
++  const reasoningPrice = toNumber(rates.reasoning, toNumber(rates.output, 0)) * outputMultiplier;
++  const cacheCreationPrice = toNumber(rates.cache_creation, toNumber(rates.input, 0)) * inputMultiplier;
 +
 +  const nativeClaudePrice = ["claude", "cc", "anthropic"].includes(normalizeServiceTier(options.provider));
 +  const hourCacheCreationPrice = toNumber(rates.cache_creation_1h,

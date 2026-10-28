@@ -7,7 +7,7 @@
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
   "trackedNexaFiles": 410,
-  "totalNexaBytes": 1770985,
+  "totalNexaBytes": 1771826,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -1126,9 +1126,9 @@
     {
       "path": "nexa/new/tests/unit/gpt-6-1-sol-pricing.test.ts",
       "mode": "100644",
-      "gitBlobSha": "368e01b2c9a6ce25472a25e77d4448d7722b9931",
-      "bytes": 2298,
-      "sha256": "befb558a0d2c5ea5c398f923a3341297a7eb43e7db3726bd7e4fe8d3b20fc931"
+      "gitBlobSha": "384d30d0b6163ea004470d9f43c843fb6e317bc6",
+      "bytes": 2867,
+      "sha256": "990d51627ccf94efb56d734187e4ad5dda03b0b24b54a2a5775cd003a36db831"
     },
     {
       "path": "nexa/new/tests/unit/gpt-6-1-sol-support.test.ts",
@@ -2197,9 +2197,9 @@
     {
       "path": "nexa/patches/src__lib__usage__costCalculator.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "3d4ee720d628f8d5b4ec20a1367a77df284b6941",
-      "bytes": 4673,
-      "sha256": "4ae9d16ee4910a044fda3d0342d2867f512a68e2b2df923cb82dd92669e3f500"
+      "gitBlobSha": "656dfbfbf8c770fef9bb80c3660e97e057290c48",
+      "bytes": 4785,
+      "sha256": "2da78333b396bb13547a76005d27e83a8cee68e3ce0d1162ac073e1db9d508d2"
     },
     {
       "path": "nexa/patches/src__lib__usage__providerLimits.ts.patch",
@@ -2813,9 +2813,9 @@
     {
       "path": "nexa/tests/overlay-doc-counts.test.mjs",
       "mode": "100644",
-      "gitBlobSha": "241302eda7369a428f8fae28108f61e8e18275d7",
-      "bytes": 3494,
-      "sha256": "0375f4c9924c8147df116302f4a20b96c1300213f73576b064aaa5ae13c43a37"
+      "gitBlobSha": "4adbb1d335feeb64f708b229f9cf189c2befe296",
+      "bytes": 3654,
+      "sha256": "befcdb86afed75c86ba770ca6d7c64ae84d5a5a545d671cdd2d3d757f840344f"
     },
     {
       "path": "nexa/tests/overlay-inventory.test.mjs",

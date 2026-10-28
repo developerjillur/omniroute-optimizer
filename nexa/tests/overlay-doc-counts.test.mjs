@@ -21,6 +21,10 @@ async function fixture({ locales = true, count = 2 } = {}) {
   if (locales) fs.mkdirSync(path.join(root, "docs/i18n"), { recursive: true });
   const modulePath = path.join(root, "nexa/lib/overlay.mjs");
   fs.copyFileSync(overlaySource, modulePath);
+  fs.copyFileSync(
+    fileURLToPath(new URL("../lib/retiredPatches.mjs", import.meta.url)),
+    path.join(path.dirname(modulePath), "retiredPatches.mjs")
+  );
   const { syncMigrationDocCounts } = await import(pathToFileURL(modulePath).href);
   return { root, syncMigrationDocCounts };
 }

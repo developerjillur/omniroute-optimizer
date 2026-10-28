@@ -75,7 +75,17 @@ test("resilience schema retains concurrency bounds and strict unknown-key reject
 });
 
 test("omitted resilience settings retain the current runtime defaults", () => {
-  assert.deepEqual(updateResilienceSchema.parse({}), {});
-  assert.deepEqual(normalizeRequestQueueSettings({}, queueDefaults), queueDefaults);
-  assert.deepEqual(normalizeWaitForCooldownSettings({}, waitDefaults), waitDefaults);
+  assert.equal(updateResilienceSchema.safeParse({}).success, false);
+  const input = { requestQueue: { globalConcurrentRequests: 0 } };
+  const parsed = updateResilienceSchema.parse(input);
+  assert.deepEqual(parsed, input);
+  assert.equal(Object.hasOwn(parsed, "waitForCooldown"), false);
+  assert.deepEqual(
+    normalizeRequestQueueSettings(parsed.requestQueue, queueDefaults),
+    queueDefaults
+  );
+  assert.deepEqual(
+    normalizeWaitForCooldownSettings(parsed.waitForCooldown, waitDefaults),
+    waitDefaults
+  );
 });

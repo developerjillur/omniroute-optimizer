@@ -7,7 +7,7 @@
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
   "trackedNexaFiles": 429,
-  "totalNexaBytes": 1887443,
+  "totalNexaBytes": 1889464,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -510,9 +510,9 @@
     {
       "path": "nexa/docs/UPGRADE-3.8.52-2026-10-28.md",
       "mode": "100644",
-      "gitBlobSha": "e65cf9da0869ac3ce844c32109dc45da239cc9cf",
-      "bytes": 15639,
-      "sha256": "1a432cc8c24c3d6569fff175c2d30e79db0ea3af541b65a4d8882d280c136fc5"
+      "gitBlobSha": "06d00dbd5ef8f527b50c5098812bc13c4fd2939b",
+      "bytes": 16323,
+      "sha256": "2e7b9cbb95170b86a1beba63717a290b867b23f40dbb2ebb15790f66ad0b91a9"
     },
     {
       "path": "nexa/docs/USAGE-AUDIT-2026-10-14.md",
@@ -1007,9 +1007,9 @@
     {
       "path": "nexa/new/tests/unit/auto-update-command-mode.test.ts",
       "mode": "100644",
-      "gitBlobSha": "d9866a949b2373727a2fc5d972ab09493b325af0",
-      "bytes": 3320,
-      "sha256": "95094513d514263c4b11702c6f0713fe480dc3daee5c71f5a4c4e104f1476bfd"
+      "gitBlobSha": "dc69a40bd11839566ccd6f01eca35680ed81b480",
+      "bytes": 4028,
+      "sha256": "15f0cc2aa869916e50413707ae28e55462deabf3a32a11f3783a11639b0ebf01"
     },
     {
       "path": "nexa/new/tests/unit/cache-ttl-extraction.test.ts",
@@ -1350,9 +1350,9 @@
     {
       "path": "nexa/new/tests/unit/resilience-settings-contract.test.ts",
       "mode": "100644",
-      "gitBlobSha": "cbca24d0d8a367ebe398c0d8eeefdfaf36cfd1ee",
-      "bytes": 3416,
-      "sha256": "73e13e20b0ade7dec12d7350f5dae5edd795733c048a7a6765db831f4aec9c3a"
+      "gitBlobSha": "5192744cac28bb31594cfda5cb8393d6fa3de50a",
+      "bytes": 3709,
+      "sha256": "c4c1ddf1bea3783e02c60c35b8d7ed620a9c273a00e6bfb59d9ec3ace83fa337"
     },
     {
       "path": "nexa/new/tests/unit/security/audit-remediation-guards.test.ts",
@@ -2197,9 +2197,9 @@
     {
       "path": "nexa/patches/src__lib__system__autoUpdate.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "0c63d3d447bd50befdcf0485b59a386a6589957a",
-      "bytes": 3346,
-      "sha256": "93e5639188a7baa222105262c633d38e251ce1d55a1841fb29b71bb42c03c500"
+      "gitBlobSha": "3db81fd5cd1f963f90d7171548f142bdd3e786d3",
+      "bytes": 3682,
+      "sha256": "9f4531e0029e7c12f3d66ae375df9112d4bee0513f41714d504aba50d847677c"
     },
     {
       "path": "nexa/patches/src__lib__tokenHealthCheck.ts.patch",

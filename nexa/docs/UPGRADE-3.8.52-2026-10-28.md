@@ -170,3 +170,10 @@ fixture-ও পাওয়া গেছে। Source/compose fixtures-এ বি�
 defaults যোগ করা হয়েছে; command updater-এর production contract ও আগের সব
 assertion অক্ষত। এই সাতটি existing upstream test-ও broad compatibility lane-এ
 চলে। Test-এ spawn/exec mock থাকে; কোনো update command বাস্তবে চালানো হয় না।
+
+Settings-এর omitted-field control valid partial PATCH ব্যবহার করে defaults
+সংরক্ষণ যাচাই করে এবং empty PATCH rejection-ও ধরে রাখে। Process probes শুধু
+`execFile`-এর fulfilled result await করে; তাদের injected dependency সেই typed
+result ও ব্যবহৃত `cwd/timeout` options প্রকাশ করে। Child-process control আগের মতো
+`spawnImpl`-এ থাকে। Cast ছাড়া ordinary async probe-এর নতুন case দুই Node version-এ
+চলে; required production config fields শিথিল করা হয়নি।

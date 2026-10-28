@@ -803,7 +803,7 @@
       "target": "src/lib/system/autoUpdate.ts",
       "patch": "src__lib__system__autoUpdate.ts.patch",
       "disposition": "ported",
-      "candidateSha256": "da4b9a585d28bffb655efa75aa7aa593c9073cacc8bc5a11957b7fdc41ec6000",
+      "candidateSha256": "18ffa9604b3c9165b3f3342b71a5dbf2c9490cc9317a011a9670af9d48ffcff5",
       "baselinePatchSha256": "cac7f8411efeea98444838a1af6ae6821130a383848542c8ddf709d284034e9f"
     },
     {
@@ -1765,6 +1765,11 @@
       "atUtc": "2026-10-28T07:42:23.554158+00:00",
       "target": "tests/unit/auto-update.test.ts",
       "decision": "Supply all required auxiliary configuration defaults in nine existing source/compose fixtures. Keep production types, runtime defaults, every existing assertion and mocked spawn behavior intact."
+    },
+    {
+      "atUtc": "2026-10-28T08:17:35.687517+00:00",
+      "target": "src/lib/system/autoUpdate.ts",
+      "decision": "Express the existing process-probe dependency as a typed promise of the fulfilled execFile result with the exact cwd/timeout options consumed; child-process control remains with spawnImpl. Ordinary async probes now satisfy the honest runtime contract without casts or loss of required config fields."
     }
   ],
   "validationAttempts": [
@@ -2098,6 +2103,135 @@
       "lint": "pass",
       "docsAll": "pass",
       "completeHistoricalBootstrapVerified": true,
+      "fullBuild": false,
+      "deployment": false,
+      "privateRuntimeDataUsed": false
+    },
+    {
+      "sourceCommit": "955ff8405bae7f2b7ab7c8135e9541823305d2fb",
+      "runUrl": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/40652479495",
+      "accepted": false,
+      "counts": {
+        "tooling-node24.tap": {
+          "tests": 48,
+          "pass": 48,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "tooling-node26.tap": {
+          "tests": 48,
+          "pass": 48,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-production.tap": {
+          "tests": 171,
+          "pass": 170,
+          "fail": 1,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "production-migrations.tap": {
+          "tests": 7,
+          "pass": 7,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "stream-green.tap": {
+          "tests": 392,
+          "pass": 392,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "effort-primary.tap": {
+          "tests": 102,
+          "pass": 102,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-extended.tap": {
+          "tests": 171,
+          "pass": 171,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "upgrade-migrations.tap": {
+          "tests": 11,
+          "pass": 11,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "effort-production.tap": {
+          "tests": 102,
+          "pass": 102,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-green.tap": {
+          "tests": 164,
+          "pass": 164,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "upgrade-compatibility.tap": {
+          "tests": 1196,
+          "pass": 1195,
+          "fail": 1,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-red.tap": {
+          "tests": 28,
+          "pass": 10,
+          "fail": 18,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "deployment-helpers.tap": {
+          "tests": 63,
+          "pass": 62,
+          "fail": 0,
+          "skipped": 1,
+          "cancelled": 0
+        },
+        "resilience-budget-red.tap": {
+          "tests": 6,
+          "pass": 3,
+          "fail": 3,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "cache-cost-red.tap": {
+          "tests": 1,
+          "pass": 0,
+          "fail": 1,
+          "skipped": 0,
+          "cancelled": 0
+        }
+      },
+      "fullTypes": {
+        "pristine": 6572,
+        "applied": 6528,
+        "ceiling": 6529,
+        "newIdentities": 8,
+        "accepted": false
+      },
+      "nativeFilteredTerminalTests": "pass",
+      "historicalMigrations": "11/11 and 7/7 pass",
+      "resilienceRedAccepted": false,
+      "resilienceRedReason": "A third failure came from a test incorrectly accepting empty PATCH; existing upstream requires at least one section. Preserve rejection and test a valid partial payload.",
+      "newTypeCause": "Valid config fixtures exposed eight mocks constrained to PromiseWithChild despite process probes only awaiting the fulfilled result. Express the actual typed completion contract and retain child control with spawnImpl.",
+      "committedFormatting": "pass",
+      "tooling": "48/48 on both runtimes",
       "fullBuild": false,
       "deployment": false,
       "privateRuntimeDataUsed": false

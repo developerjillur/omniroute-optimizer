@@ -1,17 +1,26 @@
 diff --git a/src/lib/system/autoUpdate.ts b/src/lib/system/autoUpdate.ts
-index 7b59eb0c67b6a767447cdf75cfc7fe851d9309f5..7d29978092d4094dc41d474158c92686b99dfddd 100644
+index 7b59eb0c67b6a767447cdf75cfc7fe851d9309f5..a76b119fbc7f0af3f44fa3d1ab7596374c1a2e33 100644
 --- a/src/lib/system/autoUpdate.ts
 +++ b/src/lib/system/autoUpdate.ts
-@@ -61,7 +61,7 @@
+@@ -61,9 +61,14 @@
   * image container (no `.git`, not under `node_modules`). See `./dockerUpdateTrigger.ts`.
   */
  export type AutoUpdateMode =
 -  "npm" | "docker-compose" | "source" | "docker-image" | "docker-trigger";
+-
+-type ExecFileLike = typeof execFileAsync;
 +  "npm" | "docker-compose" | "source" | "docker-image" | "docker-trigger" | "command";
- 
- type ExecFileLike = typeof execFileAsync;
++
++// Process probes consume the fulfilled execFile result. Child control stays with spawnImpl.
++type ExecFileLike = (
++  command: string,
++  args: string[],
++  options?: Pick<import("node:child_process").ExecFileOptions, "cwd" | "timeout">
++) => Promise<Awaited<ReturnType<typeof execFileAsync>>>;
  type SpawnLike = typeof spawn;
-@@ -81,6 +81,8 @@
+ 
+ export type AutoUpdateConfig = {
+@@ -81,6 +86,8 @@
    dockerTriggerFile: string | null;
    /** Host-side compose command shown to the operator in `docker-image` mode. */
    manualUpdateCommand: string | null;
@@ -20,7 +29,7 @@ index 7b59eb0c67b6a767447cdf75cfc7fe851d9309f5..7d29978092d4094dc41d474158c92686
  };
  
  export type AutoUpdateValidation = {
-@@ -98,7 +100,7 @@
+@@ -98,7 +105,7 @@
  };
  
  function normalizeMode(raw: string | undefined): AutoUpdateMode {
@@ -29,7 +38,7 @@ index 7b59eb0c67b6a767447cdf75cfc7fe851d9309f5..7d29978092d4094dc41d474158c92686
      return raw;
    }
    return "npm";
-@@ -267,6 +269,7 @@
+@@ -267,6 +274,7 @@
      dockerTriggerFile,
      manualUpdateCommand:
        mode === "docker-image" ? buildDockerImageUpdateCommand(env.AUTO_UPDATE_SERVICE) : null,
@@ -37,7 +46,7 @@ index 7b59eb0c67b6a767447cdf75cfc7fe851d9309f5..7d29978092d4094dc41d474158c92686
    };
  }
  
-@@ -293,6 +296,24 @@
+@@ -293,6 +301,24 @@
    execFileImpl: ExecFileLike = execFileAsync,
    existsImpl: (targetPath: string) => Promise<boolean> = pathExists
  ): Promise<AutoUpdateValidation> {
@@ -62,7 +71,7 @@ index 7b59eb0c67b6a767447cdf75cfc7fe851d9309f5..7d29978092d4094dc41d474158c92686
    if (config.mode === "source") {
      const gitDir = path.join(PROJECT_ROOT, ".git");
      if (!(await existsImpl(gitDir))) {
-@@ -413,6 +434,15 @@
+@@ -413,6 +439,15 @@
    } catch {
      throw new Error(`Git tag not found: ${targetTag}`);
    }
@@ -78,7 +87,7 @@ index 7b59eb0c67b6a767447cdf75cfc7fe851d9309f5..7d29978092d4094dc41d474158c92686
  }
  
  export function buildNpmUpdateScript(latest: string): string {
-@@ -554,7 +584,9 @@
+@@ -554,7 +589,9 @@
          })
        : config.mode === "source"
          ? buildSourceUpdateScript(latest, config.gitRemote)

@@ -164,13 +164,6 @@
       "baselinePatchSha256": "48faf678c3f7e7aa182aa7812f8b235365377b7d5157e0d369c0e56bc46edb6b"
     },
     {
-      "target": "open-sse/handlers/chatCore.ts",
-      "patch": "open-sse__handlers__chatCore.ts.patch",
-      "disposition": "ported",
-      "candidateSha256": "367d74e3fb34cf832cd415bd0f2a2ca3498eb38407861eb064092e46e8d515b7",
-      "baselinePatchSha256": "1df114fa3b63ec9e2f9c959d1854055cdaad58e14f9c695d13e3173cd6f6c0f0"
-    },
-    {
       "target": "open-sse/handlers/chatCore/attemptLogging.ts",
       "patch": "open-sse__handlers__chatCore__attemptLogging.ts.patch",
       "disposition": "ported",
@@ -246,6 +239,13 @@
       "disposition": "ported",
       "candidateSha256": "6605faa762722651174c2d7a394c4ee45128c0d3b8818c539315a7aba0b4d6ed",
       "baselinePatchSha256": "d7b204b951d85cd014221c31774a7377080fcbe996df5f26352bd7867a0a6d88"
+    },
+    {
+      "target": "open-sse/handlers/chatCore.ts",
+      "patch": "open-sse__handlers__chatCore.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "367d74e3fb34cf832cd415bd0f2a2ca3498eb38407861eb064092e46e8d515b7",
+      "baselinePatchSha256": "1df114fa3b63ec9e2f9c959d1854055cdaad58e14f9c695d13e3173cd6f6c0f0"
     },
     {
       "target": "open-sse/handlers/responseTranslator.ts",
@@ -696,17 +696,24 @@
       "baselinePatchSha256": "38191b03fd78c7c267bdc9c5cbb06f39026e7d47a093282cea825d4ea705e326"
     },
     {
-      "target": "src/lib/db/migrationRunner.ts",
-      "patch": "src__lib__db__migrationRunner.ts.patch",
-      "disposition": "new-owner-patch",
-      "candidateSha256": "faf94a5e3125d5c7ae657946269cbdea31eea2222278c4f8b4de199cc0df013e",
-      "baselinePatchSha256": null
-    },
-    {
       "target": "src/lib/db/migrationRunner/constants.ts",
       "patch": "src__lib__db__migrationRunner__constants.ts.patch",
       "disposition": "new-owner-patch",
       "candidateSha256": "55fc1b4e2c00e68994c0a488ffa80c0401e2bb974dad879f32a90403cdbc62bd",
+      "baselinePatchSha256": null
+    },
+    {
+      "target": "src/lib/db/migrationRunner/schemaState.ts",
+      "patch": "src__lib__db__migrationRunner__schemaState.ts.patch",
+      "disposition": "new-owner-patch",
+      "candidateSha256": "1f222b9500236651f3c63d3f7d9c431576407e9d6ca433f45ede5d10c103da20",
+      "baselinePatchSha256": null
+    },
+    {
+      "target": "src/lib/db/migrationRunner.ts",
+      "patch": "src__lib__db__migrationRunner.ts.patch",
+      "disposition": "new-owner-patch",
+      "candidateSha256": "b67618963139589af553b8ad5403d31123bbec75684b8fed62002c1dcd1edf92",
       "baselinePatchSha256": null
     },
     {
@@ -731,13 +738,6 @@
       "baselinePatchSha256": "e237811fcbb340634b9b8068fc9d6638eff339fc06b4aeb4c2f6a116c0301e91"
     },
     {
-      "target": "src/lib/db/usageAnalytics.ts",
-      "patch": "src__lib__db__usageAnalytics.ts.patch",
-      "disposition": "ported",
-      "candidateSha256": "25f0ff62f5377bba9a98d0a0a7ec9669bb93539dc5b99602bc69feb6ea7b4199",
-      "baselinePatchSha256": "06ee7e39b247b5670042418fe9f576b4ee6b82638d7c7cf0a90ccc214d9de262"
-    },
-    {
       "target": "src/lib/db/usageAnalytics/sources.ts",
       "patch": "src__lib__db__usageAnalytics__sources.ts.patch",
       "disposition": "ported",
@@ -745,18 +745,18 @@
       "baselinePatchSha256": "09b137135169d02269410cc9e23233b63dba0e90e9b94fe0c70b301e450a7eb7"
     },
     {
+      "target": "src/lib/db/usageAnalytics.ts",
+      "patch": "src__lib__db__usageAnalytics.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "25f0ff62f5377bba9a98d0a0a7ec9669bb93539dc5b99602bc69feb6ea7b4199",
+      "baselinePatchSha256": "06ee7e39b247b5670042418fe9f576b4ee6b82638d7c7cf0a90ccc214d9de262"
+    },
+    {
       "target": "src/lib/guardrails/registry.ts",
       "patch": "src__lib__guardrails__registry.ts.patch",
       "disposition": "ported",
       "candidateSha256": "c2dc0384d48b2d8092ea155ed5e104b359d346d3c8e0ddd1eda4d4eec5d51217",
       "baselinePatchSha256": "943401733d1f4459062e2ef569f1cac10c78da2c9a78e30911a2f076d300c8f5"
-    },
-    {
-      "target": "src/lib/resilience/settings.ts",
-      "patch": "src__lib__resilience__settings.ts.patch",
-      "disposition": "ported",
-      "candidateSha256": "328dca6d3569b29f771f2b90a4ed01b9420f7cfceac688889f4598e1ac847967",
-      "baselinePatchSha256": "2e0b11185b2952b37076e16f98306b3e6ce917ccc46c1e3dd1485911cbca1ae9"
     },
     {
       "target": "src/lib/resilience/settings/normalize.ts",
@@ -771,6 +771,13 @@
       "disposition": "ported",
       "candidateSha256": "a27b5c960f7ce8b3eae306cbe0902c61b00372761668a3f8fc310f24b8c338b7",
       "baselinePatchSha256": "784731521b746000b8bcc94d4ea250574fd0bb306b595e73052d73d662c28c92"
+    },
+    {
+      "target": "src/lib/resilience/settings.ts",
+      "patch": "src__lib__resilience__settings.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "328dca6d3569b29f771f2b90a4ed01b9420f7cfceac688889f4598e1ac847967",
+      "baselinePatchSha256": "2e0b11185b2952b37076e16f98306b3e6ce917ccc46c1e3dd1485911cbca1ae9"
     },
     {
       "target": "src/lib/skills/serverOwnedToolLoop.ts",
@@ -846,7 +853,7 @@
       "target": "src/lib/usage/costCalculator.ts",
       "patch": "src__lib__usage__costCalculator.ts.patch",
       "disposition": "ported",
-      "candidateSha256": "83ab189a52eaae6987b64ae6f65d297ce354c015a6c425154252a4fa6c981a98",
+      "candidateSha256": "c0e4e0430c35158d9e43ad3fb1de3689b7a7d7ad9c285c81d6dd15046a122372",
       "baselinePatchSha256": "9cc17ff4e399d358c51492b871c4b02d1c115cd6f5f7b0c9bf0399bd66810fc9"
     },
     {
@@ -860,15 +867,8 @@
       "target": "src/lib/usage/providerWindowCosts.ts",
       "patch": "src__lib__usage__providerWindowCosts.ts.patch",
       "disposition": "ported",
-      "candidateSha256": "cf5e0dfbf8a3e53a20e14f4649f60005789a83cabc21d21134a7274182eea56c",
+      "candidateSha256": "b3084835aa0f9adae1d79030de1527272e66a13cea9d06089be768767d0f2e2f",
       "baselinePatchSha256": "6a2c536ef7bb6ee0514421919adce8d6410588254b1edc4a9f0c7e106f419b98"
-    },
-    {
-      "target": "src/lib/usage/usageHistory.ts",
-      "patch": "src__lib__usage__usageHistory.ts.patch",
-      "disposition": "retired-preserved",
-      "candidateSha256": "54ef92df9f1812101a036ce863c9408a465d96f534bdb9c3f21196c1617588b9",
-      "baselinePatchSha256": "5f0f174ead14b2810435b1486bbc42a4522645fad85dfa8638dba9c71eb44dbd"
     },
     {
       "target": "src/lib/usage/usageHistory/duplicateEntry.ts",
@@ -883,6 +883,13 @@
       "disposition": "new-owner-patch",
       "candidateSha256": "cac0c065c37b5ad25bd5caf8acdf7eac093c63d164967c57abce43fa28690ee7",
       "baselinePatchSha256": null
+    },
+    {
+      "target": "src/lib/usage/usageHistory.ts",
+      "patch": "src__lib__usage__usageHistory.ts.patch",
+      "disposition": "retired-preserved",
+      "candidateSha256": "54ef92df9f1812101a036ce863c9408a465d96f534bdb9c3f21196c1617588b9",
+      "baselinePatchSha256": "5f0f174ead14b2810435b1486bbc42a4522645fad85dfa8638dba9c71eb44dbd"
     },
     {
       "target": "src/lib/usage/usageStats.ts",
@@ -1165,6 +1172,13 @@
       "baselinePatchSha256": "d002d53e9b93cc8cbcf00d7b8c3bc1c61e0285c0f3427e69e2c705d6ff0c1187"
     },
     {
+      "target": "tests/unit/combo/quota-weighted-strategy.test.ts",
+      "patch": "tests__unit__combo__quota-weighted-strategy.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "4b720887ec4b4cffbf60ed1fe844e4b410dd88f7eacb908910a968306981d1d5",
+      "baselinePatchSha256": "6e01ef13bec002fd182e5328e1f07c2141e93446446dd520ba25bfeecb6985b8"
+    },
+    {
       "target": "tests/unit/combo-routing-engine.test.ts",
       "patch": "tests__unit__combo-routing-engine.test.ts.patch",
       "disposition": "ported",
@@ -1179,18 +1193,25 @@
       "baselinePatchSha256": "4d2be8dc8b9f27cfb4dcf2430b292d00da432a3c02d8b0a2b91e4bb7a71f9909"
     },
     {
-      "target": "tests/unit/combo/quota-weighted-strategy.test.ts",
-      "patch": "tests__unit__combo__quota-weighted-strategy.test.ts.patch",
-      "disposition": "ported",
-      "candidateSha256": "4b720887ec4b4cffbf60ed1fe844e4b410dd88f7eacb908910a968306981d1d5",
-      "baselinePatchSha256": "6e01ef13bec002fd182e5328e1f07c2141e93446446dd520ba25bfeecb6985b8"
-    },
-    {
       "target": "tests/unit/csp-lan-ws-5083.test.ts",
       "patch": "tests__unit__csp-lan-ws-5083.test.ts.patch",
       "disposition": "ported",
       "candidateSha256": "ab9117bb39e3829cc3c2e28af7ef5c4b3fd255b41075e295c856ac295ce9b442",
       "baselinePatchSha256": "db03f7b04ebcd532ab0e19785efd6c21292a6f14a5147f9992c9613aa0ab7de6"
+    },
+    {
+      "target": "tests/unit/db/no-migration-collisions.test.ts",
+      "patch": "tests__unit__db__no-migration-collisions.test.ts.patch",
+      "disposition": "new-owner-patch",
+      "candidateSha256": "adb987fc14631490feca1390b41a7cb62c0f87178ad176004c5100dd8bc79b80",
+      "baselinePatchSha256": null
+    },
+    {
+      "target": "tests/unit/db-migration-version-uniqueness.test.ts",
+      "patch": "tests__unit__db-migration-version-uniqueness.test.ts.patch",
+      "disposition": "new-owner-patch",
+      "candidateSha256": "70c64dc86f7b5aab251e65309913d73c147b556e6073ec2a5637b6a2da06bbca",
+      "baselinePatchSha256": null
     },
     {
       "target": "tests/unit/executor-claude-identity.test.ts",
@@ -1331,6 +1352,356 @@
       "disposition": "ported",
       "candidateSha256": "b15ea15f0b93ed9195f97f69862f3292c0d0b23440b5989800e5e36b9219e252",
       "baselinePatchSha256": "b53a6af9831b073e75fae6a581774f586eb4766ec86b0a1dd51654c0b271c81b"
+    }
+  ],
+  "resolutionDecisions": [
+    {
+      "path": "Dockerfile",
+      "regions": 1,
+      "reason": "Retain the operator-pinned CLI 0.160.0; preserve other upstream Docker changes.",
+      "sha256": "8254bef57733704541c13b48e8b9a2fac98d8fe5647b0c404cb97b489d30e2a3"
+    },
+    {
+      "path": "bin/cli/utils/pid.mjs",
+      "regions": 1,
+      "reason": "Upstream now scopes lsof to LISTEN and adds address-aware parsing; the original listener-only fix is incorporated.",
+      "sha256": "2f389c5b9ba7056ea5808089732a9ebebfdeae6fafc2719ff150ab102a1fc7aa"
+    },
+    {
+      "path": "config/quality/eslint-suppressions.json",
+      "regions": 1,
+      "reason": "Keep both upstream suppression removals and the existing Nexa removal; never restore resolved warning budgets.",
+      "sha256": "367bd9072c1207a9b54a0077c125b7dc16dc78fa40a7f2588f13b3e6b32678b8"
+    },
+    {
+      "path": "docs/openapi.yaml",
+      "regions": 1,
+      "reason": "Do not restore a retired traffic-inspector endpoint; retain guards on current documented operations.",
+      "sha256": "6a4e96fd4a6279c5b1f6896dd7b3cad4e4ae1d321ced1b973593db911208be2a"
+    },
+    {
+      "path": "public/openapi.yaml",
+      "regions": 1,
+      "reason": "Keep public and canonical OpenAPI mirrors consistent without restoring retired endpoints.",
+      "sha256": "3f12f17dd249281e1273f274c27054394bcdd02a6302f3ed93835a5b8db4faff"
+    },
+    {
+      "path": ".env.example",
+      "regions": 1,
+      "reason": "Document new upstream optional controls and retain explicit local bridge timeout/cloud signature controls.",
+      "sha256": "3fcaf914ba14fe109caccef5d9fed967b8d2683541b083ad4377094bb4f37e96"
+    },
+    {
+      "path": "open-sse/config/providerModels.ts",
+      "regions": 1,
+      "reason": "Retain new published catalog mapping and Haiku capability compatibility.",
+      "sha256": "f52b850e8e8df73d1f5eeca0b90c41050513ab0b77762e406eb7cdf4e31eb975"
+    },
+    {
+      "path": "open-sse/executors/base.ts",
+      "regions": 5,
+      "reason": "Keep validation/tier/advisor changes; preserve sparse native Thread fields and bypass destructive recovery on that protocol.",
+      "sha256": "c36535f408730d72c44b72edd3484cee4eb606eadef5cc0e06e3805ef921b6af"
+    },
+    {
+      "path": "open-sse/executors/claudeIdentity.ts",
+      "regions": 1,
+      "reason": "Retain all upstream mid-conversation model prefixes plus existing dotted Sonnet spelling.",
+      "sha256": "fa77140da069e43d1402f0fa0375a2ccd4b6b25f4b97add93f4f9e5449886f47"
+    },
+    {
+      "path": "open-sse/executors/codex/reasoningSuffix.ts",
+      "regions": 1,
+      "reason": "Keep upstream Sol support and the existing reserve model family.",
+      "sha256": "b3c0edbee8cbd06251c3c4de0d29a34da9020cf7bc37d142f9ad3d863d57e3ab"
+    },
+    {
+      "path": "open-sse/handlers/chatCore/attemptLogging.ts",
+      "regions": 1,
+      "reason": "Adopt upstream error-body fallback; conflicting custom change was formatting only.",
+      "sha256": "c265ea55a69ca16b79dd204a6bef69bafe53c16ce950fb5ea2b3c31328d81d9e"
+    },
+    {
+      "path": "open-sse/handlers/chatCore/nonStreamingProviderLeg.ts",
+      "regions": 1,
+      "reason": "Preserve context-overflow rejection on every recovery send plus new buffered Responses failure handling.",
+      "sha256": "598186e2fe08009cecabe323bb0c9bca0a8a77dd01d5ddb7e4e0d23ca5189d76"
+    },
+    {
+      "path": "open-sse/handlers/responseTranslator.ts",
+      "regions": 1,
+      "reason": "Upstream centralized stop mapping now includes refusal/content_filter and other valid terminal mappings.",
+      "sha256": "b1b21cfe0bb6c74ebfb457596cc47562167f707450e6316128a3a7bec6b40862"
+    },
+    {
+      "path": "open-sse/handlers/sseParser.ts",
+      "regions": 1,
+      "reason": "Retain actual error and incomplete_details in buffered Responses results.",
+      "sha256": "eb417b618e0e57dfad60b66f8b7ef90e375e9ced70450e605027a835cb9cdaec"
+    },
+    {
+      "path": "open-sse/handlers/usageExtractor.ts",
+      "regions": 3,
+      "reason": "Combine exact provider cost/credits validation with native metered usage and cache TTL accounting.",
+      "sha256": "23690b3df108b6b6d4c265c0f9be3f4424365d8c7380647ee58aa707fc7635f2"
+    },
+    {
+      "path": "open-sse/services/antigravityQuotaFamily.ts",
+      "regions": 1,
+      "reason": "Preserve Gemini flash/pro family membership and upstream session plus weekly quota windows.",
+      "sha256": "b0dad39f26d9235e9e6dee3d9d9f570d8decd165c951c46978bc2c5631335dc1"
+    },
+    {
+      "path": "open-sse/translator/helpers/schemaCoercion.ts",
+      "regions": 2,
+      "reason": "Retain the new predicate-based invalid-regex sanitizer; native scalar normalization applies only to the Responses sanitizer; recurse through conditional schema fields.",
+      "sha256": "8f8ccaa69cf51372d0fc27fa33eed1e069a544afe7851a0d0691e60dd510824f"
+    },
+    {
+      "path": "open-sse/translator/request/claude-to-openai.ts",
+      "regions": 4,
+      "reason": "Preserve upstream native Gemini/web-search and parallel-tool semantics while keeping reserved advisor/deferred sentinels off unsupported function surfaces.",
+      "sha256": "4ecdc0b2c25ec0ab0bd7d07afa04c990c48241ad73ef86bbd1e7084b6294f52d"
+    },
+    {
+      "path": "open-sse/translator/request/openai-responses/helpers.ts",
+      "regions": 2,
+      "reason": "Use shared model effort caps and preserve both upstream Kiro model patterns.",
+      "sha256": "ba98291b04119b5c187784c756d88cc6392a9175051f10e76f2e7b7464147a08"
+    },
+    {
+      "path": "open-sse/translator/response/claude-to-openai.ts",
+      "regions": 2,
+      "reason": "Combine native metered usage/signatures with upstream thinking store and non-inclusive prompt cache metadata.",
+      "sha256": "b4cd9b3cd521443d3ef928e070d2a921651d08a2ae35ff7a0ada03984a130b3d"
+    },
+    {
+      "path": "open-sse/utils/stream.ts",
+      "regions": 5,
+      "reason": "Retain upstream stream failure snapshots and trailing summary handling while collecting native Claude envelopes and exact metered TTL usage.",
+      "sha256": "8d4a9fde05a3c18a4b1601eda1b3d8fe54a10814573849f85081c921147d2cd1"
+    },
+    {
+      "path": "open-sse/utils/streamClaudeEmptyBody.ts",
+      "regions": 1,
+      "reason": "Keep upstream clean empty-turn terminal handling and explicit native refusal lifecycle validation.",
+      "sha256": "45dc7faf6cac216d8464fbc71f5d432ec8a2548ac0226c9d8a7369087217b5ac"
+    },
+    {
+      "path": "open-sse/utils/streamHandler.ts",
+      "regions": 7,
+      "reason": "Preserve trusted upstream empty-turn receipts and stall tracking alongside strict native suggestion and hidden thinking progress contracts.",
+      "sha256": "de5dfd6e86511e830e69202a59b995de11126099e22df9c1b0a44813ef20b6b6"
+    },
+    {
+      "path": "open-sse/utils/streamReadiness.ts",
+      "regions": 1,
+      "reason": "Preserve upstream progress accounting and the exact native Claude stop reason.",
+      "sha256": "75ec95d9188169c6dc1ee9d94e85fda235a38cefef5b8dd8a38c16556f1ab9e3"
+    },
+    {
+      "path": "open-sse/utils/usageTracking.ts",
+      "regions": 2,
+      "reason": "Retain process-global symbol identity, exact provider credits/costs and custom native cache TTL fields.",
+      "sha256": "25756fffd280e4e8cce6c8ea69cfd175b5036b6234bc38f64bec064c98cd28c5"
+    },
+    {
+      "path": "src/app/api/system/version/route.ts",
+      "regions": 1,
+      "reason": "Preserve socket-free Docker update flow and operator-owned external command mode.",
+      "sha256": "41850153b6a24142ea01476ac3870527ff2cfa067795cd2cff0a6718a483c0c4"
+    },
+    {
+      "path": "src/lib/system/autoUpdate.ts",
+      "regions": 3,
+      "reason": "Preserve Docker image detection and explicit custom update command settings.",
+      "sha256": "da4b9a585d28bffb655efa75aa7aa593c9073cacc8bc5a11957b7fdc41ec6000"
+    },
+    {
+      "path": "src/shared/constants/codexClient.ts",
+      "regions": 1,
+      "reason": "Retain the tested pinned CLI identity 0.160.0.",
+      "sha256": "7b82911f5ef764b45eae8584f4c9d20165ace8b63bf5f7e532a55037506a879f"
+    },
+    {
+      "path": "src/shared/constants/pricing/frontier-labs.ts",
+      "regions": 1,
+      "reason": "Preserve new upstream long-context tiers while keeping the configured Sol 6.1 tariff.",
+      "sha256": "ea1dc218e8836736060dcca77d8222cc0c7da1a2b70bdb04a7ec6678e0f61d81"
+    },
+    {
+      "path": "src/shared/validation/schemas/pricing.ts",
+      "regions": 1,
+      "reason": "Preserve long-context pricing validation and the 1-hour cache creation tariff.",
+      "sha256": "8e39bccc91233b2e380162367c6f9c099e141d2a618ca96c867023f34d2613a6"
+    },
+    {
+      "path": "src/lib/guardrails/registry.ts",
+      "regions": 1,
+      "reason": "Keep client override opt-in and preserve both independent header aliases within that gate.",
+      "sha256": "c2dc0384d48b2d8092ea155ed5e104b359d346d3c8e0ddd1eda4d4eec5d51217"
+    },
+    {
+      "path": "src/app/api/providers/[id]/test/route.ts",
+      "regions": 1,
+      "reason": "Use upstream CAS-aware health persistence and preserve Google verification snapshot fencing.",
+      "sha256": "9100f35b9911ac6d191fb46ae1173238dfaec69ad57f240817978c9ef29f8598"
+    },
+    {
+      "path": "src/mitm/manager.ts",
+      "regions": 4,
+      "reason": "Combine upstream unexpected-exit DNS recovery with shared lifecycle ownership, confirmed listener readiness, and safe child termination.",
+      "sha256": "8c79aab0e1203d83b2c71b0c9d1d46724ab4f42bebc8aeb770ec723dc4e914d4"
+    },
+    {
+      "path": "src/mitm/server.cjs",
+      "regions": 2,
+      "reason": "Preserve existing loopback binding and native buffering/router timeouts, adding upstream independent peer validation.",
+      "sha256": "fa7dc6c7553009a0a8d395446d8f2d1ed9d1d7c52c8114cab3e94fd3b7b2ec84"
+    },
+    {
+      "path": "src/sse/services/auth.ts",
+      "regions": 6,
+      "reason": "Preserve scoped provider pools, opt-in quota policy and upstream stall cooldowns; retain selected-test fencing, Google verification state and native session selection.",
+      "sha256": "60ab54eb76c88e732690c7945fa676350ec1ee8fd4ae21448d27c0bc6cbc31af"
+    },
+    {
+      "path": "src/sse/handlers/chat.ts",
+      "regions": 3,
+      "reason": "Retain upstream authorization/model policy checks and native Thread account ownership; a Thread replay error returns without account health mutation.",
+      "sha256": "9589d89cea55fab39d02f0b2a0e3b9cf1c71f96dc0ac754958ce160e7300993d"
+    },
+    {
+      "path": "open-sse/utils/proxyFetch.ts",
+      "regions": 9,
+      "reason": "Adopt upstream extracted TLS policies and response-start method gating; retain custom pre-connect-only recovery and no replay after ambiguous inference acceptance.",
+      "sha256": "013856ee466a3c6f019b92a2dc17193de7bfd2f82e3379919aade17e6d6c7fcb"
+    },
+    {
+      "path": "src/app/(dashboard)/dashboard/usage/components/ProviderLimits/parts/QuotaCardExpanded.tsx",
+      "regions": 2,
+      "reason": "Preserve upstream refreshed quota layout and add the existing display-only catalog list beneath its windows.",
+      "sha256": "c5211266e7c81f7bf26c790a12db9ea656e39948e3909a76bdd00956210a2135"
+    },
+    {
+      "path": "src/app/api/usage/analytics/route.ts",
+      "regions": 1,
+      "reason": "Preserve upstream stored-cost plus residual-token accounting and exact custom cache TTL/long-context fields.",
+      "sha256": "4880de7dc6d7aa38ca94a425569ca4403d321424edfc008c98d86a189f99624e"
+    },
+    {
+      "path": "src/domain/quotaCache.ts",
+      "regions": 4,
+      "reason": "Retain upstream predictive quota/credit opt-ins; preserve token-refresh-aware fetches and scheduled Claude reset windows.",
+      "sha256": "ce30bc9fe3ed141f7ecb2b12bc26ba46ee5b816e6886686a99c2d7a519469b74"
+    },
+    {
+      "path": "src/lib/api/modelTestRunner.ts",
+      "regions": 4,
+      "reason": "Retain upstream audio/custom-prompt model probes and selected-account cancellation/stream scope fencing.",
+      "sha256": "742a5c749dce25237acb14c897f79a6df8d42a95ee102fec863e7f284d8d75cb"
+    },
+    {
+      "path": "src/lib/usage/providerLimits.ts",
+      "regions": 1,
+      "reason": "Keep future exhausted Claude windows parked before live model refresh; manual refresh remains available.",
+      "sha256": "f9ecda78948f6bb048b0767a9ec627b94fa4a622ce8c21d8495d2b2ee4a18684"
+    },
+    {
+      "path": "src/lib/usage/providerWindowCosts.ts",
+      "regions": 2,
+      "reason": "Combine upstream recorded-cost matching with TTL-aware residual token pricing and long-context selection.",
+      "sha256": "a0b3cd2335d9afc9050f9702e0a25177601a6544472fef0e9b235db324de7503"
+    },
+    {
+      "path": "src/lib/usage/aggregateHistory.ts",
+      "regions": 2,
+      "reason": "Preserve exact provider-billed archival costs and use TTL rates only for rows without a reported cost.",
+      "sha256": "b1ca5b36b656269beca37472c0f40e62aed1d0e548c09239eb31fdea5f101558"
+    },
+    {
+      "path": "src/lib/usage/costCalculator.ts",
+      "regions": 7,
+      "reason": "Preserve upstream exact-cost and credit-metered rules, inclusive reasoning accounting and nested tiers; retain native 1-hour writes, legacy Sol tiers and service-tier multipliers.",
+      "sha256": "a5caeb3092eb191a49bfead6df1b2632bc2045e983f6ee0bc941bf251eca95f9"
+    },
+    {
+      "path": "src/lib/db/usageAnalytics.ts",
+      "regions": 14,
+      "reason": "Retain upstream priceable-token/stored-cost separation, custom TTL sums and per-request long-context buckets throughout analytics.",
+      "sha256": "da8351907f084021de34e3975be5463036fc26783273b2d9a71734fbeee5c93e"
+    },
+    {
+      "path": "src/lib/db/usageAnalytics/sources.ts",
+      "regions": 2,
+      "reason": "Keep UNION column parity and exact-cost raw columns alongside nullable native TTL fields.",
+      "sha256": "b31d67cd06ebb0eaed31c08d228ad83b2021b0cd468a86235c1b6fd4ea1a4f8e"
+    },
+    {
+      "path": "src/lib/usage/usageStats.ts",
+      "regions": 5,
+      "reason": "Keep upstream exact cost masks and price native TTL fields only on records whose token tariff remains the cost basis.",
+      "sha256": "540b336357463b5a8e04cfbd02d1b9be2348ada198211a3b20811140b82641db"
+    },
+    {
+      "path": "tests/unit/proxyfetch-direct-response-start-timeout-10214.test.ts",
+      "regions": 8,
+      "reason": "Upstream rewrote the old timeout tests to distinguish safe reads, ambiguous POSTs and Request-carried aborts; retain that stronger suite and the separate Nexa no-replay tests.",
+      "sha256": "b3551f6e8c913a3a518471ae36d1d4e588f5b1fbc3cc0520cf6f539abe513ca9"
+    },
+    {
+      "path": "tests/unit/cli-serve-port-in-use-preflight.test.mjs",
+      "regions": 1,
+      "reason": "Retain the upstream listener-only regression and address-aware parsing assertions.",
+      "sha256": "a0ae150079a971166c4688654843a3ff1119d9ae444d8f97ac5a0eb6ffa7ba62"
+    },
+    {
+      "path": "tests/unit/executor-codex.test.ts",
+      "regions": 3,
+      "reason": "Assert the retained exact 0.160.0 client fingerprint.",
+      "sha256": "b1405a2151fa4aa40377489d3495fd11fd46e99acc07c65dd6d09fdb491d5581"
+    },
+    {
+      "path": "tests/unit/usage-history-provider-alias-13459.test.ts",
+      "regions": 2,
+      "reason": "Upstream now independently timestamps real alias events, incorporating the original dedup flake fix.",
+      "sha256": "44d37f44b8075abe9e6f0432b2b987fc52531e7b20d23323b802e7d0f50833d6"
+    },
+    {
+      "path": "tests/unit/proxyfetch-direct-response-start-flat-retry-budget-13703.test.ts",
+      "regions": 1,
+      "reason": "Retain upstream safe-read budget checks and explicit deadline timer cleanup.",
+      "sha256": "d8c2e356edde37ad1b7eccf4ae6fd1972add17983162b40f2c286c937985c00b"
+    },
+    {
+      "path": "tests/unit/classify429.test.ts",
+      "regions": 1,
+      "reason": "Keep upstream compound RetryInfo delays and existing Anthropic extra-usage quota classification coverage.",
+      "sha256": "ae15274aa48b5cd770e31e9d6bdb1ab8bae9d9a3155012ef8788131c741c9691"
+    },
+    {
+      "path": "tests/snapshots/provider/translate-path.json",
+      "regions": 9,
+      "reason": "Change only known pinned CLI versions and platform normalization; retain all other new upstream snapshot content.",
+      "sha256": "43cf4c36e35d667f168c54199788ccf96d07cceedd50211093c1b377fadc2d75"
+    },
+    {
+      "path": "src/lib/usage/callLogs.ts",
+      "regions": 3,
+      "reason": "Preserve upstream write-lock retry, row-first pending artifact publication and final accepted identifier; port native metering into the extracted row builder/writer.",
+      "sha256": "183b25a0b4230f8fc512c19c9c607fea90688df2797ad63721597592a1b5ea9d"
+    },
+    {
+      "path": "src/lib/usage/usageHistory.ts",
+      "regions": 4,
+      "reason": "Preserve upstream immutable retry timestamps, request-scoped API-key attribution and extracted row mapping/dedup writer; native TTL behavior moves to those owning helpers.",
+      "sha256": "54ef92df9f1812101a036ce863c9408a465d96f534bdb9c3f21196c1617588b9"
+    },
+    {
+      "path": "open-sse/handlers/chatCore.ts",
+      "regions": 7,
+      "reason": "Move the existing native request, suggestion, error retention and hidden-thinking contracts into the new upstream helper owners, preserving the upstream orchestration and policy wiring.",
+      "sha256": "3dd18dfddff6f14cbb679ee72b856c62d3e6f0c671a5b04e2a31ed0429eca1de"
     }
   ]
 }

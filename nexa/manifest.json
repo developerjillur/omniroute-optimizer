@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 309,
-    "patches": 185,
+    "total": 310,
+    "patches": 186,
     "new": 118,
     "tooling": 6,
     "upstreamCandidates": 28,
     "nexaSpecific": 99,
-    "needsReview": 182,
+    "needsReview": 183,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
   },
@@ -817,6 +817,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "src/lib/db/migrationRunner/constants.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/src__lib__db__migrationRunner__schemaState.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/lib/db/migrationRunner/schemaState.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },

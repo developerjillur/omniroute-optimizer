@@ -16,6 +16,17 @@ Before deploying a new canonical change, prepare and validate an isolated
 application checkout using the exact reviewed optimizer commit. A source push or
 passing source-only CI is not a production build, install or deployment receipt.
 
+For v3.8.52, run `python3 nexa/deploy/check-upgrade-data.py --database <existing-storage.sqlite>`
+before preparing a migration clone and again before any approved live promotion.
+The check is read-only and must exit 0. Migration 207 removes or remaps old
+`opencode` / `oc` provider configuration; if any affected record exists, hold
+promotion and preserve that configuration until an explicit migration decision.
+The pinned upstream release is `ad6f33f66bda34eba98645d3bfdabbde294bc843`;
+do not substitute the upstream default branch or a later release. Keep the two
+custom SQL paths intact: their runtime ledger identities are namespaced, and
+the old applied timestamps and native cache values must survive the cloned-data
+acceptance check. Source tests alone do not establish a safe live data migration.
+
 For a canonical release, retain both the optimizer commit and the application
 integration commit in the build receipt. In a new isolated pristine application
 checkout, copy and verify the reviewed overlay, then save that overlay with normal

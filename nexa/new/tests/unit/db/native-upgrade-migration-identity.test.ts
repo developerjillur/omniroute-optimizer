@@ -50,7 +50,7 @@ for (const legacy of [false, true]) {
     try {
       if (legacy) {
         for (const file of files.slice(2)) raw.exec(fs.readFileSync(path.join(source, file), "utf8"));
-        raw.exec(`CREATE TABLE _omniroute_migrations(version TEXT PRIMARY KEY,name TEXT NOT NULL,applied_at TEXT NOT NULL);
+        raw.exec(`CREATE TABLE _omniroute_migrations(version TEXT PRIMARY KEY,name TEXT NOT NULL,applied_at TEXT NOT NULL DEFAULT(datetime('now')));
           INSERT INTO _omniroute_migrations VALUES ('197','native_claude_cache_details','2026-10-19T00:00:00Z'),
           ('198','usage_history_cache_ttl','2026-10-19T00:00:00Z');
           INSERT INTO usage_history VALUES (17,30,10,20);
@@ -75,6 +75,34 @@ for (const legacy of [false, true]) {
     } finally { db.close(); }
   });
 }
+
+test("partial physical columns without ledger markers are completed without replacing values", () => {
+  const { raw, db } = database();
+  try {
+    raw.exec(`ALTER TABLE call_logs ADD COLUMN tokens_cache_creation_5m INTEGER;
+      ALTER TABLE usage_history ADD COLUMN tokens_cache_creation_5m INTEGER;
+      INSERT INTO call_logs VALUES ('partial-call','fixture-model','2026-10-19',200,10);
+      INSERT INTO usage_history VALUES (17,30,10);`);
+    runMigrations(db, { databaseExistedBeforeInitialization: false });
+    assert.deepEqual(raw.prepare("SELECT tokens_cache_creation_5m,tokens_cache_creation_1h FROM usage_history WHERE id=17").get(),
+      {tokens_cache_creation_5m:10,tokens_cache_creation_1h:null});
+    assert.deepEqual(raw.prepare("SELECT tokens_cache_creation_5m,tokens_cache_creation_1h,native_session_tag FROM call_logs").get(),
+      {tokens_cache_creation_5m:10,tokens_cache_creation_1h:null,native_session_tag:null});
+    assert.equal(runMigrations(db), 0);
+  } finally { db.close(); }
+});
+
+test("conflicting legacy identity aborts atomically before changing the original ledger", () => {
+  const { raw, db } = database();
+  try {
+    raw.exec(`CREATE TABLE _omniroute_migrations(version TEXT PRIMARY KEY,name TEXT NOT NULL,applied_at TEXT NOT NULL DEFAULT(datetime('now')));
+      INSERT INTO _omniroute_migrations VALUES ('197','native_claude_cache_details','fixture-original'),
+      ('legacy-197-native_claude_cache_details','unexpected-name','fixture-other');`);
+    const before = raw.prepare("SELECT * FROM _omniroute_migrations ORDER BY version").all();
+    assert.throws(() => runMigrations(db, {databaseExistedBeforeInitialization:false}), /Legacy migration identity conflict/);
+    assert.deepEqual(raw.prepare("SELECT * FROM _omniroute_migrations ORDER BY version").all(), before);
+  } finally { db.close(); }
+});
 
 test("an unrecognized duplicate numeric slot still fails closed", () => {
   fs.writeFileSync(path.join(folder, "197_unknown.sql"), "CREATE TABLE unexpected(id INTEGER);");

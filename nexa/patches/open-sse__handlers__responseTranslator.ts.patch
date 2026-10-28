@@ -1,0 +1,11 @@
+diff --git a/open-sse/handlers/responseTranslator.ts b/open-sse/handlers/responseTranslator.ts
+--- a/open-sse/handlers/responseTranslator.ts
++++ b/open-sse/handlers/responseTranslator.ts
+@@ -631,6 +631,7 @@
+       // the raw spelling here makes a truncated completion look like an unknown
+       // finish to the chat empty-output check.
+       if (finishReason === "max_tokens") finishReason = "length";
++      if (finishReason === "refusal") finishReason = "content_filter";
+ 
+       const result: JsonRecord = {
+         id: `chatcmpl-${toString(root.id, String(Date.now()))}`,

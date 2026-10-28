@@ -1,0 +1,40 @@
+diff --git a/src/lib/usage/aggregateHistory.ts b/src/lib/usage/aggregateHistory.ts
+--- a/src/lib/usage/aggregateHistory.ts
++++ b/src/lib/usage/aggregateHistory.ts
+@@ -165,6 +165,8 @@
+           COALESCE(tokens_output, 0) as requestOutputTokens,
+           COALESCE(tokens_cache_read, 0) as requestCacheReadTokens,
+           COALESCE(tokens_cache_creation, 0) as requestCacheCreationTokens,
++          tokens_cache_creation_5m as requestCacheCreation5mTokens,
++          tokens_cache_creation_1h as requestCacheCreation1hTokens,
+           COALESCE(tokens_reasoning, 0) as requestReasoningTokens,
+           COALESCE(SUM(tokens_input), 0) as inputTokens,
+           COALESCE(SUM(tokens_output), 0) as outputTokens,
+@@ -177,7 +179,8 @@
+           AND model IS NOT NULL AND model != ''
+         GROUP BY LOWER(provider), LOWER(model), DATE(timestamp), serviceTier,
+           requestInputTokens, requestOutputTokens, requestCacheReadTokens,
+-          requestCacheCreationTokens, requestReasoningTokens`
++          requestCacheCreationTokens, requestCacheCreation5mTokens,
++          requestCacheCreation1hTokens, requestReasoningTokens`
+       )
+       .all(beforeDate) as Array<{
+       provider: string;
+@@ -189,6 +192,8 @@
+       requestOutputTokens: number;
+       requestCacheReadTokens: number;
+       requestCacheCreationTokens: number;
++      requestCacheCreation5mTokens: number | null;
++      requestCacheCreation1hTokens: number | null;
+       requestReasoningTokens: number;
+       inputTokens: number;
+       outputTokens: number;
+@@ -216,6 +221,8 @@
+               output: row.requestOutputTokens,
+               cacheRead: row.requestCacheReadTokens,
+               cacheCreation: row.requestCacheCreationTokens,
++              cacheCreation5m: row.requestCacheCreation5mTokens,
++              cacheCreation1h: row.requestCacheCreation1hTokens,
+               reasoning: row.requestReasoningTokens,
+             },
+             {

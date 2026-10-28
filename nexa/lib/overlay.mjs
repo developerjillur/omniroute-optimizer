@@ -153,7 +153,24 @@ export function syncMigrationDocCounts() {
     .readdirSync(path.join(REPO, "src/lib/db/migrations"))
     .filter((name) => name.endsWith(".sql")).length;
   const changed = [];
-  for (const rel of ["README.md", "AGENTS.md", "llm.txt"]) {
+  const documents = ["README.md", "AGENTS.md", "llm.txt"];
+  const locales = path.join(REPO, "docs/i18n");
+  if (fs.existsSync(locales)) {
+    if (fs.lstatSync(locales).isSymbolicLink()) {
+      throw Error("Unsafe documentation path: docs/i18n");
+    }
+    for (const entry of fs.readdirSync(locales, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const rel = `docs/i18n/${entry.name}/llm.txt`;
+      try {
+        fs.lstatSync(path.join(REPO, rel));
+        documents.push(rel);
+      } catch (error) {
+        if (error.code !== "ENOENT") throw error;
+      }
+    }
+  }
+  for (const rel of documents) {
     const file = path.join(REPO, rel);
     if (fs.lstatSync(file).isSymbolicLink()) throw Error(`Unsafe documentation path: ${rel}`);
     const before = fs.readFileSync(file, "utf8");

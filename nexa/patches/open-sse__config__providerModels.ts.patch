@@ -1,0 +1,18 @@
+diff --git a/open-sse/config/providerModels.ts b/open-sse/config/providerModels.ts
+--- a/open-sse/config/providerModels.ts
++++ b/open-sse/config/providerModels.ts
+@@ -1,5 +1,6 @@
+ import { generateModels, generateAliasMap, type RegistryModel } from "./providerRegistry.ts";
+ import { getVertexModelTargetFormat } from "./vertexModels.ts";
++import { isClaudeHaiku55 } from "./claudeHaikuCapabilities.ts";
+ 
+ // Lazy PROVIDER_MODELS: deferred until first property access to speed up startup.
+ // The Proxy defers `generateModels()` from module-evaluation time to the first read.
+@@ -333,6 +334,7 @@
+   const claudeMatch = normalized.match(CLAUDE_MODEL_PATTERN);
+   if (!claudeMatch) return false;
+   const claudeScopedId = normalized.slice(claudeMatch.index ?? 0);
++  if (isClaudeHaiku55(claudeScopedId)) return true;
+   return !CLAUDE_MAX_EFFORT_UNSUPPORTED_FAMILY_PATTERNS.some((pattern) =>
+     pattern.test(claudeScopedId)
+   );

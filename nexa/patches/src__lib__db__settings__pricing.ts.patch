@@ -1,0 +1,86 @@
+diff --git a/src/lib/db/settings/pricing.ts b/src/lib/db/settings/pricing.ts
+--- a/src/lib/db/settings/pricing.ts
++++ b/src/lib/db/settings/pricing.ts
+@@ -146,40 +146,50 @@
+   };
+ 
+   const pLower = (provider || "").toLowerCase();
+-  let providerPricing = findKeyInsensitive<PricingModels>(pricing, pLower);
+-
+-  if (!providerPricing) {
+-    const alias = findKeyInsensitive<string>(PROVIDER_ID_TO_ALIAS, pLower);
+-    if (alias) providerPricing = findKeyInsensitive(pricing, alias);
+-  }
+-
+-  if (!providerPricing) {
+-    for (const [id, mappedAlias] of Object.entries(PROVIDER_ID_TO_ALIAS)) {
+-      if (typeof mappedAlias === "string" && mappedAlias.toLowerCase() === pLower) {
+-        providerPricing = findKeyInsensitive(pricing, id);
+-        if (providerPricing) break;
+-      }
+-    }
+-  }
+-
+-  if (!providerPricing) {
++  const mLower = (model || "").toLowerCase();
++  const findModelPricing = (
++    providerPricing: PricingModels | null | undefined
++  ): JsonRecord | null => {
++    if (!providerPricing) return null;
++    return (
++      findKeyInsensitive<JsonRecord>(providerPricing, mLower) ||
++      findKeyInsensitive<JsonRecord>(providerPricing, mLower.replace(/\./g, "-")) ||
++      null
++    );
++  };
++
++  const directProvider = findKeyInsensitive<PricingModels>(pricing, pLower);
++  const directPrice = findModelPricing(directProvider);
++  if (directPrice) return directPrice;
++
++  // A partial override must not hide defaults under an equivalent provider alias.
++  let matchedNamespace = Boolean(directProvider);
++  const alias = findKeyInsensitive<string>(PROVIDER_ID_TO_ALIAS, pLower);
++  if (alias) {
++    const aliasProvider = findKeyInsensitive<PricingModels>(pricing, alias);
++    matchedNamespace ||= Boolean(aliasProvider);
++    const aliasPrice = findModelPricing(aliasProvider);
++    if (aliasPrice) return aliasPrice;
++  }
++
++  for (const [id, mappedAlias] of Object.entries(PROVIDER_ID_TO_ALIAS)) {
++    if (typeof mappedAlias === "string" && mappedAlias.toLowerCase() === pLower) {
++      const canonicalProvider = findKeyInsensitive<PricingModels>(pricing, id);
++      matchedNamespace ||= Boolean(canonicalProvider);
++      const canonicalPrice = findModelPricing(canonicalProvider);
++      if (canonicalPrice) return canonicalPrice;
++    }
++  }
++
++  // Preserve the existing regional fallback only when no namespace was found.
++  if (!matchedNamespace) {
+     const np = pLower.replace(/-cn$/, "");
+     if (np && np !== pLower) {
+-      providerPricing = findKeyInsensitive(pricing, np);
+-    }
+-  }
+-
+-  if (!providerPricing) return null;
+-
+-  const mLower = (model || "").toLowerCase();
+-  let modelPricing = findKeyInsensitive<JsonRecord>(providerPricing, mLower);
+-
+-  if (!modelPricing) {
+-    const hyphenModel = mLower.replace(/\./g, "-");
+-    modelPricing = findKeyInsensitive(providerPricing, hyphenModel);
+-  }
+-
+-  return modelPricing || null;
++      return findModelPricing(findKeyInsensitive<PricingModels>(pricing, np));
++    }
++  }
++
++  return null;
+ }
+ 
+ export async function updatePricing(pricingData: PricingByProvider) {

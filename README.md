@@ -2,7 +2,15 @@
 
 Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। OmniRoute-এর pristine upstream source অপরিবর্তিত রেখে custom পরিবর্তনগুলো `nexa/` folder-এ রাখা হয়েছে।
 
-## Handoff ও বর্তমান অবস্থা — ২০২৬-১০-১৭
+## Canonical management — ২০২৬-১০-২৮
+
+OmniRoute-এর Nexa fixes, regression tests, validation ও release evidence এখন এই repository থেকে পরিচালিত হবে। `nexa/`-ই custom source; pristine application base আলাদা isolated fixture-এ apply করে পরীক্ষা করা হয়। Live database, credentials, request bodies ও ব্যক্তিগত কথোপকথন এই repository-তে রাখা হয় না।
+
+বর্তমান কাজ `nexalance` reference `72230a52a` থেকে আগের validated overlay updates এনেছে এবং native refusal/summary, Thread error classification ও bounded upstream DNS recovery সংশোধন করছে। [বর্তমান audit receipt](reports/native-reliability-2026-10-28.json)-এ data coverage, যাচাই ও বাকি gates আলাদা আছে। [Native reliability CI](.github/workflows/native-reliability.yml) pinned application source ও synthetic fixtures ব্যবহার করে; ব্যক্তিগত runtime data প্রয়োজন হয় না। CI validation চলমান থাকলে সেটিকে release বা deployment বলা যাবে না।
+
+সব commit স্বাভাবিক Git hooks এবং Jillur Rahman-এর author/committer identity-তে হবে। `--no-verify` ব্যবহার করা হবে না। কোনো upstream repository-তে এই workflow push বা PR করে না।
+
+## Historical handoff — ২০২৬-১০-১৭
 
 সব handoff, setup guide, investigation, QA ও restore note [সম্পূর্ণ handoff index](docs/handoffs/README.md)-এ আছে। ৫১টি historical document-এর public copy, current handoff, migration verification এবং content-hash manifest এক জায়গায় পাওয়া যায়।
 
@@ -12,19 +20,19 @@ Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। Om
 
 Historical documents-এর পুরোনো status-এর পরে পাওয়া ফল current handoff-এ দেওয়া আছে। Private identifiers/references সরানো হয়েছে; T7-এর originals, raw evidence ও rollback files এই publication পরিবর্তন করে না।
 
-## সংরক্ষিত source
+## বর্তমান source ও inventory
 
-| বিষয়                    | মান                                        |
-| ----------------------- | ------------------------------------------ |
-| Source repository       | `developerjillur/OmniRoute`                |
-| Source branch           | `nexalance`                                |
-| Source commit           | `2b4158371223293db12d3a6de00a9b22d44600fb` |
-| Upstream version        | `3.8.51`                                   |
-| Pristine upstream base  | `c1e30b7676975feb298b49eff6ff58923c04b89e` |
-| `nexa/` tree SHA        | `1bacd361751ca84dae89fbea0324fd8198f052b5` |
-| Versioned overlay files | 342                                        |
+| বিষয় | মান |
+| --- | --- |
+| Canonical repository | `developerjillur/omniroute-optimizer` |
+| Reference application repository | `developerjillur/OmniRoute` |
+| Reference overlay branch | `nexalance` |
+| Reference overlay commit | `72230a52a548b9fdc8dda0495c893f5193e5d64d` |
+| Pristine upstream base | `c1e30b7676975feb298b49eff6ff58923c04b89e` |
+| Upstream version | `3.8.51` |
+| Managed overlay files | 384 |
 
-`nexa/`-এর সব 342টি file মূল source commit-এর সঙ্গে byte-for-byte মিলে। প্রতিটি file-এর path, size, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এর 266টি entry-তে 166টি patch, 95টি নতুন file এবং 5টি tooling entry আছে; অন্যান্য tracked file-এ deployment scripts, tests ও documentation রয়েছে।
+বর্তমান `nexa/`-তে reference overlay-এর সঙ্গে নতুন reliability fixes আছে; তাই সব file reference commit-এর হুবহু copy—এমন দাবি করা হচ্ছে না। প্রতিটি managed file-এর byte count, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এ 302টি entry: 181টি patch, 116টি নতুন application/test file ও 5টি tooling entry। অতিরিক্ত deployment, overlay tests ও documentation-ও inventory-তে রয়েছে।
 
 ## কী রয়েছে
 
@@ -36,7 +44,7 @@ Historical documents-এর পুরোনো status-এর পরে পাও
 - Bounded build, isolated package smoke, database snapshot, deployment ও rollback scripts।
 - পূর্বের QA evidence, source validation notes এবং overlay পরিচালনার documentation।
 
-## সর্বশেষ release — ২০২৬-১০-১৪
+## Historical deployed release — ২০২৬-১০-১৪
 
 Source ও deployed runtime `2b4158371`। Native Artifact reconnect/creation, streaming progress, bounded timeout/Thread recovery, GPT-6.1 Sol pricing এবং native usage/transport accounting-এর fixes এই snapshot-এ রয়েছে।
 

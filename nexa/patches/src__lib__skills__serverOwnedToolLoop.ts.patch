@@ -1,0 +1,39 @@
+diff --git a/src/lib/skills/serverOwnedToolLoop.ts b/src/lib/skills/serverOwnedToolLoop.ts
+--- a/src/lib/skills/serverOwnedToolLoop.ts
++++ b/src/lib/skills/serverOwnedToolLoop.ts
+@@ -31,6 +31,7 @@
+   MAX_RESULT_BYTES_TOTAL,
+ } from "./followUpTranscript.ts";
+ import { createErrorResult } from "@omniroute/open-sse/utils/error.ts";
++import { getCacheCreationTtlFields } from "@/lib/usage/cacheCreationTtl";
+ 
+ // ─── Constants ────────────────────────────────────────────────────────────────
+ 
+@@ -48,11 +49,18 @@
+   let cached_tokens: number | undefined;
+   let cache_read_input_tokens: number | undefined;
+   let cache_creation_input_tokens: number | undefined;
++  let cacheCreation5m: number | undefined;
++  let cacheCreation1h: number | undefined;
+   let reasoning_tokens: number | undefined;
+   let cost_in_usd_ticks: number | undefined;
+ 
+   for (const u of usages) {
+     if (!u) continue;
++    const ttl = getCacheCreationTtlFields(u);
++    if (ttl.cacheCreation5m !== undefined)
++      cacheCreation5m = (cacheCreation5m ?? 0) + ttl.cacheCreation5m;
++    if (ttl.cacheCreation1h !== undefined)
++      cacheCreation1h = (cacheCreation1h ?? 0) + ttl.cacheCreation1h;
+     prompt_tokens += u.prompt_tokens;
+     completion_tokens += u.completion_tokens;
+     if (u.cached_tokens !== undefined) {
+@@ -80,6 +88,8 @@
+     ...(cached_tokens !== undefined ? { cached_tokens } : {}),
+     ...(cache_read_input_tokens !== undefined ? { cache_read_input_tokens } : {}),
+     ...(cache_creation_input_tokens !== undefined ? { cache_creation_input_tokens } : {}),
++    ...(cacheCreation5m !== undefined ? { cacheCreation5m } : {}),
++    ...(cacheCreation1h !== undefined ? { cacheCreation1h } : {}),
+     ...(reasoning_tokens !== undefined ? { reasoning_tokens } : {}),
+     ...(cost_in_usd_ticks !== undefined ? { cost_in_usd_ticks } : {}),
+   };

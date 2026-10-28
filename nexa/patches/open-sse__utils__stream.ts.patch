@@ -1,5 +1,4 @@
 diff --git a/open-sse/utils/stream.ts b/open-sse/utils/stream.ts
-index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b307502c9a 100644
 --- a/open-sse/utils/stream.ts
 +++ b/open-sse/utils/stream.ts
 @@ -1,3 +1,4 @@
@@ -7,79 +6,17 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
  import { translateResponse, initState } from "../translator/index.ts";
  import { FORMATS } from "../translator/formats.ts";
  import { appendRequestLog } from "@/lib/usageDb";
-@@ -12,7 +13,12 @@
+@@ -12,7 +13,9 @@
    normalizeUsage as normalizeTokenUsage,
    sanitizeUsagePayloadForRequest,
    type UsageLike,
 +  type UsagePayloadLike,
  } from "./usageTracking.ts";
-+import {
-+  mergeAnthropicUsage,
-+  normalizeAnthropicUsage,
-+} from "./anthropicUsage.ts";
++import { mergeAnthropicUsage, normalizeAnthropicUsage } from "./anthropicUsage.ts";
  import {
    parseSSELine,
    parseSSEDataPayload,
-@@ -27,13 +33,20 @@
-   hasActiveDeltaValue,
-   injectThinkingSignature,
- } from "./streamHelpers.ts";
--import { rejectEmptyChoicesStream, buildEmptyChoicesStreamError } from "./streamEmptyChoices.ts";
-+import {
-+  rejectEmptyChoicesStream,
-+  buildEmptyChoicesStreamError,
-+} from "./streamEmptyChoices.ts";
- import { shouldAbortEmptyClaudeStream } from "./streamClaudeEmptyBody.ts";
- import { calculateCost } from "@/lib/usage/costCalculator";
- import { buildOmniRouteSseMetadataComment } from "@/domain/omnirouteResponseMeta";
- import { sseCommentsEnabled } from "./sseHeartbeat.ts";
- import { createStructuredSSECollector } from "./streamPayloadCollector.ts";
--import { STREAM_IDLE_TIMEOUT_MS, FETCH_BODY_TIMEOUT_MS, HTTP_STATUS } from "../config/constants.ts";
-+import {
-+  STREAM_IDLE_TIMEOUT_MS,
-+  FETCH_BODY_TIMEOUT_MS,
-+  HTTP_STATUS,
-+} from "../config/constants.ts";
- import {
-   OMIT_STREAMING_CHUNK_MARKER,
-   isResponsesCommentaryMessageItem,
-@@ -45,7 +58,10 @@
-   createTranslateCommentaryFilter,
- } from "./responsesCommentaryDrop.ts";
- import { buildErrorBody } from "./error.ts";
--import { parseTextualToolCallCandidate, isValidToolCallHeaderPrefix } from "./textualToolCall.ts";
-+import {
-+  parseTextualToolCallCandidate,
-+  isValidToolCallHeaderPrefix,
-+} from "./textualToolCall.ts";
- import { stripObfuscationZeroWidth } from "./zeroWidth.ts";
- import {
-   formatTranslatedStreamError,
-@@ -96,7 +112,7 @@
-  */
- export function withBodyTimeout<T>(
-   promise: Promise<T>,
--  timeoutMs: number = FETCH_BODY_TIMEOUT_MS
-+  timeoutMs: number = FETCH_BODY_TIMEOUT_MS,
- ): Promise<T> {
-   if (timeoutMs <= 0) return promise;
-   let timer: ReturnType<typeof setTimeout>;
-@@ -115,10 +131,12 @@
- 
- type JsonRecord = Record<string, unknown>;
- 
--export const PENDING_REQUEST_CLEARED_MARKER = "__omniroutePendingRequestCleared";
-+export const PENDING_REQUEST_CLEARED_MARKER =
-+  "__omniroutePendingRequestCleared";
- 
- function markPendingRequestCleared(error: Error): Error {
--  (error as Error & Record<string, unknown>)[PENDING_REQUEST_CLEARED_MARKER] = true;
-+  (error as Error & Record<string, unknown>)[PENDING_REQUEST_CLEARED_MARKER] =
-+    true;
-   return error;
- }
- 
-@@ -129,6 +147,7 @@
+@@ -129,6 +132,7 @@
  };
  
  type StreamCompletePayload = {
@@ -87,7 +24,7 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
    status: number;
    usage: unknown;
    /** Minimal response body for call log (streaming: usage + note; non-streaming not used) */
-@@ -162,6 +181,7 @@
+@@ -162,6 +166,7 @@
  const DEFAULT_STREAM_BUFFER_BYTES = 16384;
  
  type StreamOptions = {
@@ -95,304 +32,51 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
    mode?: string;
    targetFormat?: string;
    sourceFormat?: string;
-@@ -199,7 +219,8 @@
-   apiKeyInfo?: unknown;
-   body?: unknown;
-   onComplete?: ((payload: StreamCompletePayload) => void) | null;
--  onFailure?: ((payload: StreamFailurePayload) => boolean | void | Promise<void>) | null;
-+  onFailure?:
-+    ((payload: StreamFailurePayload) => boolean | void | Promise<void>) | null;
-   /**
-    * Request-scoped `{namespace, name}` ledger for Responses namespace child
-    * tools that were flattened to a bare leaf on the Chat wire (#7936
-@@ -208,7 +229,10 @@
-    * `response.output_item.added` / `response.output_item.done` and emits
-    * codex-compatible `namespace` + `name` fields.
-    */
--  requestToolIdentityMap?: Map<string, { namespace: string; name: string }> | null;
-+  requestToolIdentityMap?: Map<
-+    string,
-+    { namespace: string; name: string }
-+  > | null;
-   pendingRequestId?: string | null;
- };
- 
-@@ -230,7 +254,10 @@
-   /** #6951 — per-tool JSON Schema (from request `tools[]`), keyed by tool name. */
-   toolSchemas?: Map<string, Record<string, unknown>> | null;
-   customToolNames?: ReadonlySet<string>;
--  requestToolIdentityMap?: Map<string, { namespace: string; name: string }> | null;
-+  requestToolIdentityMap?: Map<
-+    string,
-+    { namespace: string; name: string }
-+  > | null;
-   upstreamError?: {
-     status: number;
-     type: string;
-@@ -249,7 +276,9 @@
- type UsageTokenRecord = Record<string, number>;
- 
- function asRecord(value: unknown): JsonRecord {
--  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-+  return value && typeof value === "object" && !Array.isArray(value)
-+    ? (value as JsonRecord)
-+    : {};
+@@ -459,6 +464,7 @@
  }
  
- // #7936 — restore `{namespace, name}` on Responses passthrough `function_call`
-@@ -259,43 +288,58 @@
- // `function_call_deserializes_optional_namespace` round-trip test); emit it back.
- function restoreResponsesPassthroughFunctionCallIdentity(
-   parsed: JsonRecord,
--  requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null | undefined
-+  requestToolIdentityMap:
-+    Map<string, { namespace: string; name: string }> | null | undefined,
- ): boolean {
-   if (!(requestToolIdentityMap instanceof Map)) return false;
+ type ClaudeEmptyResponseLifecycle = {
++  stopReason: string | null;
+   hasMessageStart: boolean;
+   hasContentBlock: boolean;
+   hasMessageDelta: boolean;
+@@ -472,6 +478,7 @@
  
-   const restoreItem = (item: unknown): boolean => {
-     if (!item || typeof item !== "object" || Array.isArray(item)) return false;
-     const functionCall = item as JsonRecord;
--    if (functionCall.type !== "function_call" || typeof functionCall.name !== "string")
-+    if (
-+      functionCall.type !== "function_call" ||
-+      typeof functionCall.name !== "string"
-+    )
-       return false;
- 
-     const identity = requestToolIdentityMap.get(functionCall.name);
-     if (!identity) return false;
- 
-     const changed =
--      functionCall.namespace !== identity.namespace || functionCall.name !== identity.name;
-+      functionCall.namespace !== identity.namespace ||
-+      functionCall.name !== identity.name;
-     functionCall.namespace = identity.namespace;
-     functionCall.name = identity.name;
-     return changed;
-   };
- 
--  if (parsed.type === "response.output_item.added" || parsed.type === "response.output_item.done") {
-+  if (
-+    parsed.type === "response.output_item.added" ||
-+    parsed.type === "response.output_item.done"
-+  ) {
-     return restoreItem(parsed.item);
-   }
- 
--  if (parsed.type === "response.completed" && Array.isArray(asRecord(parsed.response).output)) {
-+  if (
-+    parsed.type === "response.completed" &&
-+    Array.isArray(asRecord(parsed.response).output)
-+  ) {
-     return (asRecord(parsed.response).output as unknown[]).reduce<boolean>(
-       (changed: boolean, item: unknown) => restoreItem(item) || changed,
--      false
-+      false,
-     );
-   }
- 
-   return false;
- }
- 
--function parseTextualToolCallFromContent(text: unknown): { name: string; args: unknown } | null {
-+function parseTextualToolCallFromContent(
-+  text: unknown,
-+): { name: string; args: unknown } | null {
-   const candidate = parseTextualToolCallCandidate(text);
--  return candidate?.kind === "complete" ? { name: candidate.name, args: candidate.args } : null;
-+  return candidate?.kind === "complete"
-+    ? { name: candidate.name, args: candidate.args }
-+    : null;
- }
- 
- function containsTextualToolCallCandidate(text: unknown): boolean {
-@@ -304,7 +348,7 @@
- 
- function containsMalformedTextualToolCall(
-   text: unknown,
--  allowedToolNames?: Set<string> | null
-+  allowedToolNames?: Set<string> | null,
- ): boolean {
-   if (typeof text !== "string") return false;
-   const normalized = stripObfuscationZeroWidth(text);
-@@ -341,7 +385,9 @@
-     const item = tool as JsonRecord;
-     const directName = typeof item.name === "string" ? item.name.trim() : "";
-     const fn =
--      item.function && typeof item.function === "object" && !Array.isArray(item.function)
-+      item.function &&
-+      typeof item.function === "object" &&
-+      !Array.isArray(item.function)
-         ? (item.function as JsonRecord)
-         : null;
-     const functionName = typeof fn?.name === "string" ? fn.name.trim() : "";
-@@ -354,7 +400,7 @@
- function collectPassthroughTextualToolCall(
-   text: string,
-   toolCalls: Map<string, ToolCall>,
--  allowedToolNames?: Set<string> | null
-+  allowedToolNames?: Set<string> | null,
- ): ToolCall | null {
-   const parsed = parseTextualToolCallFromContent(text);
-   if (!parsed) return null;
-@@ -385,11 +431,17 @@
-   };
- }
- 
--/* @testonly */ export function toResponsesFunctionCallItem(toolCall: ToolCall) {
-+/* @testonly */ export function toResponsesFunctionCallItem(
-+  toolCall: ToolCall,
-+) {
+ function createClaudeEmptyResponseLifecycle(): ClaudeEmptyResponseLifecycle {
    return {
-     type: "function_call",
--    id: (toolCall.id != null ? String(toolCall.id) : null) || `fc_${toolCall.index}`,
--    call_id: (toolCall.id != null ? String(toolCall.id) : null) || `call_${toolCall.index}`,
-+    id:
-+      (toolCall.id != null ? String(toolCall.id) : null) ||
-+      `fc_${toolCall.index}`,
-+    call_id:
-+      (toolCall.id != null ? String(toolCall.id) : null) ||
-+      `call_${toolCall.index}`,
-     name: toolCall.function.name,
-     arguments: toolCall.function.arguments,
-     status: "completed",
-@@ -422,7 +474,10 @@
-   return events.map((event) => `data: ${JSON.stringify(event)}\n\n`).join("");
- }
- 
--function toChatCompletionChunkWithToolCall(base: JsonRecord, toolCall: ToolCall) {
-+function toChatCompletionChunkWithToolCall(
-+  base: JsonRecord,
-+  toolCall: ToolCall,
-+) {
-   const choice = asRecord(Array.isArray(base.choices) ? base.choices[0] : null);
-   const delta = { ...asRecord(choice.delta) };
-   delete delta.content;
-@@ -443,7 +498,10 @@
-   };
- }
- 
--function toResponsesCompletedWithToolCalls(parsed: JsonRecord, toolCalls: ToolCall[]) {
-+function toResponsesCompletedWithToolCalls(
-+  parsed: JsonRecord,
-+  toolCalls: ToolCall[],
-+) {
-   const response = asRecord(parsed.response);
-   const existingOutput = Array.isArray(response.output) ? response.output : [];
-   return {
-@@ -494,7 +552,7 @@
- 
- function updateClaudeEmptyResponseLifecycle(
-   lifecycle: ClaudeEmptyResponseLifecycle,
--  payload: unknown
-+  payload: unknown,
- ) {
-   const type = getClaudeEventType(payload);
-   if (!type) return;
-@@ -522,13 +580,19 @@
-   }
- }
- 
--function hasClaudeAssistantLifecycle(lifecycle: ClaudeEmptyResponseLifecycle): boolean {
--  return lifecycle.hasMessageStart || lifecycle.hasMessageDelta || lifecycle.hasMessageStop;
-+function hasClaudeAssistantLifecycle(
-+  lifecycle: ClaudeEmptyResponseLifecycle,
-+): boolean {
-+  return (
-+    lifecycle.hasMessageStart ||
-+    lifecycle.hasMessageDelta ||
-+    lifecycle.hasMessageStop
-+  );
- }
- 
- function shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
-   lifecycle: ClaudeEmptyResponseLifecycle,
--  payload: unknown
-+  payload: unknown,
++    stopReason: null,
+     hasMessageStart: false,
+     hasContentBlock: false,
+     hasMessageDelta: false,
+@@ -508,9 +515,12 @@
+     case "content_block_stop":
+       lifecycle.hasContentBlock = true;
+       break;
+-    case "message_delta":
++    case "message_delta": {
+       lifecycle.hasMessageDelta = true;
++      const reason = asRecord(asRecord(payload).delta).stop_reason;
++      if (typeof reason === "string") lifecycle.stopReason = reason;
+       break;
++    }
+     case "message_stop":
+       lifecycle.hasMessageStop = true;
+       break;
+@@ -532,6 +542,13 @@
  ): boolean {
    const type = getClaudeEventType(payload);
    if (!type || lifecycle.hasError || lifecycle.hasContentBlock) return false;
-@@ -537,7 +601,7 @@
++  // The event name precedes its JSON data; wait for the actual terminal reason.
++  if (type === "message_delta" && !("delta" in asRecord(payload))) return false;
++  const stopReason =
++    type === "message_delta"
++      ? (asRecord(asRecord(payload).delta).stop_reason ?? lifecycle.stopReason)
++      : lifecycle.stopReason;
++  if (stopReason === "refusal") return false;
+   if (!hasClaudeAssistantLifecycle(lifecycle)) return false;
+   return type === "message_delta" || type === "message_stop";
  }
- 
- function shouldInjectClaudeMissingFinalizersOnFlush(
--  lifecycle: ClaudeEmptyResponseLifecycle
-+  lifecycle: ClaudeEmptyResponseLifecycle,
- ): boolean {
-   if (lifecycle.hasError || !lifecycle.syntheticContentInjected) return false;
-   return !lifecycle.hasMessageDelta || !lifecycle.hasMessageStop;
-@@ -550,7 +614,7 @@
-     includeContentBlock?: boolean;
-     includeMessageDelta?: boolean;
-     includeMessageStop?: boolean;
--  } = {}
-+  } = {},
- ): JsonRecord[] {
-   const {
-     includeContentBlock = true,
-@@ -594,7 +658,7 @@
-       {
-         type: "content_block_stop",
-         index: 0,
--      }
-+      },
-     );
-   }
- 
-@@ -622,13 +686,14 @@
- export function restoreClaudePassthroughToolUseName(
-   parsed: JsonRecord,
-   toolNameMap: unknown,
--  requestTools?: unknown
-+  requestTools?: unknown,
- ): boolean {
-   const block =
-     parsed.content_block && typeof parsed.content_block === "object"
-       ? (parsed.content_block as JsonRecord)
-       : null;
--  if (!block || block.type !== "tool_use" || typeof block.name !== "string") return false;
-+  if (!block || block.type !== "tool_use" || typeof block.name !== "string")
-+    return false;
- 
-   const map = toolNameMap instanceof Map ? toolNameMap : null;
- 
-@@ -648,7 +713,10 @@
-     }
-     const lower = block.name.toLowerCase();
-     for (const [sanitized, original] of map.entries()) {
--      if (sanitized.toLowerCase() !== lower && original.toLowerCase() !== lower) {
-+      if (
-+        sanitized.toLowerCase() !== lower &&
-+        original.toLowerCase() !== lower
-+      ) {
-         continue;
-       }
-       if (original !== block.name) {
-@@ -686,7 +754,10 @@
-  * (Anthropic `name` or OpenAI `function.name`). Returns the DECLARED spelling,
-  * or null when no declared tool matches (server tools, undeclared names).
-  */
--function findDeclaredToolName(requestTools: unknown, name: string): string | null {
-+function findDeclaredToolName(
-+  requestTools: unknown,
-+  name: string,
-+): string | null {
-   if (!Array.isArray(requestTools)) return null;
-   const lower = name.toLowerCase();
-   let caseInsensitive: string | null = null;
-@@ -695,7 +766,9 @@
-     const item = tool as JsonRecord;
-     const directName = typeof item.name === "string" ? item.name.trim() : "";
-     const fn =
--      item.function && typeof item.function === "object" && !Array.isArray(item.function)
-+      item.function &&
-+      typeof item.function === "object" &&
-+      !Array.isArray(item.function)
-         ? (item.function as JsonRecord)
-         : null;
-     const functionName = typeof fn?.name === "string" ? fn.name.trim() : "";
-@@ -763,6 +836,7 @@
+@@ -763,6 +780,7 @@
      requestToolIdentityMap = null,
      streamBufferBytes = DEFAULT_STREAM_BUFFER_BYTES,
      pendingRequestId = null,
@@ -400,100 +84,7 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
    } = options;
    // Request-body-size metric (for monitoring payload size distribution & correlation with TTFT).
    // The size is JSON-serialised byte count; stored as a performance mark detail so monitoring
-@@ -788,7 +862,10 @@
-   // latency (NOT token-level) — see streamTiming.ts.
-   const timing: StreamTiming = createStreamTiming();
-   /** Forward a pre-encoded SSE chunk, marking TTFT/ITL on the way. */
--  const forward = (controller: TransformStreamDefaultController<Uint8Array>, bytes: Uint8Array) => {
-+  const forward = (
-+    controller: TransformStreamDefaultController<Uint8Array>,
-+    bytes: Uint8Array,
-+  ) => {
-     timing.markForward();
-     timing.observeOutput(bytes);
-     controller.enqueue(bytes);
-@@ -797,7 +874,8 @@
-   // Drop internal commentary-phase Responses output before forwarding (#6199).
-   // Explicit option wins; otherwise read the feature flag (default on) — resolved once per stream.
-   const shouldDropResponsesCommentary =
--    dropResponsesCommentary ?? isFeatureFlagEnabled("RESPONSES_PASSTHROUGH_DROP_COMMENTARY");
-+    dropResponsesCommentary ??
-+    isFeatureFlagEnabled("RESPONSES_PASSTHROUGH_DROP_COMMENTARY");
-   const clientExpectsResponsesStream =
-     (mode === STREAM_MODE.PASSTHROUGH
-       ? clientResponseFormat === FORMATS.OPENAI_RESPONSES
-@@ -830,7 +908,9 @@
-   // their own protocol events (response.completed / message_stop / last
-   // response candidate respectively).
-   const shouldEmitDoneTerminator =
--    !clientExpectsResponsesStream && !clientExpectsClaudeStream && !clientExpectsAntigravityStream;
-+    !clientExpectsResponsesStream &&
-+    !clientExpectsClaudeStream &&
-+    !clientExpectsAntigravityStream;
- 
-   let buffer = "";
-   let usage: UsageLike | null = null;
-@@ -843,7 +923,11 @@
-   let passthroughToolCallSeq = 0;
-   const allowedToolNames = extractAllowedToolNames(body);
-   let skipPassthroughEvent = false;
--  const thinkState = initThinkState(mode === STREAM_MODE.PASSTHROUGH, provider, model);
-+  const thinkState = initThinkState(
-+    mode === STREAM_MODE.PASSTHROUGH,
-+    provider,
-+    model,
-+  );
- 
-   // State for translate mode (accumulatedContent for call log response body)
-   const state: TranslateState | null =
-@@ -876,12 +960,16 @@
-   /** Passthrough: whether a usage block was already forwarded to the client (prevents double). */
-   let passthroughForwardedUsage = false;
-   /** Translate: usage already reached the client, or no trailing usage chunk applies. */
--  let translateForwardedUsage = sourceFormat !== FORMATS.OPENAI || !shouldEmitDoneTerminator;
-+  let translateForwardedUsage =
-+    sourceFormat !== FORMATS.OPENAI || !shouldEmitDoneTerminator;
-   // Passthrough Responses SSE: snapshots of items seen via `response.output_item.done`,
-   // used to backfill `response.completed.response.output` when upstream returns it
-   // empty (which happens when `store: false` — see backfillResponsesCompletedOutput).
-   const passthroughResponsesOutputItems: unknown[] = [];
--  const passthroughResponsesPendingFunctionCalls = new Map<string, JsonRecord>();
-+  const passthroughResponsesPendingFunctionCalls = new Map<
-+    string,
-+    JsonRecord
-+  >();
-   let passthroughResponsesId: string | null = null;
-   let passthroughLastChatId: string | null = null;
-   let passthroughResponsesCurrentFunctionCallKey: string | null = null;
-@@ -917,10 +1005,13 @@
- 
-   // Cross-request tool latency: fingerprint the session from the request body
-   // so Request 2 can pick up the tool-finish timestamp left by Request 1.
--  const sessionId = generateSessionId(body as Parameters<typeof generateSessionId>[0], {
--    provider: provider ?? undefined,
--    connectionId: connectionId ?? undefined,
--  });
-+  const sessionId = generateSessionId(
-+    body as Parameters<typeof generateSessionId>[0],
-+    {
-+      provider: provider ?? undefined,
-+      connectionId: connectionId ?? undefined,
-+    },
-+  );
-   let pendingToolFinishTime: number | null = null;
-   try {
-     pendingToolFinishTime = consumeToolFinishTime(sessionId);
-@@ -976,7 +1067,8 @@
-     // silently empty for one that does. Same mode ternary as
-     // clientExpectsResponsesStream/clientExpectsClaudeStream above: passthrough
-     // forwards clientResponseFormat as-is, translate re-shapes to sourceFormat.
--    format: mode === STREAM_MODE.PASSTHROUGH ? clientResponseFormat : sourceFormat,
-+    format:
-+      mode === STREAM_MODE.PASSTHROUGH ? clientResponseFormat : sourceFormat,
-     fallbackModel: model,
-   });
-   // Per-stream instances to avoid shared state with concurrent streams
-@@ -989,9 +1081,46 @@
+@@ -989,8 +1007,39 @@
    let streamTimedOut = false;
    const claudeEmptyResponseLifecycle = createClaudeEmptyResponseLifecycle();
    // #12398: `timing.firstByteAt` doubles as "any upstream chunk ever arrived".
@@ -507,10 +98,7 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
 +          ? payload.usage
 +          : null;
 +    if (nativeUsage && typeof nativeUsage === "object") {
-+      nativeAnthropicUsage = mergeAnthropicUsage(
-+        nativeAnthropicUsage,
-+        nativeUsage,
-+      );
++      nativeAnthropicUsage = mergeAnthropicUsage(nativeAnthropicUsage, nativeUsage);
 +      return normalizeAnthropicUsage(nativeAnthropicUsage);
 +    }
 +    return extractUsage(payload);
@@ -532,136 +120,11 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
 +  };
    const shouldAbortClaudeStream = () =>
      clientExpectsClaudeStream &&
--    shouldAbortEmptyClaudeStream(claudeEmptyResponseLifecycle, timing.firstByteAt !== null);
 +    !completedSilentSuggestion &&
-+    shouldAbortEmptyClaudeStream(
-+      claudeEmptyResponseLifecycle,
-+      timing.firstByteAt !== null,
-+    );
+     shouldAbortEmptyClaudeStream(claudeEmptyResponseLifecycle, timing.firstByteAt !== null);
    // `event:` framing is only part of the SSE protocol for OpenAI Responses API
    // and Claude Messages API passthrough; a plain OpenAI Chat-Completions-format
-   // client has no `event:` field at all, so it is dropped to stop upstream
-@@ -999,7 +1128,8 @@
-   // (#10017).
-   const passthroughEventPrefix = createSSEEventPrefixBuffer({
-     forwardEvent:
--      clientResponseFormat === FORMATS.OPENAI_RESPONSES || clientResponseFormat === FORMATS.CLAUDE,
-+      clientResponseFormat === FORMATS.OPENAI_RESPONSES ||
-+      clientResponseFormat === FORMATS.CLAUDE,
-   });
-   const multilineSseDataLineNormalizer = createSSEDataLineNormalizer();
- 
-@@ -1014,29 +1144,37 @@
-     passthroughEventPrefix.clear();
-   };
- 
--  const applyTextualToolCallStreamingGuard = (parsed: Record<string, unknown>) => {
-+  const applyTextualToolCallStreamingGuard = (
-+    parsed: Record<string, unknown>,
-+  ) => {
-     const choice = Array.isArray((parsed as JsonRecord).choices)
--      ? (((parsed as JsonRecord).choices as unknown[])[0] as JsonRecord | undefined)
-+      ? (((parsed as JsonRecord).choices as unknown[])[0] as
-+          JsonRecord | undefined)
-       : undefined;
-     const delta = asRecord(choice?.delta);
-     let textualToolCallConverted = false;
- 
-     if (typeof delta?.content === "string") {
-       const incomingContent = delta.content;
--      const bufferedCandidate = passthroughBufferedTextualToolCallContent + incomingContent;
-+      const bufferedCandidate =
-+        passthroughBufferedTextualToolCallContent + incomingContent;
-       if (
-         passthroughBufferedTextualToolCallContent ||
-         containsTextualToolCallCandidate(incomingContent)
-       ) {
--        const parsedCandidate = parseTextualToolCallCandidate(bufferedCandidate);
-+        const parsedCandidate =
-+          parseTextualToolCallCandidate(bufferedCandidate);
-         if (parsedCandidate?.kind === "complete") {
-           const collectedToolCall = collectPassthroughTextualToolCall(
-             bufferedCandidate,
-             passthroughToolCalls,
--            allowedToolNames
-+            allowedToolNames,
-           );
-           if (collectedToolCall) {
--            parsed = toChatCompletionChunkWithToolCall(parsed, collectedToolCall);
-+            parsed = toChatCompletionChunkWithToolCall(
-+              parsed,
-+              collectedToolCall,
-+            );
-             passthroughHasToolCalls = true;
-           } else {
-             delete delta.content;
-@@ -1047,25 +1185,26 @@
-         } else if (parsedCandidate?.kind === "partial") {
-           passthroughBufferedTextualToolCallContent = appendBoundedText(
-             passthroughBufferedTextualToolCallContent,
--            incomingContent
-+            incomingContent,
-           );
-           textualToolCallConverted = true;
-           delta.content = "";
-         } else {
-           if (passthroughBufferedTextualToolCallContent) {
--            delta.content = passthroughBufferedTextualToolCallContent + incomingContent;
-+            delta.content =
-+              passthroughBufferedTextualToolCallContent + incomingContent;
-             textualToolCallConverted = true;
-           }
-           passthroughAccumulatedContent = appendBoundedText(
-             passthroughAccumulatedContent,
--            passthroughBufferedTextualToolCallContent + incomingContent
-+            passthroughBufferedTextualToolCallContent + incomingContent,
-           );
-           passthroughBufferedTextualToolCallContent = "";
-         }
-       } else {
-         passthroughAccumulatedContent = appendBoundedText(
-           passthroughAccumulatedContent,
--          incomingContent
-+          incomingContent,
-         );
-       }
-     }
-@@ -1079,19 +1218,19 @@
-       includeContentBlock?: boolean;
-       includeMessageDelta?: boolean;
-       includeMessageStop?: boolean;
--    } = {}
-+    } = {},
-   ) => {
-     const events = buildSyntheticClaudeEmptyResponseEvents(
-       claudeEmptyResponseLifecycle,
-       model,
--      options
-+      options,
-     );
-     if (events.length === 0) return;
- 
-     if (!claudeEmptyResponseLifecycle.warningLogged) {
-       claudeEmptyResponseLifecycle.warningLogged = true;
-       console.warn(
--        `[STREAM] Injecting synthetic Claude SSE response for empty upstream output (${provider || "provider"}:${model || "unknown"})`
-+        `[STREAM] Injecting synthetic Claude SSE response for empty upstream output (${provider || "provider"}:${model || "unknown"})`,
-       );
-     }
- 
-@@ -1100,7 +1239,10 @@
-       if (!passthroughAccumulatedContent.trim()) {
-         passthroughAccumulatedContent = SYNTHETIC_CLAUDE_EMPTY_RESPONSE_TEXT;
-       }
--      if (state?.accumulatedContent !== undefined && !state.accumulatedContent.trim()) {
-+      if (
-+        state?.accumulatedContent !== undefined &&
-+        !state.accumulatedContent.trim()
-+      ) {
-         state.accumulatedContent = SYNTHETIC_CLAUDE_EMPTY_RESPONSE_TEXT;
-       }
-     }
-@@ -1116,20 +1258,28 @@
+@@ -1116,7 +1165,12 @@
  
    const clearSeen = { done: false };
    const clearPendingRequestFromStream = () => {
@@ -675,15 +138,8 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
    };
  
    const emitClaudeEmptyStreamErrorAndAbort = (
-     controller: TransformStreamDefaultController,
--    decrementPendingRequest = true
-+    decrementPendingRequest = true,
-   ) => {
-     clearIdleTimer();
-     const msg = "Claude returned an empty response (no content block)";
-     console.warn(
--      `[STREAM] Empty Claude stream at flush - emitting error (${provider || "provider"}:${model || "unknown"})`
-+      `[STREAM] Empty Claude stream at flush - emitting error (${provider || "provider"}:${model || "unknown"})`,
+@@ -1129,7 +1183,10 @@
+       `[STREAM] Empty Claude stream at flush - emitting error (${provider || "provider"}:${model || "unknown"})`
      );
      const errorBody = buildErrorBody(502, msg);
 -    const errorEvent: Record<string, unknown> = { type: "error", error: errorBody.error };
@@ -694,194 +150,15 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
      const errOutput = formatSSE(errorEvent, FORMATS.CLAUDE);
      reqLogger?.appendConvertedChunk?.(errOutput);
      clientPayloadCollector.push(errorEvent);
-@@ -1138,7 +1288,9 @@
-     let failureHandled = false;
-     if (onFailure) {
-       try {
--        failureHandled = onFailure({ status: 502, message: msg, code: "empty_response" }) === true;
-+        failureHandled =
-+          onFailure({ status: 502, message: msg, code: "empty_response" }) ===
-+          true;
-       } catch (e) {
-         console.debug(`[STREAM] onFailure callback error (empty_response):`, e);
-       }
-@@ -1159,12 +1311,16 @@
- 
-   const emitTranslatedClientItem = (
-     controller: TransformStreamDefaultController,
--    item: Record<string, unknown>
-+    item: Record<string, unknown>,
-   ) => {
-     let itemSanitized: Record<string, unknown> = item;
--    const isResponsesEvent = typeof item?.event === "string" && item.event.startsWith("response.");
-+    const isResponsesEvent =
-+      typeof item?.event === "string" && item.event.startsWith("response.");
-     if (sourceFormat === FORMATS.OPENAI && !isResponsesEvent) {
--      itemSanitized = sanitizeStreamingChunk(itemSanitized) as Record<string, unknown>;
-+      itemSanitized = sanitizeStreamingChunk(itemSanitized) as Record<
-+        string,
-+        unknown
-+      >;
-     }
- 
-     if (!hasValuableContent(itemSanitized, sourceFormat)) {
-@@ -1172,7 +1328,8 @@
-     }
- 
-     const isFinishChunk =
--      itemSanitized.type === "message_delta" || itemSanitized.choices?.[0]?.finish_reason;
-+      itemSanitized.type === "message_delta" ||
-+      itemSanitized.choices?.[0]?.finish_reason;
-     if (
-       state?.finishReason &&
-       isFinishChunk &&
-@@ -1180,25 +1337,39 @@
-       totalContentLength > 0
-     ) {
-       const estimated = estimateUsage(body, totalContentLength, sourceFormat);
--      itemSanitized.usage = timing.withTps(filterUsageForFormat(estimated, sourceFormat));
-+      itemSanitized.usage = timing.withTps(
-+        filterUsageForFormat(estimated, sourceFormat),
-+      );
-       state.usage = estimated;
-       if (hasValidUsage(estimated)) translateForwardedUsage = true; // finish chunk carries it
-     } else if (state?.finishReason && isFinishChunk && state.usage) {
-       const buffered = addBufferToUsage(state.usage);
--      itemSanitized.usage = timing.withTps(filterUsageForFormat(buffered, sourceFormat));
-+      itemSanitized.usage = timing.withTps(
-+        filterUsageForFormat(buffered, sourceFormat),
-+      );
-       translateForwardedUsage = true;
-     }
+@@ -1191,6 +1248,7 @@
  
      if (
        sourceFormat === FORMATS.CLAUDE &&
--      shouldInjectClaudeEmptyResponseBeforeCurrentEvent(claudeEmptyResponseLifecycle, itemSanitized)
 +      !completedSilentSuggestion &&
-+      shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
-+        claudeEmptyResponseLifecycle,
-+        itemSanitized,
-+      )
+       shouldInjectClaudeEmptyResponseBeforeCurrentEvent(claudeEmptyResponseLifecycle, itemSanitized)
      ) {
        emitClaudeEmptyStreamErrorAndAbort(controller);
-       return;
-     }
- 
--    if (sourceFormat === FORMATS.CLAUDE && isClaudeEventPayload(itemSanitized)) {
--      updateClaudeEmptyResponseLifecycle(claudeEmptyResponseLifecycle, itemSanitized);
-+    if (
-+      sourceFormat === FORMATS.CLAUDE &&
-+      isClaudeEventPayload(itemSanitized)
-+    ) {
-+      updateClaudeEmptyResponseLifecycle(
-+        claudeEmptyResponseLifecycle,
-+        itemSanitized,
-+      );
-     }
- 
-     const output = formatSSE(itemSanitized, sourceFormat);
-@@ -1210,7 +1381,7 @@
- 
-   const emitFinalSseMetadata = async (
-     controller: TransformStreamDefaultController,
--    finalUsage: UsageTokenRecord | Record<string, unknown> | null | undefined
-+    finalUsage: UsageTokenRecord | Record<string, unknown> | null | undefined,
-   ) => {
-     // Skip SSE metadata comment lines when OMNIROUTE_SSE_COMMENTS is disabled
-     // (e.g., "off", "false", "0", "no"). Strict OpenAI-compatible clients that
-@@ -1234,14 +1405,18 @@
-     forward(controller, encoder.encode(comment));
-   };
- 
--  const getResponsesReasoningKey = (payload: Record<string, unknown>): string | null => {
-+  const getResponsesReasoningKey = (
-+    payload: Record<string, unknown>,
-+  ): string | null => {
-     const itemId = stringifyIdValue(payload.item_id);
-     if (itemId) {
-       return itemId;
-     }
- 
-     const item =
--      payload.item && typeof payload.item === "object" && !Array.isArray(payload.item)
-+      payload.item &&
-+      typeof payload.item === "object" &&
-+      !Array.isArray(payload.item)
-         ? (payload.item as Record<string, unknown>)
-         : null;
-     const outputItemId = item ? stringifyIdValue(item.id) : null;
-@@ -1249,21 +1424,27 @@
-       return outputItemId;
-     }
- 
--    const responseId = stringifyIdValue(payload.response_id) || passthroughResponsesId;
-+    const responseId =
-+      stringifyIdValue(payload.response_id) || passthroughResponsesId;
-     const outputIndex =
--      typeof payload.output_index === "number" && Number.isInteger(payload.output_index)
-+      typeof payload.output_index === "number" &&
-+      Number.isInteger(payload.output_index)
-         ? payload.output_index
-         : null;
- 
--    return responseId !== null && outputIndex !== null ? `${responseId}:${outputIndex}` : null;
-+    return responseId !== null && outputIndex !== null
-+      ? `${responseId}:${outputIndex}`
-+      : null;
-   };
- 
-   const emitSyntheticResponsesReasoningSummary = (
-     controller: TransformStreamDefaultController,
--    payload: Record<string, unknown>
-+    payload: Record<string, unknown>,
-   ) => {
-     const item =
--      payload.item && typeof payload.item === "object" && !Array.isArray(payload.item)
-+      payload.item &&
-+      typeof payload.item === "object" &&
-+      !Array.isArray(payload.item)
-         ? (payload.item as Record<string, unknown>)
-         : null;
-     if (!item || item.type !== "reasoning") {
-@@ -1280,14 +1461,19 @@
-     }
- 
-     const reasoningKey = getResponsesReasoningKey(payload);
--    if (!reasoningKey || passthroughResponsesReasoningSummarySeen.has(reasoningKey)) {
-+    if (
-+      !reasoningKey ||
-+      passthroughResponsesReasoningSummarySeen.has(reasoningKey)
-+    ) {
-       return;
-     }
-     passthroughResponsesReasoningSummarySeen.add(reasoningKey);
- 
--    const itemId = typeof item.id === "string" && item.id ? item.id : reasoningKey;
-+    const itemId =
-+      typeof item.id === "string" && item.id ? item.id : reasoningKey;
-     const outputIndex =
--      typeof payload.output_index === "number" && Number.isInteger(payload.output_index)
-+      typeof payload.output_index === "number" &&
-+      Number.isInteger(payload.output_index)
-         ? payload.output_index
-         : 0;
- 
-@@ -1331,7 +1517,8 @@
-       providerPayloadCollector.build(providerPayloadCollector.getSummary(), {
-         includeEvents: false,
-       }),
--    buildClientPayload: (body) => clientPayloadCollector.build(body, { includeEvents: false }),
-+    buildClientPayload: (body) =>
-+      clientPayloadCollector.build(body, { includeEvents: false }),
-     clearIdleTimer,
-     clearPendingRequest: clearPendingRequestFromStream,
-     markPendingRequestCleared,
-@@ -1340,19 +1527,24 @@
- 
-   const emitTranslatedFailureAndAbort = (
-     controller: TransformStreamDefaultController<Uint8Array>,
--    payload: unknown
-+    payload: unknown,
+@@ -1344,7 +1402,7 @@
    ): boolean => {
      const failure = prepareTranslatedStreamFailure(payload);
      if (!failure) return false;
@@ -890,183 +167,16 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
      const output = formatTranslatedStreamError(failure.record, sourceFormat);
      reqLogger?.appendConvertedChunk?.(output);
      forward(controller, encoder.encode(output));
-     upstreamErrorForwarded = true;
-     doneSent = true;
--    abortStreamFailure(controller, failure.internalFailure, failure.publicMessage, {
--      notifyComplete: true,
--    });
-+    abortStreamFailure(
-+      controller,
-+      failure.internalFailure,
-+      failure.publicMessage,
-+      {
-+        notifyComplete: true,
-+      },
-+    );
-     return true;
-   };
- 
-@@ -1362,7 +1554,10 @@
-         // Start idle watchdog — checks every 10s if provider has stopped sending
-         if (STREAM_IDLE_TIMEOUT_MS > 0) {
-           idleTimer = setInterval(() => {
--            if (!streamTimedOut && Date.now() - lastChunkTime > STREAM_IDLE_TIMEOUT_MS) {
-+            if (
-+              !streamTimedOut &&
-+              Date.now() - lastChunkTime > STREAM_IDLE_TIMEOUT_MS
-+            ) {
-               streamTimedOut = true;
-               clearIdleTimer();
-               const timeoutMsg = `[STREAM] Idle timeout: no data from ${provider || "provider"} for ${STREAM_IDLE_TIMEOUT_MS}ms (model: ${model || "unknown"})`;
-@@ -1379,7 +1574,10 @@
-                       type: "timeout_error",
-                     }) === true;
-                 } catch (e) {
--                  console.debug(`[STREAM] onFailure callback error (idle_timeout):`, e);
-+                  console.debug(
-+                    `[STREAM] onFailure callback error (idle_timeout):`,
-+                    e,
-+                  );
-                 }
-               }
-               if (!failureHandled) {
-@@ -1441,9 +1639,12 @@
-             if (/^event:/i.test(trimmed)) {
-               const eventType = trimmed.replace(/^event:\s*/i, "");
-               if (
--                shouldInjectClaudeEmptyResponseBeforeCurrentEvent(claudeEmptyResponseLifecycle, {
--                  type: eventType,
--                })
-+                shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
-+                  claudeEmptyResponseLifecycle,
-+                  {
-+                    type: eventType,
-+                  },
-+                )
-               ) {
-                 emitClaudeEmptyStreamErrorAndAbort(controller);
-                 return;
-@@ -1485,29 +1686,39 @@
-               parsedPassthroughData &&
-               typeof parsedPassthroughData.type === "string" &&
-               parsedPassthroughData.type.startsWith("response.") &&
--              isDuplicateResponsesSequence(parsedPassthroughData.sequence_number)
-+              isDuplicateResponsesSequence(
-+                parsedPassthroughData.sequence_number,
-+              )
-             ) {
-               clearPendingPassthroughEvent();
-               continue;
-             }
- 
+@@ -1494,7 +1552,7 @@
              if (trimmed.startsWith("data:")) {
--              const providerPayload = parsedPassthroughData ?? parseSSELine(trimmed);
-+              const providerPayload =
-+                parsedPassthroughData ?? parseSSELine(trimmed);
+               const providerPayload = parsedPassthroughData ?? parseSSELine(trimmed);
                if (providerPayload) {
 -                providerPayloadCollector.push(providerPayload);
 +                collectProviderPayload(providerPayload);
                  if ((providerPayload as { done?: unknown }).done === true) {
                    continue;
                  }
-               }
-             }
- 
--            if (trimmed.startsWith("data:") && trimmed.slice(5).trim() === "[DONE]") {
-+            if (
-+              trimmed.startsWith("data:") &&
-+              trimmed.slice(5).trim() === "[DONE]"
-+            ) {
-               continue;
-             }
- 
--            if (trimmed.startsWith("data:") && trimmed.slice(5).trim() !== "[DONE]") {
-+            if (
-+              trimmed.startsWith("data:") &&
-+              trimmed.slice(5).trim() !== "[DONE]"
-+            ) {
-               try {
--                let parsed = parsedPassthroughData ?? JSON.parse(trimmed.slice(5).trim());
-+                let parsed =
-+                  parsedPassthroughData ?? JSON.parse(trimmed.slice(5).trim());
-                 const projectedFailure = projectStreamFailureEvent(parsed);
-                 if (projectedFailure) {
-                   parsed = projectedFailure.publicPayload;
-@@ -1528,7 +1739,8 @@
-                   Array.isArray(parsed?.choices) &&
-                   parsed.choices.length > 0 &&
-                   parsed.choices.every((choice) => {
--                    const candidate = choice && typeof choice === "object" ? choice : {};
-+                    const candidate =
-+                      choice && typeof choice === "object" ? choice : {};
-                     const delta =
-                       candidate.delta && typeof candidate.delta === "object"
-                         ? candidate.delta
-@@ -1536,11 +1748,18 @@
- 
-                     if (!delta || delta.role !== "assistant") return false;
-                     if (hasActiveDeltaValue(delta.content)) return false;
--                    if (candidate.finish_reason !== null && candidate.finish_reason !== undefined) {
-+                    if (
-+                      candidate.finish_reason !== null &&
-+                      candidate.finish_reason !== undefined
-+                    ) {
-                       return false;
-                     }
- 
--                    const { role: _role, content: _content, ...restDelta } = delta;
-+                    const {
-+                      role: _role,
-+                      content: _content,
-+                      ...restDelta
-+                    } = delta;
-                     return !hasActiveDeltaValue(restDelta);
-                   });
- 
-@@ -1566,7 +1785,13 @@
-                     parsed.type.startsWith("content_block") ||
-                     parsed.type === "ping" ||
-                     parsed.type === "error");
--                if (sanitizeUsagePayloadForRequest(parsed, body, clientResponseFormat)) {
-+                if (
-+                  sanitizeUsagePayloadForRequest(
-+                    parsed,
-+                    body,
-+                    clientResponseFormat,
-+                  )
-+                ) {
-                   output = `data: ${JSON.stringify(parsed)}\n\n`;
-                   injectedUsage = true;
-                 }
-@@ -1579,14 +1804,16 @@
-                     shouldDropResponsesCommentaryEvent(
-                       parsed as JsonRecord,
-                       passthroughResponsesCommentaryItemIds,
--                      passthroughResponsesCommentaryIndexes
-+                      passthroughResponsesCommentaryIndexes,
-                     )
-                   ) {
-                     clearPendingPassthroughEvent();
-                     continue;
-                   }
- 
--                  const responsesIdsNormalized = normalizeResponsesSseIds(parsed as JsonRecord);
-+                  const responsesIdsNormalized = normalizeResponsesSseIds(
-+                    parsed as JsonRecord,
-+                  );
-                   const parsedResponse =
-                     parsed.response &&
-                     typeof parsed.response === "object" &&
-@@ -1594,13 +1821,14 @@
-                       ? (parsed.response as JsonRecord)
-                       : null;
-                   const responseId =
--                    (parsedResponse ? stringifyIdValue(parsedResponse.id) : null) ||
--                    stringifyIdValue(parsed.response_id);
-+                    (parsedResponse
-+                      ? stringifyIdValue(parsedResponse.id)
-+                      : null) || stringifyIdValue(parsed.response_id);
-                   if (responseId) {
+@@ -1600,7 +1658,7 @@
                      passthroughResponsesId = responseId;
                    }
                    // Responses SSE: only extract usage, forward payload as-is
@@ -1075,251 +185,10 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
                    if (extracted) {
                      usage = extracted;
                    }
-@@ -1621,13 +1849,15 @@
-                       passthroughBufferedTextualToolCallContent ||
-                       containsTextualToolCallCandidate(incomingDelta)
-                     ) {
--                      const parsedCandidate = parseTextualToolCallCandidate(bufferedCandidate);
-+                      const parsedCandidate =
-+                        parseTextualToolCallCandidate(bufferedCandidate);
-                       if (parsedCandidate?.kind === "complete") {
--                        const collectedToolCall = collectPassthroughTextualToolCall(
--                          bufferedCandidate,
--                          passthroughToolCalls,
--                          allowedToolNames
--                        );
-+                        const collectedToolCall =
-+                          collectPassthroughTextualToolCall(
-+                            bufferedCandidate,
-+                            passthroughToolCalls,
-+                            allowedToolNames,
-+                          );
-                         if (collectedToolCall) {
-                           passthroughHasToolCalls = true;
-                           const responseToolCallEvents =
-@@ -1646,29 +1876,33 @@
-                         passthroughBufferedTextualToolCallContent = "";
-                         parsed.delta = "";
-                       } else if (parsedCandidate?.kind === "partial") {
--                        passthroughBufferedTextualToolCallContent = appendBoundedText(
--                          passthroughBufferedTextualToolCallContent,
--                          incomingDelta
--                        );
-+                        passthroughBufferedTextualToolCallContent =
-+                          appendBoundedText(
-+                            passthroughBufferedTextualToolCallContent,
-+                            incomingDelta,
-+                          );
-                         parsed.delta = "";
-                         output = `data: ${JSON.stringify(parsed)}\n\n`;
-                         injectedUsage = true;
-                       } else {
-                         if (passthroughBufferedTextualToolCallContent) {
--                          parsed.delta = passthroughBufferedTextualToolCallContent + incomingDelta;
-+                          parsed.delta =
-+                            passthroughBufferedTextualToolCallContent +
-+                            incomingDelta;
-                           output = `data: ${JSON.stringify(parsed)}\n\n`;
-                           injectedUsage = true;
-                         }
-                         passthroughAccumulatedContent = appendBoundedText(
-                           passthroughAccumulatedContent,
--                          passthroughBufferedTextualToolCallContent + incomingDelta
-+                          passthroughBufferedTextualToolCallContent +
-+                            incomingDelta,
-                         );
-                         passthroughBufferedTextualToolCallContent = "";
-                       }
-                     } else {
-                       passthroughAccumulatedContent = appendBoundedText(
-                         passthroughAccumulatedContent,
--                        incomingDelta
-+                        incomingDelta,
-                       );
-                     }
-                   }
-@@ -1679,7 +1913,9 @@
-                   ) {
-                     const reasoningKey = getResponsesReasoningKey(parsed);
-                     if (reasoningKey) {
--                      passthroughResponsesReasoningSummarySeen.add(reasoningKey);
-+                      passthroughResponsesReasoningSummarySeen.add(
-+                        reasoningKey,
-+                      );
-                     }
-                   }
-                   // Track a reasoning opening (paired at `done` for the duration).
-@@ -1693,7 +1929,9 @@
-                     parsed.item?.type === "function_call"
-                   ) {
-                     const item =
--                      parsed.item && typeof parsed.item === "object" && !Array.isArray(parsed.item)
-+                      parsed.item &&
-+                      typeof parsed.item === "object" &&
-+                      !Array.isArray(parsed.item)
-                         ? { ...(parsed.item as JsonRecord) }
-                         : null;
-                     const pendingKey =
-@@ -1706,11 +1944,16 @@
-                       if (typeof item.arguments !== "string") {
-                         item.arguments = "";
-                       }
--                      passthroughResponsesPendingFunctionCalls.set(pendingKey, item);
-+                      passthroughResponsesPendingFunctionCalls.set(
-+                        pendingKey,
-+                        item,
-+                      );
-                       passthroughResponsesCurrentFunctionCallKey = pendingKey;
-                     }
-                   }
--                  if (parsed.type === "response.function_call_arguments.delta") {
-+                  if (
-+                    parsed.type === "response.function_call_arguments.delta"
-+                  ) {
-                     const pendingKey =
-                       typeof parsed.item_id === "string"
-                         ? parsed.item_id
-@@ -1720,7 +1963,9 @@
-                       : undefined;
-                     if (pending && typeof parsed.delta === "string") {
-                       const previousArgs =
--                        typeof pending.arguments === "string" ? pending.arguments : "";
-+                        typeof pending.arguments === "string"
-+                          ? pending.arguments
-+                          : "";
-                       pending.arguments = previousArgs + parsed.delta;
-                     }
-                   }
-@@ -1736,15 +1981,24 @@
-                       if (typeof parsed.arguments === "string") {
-                         pending.arguments = parsed.arguments;
-                       }
--                      pushUniqueResponsesOutputItems(passthroughResponsesOutputItems, [pending]);
-+                      pushUniqueResponsesOutputItems(
-+                        passthroughResponsesOutputItems,
-+                        [pending],
-+                      );
-                     }
-                   }
-                   // Capture each completed output item so the final
-                   // response.completed snapshot can be backfilled when upstream
-                   // returns an empty `output` (happens with store: false).
--                  if (parsed.type === "response.output_item.done" && parsed.item) {
-+                  if (
-+                    parsed.type === "response.output_item.done" &&
-+                    parsed.item
-+                  ) {
-                     emitSyntheticResponsesReasoningSummary(controller, parsed);
--                    pushUniqueResponsesOutputItems(passthroughResponsesOutputItems, [parsed.item]);
-+                    pushUniqueResponsesOutputItems(
-+                      passthroughResponsesOutputItems,
-+                      [parsed.item],
-+                    );
-                     // L12 replay already filtered above via isDuplicateResponsesSequence.
-                     reasoningObserver.note(parsed, Date.now());
-                     if (parsed.item?.type === "function_call") {
-@@ -1755,8 +2009,13 @@
-                             ? parsed.item.call_id
-                             : null;
-                       if (pendingKey) {
--                        passthroughResponsesPendingFunctionCalls.delete(pendingKey);
--                        if (passthroughResponsesCurrentFunctionCallKey === pendingKey) {
-+                        passthroughResponsesPendingFunctionCalls.delete(
-+                          pendingKey,
-+                        );
-+                        if (
-+                          passthroughResponsesCurrentFunctionCallKey ===
-+                          pendingKey
-+                        ) {
-                           passthroughResponsesCurrentFunctionCallKey = null;
-                         }
-                       }
-@@ -1773,10 +2032,11 @@
-                     // SSE frames were already dropped above. Keep both representations
-                     // consistent by applying the same drop here.
-                     if (shouldDropResponsesCommentary) {
--                      const { items, changed } = filterResponsesCommentaryFromItems(
--                        parsed.response.output,
--                        isResponsesCommentaryMessageItem
--                      );
-+                      const { items, changed } =
-+                        filterResponsesCommentaryFromItems(
-+                          parsed.response.output,
-+                          isResponsesCommentaryMessageItem,
-+                        );
-                       if (changed) {
-                         parsed.response.output = items;
-                         responsesCommentaryStrippedFromCompleted = true;
-@@ -1784,7 +2044,7 @@
-                     }
-                     pushUniqueResponsesOutputItems(
-                       passthroughResponsesOutputItems,
--                      parsed.response.output
-+                      parsed.response.output,
-                     );
-                   }
-                   // #7936 — restore `namespace` + `name` fields on passthrough
-@@ -1796,16 +2056,17 @@
-                   ) {
-                     restoreResponsesPassthroughFunctionCallIdentity(
-                       parsed as JsonRecord,
--                      requestToolIdentityMap
-+                      requestToolIdentityMap,
-                     );
-                   }
-                   if (
-                     parsed.type === "response.completed" &&
-                     passthroughResponsesPendingFunctionCalls.size > 0
-                   ) {
--                    pushUniqueResponsesOutputItems(passthroughResponsesOutputItems, [
--                      ...passthroughResponsesPendingFunctionCalls.values(),
--                    ]);
-+                    pushUniqueResponsesOutputItems(
-+                      passthroughResponsesOutputItems,
-+                      [...passthroughResponsesPendingFunctionCalls.values()],
-+                    );
-                     passthroughResponsesPendingFunctionCalls.clear();
-                     passthroughResponsesCurrentFunctionCallKey = null;
-                   }
-@@ -1818,11 +2079,13 @@
-                   //      build their tool-call list from that snapshot rather
-                   //      than from per-item events.
-                   const textualToolCallBackfilled =
--                    parsed.type === "response.completed" && passthroughToolCalls.size > 0;
-+                    parsed.type === "response.completed" &&
-+                    passthroughToolCalls.size > 0;
-                   if (textualToolCallBackfilled) {
--                    parsed = toResponsesCompletedWithToolCalls(parsed as JsonRecord, [
--                      ...passthroughToolCalls.values(),
--                    ]) as typeof parsed;
-+                    parsed = toResponsesCompletedWithToolCalls(
-+                      parsed as JsonRecord,
-+                      [...passthroughToolCalls.values()],
-+                    ) as typeof parsed;
-                   }
-                   const stripped = stripResponsesLifecycleEcho(parsed);
-                   // Belt-and-suspenders for #10156: filter the backfill buffer itself
-@@ -1832,10 +2095,13 @@
-                   const backfillCandidates = shouldDropResponsesCommentary
-                     ? filterResponsesCommentaryFromItems(
-                         passthroughResponsesOutputItems,
--                        isResponsesCommentaryMessageItem
-+                        isResponsesCommentaryMessageItem,
-                       ).items
-                     : passthroughResponsesOutputItems;
--                  const backfilled = backfillResponsesCompletedOutput(parsed, backfillCandidates);
-+                  const backfilled = backfillResponsesCompletedOutput(
-+                    parsed,
-+                    backfillCandidates,
-+                  );
-                   const usageNormalized = normalizeUsage(parsed);
-                   if (
-                     stripped ||
-@@ -1865,50 +2131,43 @@
-                   }
+@@ -1866,21 +1924,8 @@
                  } else if (isClaudeSSE) {
                    // Claude SSE: extract usage, track content, forward as-is
--                  const thinkingSignatureInjected = injectThinkingSignature(parsed, provider);
+                   const thinkingSignatureInjected = injectThinkingSignature(parsed, provider);
 -                  const extracted = extractUsage(parsed);
 -                  if (extracted) {
 -                    // Non-destructive merge: never overwrite a positive value with 0
@@ -1335,154 +204,21 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
 -                    if (eu.cache_creation_input_tokens)
 -                      u.cache_creation_input_tokens = eu.cache_creation_input_tokens;
 -                  }
-+                  const thinkingSignatureInjected = injectThinkingSignature(
-+                    parsed,
-+                    provider,
-+                  );
 +                  const extracted = extractStreamUsage(parsed);
 +                  if (extracted) usage = extracted;
                    if (
                      shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
                        claudeEmptyResponseLifecycle,
--                      parsed
-+                      parsed,
-                     )
-                   ) {
-                     emitClaudeEmptyStreamErrorAndAbort(controller);
-                     return;
-                   }
--                  updateClaudeEmptyResponseLifecycle(claudeEmptyResponseLifecycle, parsed);
-+                  updateClaudeEmptyResponseLifecycle(
-+                    claudeEmptyResponseLifecycle,
-+                    parsed,
-+                  );
-                   const restoredToolName = restoreClaudePassthroughToolUseName(
-                     parsed,
-                     toolNameMap,
--                    body
-+                    body,
-                   );
-                   // Track content length and accumulate from Claude format
-                   if (parsed.delta?.text) {
-                     totalContentLength += parsed.delta.text.length;
-                     passthroughAccumulatedContent = appendBoundedText(
-                       passthroughAccumulatedContent,
--                      parsed.delta.text
-+                      parsed.delta.text,
-                     );
-                   }
-                   if (parsed.delta?.thinking) {
-                     totalContentLength += parsed.delta.thinking.length;
-                     passthroughAccumulatedReasoning = appendBoundedText(
-                       passthroughAccumulatedReasoning,
--                      parsed.delta.thinking
-+                      parsed.delta.thinking,
-                     );
-                   }
-                   if (restoredToolName || thinkingSignatureInjected) {
-@@ -1945,8 +2204,12 @@
+@@ -1945,7 +1990,7 @@
                          Object.keys(parsed.choices[0].delta).length === 0 &&
                          !parsed.choices[0]?.finish_reason))
                    ) {
 -                    const emptyChoicesUsage = extractUsage(parsed) ?? parsed.usage;
--                    if (hasValidUsage(emptyChoicesUsage) && !passthroughForwardedUsage) {
-+                    const emptyChoicesUsage =
-+                      extractStreamUsage(parsed) ?? parsed.usage;
-+                    if (
-+                      hasValidUsage(emptyChoicesUsage) &&
-+                      !passthroughForwardedUsage
-+                    ) {
++                    const emptyChoicesUsage = extractStreamUsage(parsed) ?? parsed.usage;
+                     if (hasValidUsage(emptyChoicesUsage) && !passthroughForwardedUsage) {
                        // Some upstreams (e.g. Ollama Cloud) emit prompt_tokens: 0
                        // even when input was sent — they simply don't count input
-                       // tokens.  When we have a non-zero output but zero input,
-@@ -1962,12 +2225,14 @@
-                           const estimated = estimateUsage(
-                             body,
-                             totalContentLength,
--                            sourceFormat || FORMATS.OPENAI
-+                            sourceFormat || FORMATS.OPENAI,
-                           );
-                           if (estimated?.prompt_tokens > 0) {
--                            emptyChoicesUsage.prompt_tokens = estimated.prompt_tokens;
-+                            emptyChoicesUsage.prompt_tokens =
-+                              estimated.prompt_tokens;
-                             emptyChoicesUsage.total_tokens =
--                              (emptyChoicesUsage.total_tokens ?? 0) + estimated.prompt_tokens;
-+                              (emptyChoicesUsage.total_tokens ?? 0) +
-+                              estimated.prompt_tokens;
-                           }
-                         }
-                       }
-@@ -1983,12 +2248,15 @@
-                     }
- 
-                     // If we already forwarded usage, drop any trailing empty-choices valid usage
--                    if (passthroughForwardedUsage && hasValidUsage(emptyChoicesUsage)) {
-+                    if (
-+                      passthroughForwardedUsage &&
-+                      hasValidUsage(emptyChoicesUsage)
-+                    ) {
-                       continue;
-                     }
- 
-                     console.warn(
--                      `[STREAM] Upstream returned empty choices array (${provider || "provider"}:${model || "unknown"}) — dropping chunk`
-+                      `[STREAM] Upstream returned empty choices array (${provider || "provider"}:${model || "unknown"}) — dropping chunk`,
-                     );
-                     continue;
-                   }
-@@ -1998,14 +2266,15 @@
-                         (choice) =>
-                           Array.isArray(choice?.delta?.tool_calls) &&
-                           choice.delta.tool_calls.some(
--                            (tc) => tc?.id != null && typeof tc.id !== "string"
--                          )
-+                            (tc) => tc?.id != null && typeof tc.id !== "string",
-+                          ),
-                       )
-                     : false;
-                   const hadNonStringTopLevelId =
-                     parsed?.id != null && typeof parsed.id !== "string";
-                   const rawDelta = parsed.choices?.[0]?.delta;
--                  const hadReasoningAlias = hasUnsupportedReasoningSignal(rawDelta);
-+                  const hadReasoningAlias =
-+                    hasUnsupportedReasoningSignal(rawDelta);
-                   const hadUpstreamReasoningContent =
-                     typeof rawDelta?.reasoning_content === "string" &&
-                     rawDelta.reasoning_content.length > 0;
-@@ -2016,16 +2285,26 @@
-                       parsed &&
-                       typeof parsed === "object" &&
-                       !Array.isArray(parsed) &&
--                      (parsed as Record<string, unknown>)[OMIT_STREAMING_CHUNK_MARKER] === true
-+                      (parsed as Record<string, unknown>)[
-+                        OMIT_STREAMING_CHUNK_MARKER
-+                      ] === true
-                     ) {
-                       continue;
-                     }
-                   }
- 
--                  const restoredOpenAIToolName = restoreOpenAIToolNames(parsed, toolNameMap);
--                  const idFixed = hadNonStringTopLevelId ? false : fixInvalidId(parsed);
--
--                  if (!projectedFailure && !hasValuableContent(parsed, FORMATS.OPENAI)) {
-+                  const restoredOpenAIToolName = restoreOpenAIToolNames(
-+                    parsed,
-+                    toolNameMap,
-+                  );
-+                  const idFixed = hadNonStringTopLevelId
-+                    ? false
-+                    : fixInvalidId(parsed);
-+
-+                  if (
-+                    !projectedFailure &&
-+                    !hasValuableContent(parsed, FORMATS.OPENAI)
-+                  ) {
-                     continue;
-                   }
- 
-@@ -2050,7 +2329,10 @@
+@@ -2050,7 +2095,10 @@
                        choices: [
                          {
                            ...parsed.choices[0],
@@ -1494,57 +230,8 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
                            finish_reason: null,
                          },
                          ...parsed.choices.slice(1),
-@@ -2059,7 +2341,7 @@
-                     const rOutput = `data: ${JSON.stringify(reasoningChunk)}\n\n`;
-                     passthroughAccumulatedReasoning = appendBoundedText(
-                       passthroughAccumulatedReasoning,
--                      delta.reasoning_content
-+                      delta.reasoning_content,
-                     );
-                     totalContentLength += delta.reasoning_content.length;
-                     clientPayloadCollector.push(reasoningChunk);
-@@ -2110,11 +2392,15 @@
-                       }
-                       const existing = passthroughToolCalls.get(key);
-                       const deltaArgs =
--                        typeof tc?.function?.arguments === "string" ? tc.function.arguments : "";
-+                        typeof tc?.function?.arguments === "string"
-+                          ? tc.function.arguments
-+                          : "";
-                       if (!existing) {
-                         passthroughToolCalls.set(key, {
-                           id: tc?.id != null ? String(tc.id) : null,
--                          index: Number.isInteger(tc?.index) ? tc.index : passthroughToolCalls.size,
-+                          index: Number.isInteger(tc?.index)
-+                            ? tc.index
-+                            : passthroughToolCalls.size,
-                           type: tc?.type || "function",
-                           function: {
-                             name: tc?.function?.name || "",
-@@ -2143,7 +2429,7 @@
-                           recordToolLatency(
-                             provider || "unknown",
-                             toolTs ? now - toolTs : null,
--                            lastChunkTs ? now - lastChunkTs : null
-+                            lastChunkTs ? now - lastChunkTs : null,
-                           );
-                         } catch {} // best-effort telemetry — must never break the stream
-                         pendingToolFinishTime = null;
-@@ -2156,7 +2442,7 @@
-                   }
-                   {
-                     const guarded = applyTextualToolCallStreamingGuard(
--                      parsed as Record<string, unknown>
-+                      parsed as Record<string, unknown>,
-                     );
-                     parsed = guarded.parsed as typeof parsed;
-                     textualToolCallConverted = guarded.textualToolCallConverted;
-@@ -2164,10 +2450,10 @@
-                   if (reasoningDelta)
-                     passthroughAccumulatedReasoning = appendBoundedText(
-                       passthroughAccumulatedReasoning,
--                      reasoningDelta
-+                      reasoningDelta,
+@@ -2167,7 +2215,7 @@
+                       reasoningDelta
                      );
  
 -                  const extracted = extractUsage(parsed);
@@ -1552,168 +239,16 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
                    if (extracted) {
                      usage = extracted;
                    }
-@@ -2216,10 +2502,17 @@
-                   // and made the real trailing block get dropped in favor of the estimate
-                   // (billing regression pinned by tests/unit/stream-utils.test.ts). The
-                   // estimate is now emitted in flush(), only when the upstream stayed silent.
--                  if (isFinishChunk && hasValidUsage(usage) && !passthroughForwardedUsage) {
-+                  if (
-+                    isFinishChunk &&
-+                    hasValidUsage(usage) &&
-+                    !passthroughForwardedUsage
-+                  ) {
-                     const buffered = addBufferToUsage(usage);
-                     parsed.usage = timing.withTps(
--                      filterUsageForFormat(buffered, sourceFormat || FORMATS.OPENAI)
-+                      filterUsageForFormat(
-+                        buffered,
-+                        sourceFormat || FORMATS.OPENAI,
-+                      ),
-                     );
-                     output = `data: ${JSON.stringify(parsed)}\n\n`;
-                     passthroughForwardedUsage = true;
-@@ -2269,7 +2562,7 @@
-               abortStreamFailure(
-                 controller,
-                 failurePayload,
--                publicFailureMessage || "Upstream failure"
-+                publicFailureMessage || "Upstream failure",
-               );
-               return;
-             }
-@@ -2313,8 +2606,12 @@
-           )
+@@ -2314,7 +2362,7 @@
              reasoningObserver.note(parsed, Date.now());
  
--          if (shouldDropResponsesCommentary && dropCommentary(parsed as JsonRecord)) continue;
+           if (shouldDropResponsesCommentary && dropCommentary(parsed as JsonRecord)) continue;
 -          providerPayloadCollector.push(parsed);
-+          if (
-+            shouldDropResponsesCommentary &&
-+            dropCommentary(parsed as JsonRecord)
-+          )
-+            continue;
 +          collectProviderPayload(parsed);
            if (parsed && parsed.done) {
              continue;
            }
-@@ -2342,7 +2639,10 @@
-             if (typeof c === "string") {
-               totalContentLength += c.length;
-               if (state?.accumulatedContent !== undefined)
--                state.accumulatedContent = appendBoundedText(state.accumulatedContent, c);
-+                state.accumulatedContent = appendBoundedText(
-+                  state.accumulatedContent,
-+                  c,
-+                );
-             } else if (Array.isArray(c)) {
-               for (const part of c) {
-                 if (part?.text && typeof part.text === "string") {
-@@ -2350,7 +2650,7 @@
-                   if (state?.accumulatedContent !== undefined)
-                     state.accumulatedContent = appendBoundedText(
-                       state.accumulatedContent,
--                      part.text
-+                      part.text,
-                     );
-                 }
-               }
-@@ -2363,7 +2663,7 @@
-             if (state?.accumulatedReasoning !== undefined)
-               state.accumulatedReasoning = appendBoundedText(
-                 state.accumulatedReasoning,
--                openAiReasoning
-+                openAiReasoning,
-               );
-           }
-           // Mirror only client-unsupported reasoning aliases into `reasoning_content`.
-@@ -2386,7 +2686,10 @@
-               delete parsed.choices[0].delta.thought;
-               totalContentLength += r.length;
-               if (state?.accumulatedReasoning !== undefined)
--                state.accumulatedReasoning = appendBoundedText(state.accumulatedReasoning, r);
-+                state.accumulatedReasoning = appendBoundedText(
-+                  state.accumulatedReasoning,
-+                  r,
-+                );
-             }
-           }
- 
-@@ -2394,14 +2697,20 @@
-           // Cloud Code API wraps in { response: { candidates: [...] } }, so unwrap.
-           // Only applies to Gemini-family formats — skip for OpenAI, Claude, etc.
-           const isGeminiFormat =
--            targetFormat === FORMATS.GEMINI || targetFormat === FORMATS.ANTIGRAVITY;
--          const geminiChunk = isGeminiFormat ? unwrapGeminiChunk(parsed) : parsed;
-+            targetFormat === FORMATS.GEMINI ||
-+            targetFormat === FORMATS.ANTIGRAVITY;
-+          const geminiChunk = isGeminiFormat
-+            ? unwrapGeminiChunk(parsed)
-+            : parsed;
-           if (geminiChunk.candidates?.[0]?.content?.parts) {
-             for (const part of geminiChunk.candidates[0].content.parts) {
-               if (part.text && typeof part.text === "string") {
-                 totalContentLength += part.text.length;
-                 if (state?.accumulatedContent !== undefined)
--                  state.accumulatedContent = appendBoundedText(state.accumulatedContent, part.text);
-+                  state.accumulatedContent = appendBoundedText(
-+                    state.accumulatedContent,
-+                    part.text,
-+                  );
-               }
-             }
-           }
-@@ -2424,7 +2733,10 @@
-                 responsesEventType === "response.output_text.delta" &&
-                 state?.accumulatedContent !== undefined
-               ) {
--                state.accumulatedContent = appendBoundedText(state.accumulatedContent, d);
-+                state.accumulatedContent = appendBoundedText(
-+                  state.accumulatedContent,
-+                  d,
-+                );
-               }
-             }
-           }
-@@ -2433,17 +2745,26 @@
-           if (!responsesEventType && state?.accumulatedContent !== undefined) {
-             if (typeof (parsed as JsonRecord).delta === "string") {
-               const d = (parsed as JsonRecord).delta as string;
--              state.accumulatedContent = appendBoundedText(state.accumulatedContent, d);
-+              state.accumulatedContent = appendBoundedText(
-+                state.accumulatedContent,
-+                d,
-+              );
-               totalContentLength += d.length;
-             }
-             if (typeof (parsed as JsonRecord).content === "string") {
-               const c = (parsed as JsonRecord).content as string;
--              state.accumulatedContent = appendBoundedText(state.accumulatedContent, c);
-+              state.accumulatedContent = appendBoundedText(
-+                state.accumulatedContent,
-+                c,
-+              );
-               totalContentLength += c.length;
-             }
-             if (typeof (parsed as JsonRecord).text === "string") {
-               const t = (parsed as JsonRecord).text as string;
--              state.accumulatedContent = appendBoundedText(state.accumulatedContent, t);
-+              state.accumulatedContent = appendBoundedText(
-+                state.accumulatedContent,
-+                t,
-+              );
-               totalContentLength += t.length;
-             }
-           }
-@@ -2461,7 +2782,7 @@
-                 recordToolLatency(
-                   provider || "unknown",
-                   toolTs ? now - toolTs : null,
--                  lastChunkTs ? now - lastChunkTs : null
-+                  lastChunkTs ? now - lastChunkTs : null,
-                 );
-               } catch {} // best-effort telemetry — must never break the stream
-               pendingToolFinishTime = null;
-@@ -2469,7 +2790,7 @@
+@@ -2469,13 +2517,19 @@
            }
  
            // Extract usage
@@ -1722,86 +257,35 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
            if (extracted) {
              if (!state.usage) {
                state.usage = extracted;
-@@ -2477,7 +2798,8 @@
+             } else {
                const su = state.usage as Record<string, number>;
                const eu = extracted as Record<string, number>;
++              if (eu.cache_creation_input_tokens !== undefined) {
++                delete su.cacheCreation5m;
++                delete su.cacheCreation1h;
++              }
++              if (eu.cacheCreation5m !== undefined) su.cacheCreation5m = eu.cacheCreation5m;
++              if (eu.cacheCreation1h !== undefined) su.cacheCreation1h = eu.cacheCreation1h;
                if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
--              if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
-+              if (eu.completion_tokens > 0)
-+                su.completion_tokens = eu.completion_tokens;
+               if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
                if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
-               if (eu.input_tokens > 0) su.input_tokens = eu.input_tokens;
-               if (eu.output_tokens > 0) su.output_tokens = eu.output_tokens;
-@@ -2486,12 +2808,18 @@
-               if (eu.cache_creation_input_tokens > 0)
-                 su.cache_creation_input_tokens = eu.cache_creation_input_tokens;
-               if (eu.cached_tokens > 0) su.cached_tokens = eu.cached_tokens;
--              if (eu.reasoning_tokens > 0) su.reasoning_tokens = eu.reasoning_tokens;
-+              if (eu.reasoning_tokens > 0)
-+                su.reasoning_tokens = eu.reasoning_tokens;
-             }
-           }
- 
-           // Translate: targetFormat -> openai -> sourceFormat
--          const translated = translateResponse(targetFormat, sourceFormat, parsed, state);
-+          const translated = translateResponse(
-+            targetFormat,
-+            sourceFormat,
-+            parsed,
-+            state,
-+          );
- 
-           // Log OpenAI intermediate chunks (if available)
-           for (const item of getOpenAIIntermediateChunks(translated)) {
-@@ -2525,7 +2853,8 @@
-           let normalizedTailLines: string[] = [];
-           if (multilineSseDataLineNormalizer.hasPending()) {
-             const tailLines = buffer ? [buffer, ""] : [""];
--            normalizedTailLines = multilineSseDataLineNormalizer.normalize(tailLines);
-+            normalizedTailLines =
-+              multilineSseDataLineNormalizer.normalize(tailLines);
-             buffer = "";
-           }
- 
-@@ -2539,22 +2868,39 @@
-               shouldAbortOnClaudeLifecycle: (payload: unknown) =>
-                 shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
-                   claudeEmptyResponseLifecycle,
--                  payload
-+                  payload,
-                 ),
-               emitClaudeEmptyStreamErrorAndAbort: () =>
-                 emitClaudeEmptyStreamErrorAndAbort(controller),
-               isClaudeEventPayload,
-               updateClaudeEmptyResponseLifecycle: (payload: unknown) =>
--                updateClaudeEmptyResponseLifecycle(claudeEmptyResponseLifecycle, payload),
-+                updateClaudeEmptyResponseLifecycle(
-+                  claudeEmptyResponseLifecycle,
-+                  payload,
-+                ),
-               passthroughEventPrefix,
-               emitConvertedOutput: (output: string) => {
+@@ -2551,10 +2605,20 @@
                  reqLogger?.appendConvertedChunk?.(output);
                  forward(controller, encoder.encode(output));
                },
 -              pushProviderPayload: (payload: unknown) => providerPayloadCollector.push(payload),
--              pushClientPayload: (payload: unknown) => clientPayloadCollector.push(payload),
++              pushProviderPayload: (payload: unknown) => collectProviderPayload(payload),
+               pushClientPayload: (payload: unknown) => clientPayloadCollector.push(payload),
 -              sanitizeUsagePayload: (payload: unknown) =>
 -                sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat),
-+              pushProviderPayload: (payload: unknown) =>
-+                collectProviderPayload(payload),
-+              pushClientPayload: (payload: unknown) =>
-+                clientPayloadCollector.push(payload),
 +              sanitizeUsagePayload: (payload: unknown) => {
 +                const changed = sanitizeUsagePayloadForRequest(
 +                  payload as UsagePayloadLike,
 +                  body,
-+                  clientResponseFormat,
++                  clientResponseFormat
 +                );
 +                if (isClaudeEventPayload(payload)) {
-+                  const extracted = extractStreamUsage(
-+                    payload as UsagePayloadLike,
-+                  );
++                  const extracted = extractStreamUsage(payload as UsagePayloadLike);
 +                  if (extracted) usage = extracted;
 +                }
 +                return changed;
@@ -1809,371 +293,74 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
                setPassthroughResponsesId: (value: string) => {
                  passthroughResponsesId = value;
                },
-@@ -2567,26 +2913,29 @@
-               appendPassthroughContent: (value: string) => {
-                 passthroughAccumulatedContent = appendBoundedText(
-                   passthroughAccumulatedContent,
--                  value
-+                  value,
-                 );
-               },
-               appendPassthroughReasoning: (value: string) => {
-                 passthroughAccumulatedReasoning = appendBoundedText(
-                   passthroughAccumulatedReasoning,
--                  value
-+                  value,
-                 );
-               },
-               getResponsesReasoningKey,
-               markResponsesReasoningSummarySeen: (key: string) => {
-                 passthroughResponsesReasoningSummarySeen.add(key);
-               },
--              emitSyntheticResponsesReasoningSummary: (payload: Record<string, unknown>) =>
--                emitSyntheticResponsesReasoningSummary(controller, payload),
-+              emitSyntheticResponsesReasoningSummary: (
-+                payload: Record<string, unknown>,
-+              ) => emitSyntheticResponsesReasoningSummary(controller, payload),
-               passthroughResponsesOutputItems,
-               passthroughResponsesPendingFunctionCalls,
-               getPassthroughResponsesCurrentFunctionCallKey: () =>
-                 passthroughResponsesCurrentFunctionCallKey,
--              setPassthroughResponsesCurrentFunctionCallKey: (value: string | null) => {
-+              setPassthroughResponsesCurrentFunctionCallKey: (
-+                value: string | null,
-+              ) => {
-                 passthroughResponsesCurrentFunctionCallKey = value;
-               },
-               hasPassthroughToolCalls: () => passthroughToolCalls.size > 0,
-@@ -2596,8 +2945,10 @@
-                 ]) as JsonRecord,
-               restoreOpenAIToolNames: (parsed: JsonRecord) =>
-                 restoreOpenAIToolNames(parsed, toolNameMap),
--              abortFailure: (failure: StreamFailurePayload, publicMessage: string) =>
--                abortStreamFailure(controller, failure, publicMessage),
-+              abortFailure: (
-+                failure: StreamFailurePayload,
-+                publicMessage: string,
-+              ) => abortStreamFailure(controller, failure, publicMessage),
-             };
- 
-             for (const line of normalizedTailLines) {
-@@ -2606,54 +2957,84 @@
-               }
-             }
-             const bufferedLine = buffer.trim();
--            if (skipPassthroughEvent || /^event:\s*keepalive\b/i.test(bufferedLine)) {
-+            if (
-+              skipPassthroughEvent ||
-+              /^event:\s*keepalive\b/i.test(bufferedLine)
-+            ) {
-               skipPassthroughEvent = false;
-               clearPendingPassthroughEvent();
-             } else if (buffer) {
-               let output = buffer;
--              let bufferedProjectedFailure: ReturnType<typeof projectStreamFailureEvent> = null;
-+              let bufferedProjectedFailure: ReturnType<
-+                typeof projectStreamFailureEvent
-+              > = null;
-               if (buffer.startsWith("data:") && !buffer.startsWith("data: ")) {
-                 output = "data: " + buffer.slice(5);
+@@ -2617,7 +2681,7 @@
                }
                let bufferedPayload = parseSSELine(bufferedLine);
                if (bufferedPayload) {
 -                providerPayloadCollector.push(bufferedPayload);
--                bufferedProjectedFailure = projectStreamFailureEvent(bufferedPayload);
 +                collectProviderPayload(bufferedPayload);
-+                bufferedProjectedFailure =
-+                  projectStreamFailureEvent(bufferedPayload);
+                 bufferedProjectedFailure = projectStreamFailureEvent(bufferedPayload);
                  if (bufferedProjectedFailure) {
                    bufferedPayload = bufferedProjectedFailure.publicPayload;
-                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
+@@ -2625,6 +2689,10 @@
                  }
--                if (sanitizeUsagePayloadForRequest(bufferedPayload, body, clientResponseFormat))
-+                if (
-+                  sanitizeUsagePayloadForRequest(
-+                    bufferedPayload,
-+                    body,
-+                    clientResponseFormat,
-+                  )
-+                )
+                 if (sanitizeUsagePayloadForRequest(bufferedPayload, body, clientResponseFormat))
                    output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
 +                if (isClaudeEventPayload(bufferedPayload)) {
-+                  const extracted = extractStreamUsage(
-+                    bufferedPayload as UsagePayloadLike,
-+                  );
++                  const extracted = extractStreamUsage(bufferedPayload as UsagePayloadLike);
 +                  if (extracted) usage = extracted;
 +                }
                  if (
                    shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
                      claudeEmptyResponseLifecycle,
--                    bufferedPayload
-+                    bufferedPayload,
-                   )
-                 ) {
-                   emitClaudeEmptyStreamErrorAndAbort(controller);
-                   return;
-                 }
-                 if (isClaudeEventPayload(bufferedPayload)) {
--                  updateClaudeEmptyResponseLifecycle(claudeEmptyResponseLifecycle, bufferedPayload);
-+                  updateClaudeEmptyResponseLifecycle(
-+                    claudeEmptyResponseLifecycle,
-+                    bufferedPayload,
-+                  );
-                 }
-                 clientPayloadCollector.push(bufferedPayload);
-                 // Normalize numeric IDs for final buffered data: chunk (same as transform path)
--                if (typeof bufferedPayload === "object" && !Array.isArray(bufferedPayload)) {
-+                if (
-+                  typeof bufferedPayload === "object" &&
-+                  !Array.isArray(bufferedPayload)
-+                ) {
-                   const flushedParsed = bufferedPayload as JsonRecord;
-                   const flushedType =
--                    typeof flushedParsed.type === "string" ? flushedParsed.type : "";
-+                    typeof flushedParsed.type === "string"
-+                      ? flushedParsed.type
-+                      : "";
-                   const isResponses = flushedType.startsWith("response.");
-                   const isClaude = isClaudeEventPayload(flushedParsed);
-                   if (isResponses) {
--                    const idsNormalized = normalizeResponsesSseIds(flushedParsed);
-+                    const idsNormalized =
-+                      normalizeResponsesSseIds(flushedParsed);
-                     const usageNormalized = normalizeUsage(flushedParsed);
-                     if (idsNormalized || usageNormalized) {
-                       output = `data: ${JSON.stringify(flushedParsed)}\n\n`;
-                     }
-                   } else if (!isClaude) {
-                     const { changed: flushChanged, hasFinishReason } =
--                      normalizeFinalOpenAIStreamChunk(flushedParsed, toolNameMap);
-+                      normalizeFinalOpenAIStreamChunk(
-+                        flushedParsed,
-+                        toolNameMap,
-+                      );
-                     // #7800: track finish_reason in the flush path too, so a
-                     // final chunk without trailing newline still suppresses the
-                     // synthetic finish_reason synthesis.
-@@ -2664,10 +3045,13 @@
-                   }
-                 }
-               }
--              if (!bufferedLine) output = passthroughEventPrefix.flush() || output;
-+              if (!bufferedLine)
-+                output = passthroughEventPrefix.flush() || output;
-               output = passthroughEventPrefix.prefixData(output, buffer);
-               if (output && !output.endsWith("\n\n")) {
--                output = output.endsWith("\n") ? `${output}\n` : `${output}\n\n`;
-+                output = output.endsWith("\n")
-+                  ? `${output}\n`
-+                  : `${output}\n\n`;
-               }
-               reqLogger?.appendConvertedChunk?.(output);
-               forward(controller, encoder.encode(output));
-@@ -2675,7 +3059,7 @@
-                 abortStreamFailure(
-                   controller,
-                   bufferedProjectedFailure.internalFailure,
--                  bufferedProjectedFailure.publicMessage
-+                  bufferedProjectedFailure.publicMessage,
-                 );
-                 return;
-               }
-@@ -2684,11 +3068,17 @@
-             if (shouldAbortClaudeStream()) {
-               emitClaudeEmptyStreamErrorAndAbort(controller);
-               return;
--            } else if (shouldInjectClaudeMissingFinalizersOnFlush(claudeEmptyResponseLifecycle)) {
-+            } else if (
-+              shouldInjectClaudeMissingFinalizersOnFlush(
-+                claudeEmptyResponseLifecycle,
-+              )
-+            ) {
-               emitSyntheticClaudeEmptyResponse(controller, {
-                 includeContentBlock: false,
--                includeMessageDelta: !claudeEmptyResponseLifecycle.hasMessageDelta,
--                includeMessageStop: !claudeEmptyResponseLifecycle.hasMessageStop,
-+                includeMessageDelta:
-+                  !claudeEmptyResponseLifecycle.hasMessageDelta,
-+                includeMessageStop:
-+                  !claudeEmptyResponseLifecycle.hasMessageStop,
-               });
-             }
-             clearPendingPassthroughEvent();
-@@ -2716,23 +3106,32 @@
-                 };
-                 flushOutput = `data: ${JSON.stringify(syntheticChunk)}\n\n`;
-               } else {
--                const syntheticChunk = buildSyntheticChatChunk(passthroughResponsesId, model, {
--                  content: passthroughBufferedTextualToolCallContent,
--                });
-+                const syntheticChunk = buildSyntheticChatChunk(
-+                  passthroughResponsesId,
-+                  model,
-+                  {
-+                    content: passthroughBufferedTextualToolCallContent,
-+                  },
-+                );
-                 flushOutput = `data: ${JSON.stringify(syntheticChunk)}\n\n`;
-               }
-               reqLogger?.appendConvertedChunk?.(flushOutput);
-               forward(controller, encoder.encode(flushOutput));
-               passthroughAccumulatedContent = appendBoundedText(
-                 passthroughAccumulatedContent,
--                passthroughBufferedTextualToolCallContent
-+                passthroughBufferedTextualToolCallContent,
-               );
-               passthroughBufferedTextualToolCallContent = "";
-             }
- 
-             const accR = passthroughAccumulatedReasoning;
-             const accC = passthroughAccumulatedContent;
--            const thinkFlush = flushThink(thinkState, passthroughResponsesId, accR, accC);
-+            const thinkFlush = flushThink(
-+              thinkState,
-+              passthroughResponsesId,
-+              accR,
-+              accC,
-+            );
-             if (thinkFlush) {
-               passthroughAccumulatedReasoning = thinkFlush.reasoning;
-               passthroughAccumulatedContent = thinkFlush.content;
-@@ -2744,7 +3143,11 @@
- 
-             // Estimate usage if provider didn't return valid usage
-             if (!hasValidUsage(usage) && totalContentLength > 0) {
--              usage = estimateUsage(body, totalContentLength, sourceFormat || FORMATS.OPENAI);
-+              usage = estimateUsage(
-+                body,
-+                totalContentLength,
-+                sourceFormat || FORMATS.OPENAI,
-+              );
-             }
- 
-             if (hasValidUsage(usage)) {
-@@ -2769,7 +3172,7 @@
-                   passthroughResponsesId,
-                   model,
-                   {},
--                  passthroughHasToolCalls ? "tool_calls" : "stop"
-+                  passthroughHasToolCalls ? "tool_calls" : "stop",
-                 );
-                 const finishOutput = `data: ${JSON.stringify(syntheticFinishChunk)}\n\n`;
-                 reqLogger?.appendConvertedChunk?.(finishOutput);
-@@ -2781,11 +3184,17 @@
-               // [DONE], so metered clients still see token counts. When the
-               // upstream DID send usage (trailing or in-band), it was forwarded
-               // already and passthroughForwardedUsage guards this off.
--              if (shouldEmitDoneTerminator && !passthroughForwardedUsage && hasValidUsage(usage)) {
-+              if (
-+                shouldEmitDoneTerminator &&
-+                !passthroughForwardedUsage &&
-+                hasValidUsage(usage)
-+              ) {
-                 const usageOnlyChunk = buildUsageOnlyChunk(
-                   passthroughLastChatId ?? passthroughResponsesId,
-                   model,
--                  timing.withTps(filterUsageForFormat(usage, sourceFormat || FORMATS.OPENAI))
-+                  timing.withTps(
-+                    filterUsageForFormat(usage, sourceFormat || FORMATS.OPENAI),
-+                  ),
-                 );
-                 const usageOutput = `data: ${JSON.stringify(usageOnlyChunk)}\n\n`;
-                 reqLogger?.appendConvertedChunk?.(usageOutput);
-@@ -2807,7 +3216,9 @@
-               try {
-                 const u = usage as Record<string, unknown> | null;
-                 const prompt = Number(u?.prompt_tokens ?? u?.input_tokens ?? 0);
--                const completion = Number(u?.completion_tokens ?? u?.output_tokens ?? 0);
-+                const completion = Number(
-+                  u?.completion_tokens ?? u?.output_tokens ?? 0,
-+                );
-                 let content = passthroughAccumulatedContent.trim() || "";
-                 const finalBufferedTextualToolCall =
-                   passthroughBufferedTextualToolCallContent.trim();
-@@ -2816,7 +3227,7 @@
-                     collectPassthroughTextualToolCall(
-                       finalBufferedTextualToolCall,
-                       passthroughToolCalls,
--                      allowedToolNames
-+                      allowedToolNames,
-                     )
-                   ) {
-                     passthroughHasToolCalls = true;
-@@ -2825,11 +3236,17 @@
-                 }
-                 if (
-                   content &&
--                  collectPassthroughTextualToolCall(content, passthroughToolCalls, allowedToolNames)
-+                  collectPassthroughTextualToolCall(
-+                    content,
-+                    passthroughToolCalls,
-+                    allowedToolNames,
-+                  )
-                 ) {
-                   passthroughHasToolCalls = true;
-                   content = "";
--                } else if (containsMalformedTextualToolCall(content, allowedToolNames)) {
-+                } else if (
-+                  containsMalformedTextualToolCall(content, allowedToolNames)
-+                ) {
-                   content = "";
-                 }
-                 const message: Record<string, unknown> = {
-@@ -2842,16 +3259,24 @@
-                 }
-                 if (passthroughToolCalls.size > 0) {
-                   message.tool_calls = [...passthroughToolCalls.values()].sort(
--                    (a, b) => a.index - b.index
-+                    (a, b) => a.index - b.index,
-                   );
-                 }
-                 // Hardening: log empty assistant response after tool completion
-                 // for observability — helps diagnose Copilot "Sorry, no response was returned"
--                if (passthroughHasToolCalls && !content.trim() && !reasoning.trim()) {
-+                if (
-+                  passthroughHasToolCalls &&
-+                  !content.trim() &&
-+                  !reasoning.trim()
-+                ) {
-                   console.warn(
--                    `[STREAM] Empty assistant response after tool_calls completion (${provider || "provider"}:${model || "unknown"}) — sessionId=${sessionId}`
-+                    `[STREAM] Empty assistant response after tool_calls completion (${provider || "provider"}:${model || "unknown"}) — sessionId=${sessionId}`,
-                   );
--                } else if (passthroughHasToolCalls && !content.trim() && reasoning.trim()) {
-+                } else if (
-+                  passthroughHasToolCalls &&
-+                  !content.trim() &&
-+                  reasoning.trim()
-+                ) {
+@@ -2855,20 +2923,23 @@
                    message.content = "";
                  }
  
-@@ -2859,7 +3284,9 @@
-                   choices: [
-                     {
-                       message,
+-                const responseBody = {
+-                  choices: [
+-                    {
+-                      message,
 -                      finish_reason: passthroughHasToolCalls ? "tool_calls" : "stop",
-+                      finish_reason: passthroughHasToolCalls
-+                        ? "tool_calls"
-+                        : "stop",
-                     },
-                   ],
-                   usage: {
-@@ -2889,10 +3316,11 @@
+-                    },
+-                  ],
+-                  usage: {
+-                    prompt_tokens: prompt,
+-                    completion_tokens: completion,
+-                    total_tokens: prompt + completion,
+-                  },
+-                  _streamed: true,
+-                };
++                const responseBody =
++                  clientResponseFormat === FORMATS.CLAUDE
++                    ? { ...asRecord(clientPayloadCollector.getSummary()), _streamed: true }
++                    : {
++                        choices: [
++                          {
++                            message,
++                            finish_reason: passthroughHasToolCalls ? "tool_calls" : "stop",
++                          },
++                        ],
++                        usage: {
++                          prompt_tokens: prompt,
++                          completion_tokens: completion,
++                          total_tokens: prompt + completion,
++                        },
++                        _streamed: true,
++                      };
+                 onComplete({
+                   status: 200,
+                   usage,
+@@ -2889,7 +2960,7 @@
                    // reasoning-heavy stream (live incident 2026-09-04) -- see
                    // providerPayloadCollector's own `format:` construction comment above.
                    providerPayload: providerPayloadCollector.build(
 -                    sourceFormat === FORMATS.OPENAI_RESPONSES
-+                    sourceFormat === FORMATS.OPENAI_RESPONSES ||
-+                      sourceFormat === FORMATS.CLAUDE
++                    sourceFormat === FORMATS.OPENAI_RESPONSES || sourceFormat === FORMATS.CLAUDE
                        ? providerPayloadCollector.getSummary()
                        : { object: "chat.completion", ...responseBody },
--                    { includeEvents: false }
-+                    { includeEvents: false },
-                   ),
-                   // Same OPENAI_RESPONSES carve-out as providerPayload above, but keyed on
-                   // clientResponseFormat (what the client actually receives) rather than
-@@ -2906,14 +3334,18 @@
+                     { includeEvents: false }
+@@ -2906,7 +2977,8 @@
                    // reasoning as providerPayload above; clientPayloadCollector's own `format:`
                    // construction above gives it the same live, cap-independent reducer.
                    clientPayload: clientPayloadCollector.build(
@@ -2182,20 +369,8 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
 +                      clientResponseFormat === FORMATS.CLAUDE
                        ? clientPayloadCollector.getSummary()
                        : responseBody,
--                    { includeEvents: false }
-+                    { includeEvents: false },
-                   ),
-                 });
-               } catch (e) {
--                console.debug(`[STREAM] onComplete callback error (${model || "unknown"}):`, e);
-+                console.debug(
-+                  `[STREAM] onComplete callback error (${model || "unknown"}):`,
-+                  e,
-+                );
-               }
-             } else {
-               clearPendingRequestFromStream();
-@@ -2926,14 +3358,14 @@
+                     { includeEvents: false }
+@@ -2926,20 +2998,26 @@
              const parsed = parseSSELine(buffer.trim());
              if (parsed && !parsed.done) {
                if (emitTranslatedFailureAndAbort(controller, parsed)) return;
@@ -2212,54 +387,19 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
                if (extracted) {
                  if (!state.usage) {
                    state.usage = extracted;
-@@ -2941,20 +3373,28 @@
+                 } else {
                    const su = state.usage as Record<string, number>;
                    const eu = extracted as Record<string, number>;
++                  if (eu.cache_creation_input_tokens !== undefined) {
++                    delete su.cacheCreation5m;
++                    delete su.cacheCreation1h;
++                  }
++                  if (eu.cacheCreation5m !== undefined) su.cacheCreation5m = eu.cacheCreation5m;
++                  if (eu.cacheCreation1h !== undefined) su.cacheCreation1h = eu.cacheCreation1h;
                    if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
--                  if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
-+                  if (eu.completion_tokens > 0)
-+                    su.completion_tokens = eu.completion_tokens;
+                   if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
                    if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
-                   if (eu.input_tokens > 0) su.input_tokens = eu.input_tokens;
-                   if (eu.output_tokens > 0) su.output_tokens = eu.output_tokens;
-                   if (eu.cache_read_input_tokens > 0)
-                     su.cache_read_input_tokens = eu.cache_read_input_tokens;
-                   if (eu.cache_creation_input_tokens > 0)
--                    su.cache_creation_input_tokens = eu.cache_creation_input_tokens;
-+                    su.cache_creation_input_tokens =
-+                      eu.cache_creation_input_tokens;
-                   if (eu.cached_tokens > 0) su.cached_tokens = eu.cached_tokens;
--                  if (eu.reasoning_tokens > 0) su.reasoning_tokens = eu.reasoning_tokens;
-+                  if (eu.reasoning_tokens > 0)
-+                    su.reasoning_tokens = eu.reasoning_tokens;
-                 }
-               }
- 
--              const translated = translateResponse(targetFormat, sourceFormat, parsed, state);
-+              const translated = translateResponse(
-+                targetFormat,
-+                sourceFormat,
-+                parsed,
-+                state,
-+              );
- 
-               // Log OpenAI intermediate chunks
-               for (const item of getOpenAIIntermediateChunks(translated)) {
-@@ -2979,7 +3419,12 @@
-             // open items (reasoning, tool calls, etc.), instead of silently
-             // aborting the stream and leaving partial items dangling.
-             try {
--              const flushed = translateResponse(targetFormat, sourceFormat, null, state);
-+              const flushed = translateResponse(
-+                targetFormat,
-+                sourceFormat,
-+                null,
-+                state,
-+              );
-               if (flushed?.length > 0) {
-                 for (const item of flushed) {
-                   emitTranslatedClientItem(controller, item);
-@@ -2992,7 +3437,9 @@
+@@ -2992,7 +3070,9 @@
  
              const errorBody = buildErrorBody(err.status, err.message);
              const publicErrorMessage = errorBody.error.message;
@@ -2270,7 +410,7 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
              return;
            }
  
-@@ -3000,6 +3447,7 @@
+@@ -3000,6 +3080,7 @@
            // (all-empty `choices: []`) instead of completing with an empty 200.
            if (
              mode === STREAM_MODE.TRANSLATE &&
@@ -2278,119 +418,7 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
              rejectEmptyChoicesStream({
                forwardedValuableChunk,
                hasValidUsage: hasValidUsage(state?.usage),
-@@ -3013,12 +3461,19 @@
-               clearPendingRequestFromStream,
-             })
-           ) {
--            controller.error(markPendingRequestCleared(buildEmptyChoicesStreamError()));
-+            controller.error(
-+              markPendingRequestCleared(buildEmptyChoicesStreamError()),
-+            );
-             return;
-           }
- 
-           // Flush remaining events (only once at stream end)
--          const flushed = translateResponse(targetFormat, sourceFormat, null, state);
-+          const flushed = translateResponse(
-+            targetFormat,
-+            sourceFormat,
-+            null,
-+            state,
-+          );
- 
-           // Log OpenAI intermediate chunks for flushed events
-           for (const item of getOpenAIIntermediateChunks(flushed)) {
-@@ -3036,11 +3491,17 @@
-             if (shouldAbortClaudeStream()) {
-               emitClaudeEmptyStreamErrorAndAbort(controller);
-               return;
--            } else if (shouldInjectClaudeMissingFinalizersOnFlush(claudeEmptyResponseLifecycle)) {
-+            } else if (
-+              shouldInjectClaudeMissingFinalizersOnFlush(
-+                claudeEmptyResponseLifecycle,
-+              )
-+            ) {
-               emitSyntheticClaudeEmptyResponse(controller, {
-                 includeContentBlock: false,
--                includeMessageDelta: !claudeEmptyResponseLifecycle.hasMessageDelta,
--                includeMessageStop: !claudeEmptyResponseLifecycle.hasMessageStop,
-+                includeMessageDelta:
-+                  !claudeEmptyResponseLifecycle.hasMessageDelta,
-+                includeMessageStop:
-+                  !claudeEmptyResponseLifecycle.hasMessageStop,
-               });
-             }
-           }
-@@ -3068,14 +3529,17 @@
-               const usageOnlyChunk = buildUsageOnlyChunk(
-                 (state as unknown as Record<string, unknown>)?.chatId,
-                 model,
--                timing.withTps(filterUsageForFormat(state.usage, sourceFormat))
-+                timing.withTps(filterUsageForFormat(state.usage, sourceFormat)),
-               );
-               const usageOutput = `data: ${JSON.stringify(usageOnlyChunk)}\n\n`;
-               reqLogger?.appendConvertedChunk?.(usageOutput);
-               forward(controller, encoder.encode(usageOutput));
-               clientPayloadCollector.push(usageOnlyChunk);
-             }
--            await emitFinalSseMetadata(controller, state?.usage as Record<string, unknown> | null);
-+            await emitFinalSseMetadata(
-+              controller,
-+              state?.usage as Record<string, unknown> | null,
-+            );
-             doneSent = true;
-             if (shouldEmitDoneTerminator) {
-               clientPayloadCollector.push({ done: true });
-@@ -3086,7 +3550,13 @@
-           }
- 
-           if (hasValidUsage(state?.usage)) {
--            logUsage(state.provider || targetFormat, state.usage, model, connectionId, apiKeyInfo);
-+            logUsage(
-+              state.provider || targetFormat,
-+              state.usage,
-+              model,
-+              connectionId,
-+              apiKeyInfo,
-+            );
-           } else {
-             appendRequestLog({
-               model,
-@@ -3099,15 +3569,19 @@
-           // Notify caller for call log persistence (include full response body with accumulated content)
-           if (onComplete) {
-             try {
--              const u = state?.usage as Record<string, unknown> | null | undefined;
-+              const u = state?.usage as
-+                Record<string, unknown> | null | undefined;
-               const prompt = Number(u?.prompt_tokens ?? u?.input_tokens ?? 0);
--              const completion = Number(u?.completion_tokens ?? u?.output_tokens ?? 0);
-+              const completion = Number(
-+                u?.completion_tokens ?? u?.output_tokens ?? 0,
-+              );
-               let content = (state?.accumulatedContent ?? "").trim() || "";
-               const normalizedToolCalls: ToolCall[] = state?.toolCalls?.size
-                 ? [...state.toolCalls.values()]
-                     .map((tc: Record<string, unknown>): ToolCall => ({
-                       id: tc.id != null ? String(tc.id) : null,
--                      index: (tc.index as number) ?? (tc.blockIndex as number) ?? 0,
-+                      index:
-+                        (tc.index as number) ?? (tc.blockIndex as number) ?? 0,
-                       type: (tc.type as string) ?? "function",
-                       function: (tc.function as ToolCall["function"]) ?? {
-                         name: (tc.name as string) ?? "",
-@@ -3128,7 +3602,9 @@
-                   },
-                 });
-                 content = "";
--              } else if (containsMalformedTextualToolCall(content, allowedToolNames)) {
-+              } else if (
-+                containsMalformedTextualToolCall(content, allowedToolNames)
-+              ) {
-                 content = "";
-               }
-               const reasoning = (state?.accumulatedReasoning ?? "").trim();
-@@ -3159,6 +3635,7 @@
+@@ -3159,6 +3240,7 @@
                };
                onComplete({
                  status: 200,
@@ -2398,80 +426,26 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
                  usage: state?.usage,
                  responseBody,
                  ...timing.completionTiming(),
-@@ -3175,10 +3652,11 @@
+@@ -3175,7 +3257,7 @@
                  // reasoning-heavy stream (live incident 2026-09-04) -- see
                  // providerPayloadCollector's own `format:` construction comment above.
                  providerPayload: providerPayloadCollector.build(
 -                  targetFormat === FORMATS.OPENAI_RESPONSES
-+                  targetFormat === FORMATS.OPENAI_RESPONSES ||
-+                    targetFormat === FORMATS.CLAUDE
++                  targetFormat === FORMATS.OPENAI_RESPONSES || targetFormat === FORMATS.CLAUDE
                      ? providerPayloadCollector.getSummary()
                      : { object: "chat.completion", ...responseBody },
--                  { includeEvents: false }
-+                  { includeEvents: false },
-                 ),
-                 // Same OPENAI_RESPONSES carve-out as providerPayload above and the
-                 // passthrough branch's onComplete, but keyed on sourceFormat (what the
-@@ -3195,20 +3673,23 @@
-                   sourceFormat === FORMATS.OPENAI_RESPONSES
-                     ? clientPayloadCollector.getSummary()
-                     : responseBody,
--                  { includeEvents: false }
-+                  { includeEvents: false },
-                 ),
-               });
-             } catch (e) {
-               console.debug(
-                 `[STREAM] onComplete callback error in flush (${model || "unknown"}):`,
--                e
-+                e,
-               );
-             }
-           } else {
-             clearPendingRequestFromStream();
-           }
-         } catch (error) {
--          console.log(`[STREAM] Error in flush (${model || "unknown"}):`, error.message || error);
-+          console.log(
-+            `[STREAM] Error in flush (${model || "unknown"}):`,
-+            error.message || error,
-+          );
-         }
-       },
-       cancel(reason) {
-@@ -3216,7 +3697,7 @@
-       },
-     },
-     { highWaterMark: streamBufferBytes },
--    { highWaterMark: streamBufferBytes }
-+    { highWaterMark: streamBufferBytes },
-   );
- }
- 
-@@ -3234,13 +3715,19 @@
-   body: unknown = null,
-   onComplete: ((payload: StreamCompletePayload) => void) | null = null,
-   apiKeyInfo: unknown = null,
--  onFailure: ((payload: StreamFailurePayload) => boolean | void | Promise<void>) | null = null,
-+  onFailure:
-+    | ((payload: StreamFailurePayload) => boolean | void | Promise<void>)
-+    | null = null,
-   copilotCompatibleReasoning = false,
-   suppressThinkClose = false,
+                   { includeEvents: false }
+@@ -3240,7 +3322,8 @@
    requestedThinking: boolean | undefined = undefined,
    customToolNames: ReadonlySet<string> = new Set(),
--  requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null = null,
+   requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null = null,
 -  streamBufferBytes: number = DEFAULT_STREAM_BUFFER_BYTES
-+  requestToolIdentityMap: Map<
-+    string,
-+    { namespace: string; name: string }
-+  > | null = null,
 +  streamBufferBytes: number = DEFAULT_STREAM_BUFFER_BYTES,
-+  nativeSuggestionRequest = false,
++  nativeSuggestionRequest = false
  ) {
    return createSSEStream({
      mode: STREAM_MODE.TRANSLATE,
-@@ -3261,6 +3748,7 @@
+@@ -3261,6 +3344,7 @@
      customToolNames,
      requestToolIdentityMap,
      streamBufferBytes,
@@ -2479,20 +453,7 @@ index d563cf7e6990b3b06e9949a1882a1754c9d014d9..465fbc7335a2f46fd132bdbf8547a4b3
    });
  }
  
-@@ -3273,12 +3761,20 @@
-   body: unknown = null,
-   onComplete: ((payload: StreamCompletePayload) => void) | null = null,
-   apiKeyInfo: unknown = null,
--  onFailure: ((payload: StreamFailurePayload) => boolean | void | Promise<void>) | null = null,
-+  onFailure:
-+    | ((payload: StreamFailurePayload) => boolean | void | Promise<void>)
-+    | null = null,
-   clientResponseFormat: string | null = null,
--  requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null = null
-+  requestToolIdentityMap: Map<
-+    string,
-+    { namespace: string; name: string }
-+  > | null = null,
+@@ -3279,6 +3363,9 @@
  ) {
    return createSSEStream({
      mode: STREAM_MODE.PASSTHROUGH,

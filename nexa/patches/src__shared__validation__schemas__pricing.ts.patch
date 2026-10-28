@@ -1,0 +1,11 @@
+diff --git a/src/shared/validation/schemas/pricing.ts b/src/shared/validation/schemas/pricing.ts
+--- a/src/shared/validation/schemas/pricing.ts
++++ b/src/shared/validation/schemas/pricing.ts
+@@ -21,6 +21,7 @@
+     cached: z.number().min(0).optional(),
+     reasoning: z.number().min(0).optional(),
+     cache_creation: z.number().min(0).optional(),
++    cache_creation_1h: z.number().min(0).optional(),
+     // Written by pricingSync alongside the token fields and echoed back by the
+     // dashboard's GET → PATCH round-trip; strict() would otherwise reject the
+     // API's own output with an unrecognized-keys 400 (#12494).

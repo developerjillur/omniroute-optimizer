@@ -1,0 +1,60 @@
+diff --git a/src/lib/db/usageAnalytics/sources.ts b/src/lib/db/usageAnalytics/sources.ts
+--- a/src/lib/db/usageAnalytics/sources.ts
++++ b/src/lib/db/usageAnalytics/sources.ts
+@@ -98,6 +98,8 @@
+           tokens_output,
+           tokens_cache_read,
+           tokens_cache_creation,
++          tokens_cache_creation_5m,
++          tokens_cache_creation_1h,
+           tokens_reasoning,
+           service_tier,
+           success,
+@@ -120,6 +122,8 @@
+           total_output_tokens as tokens_output,
+           0 as tokens_cache_read,
+           0 as tokens_cache_creation,
++          NULL as tokens_cache_creation_5m,
++          NULL as tokens_cache_creation_1h,
+           0 as tokens_reasoning,
+           'standard' as service_tier,
+           1 as success,
+@@ -137,7 +141,8 @@
+     : `(SELECT
+           timestamp, provider, model,
+           tokens_input, tokens_output,
+-          tokens_cache_read, tokens_cache_creation, tokens_reasoning,
++          tokens_cache_read, tokens_cache_creation,
++          tokens_cache_creation_5m, tokens_cache_creation_1h, tokens_reasoning,
+           service_tier, success, latency_ms,
+           connection_id, account_key, api_key_id, api_key_name,
+           0.0 as stored_cost, 0 as is_aggregated,
+@@ -190,7 +195,8 @@
+     ? `(
+         SELECT timestamp, provider, model, service_tier,
+           tokens_input, tokens_output,
+-          tokens_cache_read, tokens_cache_creation, tokens_reasoning,
++          tokens_cache_read, tokens_cache_creation,
++          tokens_cache_creation_5m, tokens_cache_creation_1h, tokens_reasoning,
+           0.0 as stored_cost, 0 as is_aggregated
+         FROM usage_history
+         ${presetRawWhere}
+@@ -203,6 +209,8 @@
+           total_output_tokens as tokens_output,
+           0 as tokens_cache_read,
+           0 as tokens_cache_creation,
++          NULL as tokens_cache_creation_5m,
++          NULL as tokens_cache_creation_1h,
+           0 as tokens_reasoning,
+           COALESCE(total_cost, 0.0) as stored_cost,
+           1 as is_aggregated
+@@ -211,7 +219,8 @@
+       )`
+     : `(SELECT timestamp, provider, model, service_tier,
+           tokens_input, tokens_output,
+-          tokens_cache_read, tokens_cache_creation, tokens_reasoning,
++          tokens_cache_read, tokens_cache_creation,
++          tokens_cache_creation_5m, tokens_cache_creation_1h, tokens_reasoning,
+           0.0 as stored_cost, 0 as is_aggregated
+         FROM usage_history
+         ${presetRawWhere}

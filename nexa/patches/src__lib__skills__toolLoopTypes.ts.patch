@@ -1,0 +1,12 @@
+diff --git a/src/lib/skills/toolLoopTypes.ts b/src/lib/skills/toolLoopTypes.ts
+--- a/src/lib/skills/toolLoopTypes.ts
++++ b/src/lib/skills/toolLoopTypes.ts
+@@ -12,6 +12,8 @@
+   cached_tokens?: number;
+   cache_read_input_tokens?: number;
+   cache_creation_input_tokens?: number;
++  cacheCreation5m?: number;
++  cacheCreation1h?: number;
+   reasoning_tokens?: number;
+   cost_in_usd_ticks?: number;
+ }

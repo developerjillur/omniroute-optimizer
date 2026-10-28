@@ -1,0 +1,88 @@
+{
+  "asOfUtc": "2026-10-28T03:03:00Z",
+  "canonicalRepository": "https://github.com/developerjillur/omniroute-optimizer",
+  "referenceOverlayCommit": "72230a52a548b9fdc8dda0495c893f5193e5d64d",
+  "upstreamBase": "c1e30b7676975feb298b49eff6ff58923c04b89e",
+  "upstreamVersion": "3.8.51",
+  "dataCoverage": {
+    "usageRows": 279382,
+    "usageFirstUtc": "2026-10-01T19:13:17.241Z",
+    "requestMetadataRows": 48689,
+    "requestFirstUtc": "2026-10-21T03:02:34.476Z",
+    "retainedDetailArtifactsReviewed": 10000,
+    "rawPrivateContentPublished": false,
+    "countsAreAttemptsNotDistinctUserTurns": true
+  },
+  "findings": [
+    {
+      "id": "native-terminal",
+      "status": "source_fix_validation_pending",
+      "detail": "Preserve refusal terminals and native retained summaries. Missing message_stop remains a transport error; no refusal retry or account rotation is added."
+    },
+    {
+      "id": "native-signatures",
+      "status": "source_fix_validation_pending",
+      "detail": "Retained native summaries must keep thinking signature deltas and actual stop details, and must not invent end_turn."
+    },
+    {
+      "id": "thread-errors",
+      "status": "source_fix_validation_pending",
+      "detail": "Both local and upstream missing Thread phrases are request-scoped, not unavailable models. Sparse history is never silently recreated."
+    },
+    {
+      "id": "upstream-dns",
+      "status": "offline_unit_red_green_pass",
+      "detail": "Coalesce concurrent lookups; cache bounded TTL; reuse a previously resolved address only through a brief transient resolver failure; retain TLS verification."
+    },
+    {
+      "id": "cache-ttl-input",
+      "status": "documented_input_rejection",
+      "detail": "Three retained requests contained implicit 5-minute markers before explicit 1-hour markers. Native caller TTL choices remain unchanged; this does not establish a gateway corruption."
+    },
+    {
+      "id": "upstream-limits",
+      "status": "external_boundary",
+      "detail": "Quota, upstream overload and revoked credentials remain distinct from transport/translation defects. Banned accounts and safety refusals are not bypassed."
+    }
+  ],
+  "verification": {
+    "dnsRegression": {
+      "baselineTests": 1,
+      "baselineFailures": 1,
+      "candidateTests": 6,
+      "candidatePassed": 6,
+      "networkRequests": 0
+    },
+    "patchApplicability": {
+      "total": 181,
+      "strictFailures": 0
+    },
+    "postRestartHttps": {
+      "changedBootTimestamp": true,
+      "httpsIPv4": 200,
+      "httpsIPv6": 200,
+      "certificateVerifiedHttps": 200,
+      "coreHttp": 200,
+      "bothIngressJobsRunning": true
+    },
+    "nativeRegressions": "pending",
+    "coreTypecheck": "pending",
+    "fullLint": "pending",
+    "docsAll": "pending",
+    "hostedCi": "pending",
+    "fullBuild": "not_run",
+    "deployment": "not_performed",
+    "freshNativeAppCliAcceptance": "not_run",
+    "installedPreFixSourceFingerprintMatched": true,
+    "currentClients": {
+      "desktop": "3.6556.2",
+      "standaloneCli": "2.1.301"
+    }
+  },
+  "limits": [
+    "Historical HTTP status and retained synthetic stop summaries cannot prove every native terminal outcome.",
+    "The current Mac had warning memory pressure; application test/build admission was not bypassed.",
+    "No zero-error, permanent uptime, invoice parity or full hosted-feature parity claim is made.",
+    "Bounded native client log tails included startup MCP timeouts and older connector sync warnings; these are not attributed to the gateway without a correlated request."
+  ]
+}

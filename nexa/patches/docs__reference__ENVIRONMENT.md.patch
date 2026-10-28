@@ -1,8 +1,7 @@
 diff --git a/docs/reference/ENVIRONMENT.md b/docs/reference/ENVIRONMENT.md
-index fbd9a2299..3a5e9711d 100644
 --- a/docs/reference/ENVIRONMENT.md
 +++ b/docs/reference/ENVIRONMENT.md
-@@ -1791,6 +1791,16 @@ Long-lived SSE consumer that mirrors OmniConductor hub tasks into the local A2A
+@@ -1791,6 +1791,17 @@
  | `CONDUCTOR_ORCHESTRATOR_TOKEN` | _(empty)_ | `src/lib/conductor/hubProxy.ts` | Credential for inbound A2A→hub task delegation (`POST /v1/tasks`); falls back to `CONDUCTOR_HUB_TOKEN` when unset. |
  | `CONDUCTOR_SPOKESPERSON_URL` | `http://127.0.0.1:7920` | `src/lib/conductor/faroProxy.ts` | Base URL of the spokesperson (Faro) service behind the dashboard chat proxy (`/api/conductor/ask`). |
  
@@ -13,6 +12,7 @@ index fbd9a2299..3a5e9711d 100644
 +| `MITM_LOCAL_HOST` | `127.0.0.1` | `src/mitm/server.cjs` | Local OmniRoute ingress host used by the native Bridge. |
 +| `MITM_TARGET_AGENT` | `claude-code` | `src/mitm/server.cjs` | Native client profile routed through the Bridge. |
 +| `MITM_SELECTED_ONLY` | `true` | `src/mitm/server.cjs` | Route only enabled, operator-selected integrations. |
++| `MITM_ROUTER_TIMEOUT_MS` | Unset: 540000 ms normally; 1290000 ms for buffered native thinking | `src/mitm/_internal/routerFetch.cjs` | Optional integer override from 1000 through 1290000 milliseconds. The override applies to both paths; leave unset to retain the separate defaults. |
 +| `MITM_AUTO_RECOVER` | `true` | `src/mitm/bootRecovery.ts` | Restore the previously enabled native listener after gateway startup. Isolated builds and tests set this to `false`. |
 +| `OMNIROUTE_CLOUD_SYNC_ALLOW_UNVERIFIED` | `false` | `src/lib/cloudSync.ts` | Explicit compatibility opt-in for unsigned cloud responses. Keep disabled when response signatures are required. |
 +

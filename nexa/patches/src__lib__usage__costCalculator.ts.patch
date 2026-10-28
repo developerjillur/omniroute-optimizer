@@ -1,8 +1,15 @@
 diff --git a/src/lib/usage/costCalculator.ts b/src/lib/usage/costCalculator.ts
-index 5774fc4b5..3e3ad53b0 100644
 --- a/src/lib/usage/costCalculator.ts
 +++ b/src/lib/usage/costCalculator.ts
-@@ -35,6 +35,8 @@ export type CostCalculationOptions = {
+@@ -8,6 +8,7 @@
+  */
+ 
+ import { isFlatRateProvider } from "./flatRateProviders";
++import { getCacheCreationTtl } from "./cacheCreationTtl";
+ 
+ /**
+  * Normalize model name — strip provider path prefixes.
+@@ -35,6 +36,8 @@
     * `provider` to be set.
     */
    flatRateAsZero?: boolean;
@@ -11,22 +18,40 @@ index 5774fc4b5..3e3ad53b0 100644
  };
  
  /**
-@@ -97,9 +99,12 @@ export function getCodexFastCostMultiplier(
+@@ -56,7 +59,7 @@
+  * only xAI's `cost_in_usd_ticks` field is handled — see comment above.
+  */
+ function extractExactCostUsd(
+-  tokens: Record<string, number | undefined> | null | undefined
++  tokens: Record<string, number | null | undefined> | null | undefined
+ ): number | null {
+   const ticks = tokens?.cost_in_usd_ticks;
+   if (typeof ticks === "number" && Number.isFinite(ticks) && ticks >= 0) {
+@@ -97,9 +100,12 @@
    // while still using the Responses API with service_tier="flex".
    if (tier === "flex") return 0.5;
  
--  if (tier !== "priority" && tier !== "fast") return 1;
--
-   const modelKey = stripCodexEffortSuffix(normalizeModelName(String(model || "")).toLowerCase());
++  const modelKey = stripCodexEffortSuffix(normalizeModelName(String(model || "")).toLowerCase());
 +  if (modelKey === "gpt-6.1-sol") {
 +    if (tier === "ultrafast") return 6;
 +    if (tier === "priority" || tier === "fast") return 2;
 +  }
-+  if (tier !== "priority" && tier !== "fast") return 1;
+   if (tier !== "priority" && tier !== "fast") return 1;
+-
+-  const modelKey = stripCodexEffortSuffix(normalizeModelName(String(model || "")).toLowerCase());
    const compactModelKey = modelKey.replace(/-/g, "");
    // Codex GPT-6 Fast is 2.5x Standard (https://developers.openai.com/codex/pricing).
    if (
-@@ -146,14 +151,20 @@ export function computeCostFromPricing(
+@@ -133,7 +139,7 @@
+  */
+ export function computeCostFromPricing(
+   pricing: Record<string, unknown> | null | undefined,
+-  tokens: Record<string, number | undefined> | null | undefined,
++  tokens: Record<string, number | null | undefined> | null | undefined,
+   options: CostCalculationOptions = {}
+ ): number {
+   if (!tokens) return 0;
+@@ -146,14 +152,33 @@
    // per-token pricing rows exist only for estimation, so display surfaces opt in
    // to show $0 instead of an inflated estimate (#5552).
    if (options.flatRateAsZero && isFlatRateProvider(options.provider)) return 0;
@@ -47,9 +72,55 @@ index 5774fc4b5..3e3ad53b0 100644
 +    toNumber(pricing.reasoning, toNumber(pricing.output, 0)) * outputMultiplier;
 +  const cacheCreationPrice =
 +    toNumber(pricing.cache_creation, toNumber(pricing.input, 0)) * inputMultiplier;
++
++  const nativeClaudePrice = ["claude", "cc", "anthropic"].includes(
++    normalizeServiceTier(options.provider)
++  );
++  // Native Claude's one-hour writes use twice the configured input rate unless
++  // explicitly overridden. Other providers retain their legacy fallback rate.
++  const hourCacheCreationPrice =
++    toNumber(
++      pricing.cache_creation_1h,
++      nativeClaudePrice
++        ? toNumber(pricing.input, 0) * 2
++        : toNumber(pricing.cache_creation, toNumber(pricing.input, 0))
++    ) * inputMultiplier;
  
    let cost = 0;
 -  const inputTokens = tokens.input ?? tokens.prompt_tokens ?? tokens.input_tokens ?? 0;
    const cachedTokens =
      tokens.cacheRead ?? tokens.cached_tokens ?? tokens.cache_read_input_tokens ?? 0;
    const cacheCreationTokens = tokens.cacheCreation ?? tokens.cache_creation_input_tokens ?? 0;
+@@ -175,7 +200,13 @@
+     cost += reasoningTokens * ((reasoningPrice - outputPrice) / 1_000_000);
+   }
+ 
+-  if (cacheCreationTokens > 0) cost += cacheCreationTokens * (cacheCreationPrice / 1_000_000);
++  if (cacheCreationTokens > 0) {
++    const ttl = getCacheCreationTtl(tokens);
++    const five = ttl.cacheCreation5m ?? 0;
++    const hour = ttl.cacheCreation1h ?? 0;
++    const unknown = Math.max(0, cacheCreationTokens - five - hour);
++    cost += ((five + unknown) * cacheCreationPrice + hour * hourCacheCreationPrice) / 1_000_000;
++  }
+ 
+   return cost * getCodexFastCostMultiplier(options.provider, options.model, options.serviceTier);
+ }
+@@ -196,7 +227,7 @@
+ export async function calculateCostDetailed(
+   provider: string,
+   model: string,
+-  tokens: Record<string, number | undefined> | null | undefined,
++  tokens: Record<string, number | null | undefined> | null | undefined,
+   options: CostCalculationOptions = {}
+ ): Promise<CostCalculationResult> {
+   if (!tokens || !provider || !model) return { costUsd: 0, priced: true };
+@@ -248,7 +279,7 @@
+ export async function calculateCost(
+   provider: string,
+   model: string,
+-  tokens: Record<string, number | undefined> | null | undefined,
++  tokens: Record<string, number | null | undefined> | null | undefined,
+   options: CostCalculationOptions = {}
+ ): Promise<number> {
+   const result = await calculateCostDetailed(provider, model, tokens, options);

@@ -1,0 +1,113 @@
+diff --git a/src/lib/usage/usageHistory.ts b/src/lib/usage/usageHistory.ts
+--- a/src/lib/usage/usageHistory.ts
++++ b/src/lib/usage/usageHistory.ts
+@@ -8,6 +8,7 @@
+  */
+ 
+ import { getDbInstance } from "../db/core";
++import { getCacheCreationTtl } from "./cacheCreationTtl";
+ import { resolveProviderId } from "@/shared/constants/providers";
+ import { normalizePayloadForLog, protectPayloadForLog } from "../logPayloads";
+ import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
+@@ -684,6 +685,11 @@
+         output: toNumber(r.tokens_output),
+         cacheRead: toNumber(r.tokens_cache_read),
+         cacheCreation: toNumber(r.tokens_cache_creation),
++        ...getCacheCreationTtl({
++          cacheCreation: r.tokens_cache_creation,
++          cacheCreation5m: r.tokens_cache_creation_5m,
++          cacheCreation1h: r.tokens_cache_creation_1h,
++        }),
+         reasoning: toNumber(r.tokens_reasoning),
+       },
+       status: toStringOrNull(r.status),
+@@ -762,6 +768,7 @@
+ 
+     const tokensInput = getLoggedInputTokens(entry.tokens);
+     const tokensOutput = getLoggedOutputTokens(entry.tokens);
++    const cacheTtl = getCacheCreationTtl(entry.tokens);
+     const connection = entry.connectionId
+       ? (db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(entry.connectionId) as
+           Record<string, unknown> | undefined)
+@@ -782,7 +789,8 @@
+     db.transaction(() => {
+       const existing = db
+         .prepare(
+-          `SELECT id, endpoint, cpa_auth_index FROM usage_history
++          `SELECT id, endpoint, cpa_auth_index, tokens_cache_creation,
++                  tokens_cache_creation_5m, tokens_cache_creation_1h FROM usage_history
+            WHERE timestamp = ?
+              AND COALESCE(provider, '')     = COALESCE(?, '')
+              AND COALESCE(model, '')        = COALESCE(?, '')
+@@ -800,7 +808,16 @@
+           entry.apiKeyId || null,
+           tokensInput,
+           tokensOutput
+-        ) as { id: number; endpoint: string | null; cpa_auth_index: string | null } | undefined;
++        ) as
++        | {
++            id: number;
++            endpoint: string | null;
++            cpa_auth_index: string | null;
++            tokens_cache_creation: number;
++            tokens_cache_creation_5m: number | null;
++            tokens_cache_creation_1h: number | null;
++          }
++        | undefined;
+ 
+       if (existing) {
+         // Back-fill endpoint if the original row missed it.
+@@ -817,6 +834,19 @@
+             existing.id
+           );
+         }
++        // Enrich an identical observed event only when its total writes agree.
++        // Historical unknown TTL is never inferred from a price or model name.
++        if (
++          existing.tokens_cache_creation_5m === null &&
++          existing.tokens_cache_creation_1h === null &&
++          existing.tokens_cache_creation === getPromptCacheCreationTokens(entry.tokens) &&
++          (cacheTtl.cacheCreation5m !== null || cacheTtl.cacheCreation1h !== null)
++        ) {
++          db.prepare(
++            `UPDATE usage_history SET tokens_cache_creation_5m = ?,
++            tokens_cache_creation_1h = ? WHERE id = ?`
++          ).run(cacheTtl.cacheCreation5m, cacheTtl.cacheCreation1h, existing.id);
++        }
+         return; // duplicate — do not insert
+       }
+ 
+@@ -824,9 +854,10 @@
+         `
+         INSERT INTO usage_history (provider, model, connection_id, account_key, account_label,
+           account_label_priority, api_key_id, api_key_name, tokens_input, tokens_output,
+-          tokens_cache_read, tokens_cache_creation, tokens_reasoning, service_tier, status, success,
++          tokens_cache_read, tokens_cache_creation, tokens_cache_creation_5m,
++          tokens_cache_creation_1h, tokens_reasoning, service_tier, status, success,
+           latency_ms, ttft_ms, error_code, combo_strategy, endpoint, cpa_auth_index, timestamp)
+-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
++        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       `
+       ).run(
+         entry.provider ? resolveProviderId(entry.provider) : null,
+@@ -841,6 +872,8 @@
+         tokensOutput,
+         getPromptCacheReadTokens(entry.tokens),
+         getPromptCacheCreationTokens(entry.tokens),
++        cacheTtl.cacheCreation5m,
++        cacheTtl.cacheCreation1h,
+         getReasoningTokens(entry.tokens),
+         serviceTier,
+         entry.status || null,
+@@ -927,6 +960,11 @@
+         output: toNumber(r.tokens_output),
+         cacheRead: toNumber(r.tokens_cache_read),
+         cacheCreation: toNumber(r.tokens_cache_creation),
++        ...getCacheCreationTtl({
++          cacheCreation: r.tokens_cache_creation,
++          cacheCreation5m: r.tokens_cache_creation_5m,
++          cacheCreation1h: r.tokens_cache_creation_1h,
++        }),
+         reasoning: toNumber(r.tokens_reasoning),
+       },
+       status: toStringOrNull(r.status),

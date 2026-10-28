@@ -1,16 +1,25 @@
 diff --git a/open-sse/utils/usageTracking.ts b/open-sse/utils/usageTracking.ts
-index 95cdd636570bd78daebb37ea4615b17d71c52d6b..c95c842743404430aef4e0adf69bf5a711485c2d 100644
 --- a/open-sse/utils/usageTracking.ts
 +++ b/open-sse/utils/usageTracking.ts
-@@ -12,6 +12,7 @@
+@@ -12,6 +12,8 @@
  } from "@/lib/usage/tokenAccounting";
  import { FORMATS } from "../translator/formats.ts";
  import { pickCacheCreationTokens } from "./pickCacheCreationTokens.ts";
++import { getCacheCreationTtlFields } from "@/lib/usage/cacheCreationTtl";
 +import { normalizeAnthropicUsage } from "./anthropicUsage.ts";
  
  export { pickCacheCreationTokens };
  
-@@ -63,7 +64,7 @@
+@@ -43,6 +45,8 @@
+   cost_in_usd_ticks?: number;
+   cache_read_input_tokens?: number;
+   cache_creation_input_tokens?: number;
++  cacheCreation5m?: number;
++  cacheCreation1h?: number;
+   /** OpenRouter / Devin Desktop / codex-chatgpt-web alias for cache creation. */
+   cache_write_tokens?: number;
+   prompt_cache_hit_tokens?: number;
+@@ -63,7 +67,7 @@
  }
  
  /** SSE/JSON chunk shapes this module inspects for embedded usage containers. */
@@ -19,7 +28,7 @@ index 95cdd636570bd78daebb37ea4615b17d71c52d6b..c95c842743404430aef4e0adf69bf5a7
    type?: string;
    done?: boolean;
    prompt_eval_count?: number;
-@@ -71,7 +72,11 @@
+@@ -71,7 +75,11 @@
    usage?: UsageLike;
    usageMetadata?: UsageLike;
    message?: { usage?: UsageLike; [field: string]: unknown };
@@ -32,89 +41,7 @@ index 95cdd636570bd78daebb37ea4615b17d71c52d6b..c95c842743404430aef4e0adf69bf5a7
    [field: string]: unknown;
  }
  
-@@ -105,7 +110,8 @@
- 
- function getBufferTokens(): number {
-   const now = Date.now();
--  const isExpired = _cachedBuffer !== null && now - _cacheTimestamp >= CACHE_TTL_MS;
-+  const isExpired =
-+    _cachedBuffer !== null && now - _cacheTimestamp >= CACHE_TTL_MS;
- 
-   if (_cachedBuffer !== null && !isExpired) {
-     return _cachedBuffer;
-@@ -218,7 +224,10 @@
-   // Keep real total_tokens intact and calculate separate context-budget headroom.
-   if (result.total_tokens !== undefined) {
-     result.context_budget_total_tokens = result.total_tokens + buffer;
--  } else if (result.prompt_tokens !== undefined && result.completion_tokens !== undefined) {
-+  } else if (
-+    result.prompt_tokens !== undefined &&
-+    result.completion_tokens !== undefined
-+  ) {
-     // Calculate a real total if the provider omitted it.
-     result.total_tokens = result.prompt_tokens + result.completion_tokens;
-     result.context_budget_total_tokens = result.total_tokens + buffer;
-@@ -227,15 +236,24 @@
-   return result;
- }
- 
--export function filterUsageForFormat(usage: UsageLike | null | undefined, targetFormat: string) {
-+export function filterUsageForFormat(
-+  usage: UsageLike | null | undefined,
-+  targetFormat: string,
-+) {
-   if (!usage || typeof usage !== "object") return usage;
- 
-   // Cross-map between Claude-style and OpenAI-style field names before filtering.
-   // Some providers return input_tokens/output_tokens even when using OpenAI format.
-   const convertedUsage = { ...usage };
--  if (targetFormat === FORMATS.CLAUDE || targetFormat === FORMATS.OPENAI_RESPONSES) {
-+  if (
-+    targetFormat === FORMATS.CLAUDE ||
-+    targetFormat === FORMATS.OPENAI_RESPONSES
-+  ) {
-     // OpenAI → Claude: prompt_tokens → input_tokens
--    if (convertedUsage.prompt_tokens !== undefined && convertedUsage.input_tokens === undefined) {
-+    if (
-+      convertedUsage.prompt_tokens !== undefined &&
-+      convertedUsage.input_tokens === undefined
-+    ) {
-       convertedUsage.input_tokens = convertedUsage.prompt_tokens;
-     }
-     if (
-@@ -246,7 +264,10 @@
-     }
-   } else {
-     // Claude → OpenAI: input_tokens → prompt_tokens
--    if (convertedUsage.input_tokens !== undefined && convertedUsage.prompt_tokens === undefined) {
-+    if (
-+      convertedUsage.input_tokens !== undefined &&
-+      convertedUsage.prompt_tokens === undefined
-+    ) {
-       convertedUsage.prompt_tokens = convertedUsage.input_tokens;
-     }
-     if (
-@@ -261,11 +282,16 @@
-       convertedUsage.prompt_tokens !== undefined &&
-       convertedUsage.completion_tokens !== undefined
-     ) {
--      convertedUsage.total_tokens = convertedUsage.prompt_tokens + convertedUsage.completion_tokens;
-+      convertedUsage.total_tokens =
-+        convertedUsage.prompt_tokens + convertedUsage.completion_tokens;
-     }
-     // Rebuild prompt_tokens_details.cached_tokens from flat cached_tokens / cache_read_input_tokens (#8171)
--    const flatCached = convertedUsage.cached_tokens ?? convertedUsage.cache_read_input_tokens;
--    if (flatCached !== undefined && !convertedUsage.prompt_tokens_details?.cached_tokens) {
-+    const flatCached =
-+      convertedUsage.cached_tokens ?? convertedUsage.cache_read_input_tokens;
-+    if (
-+      flatCached !== undefined &&
-+      !convertedUsage.prompt_tokens_details?.cached_tokens
-+    ) {
-       convertedUsage.prompt_tokens_details = {
-         ...convertedUsage.prompt_tokens_details,
-         cached_tokens: flatCached,
-@@ -394,6 +420,17 @@
+@@ -394,6 +402,17 @@
      return value.some((item) => hasRemoteContextReference(item, depth + 1));
    }
  
@@ -132,206 +59,7 @@ index 95cdd636570bd78daebb37ea4615b17d71c52d6b..c95c842743404430aef4e0adf69bf5a7
    for (const [key, nested] of Object.entries(value)) {
      if (REMOTE_CONTEXT_REFERENCE_KEYS.has(key) && hasValue(nested)) {
        return true;
-@@ -406,7 +443,8 @@
- }
- 
- function getSerializedBodyBytes(body: unknown): number | null {
--  if (!body || typeof body !== "object" || hasRemoteContextReference(body)) return null;
-+  if (!body || typeof body !== "object" || hasRemoteContextReference(body))
-+    return null;
-   try {
-     const serialized = JSON.stringify(body);
-     if (!serialized) return null;
-@@ -424,28 +462,45 @@
-  * Return true when a provider-reported input count is plausible for this request.
-  * `null`/unserializable bodies and server-side context references fail open.
-  */
--export function isInputTokenCountPlausible(inputTokens: unknown, body: unknown): boolean {
--  if (typeof inputTokens !== "number" || !Number.isFinite(inputTokens) || inputTokens < 0) {
-+export function isInputTokenCountPlausible(
-+  inputTokens: unknown,
-+  body: unknown,
-+): boolean {
-+  if (
-+    typeof inputTokens !== "number" ||
-+    !Number.isFinite(inputTokens) ||
-+    inputTokens < 0
-+  ) {
-     return false;
-   }
- 
-   const bodyBytes = getSerializedBodyBytes(body);
-   if (bodyBytes === null) return true;
--  const maximum = bodyBytes * INPUT_USAGE_BYTE_MULTIPLIER + INPUT_USAGE_FIXED_ALLOWANCE;
-+  const maximum =
-+    bodyBytes * INPUT_USAGE_BYTE_MULTIPLIER + INPUT_USAGE_FIXED_ALLOWANCE;
-   return inputTokens <= maximum;
- }
- 
--function resolveUsageFormat(usage: UsageLike | null | undefined, targetFormat: string | null) {
-+function resolveUsageFormat(
-+  usage: UsageLike | null | undefined,
-+  targetFormat: string | null,
-+) {
-   if (targetFormat === FORMATS.CLAUDE) return FORMATS.CLAUDE;
-   if (targetFormat === FORMATS.GEMINI || targetFormat === FORMATS.ANTIGRAVITY) {
-     return FORMATS.GEMINI;
-   }
--  if (targetFormat === FORMATS.OPENAI_RESPONSES || targetFormat === FORMATS.OPENAI_RESPONSE) {
-+  if (
-+    targetFormat === FORMATS.OPENAI_RESPONSES ||
-+    targetFormat === FORMATS.OPENAI_RESPONSE
-+  ) {
-     return FORMATS.OPENAI_RESPONSES;
-   }
-   if (targetFormat === FORMATS.OPENAI) return FORMATS.OPENAI;
- 
--  if (usage?.promptTokenCount !== undefined || usage?.candidatesTokenCount !== undefined) {
-+  if (
-+    usage?.promptTokenCount !== undefined ||
-+    usage?.candidatesTokenCount !== undefined
-+  ) {
-     return FORMATS.GEMINI;
-   }
-   if (
-@@ -454,7 +509,8 @@
-   ) {
-     return FORMATS.CLAUDE;
-   }
--  if (usage?.input_tokens_details !== undefined) return FORMATS.OPENAI_RESPONSES;
-+  if (usage?.input_tokens_details !== undefined)
-+    return FORMATS.OPENAI_RESPONSES;
-   return FORMATS.OPENAI;
- }
- 
-@@ -475,11 +531,14 @@
-   return tokenNumber(usage.prompt_tokens ?? usage.input_tokens);
- }
- 
--function clearCachedTokenDetail<T extends UsageTokenDetail | null | undefined>(value: T): T {
-+function clearCachedTokenDetail<T extends UsageTokenDetail | null | undefined>(
-+  value: T,
-+): T {
-   if (!value || typeof value !== "object" || Array.isArray(value)) return value;
-   const result = { ...value };
-   if (result.cached_tokens !== undefined) result.cached_tokens = 0;
--  if (result.cache_creation_tokens !== undefined) result.cache_creation_tokens = 0;
-+  if (result.cache_creation_tokens !== undefined)
-+    result.cache_creation_tokens = 0;
-   if (result.cache_write_tokens !== undefined) result.cache_write_tokens = 0;
-   return result;
- }
-@@ -491,7 +550,7 @@
- export function sanitizeProviderUsageForRequest(
-   usage: UsageLike | null | undefined,
-   body: unknown,
--  targetFormat: string | null = null
-+  targetFormat: string | null = null,
- ) {
-   if (!usage || typeof usage !== "object" || Array.isArray(usage)) return usage;
- 
-@@ -503,10 +562,15 @@
-   // by a relay provider. Only treat 0 as plausible when the request body itself is
-   // trivial (no serialized body, or a body too small to plausibly need any tokens);
-   // otherwise fall through to the same local-estimate repair used for over-reports.
--  const bodyBytesForZeroCheck = reportedInput === 0 ? getSerializedBodyBytes(body) : null;
-+  const bodyBytesForZeroCheck =
-+    reportedInput === 0 ? getSerializedBodyBytes(body) : null;
-   const zeroIsPlausible =
--    reportedInput === 0 && (bodyBytesForZeroCheck === null || bodyBytesForZeroCheck === 0);
--  if (zeroIsPlausible || (reportedInput > 0 && isInputTokenCountPlausible(reportedInput, body))) {
-+    reportedInput === 0 &&
-+    (bodyBytesForZeroCheck === null || bodyBytesForZeroCheck === 0);
-+  if (
-+    zeroIsPlausible ||
-+    (reportedInput > 0 && isInputTokenCountPlausible(reportedInput, body))
-+  ) {
-     return usage;
-   }
- 
-@@ -515,8 +579,12 @@
- 
-   if (format === FORMATS.CLAUDE) {
-     result.input_tokens = estimatedInput;
--    result.prompt_tokens_details = clearCachedTokenDetail(result.prompt_tokens_details);
--    result.input_tokens_details = clearCachedTokenDetail(result.input_tokens_details);
-+    result.prompt_tokens_details = clearCachedTokenDetail(
-+      result.prompt_tokens_details,
-+    );
-+    result.input_tokens_details = clearCachedTokenDetail(
-+      result.input_tokens_details,
-+    );
-     result.cache_read_input_tokens = 0;
-     result.cache_creation_input_tokens = 0;
-     return result;
-@@ -524,7 +592,8 @@
- 
-   if (format === FORMATS.GEMINI) {
-     const output =
--      tokenNumber(result.candidatesTokenCount) + tokenNumber(result.thoughtsTokenCount);
-+      tokenNumber(result.candidatesTokenCount) +
-+      tokenNumber(result.thoughtsTokenCount);
-     result.promptTokenCount = estimatedInput;
-     result.cachedContentTokenCount = 0;
-     if (result.totalTokenCount !== undefined) {
-@@ -535,8 +604,12 @@
- 
-   if (format === FORMATS.OPENAI_RESPONSES) {
-     result.input_tokens = estimatedInput;
--    result.prompt_tokens_details = clearCachedTokenDetail(result.prompt_tokens_details);
--    result.input_tokens_details = clearCachedTokenDetail(result.input_tokens_details);
-+    result.prompt_tokens_details = clearCachedTokenDetail(
-+      result.prompt_tokens_details,
-+    );
-+    result.input_tokens_details = clearCachedTokenDetail(
-+      result.input_tokens_details,
-+    );
-     result.cache_read_input_tokens = 0;
-     result.cache_creation_input_tokens = 0;
-     if (result.total_tokens !== undefined) {
-@@ -549,9 +622,12 @@
-   result.cached_tokens = 0;
-   result.cache_read_input_tokens = 0;
-   result.cache_creation_input_tokens = 0;
--  result.prompt_tokens_details = clearCachedTokenDetail(result.prompt_tokens_details);
-+  result.prompt_tokens_details = clearCachedTokenDetail(
-+    result.prompt_tokens_details,
-+  );
-   if (result.total_tokens !== undefined) {
--    result.total_tokens = estimatedInput + tokenNumber(result.completion_tokens);
-+    result.total_tokens =
-+      estimatedInput + tokenNumber(result.completion_tokens);
-   }
-   return result;
- }
-@@ -563,17 +639,22 @@
- export function sanitizeUsagePayloadForRequest(
-   payload: UsagePayloadLike | null | undefined,
-   body: unknown,
--  targetFormat: string | null = null
-+  targetFormat: string | null = null,
- ): boolean {
--  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return false;
-+  if (!payload || typeof payload !== "object" || Array.isArray(payload))
-+    return false;
- 
-   const replaceUsage = (
-     owner: Record<string, unknown> | null | undefined,
-     key: string,
--    format: string | null
-+    format: string | null,
-   ) => {
-     if (!owner || typeof owner !== "object" || !owner[key]) return false;
--    const sanitized = sanitizeProviderUsageForRequest(owner[key] as UsageLike, body, format);
-+    const sanitized = sanitizeProviderUsageForRequest(
-+      owner[key] as UsageLike,
-+      body,
-+      format,
-+    );
-     if (sanitized === owner[key]) return false;
-     owner[key] = sanitized;
-     return true;
-@@ -583,8 +664,8 @@
+@@ -583,8 +602,8 @@
      return replaceUsage(payload.message, "usage", FORMATS.CLAUDE);
    }
    if (payload.type === "message_delta" && payload.usage) {
@@ -342,23 +70,17 @@ index 95cdd636570bd78daebb37ea4615b17d71c52d6b..c95c842743404430aef4e0adf69bf5a7
      const delta = payload.usage;
      const deltaInput =
        tokenNumber(delta.input_tokens) +
-@@ -633,7 +714,7 @@
+@@ -629,6 +648,7 @@
+   assignNumber("output_tokens", usage?.output_tokens);
+   assignNumber("cache_read_input_tokens", usage?.cache_read_input_tokens);
+   assignNumber("cache_creation_input_tokens", pickCacheCreationTokens(usage));
++  Object.assign(normalized, getCacheCreationTtlFields(usage));
+   assignNumber(
      "cached_tokens",
      usage?.cached_tokens ??
-       usage?.prompt_tokens_details?.cached_tokens ??
--      usage?.input_tokens_details?.cached_tokens
-+      usage?.input_tokens_details?.cached_tokens,
-   );
-   assignNumber("no_cache_tokens", usage?.no_cache_tokens);
-   assignNumber("reasoning_tokens", usage?.reasoning_tokens);
-@@ -661,9 +742,14 @@
- 
- export function carryEstimatedUsageMarker<T>(source: unknown, rebuilt: T): T {
+@@ -663,7 +683,10 @@
    const estimated =
--    !!source && typeof source === "object" && (source as UsageLike).estimated === true;
-+    !!source &&
-+    typeof source === "object" &&
-+    (source as UsageLike).estimated === true;
+     !!source && typeof source === "object" && (source as UsageLike).estimated === true;
    if (estimated && rebuilt && typeof rebuilt === "object") {
 -    Object.defineProperty(rebuilt, ESTIMATED_USAGE_MARKER, { value: true, enumerable: false });
 +    Object.defineProperty(rebuilt, ESTIMATED_USAGE_MARKER, {
@@ -368,7 +90,7 @@ index 95cdd636570bd78daebb37ea4615b17d71c52d6b..c95c842743404430aef4e0adf69bf5a7
    }
    return rebuilt;
  }
-@@ -755,44 +841,19 @@
+@@ -755,44 +778,14 @@
      return null;
    }
  
@@ -399,7 +121,10 @@ index 95cdd636570bd78daebb37ea4615b17d71c52d6b..c95c842743404430aef4e0adf69bf5a7
 -  }
 -
 -  // Claude format (message_delta event) — typically carries OUTPUT tokens
--  if (chunk.type === "message_delta" && chunk.usage && typeof chunk.usage === "object") {
++    const usage = normalizeAnthropicUsage(chunk.message.usage);
++    if (usage.prompt_tokens > 0 || usage.completion_tokens > 0) return normalizeUsage(usage);
++  }
+   if (chunk.type === "message_delta" && chunk.usage && typeof chunk.usage === "object") {
 -    const deltaInput = chunk.usage.input_tokens || 0;
 -    const deltaCacheRead = chunk.usage.cache_read_input_tokens || 0;
 -    const deltaCacheCreation = chunk.usage.cache_creation_input_tokens || 0;
@@ -412,91 +137,23 @@ index 95cdd636570bd78daebb37ea4615b17d71c52d6b..c95c842743404430aef4e0adf69bf5a7
 -      cache_creation_input_tokens: chunk.usage.cache_creation_input_tokens,
 -      reasoning_tokens: chunk.usage.output_tokens_details?.thinking_tokens,
 -    });
-+    const usage = normalizeAnthropicUsage(chunk.message.usage);
-+    if (usage.prompt_tokens > 0 || usage.completion_tokens > 0)
-+      return normalizeUsage(usage);
-+  }
-+  if (
-+    chunk.type === "message_delta" &&
-+    chunk.usage &&
-+    typeof chunk.usage === "object"
-+  ) {
 +    return normalizeUsage(normalizeAnthropicUsage(chunk.usage));
    }
  
    // OpenAI Responses API format (response.completed or response.done)
-@@ -821,11 +882,13 @@
-   if (
-     chunk.usage &&
-     typeof chunk.usage === "object" &&
--    (chunk.usage.prompt_tokens !== undefined || chunk.usage.input_tokens !== undefined)
-+    (chunk.usage.prompt_tokens !== undefined ||
-+      chunk.usage.input_tokens !== undefined)
+@@ -803,6 +796,7 @@
+   ) {
+     const usage = chunk.response.usage;
+     return normalizeUsage({
++      ...getCacheCreationTtlFields(usage),
+       prompt_tokens: usage.input_tokens || usage.prompt_tokens || 0,
+       completion_tokens: usage.output_tokens || usage.completion_tokens || 0,
+       cached_tokens:
+@@ -824,6 +818,7 @@
+     (chunk.usage.prompt_tokens !== undefined || chunk.usage.input_tokens !== undefined)
    ) {
      const normalized = normalizeUsage({
++      ...getCacheCreationTtlFields(chunk.usage),
        prompt_tokens: chunk.usage.prompt_tokens ?? chunk.usage.input_tokens ?? 0,
--      completion_tokens: chunk.usage.completion_tokens ?? chunk.usage.output_tokens ?? 0,
-+      completion_tokens:
-+        chunk.usage.completion_tokens ?? chunk.usage.output_tokens ?? 0,
+       completion_tokens: chunk.usage.completion_tokens ?? chunk.usage.output_tokens ?? 0,
        cached_tokens:
-         chunk.usage.prompt_tokens_details?.cached_tokens ??
-         chunk.usage.input_tokens_details?.cached_tokens ??
-@@ -895,7 +958,9 @@
-   if (!text || typeof text !== "string") return 0;
- 
-   // Count CJK ideographs separately — each is roughly 1 token
--  const cjkMatches = text.match(/[\u3000-\u9fff\uf900-\ufaff\u{20000}-\u{2fa1f}]/gu);
-+  const cjkMatches = text.match(
-+    /[\u3000-\u9fff\uf900-\ufaff\u{20000}-\u{2fa1f}]/gu,
-+  );
-   const cjkCount = cjkMatches ? cjkMatches.length : 0;
- 
-   // Remove CJK chars for the remaining estimation
-@@ -961,7 +1026,11 @@
-  * @param {number} outputTokens - Output/completion tokens
-  * @param {string} targetFormat - Target format from FORMATS
-  */
--export function formatUsage(inputTokens: number, outputTokens: number, targetFormat: string) {
-+export function formatUsage(
-+  inputTokens: number,
-+  outputTokens: number,
-+  targetFormat: string,
-+) {
-   // Claude format uses input_tokens/output_tokens
-   if (targetFormat === FORMATS.CLAUDE) {
-     return addBufferToUsage({
-@@ -989,9 +1058,13 @@
- export function estimateUsage(
-   body: unknown,
-   contentLength: number | null | undefined,
--  targetFormat: string = FORMATS.OPENAI
-+  targetFormat: string = FORMATS.OPENAI,
- ) {
--  return formatUsage(estimateInputTokens(body), estimateOutputTokens(contentLength), targetFormat);
-+  return formatUsage(
-+    estimateInputTokens(body),
-+    estimateOutputTokens(contentLength),
-+    targetFormat,
-+  );
- }
- 
- /**
-@@ -1002,7 +1075,7 @@
-   usage: UsageLike | null | undefined,
-   model: string | null = null,
-   connectionId: string | null = null,
--  apiKeyInfo = null
-+  apiKeyInfo = null,
- ) {
-   if (!usage || typeof usage !== "object") return;
- 
-@@ -1014,7 +1087,8 @@
-   const inTokens = getLoggedInputTokens(usage);
-   const outTokens = getLoggedOutputTokens(usage);
-   void apiKeyInfo;
--  const normalizedConnectionId = typeof connectionId === "string" ? connectionId : undefined;
-+  const normalizedConnectionId =
-+    typeof connectionId === "string" ? connectionId : undefined;
-   const accountPrefix = normalizedConnectionId
-     ? normalizedConnectionId.slice(0, 8) + "..."
-     : "unknown";

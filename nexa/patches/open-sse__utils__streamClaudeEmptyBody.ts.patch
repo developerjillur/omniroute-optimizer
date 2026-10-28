@@ -1,0 +1,21 @@
+diff --git a/open-sse/utils/streamClaudeEmptyBody.ts b/open-sse/utils/streamClaudeEmptyBody.ts
+--- a/open-sse/utils/streamClaudeEmptyBody.ts
++++ b/open-sse/utils/streamClaudeEmptyBody.ts
+@@ -16,6 +16,7 @@
+  * here already scoped to a Claude-format response).
+  */
+ type ClaudeEmptyLifecycleLike = {
++  stopReason?: string | null;
+   hasError: boolean;
+   hasContentBlock: boolean;
+   hasMessageStart: boolean;
+@@ -28,6 +29,9 @@
+   sawAnyUpstreamPayload: boolean
+ ): boolean {
+   if (lifecycle.hasError || lifecycle.hasContentBlock) return false;
++  // A refusal is a completed native stop, not an empty transport failure.
++  if (lifecycle.stopReason === "refusal" && lifecycle.hasMessageDelta && lifecycle.hasMessageStop)
++    return false;
+   const hasPartialLifecycle =
+     lifecycle.hasMessageStart || lifecycle.hasMessageDelta || lifecycle.hasMessageStop;
+   return hasPartialLifecycle || !sawAnyUpstreamPayload;

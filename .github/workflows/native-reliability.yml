@@ -1,0 +1,99 @@
+name: Native reliability
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, "fix/native-reliability-*"]
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      NODE_OPTIONS: --max-old-space-size=4096
+      NODE_ENV: test
+      DISABLE_SQLITE_AUTO_BACKUP: "true"
+      MITM_AUTO_RECOVER: "false"
+      OMNIROUTE_SKIP_SYSTEM_TRUST: "1"
+      OMNIROUTE_SKIP_DNS_WRITE: "1"
+      ADOBE_FIREFLY_BROWSER_REFRESH: "0"
+      APP_LOG_TO_FILE: "false"
+      OMNIROUTE_SSE_COMMENTS: "false"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "26.7.0"
+      - name: Check overlay tooling
+        run: node --test --test-concurrency=1 nexa/tests/*.test.mjs
+      - name: Prepare the pinned pristine application
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="$RUNNER_TEMP/omniroute-fixture"
+          git init "$fixture"
+          git -C "$fixture" remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+          git -C "$fixture" fetch --depth=1 upstream c1e30b7676975feb298b49eff6ff58923c04b89e
+          git -C "$fixture" checkout --detach FETCH_HEAD
+          git -C "$fixture" branch upstream-main HEAD
+          test ! -e "$fixture/nexa"
+          cp -R "$GITHUB_WORKSPACE/nexa" "$fixture/nexa"
+          cd "$fixture"
+          node nexa/check/pristine-base.mjs
+          node nexa/apply.mjs --check
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm rebuild better-sqlite3 --foreground-scripts
+          node "$fixture/node_modules/prettier/bin/prettier.cjs" --write --print-width 100 --trailing-comma es5 "$GITHUB_WORKSPACE/nexa/deploy/bridge-upstream-dns.cjs" "$GITHUB_WORKSPACE/nexa/tests/bridge-upstream-dns.test.mjs" "$GITHUB_WORKSPACE/nexa/tests/verify-baseline-red.mjs" "$GITHUB_WORKSPACE/nexa/new/tests/unit/native-claude-refusal-terminal.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/native-thread-error-classification.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/native-stream-summary.test.ts" "$GITHUB_WORKSPACE/.github/workflows/native-reliability.yml" "$GITHUB_WORKSPACE/README.md" "$GITHUB_WORKSPACE/reports/native-reliability-2026-10-28.json"
+          git -C "$GITHUB_WORKSPACE" diff --binary > "$RUNNER_TEMP/formatting.patch"
+          cp -R "$GITHUB_WORKSPACE/nexa/." "$fixture/nexa/"
+          node nexa/gen-manifest.mjs
+          cmp nexa/manifest.json "$GITHUB_WORKSPACE/nexa/manifest.json"
+          node nexa/apply.mjs
+      - name: Reproduce the original native terminal and Thread classification failures
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/omniroute-fixture"
+          export DATA_DIR="$RUNNER_TEMP/native-baseline-data"
+          export TMPDIR="$RUNNER_TEMP"
+          git apply --reverse nexa/tests/fixtures/native-refusal-delta.patch
+          set +e
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-concurrency=1 --test-force-exit tests/unit/native-claude-refusal-terminal.test.ts tests/unit/native-thread-error-classification.test.ts tests/unit/native-stream-summary.test.ts > "$RUNNER_TEMP/native-red.tap" 2>&1
+          result=$?
+          set -e
+          tail -n 70 "$RUNNER_TEMP/native-red.tap"
+          test "$result" -ne 0
+          node "$GITHUB_WORKSPACE/nexa/tests/verify-baseline-red.mjs" "$RUNNER_TEMP/native-red.tap"
+          git apply nexa/tests/fixtures/native-refusal-delta.patch
+      - name: Native, protocol, transport, cache and translator regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/omniroute-fixture"
+          export DATA_DIR="$RUNNER_TEMP/native-green-data"
+          export TMPDIR="$RUNNER_TEMP"
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-concurrency=1 --test-force-exit tests/unit/native-claude-refusal-terminal.test.ts tests/unit/native-thread-error-classification.test.ts tests/unit/native-stream-summary.test.ts tests/unit/native-artifact-recovery.test.ts tests/unit/native-usage-fidelity.test.ts tests/unit/native-claude-thread-protocol.test.ts tests/unit/native-claude-thread-executor.test.ts tests/unit/native-claude-thread-chatcore.test.ts tests/unit/native-claude-thread-routing.test.ts tests/unit/agent-bridge-native-transport.test.ts tests/unit/agent-bridge-native-cache-continuity.test.ts tests/unit/agent-bridge-thread-cache.test.ts tests/unit/native-thinking-signature-switch.test.ts tests/unit/native-suggestion-empty-response.test.ts tests/unit/native-context-overflow-error.test.ts tests/unit/cache-ttl-stream.test.ts tests/unit/cache-ttl-extraction.test.ts tests/unit/translator-resp-claude-to-openai.test.ts
+      - name: Core typecheck
+        working-directory: ${{ runner.temp }}/omniroute-fixture
+        run: npm run typecheck:core
+      - name: Full lint
+        working-directory: ${{ runner.temp }}/omniroute-fixture
+        run: npm run lint
+      - name: Documentation gates
+        working-directory: ${{ runner.temp }}/omniroute-fixture
+        run: npm run check:docs-all
+      - name: Require committed formatting
+        run: test ! -s "$RUNNER_TEMP/formatting.patch"
+      - name: Preserve reviewable formatter changes
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatting-changes
+          path: ${{ runner.temp }}/formatting.patch

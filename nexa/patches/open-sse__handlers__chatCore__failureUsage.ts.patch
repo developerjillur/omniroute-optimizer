@@ -1,0 +1,45 @@
+diff --git a/open-sse/handlers/chatCore/failureUsage.ts b/open-sse/handlers/chatCore/failureUsage.ts
+--- a/open-sse/handlers/chatCore/failureUsage.ts
++++ b/open-sse/handlers/chatCore/failureUsage.ts
+@@ -9,6 +9,7 @@
+  */
+ 
+ import { buildErrorBody } from "../../utils/error.ts";
++import { getCacheCreationTtlFields } from "@/lib/usage/cacheCreationTtl";
+ 
+ export { readCpaAuthIndex } from "./cpaTraceAuthIndex.ts";
+ 
+@@ -30,6 +31,8 @@
+   completion_tokens?: number;
+   cache_read_input_tokens?: number;
+   cache_creation_input_tokens?: number;
++  cacheCreation5m?: number;
++  cacheCreation1h?: number;
+   reasoning_tokens?: number;
+ }
+ 
+@@ -40,6 +43,8 @@
+         completion_tokens?: number;
+         cache_read_input_tokens?: number;
+         cache_creation_input_tokens?: number;
++        cacheCreation5m?: number;
++        cacheCreation1h?: number;
+         reasoning_tokens?: number;
+       }
+     | null
+@@ -51,6 +56,7 @@
+     completion_tokens: usage.completion_tokens,
+     cache_read_input_tokens: usage.cache_read_input_tokens,
+     cache_creation_input_tokens: usage.cache_creation_input_tokens,
++    ...getCacheCreationTtlFields(usage),
+     reasoning_tokens: usage.reasoning_tokens,
+   };
+ }
+@@ -78,6 +84,7 @@
+       output: opts.aggregate?.completion_tokens ?? 0,
+       cacheRead: opts.aggregate?.cache_read_input_tokens ?? 0,
+       cacheCreation: opts.aggregate?.cache_creation_input_tokens ?? 0,
++      ...getCacheCreationTtlFields(opts.aggregate),
+       reasoning: opts.aggregate?.reasoning_tokens ?? 0,
+     },
+     status: String(opts.statusCode),

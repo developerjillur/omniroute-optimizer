@@ -1,8 +1,7 @@
 diff --git a/open-sse/utils/streamHandler.ts b/open-sse/utils/streamHandler.ts
-index cef58650b..c77c24619 100644
 --- a/open-sse/utils/streamHandler.ts
 +++ b/open-sse/utils/streamHandler.ts
-@@ -6,6 +6,7 @@ import { PENDING_REQUEST_CLEARED_MARKER } from "./stream.ts";
+@@ -6,6 +6,7 @@
  import { createCompletedResponsesToolHandoffWatcher } from "./responsesToolHandoff.ts";
  import { createStreamContentWatcher, type StreamContentWatcher } from "./streamReadiness.ts";
  import { hasOpenReasoning } from "./emptyTurnRetry.ts";
@@ -10,24 +9,41 @@ index cef58650b..c77c24619 100644
  
  // Stream handler with disconnect detection - shared for all providers
  
-@@ -601,6 +602,7 @@ function resolveSilentCloseOutcome(input: {
+@@ -601,8 +602,22 @@
    clientTerminalSeen: boolean;
    clientResponseFormat?: string | null;
    contentWatcher: StreamContentWatcher;
 +  allowEmptyCompletion?: boolean;
  }): SilentCloseOutcome | null {
    if (!input.bytesWereForwarded) return null;
++
++  const watcher = input.contentWatcher;
++  if (watcher.sawError()) return null;
++  // Native refusals may contain only hidden thinking. Preserve the refusal,
++  // but still report a transport that never delivered the final message_stop.
++  if (
++    input.clientResponseFormat === FORMATS.CLAUDE &&
++    watcher.getClaudeStopReason() === "refusal"
++  ) {
++    return input.clientTerminalSeen
++      ? null
++      : { kind: "error", reason: "Upstream stream ended without a terminal marker" };
++  }
  
-@@ -638,6 +640,8 @@ function resolveSilentCloseOutcome(input: {
+   if (!input.clientTerminalSeen) {
+     if (input.clientResponseFormat === FORMATS.CLAUDE && input.contentWatcher.sawContent()) {
+@@ -636,8 +651,8 @@
+     }
+   }
  
-   const watcher = input.contentWatcher;
-   if (watcher.sawError()) return null;
+-  const watcher = input.contentWatcher;
+-  if (watcher.sawError()) return null;
 +  // Only a verified optional suggestion completion may close without model text.
 +  if (input.clientTerminalSeen && input.allowEmptyCompletion === true) return null;
    if (watcher.sawSseFrame() && !watcher.sawContent() && !watcher.sawLegitEmptyTerminal()) {
      return { kind: "error", reason: "Provider returned empty content" };
    }
-@@ -648,7 +652,7 @@ function resolveSilentCloseOutcome(input: {
+@@ -648,7 +663,7 @@
  export function createDisconnectAwareStream(
    transformStream,
    streamController,
@@ -36,7 +52,7 @@ index cef58650b..c77c24619 100644
  ) {
    const reader = transformStream.readable.getReader();
    const writer = transformStream.writable.getWriter();
-@@ -747,6 +751,7 @@ export function createDisconnectAwareStream(
+@@ -747,6 +762,7 @@
                clientTerminalSeen,
                clientResponseFormat: streamController.clientResponseFormat,
                contentWatcher,
@@ -44,7 +60,7 @@ index cef58650b..c77c24619 100644
              });
  
              if (silentClose?.kind === "truncated") {
-@@ -886,6 +891,8 @@ export function pipeWithDisconnect(
+@@ -886,6 +902,8 @@
      stallTimeoutMs?: number;
      activeTimeoutMs?: number;
      contentStallTimeoutMs?: number;
@@ -53,7 +69,7 @@ index cef58650b..c77c24619 100644
      highWaterMark?: number;
    } = {}
  ) {
-@@ -907,7 +914,7 @@ export function pipeWithDisconnect(
+@@ -907,7 +925,7 @@
      return createDisconnectAwareStream(
        { readable: transformedBody, writable: createNoopAbortWritable() },
        streamController,
@@ -62,7 +78,7 @@ index cef58650b..c77c24619 100644
      );
    }
  
-@@ -989,6 +996,9 @@ export function pipeWithDisconnect(
+@@ -989,6 +1007,9 @@
    let contentStallTimer: ReturnType<typeof setTimeout> | null = null;
    let contentStallFired = false;
    const upstreamContentWatcher = createStreamContentWatcher();
@@ -72,7 +88,7 @@ index cef58650b..c77c24619 100644
    const upstreamContentDecoder = new TextDecoder();
    // Stall diagnostics: what the upstream had sent when the content watchdog
    // trips. Counters live at this tap because it is the only point seeing raw
-@@ -1149,6 +1159,12 @@ export function pipeWithDisconnect(
+@@ -1149,6 +1170,12 @@
          noteStallText(decoded);
          upstreamContentWatcher.note(decoded);
          if (upstreamContentWatcher.sawContent()) clearContentStall();
@@ -85,7 +101,7 @@ index cef58650b..c77c24619 100644
        }
        controller.enqueue(chunk);
      },
-@@ -1164,6 +1180,6 @@ export function pipeWithDisconnect(
+@@ -1164,6 +1191,6 @@
    return createDisconnectAwareStream(
      { readable: transformedBody, writable: createNoopAbortWritable() },
      wrappedController,

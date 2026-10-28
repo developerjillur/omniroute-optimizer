@@ -1,0 +1,45 @@
+diff --git a/open-sse/utils/streamReadiness.ts b/open-sse/utils/streamReadiness.ts
+--- a/open-sse/utils/streamReadiness.ts
++++ b/open-sse/utils/streamReadiness.ts
+@@ -267,6 +267,8 @@
+    * so #8649 can stand down without treating errors as model output.
+    */
+   sawError: () => boolean;
++  /** Native terminal reason from a real message_delta, never nested metadata. */
++  getClaudeStopReason: () => string | null;
+ };
+ 
+ /**
+@@ -290,9 +292,24 @@
+   let legitEmpty = false;
+   let sse = false;
+   let error = false;
++  let claudeStopReason: string | null = null;
+ 
+   const inspect = (frame: string): void => {
+     if (!frame) return;
++    for (const line of frame.split(/\r?\n/)) {
++      const trimmed = line.trim();
++      if (!trimmed.startsWith("data:")) continue;
++      try {
++        const event: unknown = JSON.parse(trimmed.slice(5).trim());
++        if (!isRecord(event) || event.type !== "message_delta" || !isRecord(event.delta))
++          continue;
++        const reason = event.delta.stop_reason;
++        if (typeof reason === "string" && reason.length > 0 && reason.length <= 64)
++          claudeStopReason = reason;
++      } catch {
++        // Only an actual native terminal event can exempt a refusal from emptiness.
++      }
++    }
+     if (!sse && SSE_FIELD_LINE.test(frame)) sse = true;
+     if (!error && frameHasStructuredStreamError(frame)) error = true;
+     if (!content && hasUsefulStreamContent(frame)) content = true;
+@@ -328,6 +345,7 @@
+     sawLegitEmptyTerminal: () => legitEmpty,
+     sawSseFrame: () => sse,
+     sawError: () => error,
++    getClaudeStopReason: () => claudeStopReason,
+   };
+ }
+ 

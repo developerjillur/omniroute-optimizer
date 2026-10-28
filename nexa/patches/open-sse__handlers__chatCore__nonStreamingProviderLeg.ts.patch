@@ -1,8 +1,23 @@
 diff --git a/open-sse/handlers/chatCore/nonStreamingProviderLeg.ts b/open-sse/handlers/chatCore/nonStreamingProviderLeg.ts
-index b9a0aeb36..266ae2eec 100644
 --- a/open-sse/handlers/chatCore/nonStreamingProviderLeg.ts
 +++ b/open-sse/handlers/chatCore/nonStreamingProviderLeg.ts
-@@ -240,6 +240,60 @@ function parseRetryAfterMs(response: Response): number | null {
+@@ -21,6 +21,7 @@
+ import { parseNonStreamingResponseBody, isJsonRecord } from "./nonStreamingResponseParse.ts";
+ import { restoreNonStreamingToolNames } from "./passthroughToolNames.ts";
+ import { extractUsageFromResponse } from "../usageExtractor.ts";
++import { getCacheCreationTtlFields } from "@/lib/usage/cacheCreationTtl";
+ import { sanitizeUsagePayloadForRequest } from "../../utils/usageTracking.ts";
+ import { createErrorResult, formatProviderError } from "../../utils/error.ts";
+ import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
+@@ -151,6 +152,7 @@
+   const pt = typeof r.prompt_tokens === "number" ? r.prompt_tokens : 0;
+   const ct = typeof r.completion_tokens === "number" ? r.completion_tokens : 0;
+   return {
++    ...getCacheCreationTtlFields(r),
+     prompt_tokens: pt,
+     completion_tokens: ct,
+     total_tokens: typeof r.total_tokens === "number" ? r.total_tokens : pt + ct,
+@@ -240,6 +242,60 @@
    return null;
  }
  
@@ -63,7 +78,7 @@ index b9a0aeb36..266ae2eec 100644
  function finishOk(
    input: ProviderLegInput,
    params: {
-@@ -262,6 +316,10 @@ function finishOk(
+@@ -262,6 +318,10 @@
      requestUrl?: string;
    }
  ): NonStreamingProviderLegResult {
@@ -74,10 +89,11 @@ index b9a0aeb36..266ae2eec 100644
    // F-02: restore + sanitize + translate is the only success tail.
    // Fallback/retry must not skip this with responseToolNameMap: null.
    const restoreClaudeNames = params.sourceFormat === "claude" && params.targetFormat === "claude";
-@@ -859,6 +917,17 @@ export async function runNonStreamingProviderLeg(
+@@ -858,6 +918,17 @@
+   let responseBody = parsed.responseBody;
    const responsePayloadFormat = parsed.responsePayloadFormat;
    const looksLikeSSE = parsed.looksLikeSSE;
- 
++
 +  const contextOverflow = bufferedContextOverflow(input, {
 +    responseBody,
 +    responsePayloadFormat,
@@ -88,7 +104,6 @@ index b9a0aeb36..266ae2eec 100644
 +    upstreamResponse: providerResponse,
 +  });
 +  if (contextOverflow) return contextOverflow;
-+
+ 
    // -- ClinePass envelope unwrap + retry --------------------------------------
    if (provider === "clinepass") {
-     let { body: unwrapped, error: envError } = unwrapClinepassEnvelope(responseBody, provider);

@@ -1,0 +1,283 @@
+--- a/open-sse/utils/streamReadiness.ts
++++ b/open-sse/utils/streamReadiness.ts
+@@ -267,6 +267,8 @@
+    * so #8649 can stand down without treating errors as model output.
+    */
+   sawError: () => boolean;
++  /** Native terminal reason from a real message_delta, never nested metadata. */
++  getClaudeStopReason: () => string | null;
+ };
+ 
+ /**
+@@ -290,9 +292,24 @@
+   let legitEmpty = false;
+   let sse = false;
+   let error = false;
++  let claudeStopReason: string | null = null;
+ 
+   const inspect = (frame: string): void => {
+     if (!frame) return;
++    for (const line of frame.split(/\r?\n/)) {
++      const trimmed = line.trim();
++      if (!trimmed.startsWith("data:")) continue;
++      try {
++        const event: unknown = JSON.parse(trimmed.slice(5).trim());
++        if (!isRecord(event) || event.type !== "message_delta" || !isRecord(event.delta))
++          continue;
++        const reason = event.delta.stop_reason;
++        if (typeof reason === "string" && reason.length > 0 && reason.length <= 64)
++          claudeStopReason = reason;
++      } catch {
++        // Only an actual native terminal event can exempt a refusal from emptiness.
++      }
++    }
+     if (!sse && SSE_FIELD_LINE.test(frame)) sse = true;
+     if (!error && frameHasStructuredStreamError(frame)) error = true;
+     if (!content && hasUsefulStreamContent(frame)) content = true;
+@@ -328,6 +345,7 @@
+     sawLegitEmptyTerminal: () => legitEmpty,
+     sawSseFrame: () => sse,
+     sawError: () => error,
++    getClaudeStopReason: () => claudeStopReason,
+   };
+ }
+ 
+--- a/open-sse/utils/streamHandler.ts
++++ b/open-sse/utils/streamHandler.ts
+@@ -606,6 +606,19 @@
+ }): SilentCloseOutcome | null {
+   if (!input.bytesWereForwarded) return null;
+ 
++  const watcher = input.contentWatcher;
++  if (watcher.sawError()) return null;
++  // Native refusals may contain only hidden thinking. Preserve the refusal,
++  // but still report a transport that never delivered the final message_stop.
++  if (
++    input.clientResponseFormat === FORMATS.CLAUDE &&
++    watcher.getClaudeStopReason() === "refusal"
++  ) {
++    return input.clientTerminalSeen
++      ? null
++      : { kind: "error", reason: "Upstream stream ended without a terminal marker" };
++  }
++
+   if (!input.clientTerminalSeen) {
+     if (input.clientResponseFormat === FORMATS.CLAUDE && input.contentWatcher.sawContent()) {
+       // #7699 — upstream dropped after content reached the client on a Claude
+@@ -638,8 +651,6 @@
+     }
+   }
+ 
+-  const watcher = input.contentWatcher;
+-  if (watcher.sawError()) return null;
+   // Only a verified optional suggestion completion may close without model text.
+   if (input.clientTerminalSeen && input.allowEmptyCompletion === true) return null;
+   if (watcher.sawSseFrame() && !watcher.sawContent() && !watcher.sawLegitEmptyTerminal()) {
+--- a/open-sse/utils/stream.ts
++++ b/open-sse/utils/stream.ts
+@@ -464,6 +464,7 @@
+ }
+ 
+ type ClaudeEmptyResponseLifecycle = {
++  stopReason: string | null;
+   hasMessageStart: boolean;
+   hasContentBlock: boolean;
+   hasMessageDelta: boolean;
+@@ -477,6 +478,7 @@
+ 
+ function createClaudeEmptyResponseLifecycle(): ClaudeEmptyResponseLifecycle {
+   return {
++    stopReason: null,
+     hasMessageStart: false,
+     hasContentBlock: false,
+     hasMessageDelta: false,
+@@ -513,9 +515,12 @@
+     case "content_block_stop":
+       lifecycle.hasContentBlock = true;
+       break;
+-    case "message_delta":
++    case "message_delta": {
+       lifecycle.hasMessageDelta = true;
++      const reason = asRecord(asRecord(payload).delta).stop_reason;
++      if (typeof reason === "string") lifecycle.stopReason = reason;
+       break;
++    }
+     case "message_stop":
+       lifecycle.hasMessageStop = true;
+       break;
+@@ -537,6 +542,13 @@
+ ): boolean {
+   const type = getClaudeEventType(payload);
+   if (!type || lifecycle.hasError || lifecycle.hasContentBlock) return false;
++  // The event name precedes its JSON data; wait for the actual terminal reason.
++  if (type === "message_delta" && !("delta" in asRecord(payload))) return false;
++  const stopReason =
++    type === "message_delta"
++      ? (asRecord(asRecord(payload).delta).stop_reason ?? lifecycle.stopReason)
++      : lifecycle.stopReason;
++  if (stopReason === "refusal") return false;
+   if (!hasClaudeAssistantLifecycle(lifecycle)) return false;
+   return type === "message_delta" || type === "message_stop";
+ }
+@@ -2911,20 +2923,23 @@
+                   message.content = "";
+                 }
+ 
+-                const responseBody = {
+-                  choices: [
+-                    {
+-                      message,
+-                      finish_reason: passthroughHasToolCalls ? "tool_calls" : "stop",
+-                    },
+-                  ],
+-                  usage: {
+-                    prompt_tokens: prompt,
+-                    completion_tokens: completion,
+-                    total_tokens: prompt + completion,
+-                  },
+-                  _streamed: true,
+-                };
++                const responseBody =
++                  clientResponseFormat === FORMATS.CLAUDE
++                    ? { ...asRecord(clientPayloadCollector.getSummary()), _streamed: true }
++                    : {
++                        choices: [
++                          {
++                            message,
++                            finish_reason: passthroughHasToolCalls ? "tool_calls" : "stop",
++                          },
++                        ],
++                        usage: {
++                          prompt_tokens: prompt,
++                          completion_tokens: completion,
++                          total_tokens: prompt + completion,
++                        },
++                        _streamed: true,
++                      };
+                 onComplete({
+                   status: 200,
+                   usage,
+--- a/open-sse/utils/streamClaudeEmptyBody.ts
++++ b/open-sse/utils/streamClaudeEmptyBody.ts
+@@ -16,6 +16,7 @@
+  * here already scoped to a Claude-format response).
+  */
+ type ClaudeEmptyLifecycleLike = {
++  stopReason?: string | null;
+   hasError: boolean;
+   hasContentBlock: boolean;
+   hasMessageStart: boolean;
+@@ -28,6 +29,9 @@
+   sawAnyUpstreamPayload: boolean
+ ): boolean {
+   if (lifecycle.hasError || lifecycle.hasContentBlock) return false;
++  // A refusal is a completed native stop, not an empty transport failure.
++  if (lifecycle.stopReason === "refusal" && lifecycle.hasMessageDelta && lifecycle.hasMessageStop)
++    return false;
+   const hasPartialLifecycle =
+     lifecycle.hasMessageStart || lifecycle.hasMessageDelta || lifecycle.hasMessageStop;
+   return hasPartialLifecycle || !sawAnyUpstreamPayload;
+--- a/open-sse/services/errorClassifier.ts
++++ b/open-sse/services/errorClassifier.ts
+@@ -13,7 +13,8 @@
+ // successful completion (truncated at the token limit, or a tool-call turn) —
+ // NOT a silent "fake success" failure. Used to avoid rewriting a valid HTTP 200
+ // (e.g. a Claude Code `max_tokens: 1` connectivity ping) into a synthetic 502.
+-const LEGIT_EMPTY_CLAUDE_STOP = new Set(["max_tokens", "tool_use"]);
++// A refusal is intentionally terminal; never turn it into an error or retry.
++const LEGIT_EMPTY_CLAUDE_STOP = new Set(["max_tokens", "tool_use", "refusal"]);
+ const LEGIT_EMPTY_OPENAI_FINISH = new Set(["length", "tool_calls", "content_filter"]);
+ 
+ // #14160: first-party APIs where an empty completion carrying a NORMAL terminal
+@@ -364,7 +365,7 @@
+ // not provider/model health. Keep every expression bounded to avoid ReDoS on
+ // upstream-controlled error bodies.
+ const RESOURCE_NOT_FOUND_PATTERNS = [
+-  /\bno thread state was found for the requested [`"']?previous_message_id\b/i,
++  /\bno thread state (?:was found|is available) for the requested [`"']?previous_message_id\b/i,
+   /\bfiles?\b[^\n]{0,160}\b(?:not found|does not exist)\b/i,
+   /\b(?:not found|does not exist)\b[^\n]{0,160}\bfiles?\b/i,
+   /\b(?:input[_ -]?file|file[_ -]?id|item|response|vector[_ -]?store|upload)\b[^\n]{0,160}\b(?:not found|does not exist)\b/i,
+--- a/open-sse/translator/response/claude-to-openai.ts
++++ b/open-sse/translator/response/claude-to-openai.ts
+@@ -358,6 +358,8 @@
+       return "stop";
+     case "max_tokens":
+       return "length";
++    case "refusal":
++      return "content_filter";
+     case "tool_use":
+       return "tool_calls";
+     case "stop_sequence":
+--- a/open-sse/handlers/responseTranslator.ts
++++ b/open-sse/handlers/responseTranslator.ts
+@@ -631,6 +631,7 @@
+       // the raw spelling here makes a truncated completion look like an unknown
+       // finish to the chat empty-output check.
+       if (finishReason === "max_tokens") finishReason = "length";
++      if (finishReason === "refusal") finishReason = "content_filter";
+ 
+       const result: JsonRecord = {
+         id: `chatcmpl-${toString(root.id, String(Date.now()))}`,
+--- a/open-sse/utils/streamPayloadCollector.ts
++++ b/open-sse/utils/streamPayloadCollector.ts
+@@ -512,7 +512,8 @@
+   let messageId = "";
+   let model = fallbackModel || "claude";
+   let role = "assistant";
+-  let stopReason = "end_turn";
++  let stopReason: string | null = null;
++  let stopDetails: unknown = undefined;
+   let stopSequence: string | null = null;
+   // Context Editing (`anthropic-beta: context-management-2025-06-27`) surfaces
+   // `context_management.applied_edits[]` on the final `message_delta` snapshot. Preserve it
+@@ -539,6 +540,7 @@
+         model = toString(message.model, model);
+         role = toString(message.role, role);
+         mergeUsage(usage, message.usage);
++        if ("stop_details" in message) stopDetails = cloneLogPayload(message.stop_details);
+         return;
+       }
+ 
+@@ -580,6 +582,13 @@
+         const deltaType = toString(delta.type);
+         const existing = blocks.get(index);
+ 
++        if (deltaType === "signature_delta") {
++          if (existing?.type === "thinking" && typeof delta.signature === "string") {
++            existing.signature = (existing.signature ?? "") + delta.signature;
++          }
++          return;
++        }
++
+         if (deltaType === "input_json_delta") {
+           const toolUse =
+             existing && existing.type === "tool_use"
+@@ -622,7 +631,9 @@
+ 
+       if (eventType === "message_delta") {
+         const delta = asRecord(payload.delta);
+-        stopReason = toString(delta.stop_reason, stopReason);
++        if (typeof delta.stop_reason === "string") stopReason = delta.stop_reason;
++        if ("stop_details" in delta) stopDetails = cloneLogPayload(delta.stop_details);
++        else if ("stop_details" in payload) stopDetails = cloneLogPayload(payload.stop_details);
+         stopSequence =
+           typeof delta.stop_sequence === "string" ? String(delta.stop_sequence) : stopSequence;
+         mergeUsage(usage, payload.usage);
+@@ -649,7 +660,7 @@
+               : [];
+           }
+           if (block.type === "thinking") {
+-            return block.thinking
++            return block.thinking || block.signature
+               ? [
+                   {
+                     type: "thinking",
+@@ -681,6 +692,7 @@
+         model,
+         content,
+         stop_reason: stopReason,
++        ...(stopDetails !== undefined ? { stop_details: stopDetails } : {}),
+         ...(stopSequence ? { stop_sequence: stopSequence } : {}),
+         ...(Object.keys(usage).length > 0 ? { usage } : {}),
+         ...(contextManagement ? { context_management: contextManagement } : {}),

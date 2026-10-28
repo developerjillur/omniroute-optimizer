@@ -1,8 +1,7 @@
 diff --git a/src/app/api/usage/analytics/route.ts b/src/app/api/usage/analytics/route.ts
-index 56a799d41..013fcc047 100644
 --- a/src/app/api/usage/analytics/route.ts
 +++ b/src/app/api/usage/analytics/route.ts
-@@ -248,7 +248,9 @@ function computeUsageRowCost(
+@@ -248,7 +248,9 @@
    const provider = toStringValue(row.provider);
    const model = toStringValue(row.model);
    if (!provider || !model) return 0;
@@ -13,7 +12,16 @@ index 56a799d41..013fcc047 100644
    const isAggregated = toNumber(row.isAggregated ?? row.is_aggregated) > 0;
    const storedCost = toNumber(row.storedCost ?? row.stored_cost);
  
-@@ -283,6 +285,7 @@ function computeUsageRowCost(
+@@ -276,6 +278,8 @@
+       output: toNumber(row.completionTokens),
+       cacheRead: toNumber(row.cacheReadTokens),
+       cacheCreation: toNumber(row.cacheCreationTokens),
++      cacheCreation5m: toNumber(row.cacheCreation5mTokens),
++      cacheCreation1h: toNumber(row.cacheCreation1hTokens),
+       reasoning: toNumber(row.reasoningTokens),
+     },
+     {
+@@ -283,6 +287,7 @@
        model,
        serviceTier,
        flatRateAsZero,

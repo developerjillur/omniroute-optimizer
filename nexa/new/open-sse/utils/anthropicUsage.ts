@@ -1,3 +1,5 @@
+import { getCacheCreationTtlFields } from "../../src/lib/usage/cacheCreationTtl.ts";
+
 type UsageRecord = Record<string, unknown>;
 
 function record(value: unknown): UsageRecord {
@@ -68,29 +70,16 @@ export function getAnthropicMeteredUsage(value: unknown): UsageRecord {
     if (!Number.isSafeInteger(total)) return usage;
     result[field] = total;
   }
-  const ttl = { ephemeral_5m_input_tokens: 0, ephemeral_1h_input_tokens: 0 };
-  const completeTtl = (iterations as unknown[]).every((value) => {
-    const item = record(value);
-    const creation = record(item.cache_creation);
-    const short =
-      creation.ephemeral_5m_input_tokens ?? (item.cache_creation_input_tokens === 0 ? 0 : null);
-    const long =
-      creation.ephemeral_1h_input_tokens ?? (item.cache_creation_input_tokens === 0 ? 0 : null);
-    if (
-      typeof short !== "number" ||
-      typeof long !== "number" ||
-      !Number.isFinite(short) ||
-      !Number.isFinite(long) ||
-      short < 0 ||
-      long < 0 ||
-      short + long !== item.cache_creation_input_tokens
-    )
-      return false;
-    ttl.ephemeral_5m_input_tokens += short;
-    ttl.ephemeral_1h_input_tokens += long;
-    return true;
-  });
-  if (completeTtl) result.cache_creation = ttl;
+  const ttl: Record<string, number> = {};
+  for (const value of iterations) {
+    const known = getCacheCreationTtlFields(value);
+    if (known.cacheCreation5m !== undefined)
+      ttl.ephemeral_5m_input_tokens = (ttl.ephemeral_5m_input_tokens ?? 0) + known.cacheCreation5m;
+    if (known.cacheCreation1h !== undefined)
+      ttl.ephemeral_1h_input_tokens = (ttl.ephemeral_1h_input_tokens ?? 0) + known.cacheCreation1h;
+  }
+  // Keep known iteration detail; the remainder of total writes stays unknown.
+  if (Object.keys(ttl).length > 0) result.cache_creation = ttl;
   else if (iterations.length > 1) delete result.cache_creation;
   return result;
 }
@@ -103,6 +92,7 @@ export function normalizeAnthropicUsage(value: unknown): Record<string, number> 
   const input = tokens(usage.input_tokens ?? usage.prompt_tokens) + read + write;
   const output = tokens(usage.output_tokens ?? usage.completion_tokens);
   const result: Record<string, number> = {
+    ...getCacheCreationTtlFields(usage),
     prompt_tokens: input,
     input_tokens: input,
     completion_tokens: output,

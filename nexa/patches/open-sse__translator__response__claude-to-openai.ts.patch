@@ -1,5 +1,4 @@
 diff --git a/open-sse/translator/response/claude-to-openai.ts b/open-sse/translator/response/claude-to-openai.ts
-index f0bc81872109217bcfeff206c1ec8b9739367fb3..a85a1dbeb56691f53b183940a872141cf14a37c0 100644
 --- a/open-sse/translator/response/claude-to-openai.ts
 +++ b/open-sse/translator/response/claude-to-openai.ts
 @@ -1,6 +1,14 @@
@@ -251,3 +250,12 @@ index f0bc81872109217bcfeff206c1ec8b9739367fb3..a85a1dbeb56691f53b183940a872141c
                            ...(cacheCreationTokens > 0
                              ? { cache_creation_tokens: cacheCreationTokens }
                              : {}),
+@@ -422,6 +358,8 @@
+       return "stop";
+     case "max_tokens":
+       return "length";
++    case "refusal":
++      return "content_filter";
+     case "tool_use":
+       return "tool_calls";
+     case "stop_sequence":

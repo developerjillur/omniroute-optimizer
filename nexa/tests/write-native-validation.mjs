@@ -64,6 +64,18 @@ for (const name of [
     `${name}: full historical bootstrap and migration must complete`
   );
 }
+const budgetCase = "resilience budgetMs survives a complete settings payload";
+for (const name of [
+  "resilience-budget-green.tap",
+  "native-production.tap",
+  "upgrade-compatibility.tap",
+]) {
+  const output = fs.readFileSync(path.join(directory, name), "utf8");
+  assert.ok(
+    output.split("\n").some((line) => /^ok \d+ - /.test(line) && line.endsWith(budgetCase)),
+    `${name}: the runtime-supported settings payload must be accepted`
+  );
+}
 const compilerData = fs.readFileSync(path.join(directory, "tsc-diagnostics.log"), "utf8");
 const compiler = JSON.parse(compilerData.split("\n")[0]);
 const diagnostics = (compilerData.match(/error TS\d+:/g) || []).length;
@@ -88,6 +100,10 @@ const receipt = {
   productionRuntime: process.version,
   baseline: tap("native-red.tap", true),
   translatedCacheCostBaseline: tap("cache-cost-red.tap", true),
+  resilienceSettings: {
+    baseline: tap("resilience-budget-red.tap", true),
+    green: tap("resilience-budget-green.tap"),
+  },
   node26: {
     tooling: tap("tooling-node26.tap"),
     native: tap("native-green.tap"),

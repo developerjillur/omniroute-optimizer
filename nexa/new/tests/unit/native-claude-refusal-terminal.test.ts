@@ -310,6 +310,61 @@ test("Claude-to-OpenAI buffered refusal maps to content_filter", () => {
   assert.equal(record(record(choices[0]).message).content, "");
 });
 
+test("an explicit native content_filter preserves signed thinking and usage", async () => {
+  const text = events("content_filter").map(frame).join("");
+  let completed: unknown;
+  const transformed = source(text).pipeThrough(
+    createSSEStream({
+      mode: "passthrough",
+      sourceFormat: FORMATS.CLAUDE,
+      clientResponseFormat: FORMATS.CLAUDE,
+      provider: "claude",
+      model: "claude-opus-5-5",
+      body: { messages: [{ role: "user", content: "fixture request" }] },
+      onComplete: (result) => {
+        completed = result;
+      },
+    })
+  );
+  const output = await wrap(await new Response(transformed).text());
+  assert.equal(output.failures, 0);
+  assert.equal(output.text, text);
+  assert.equal(record(completed).status, 200);
+  const retained = record(record(completed).responseBody);
+  assert.equal(retained.stop_reason, "content_filter");
+  assert.ok(Array.isArray(retained.content));
+  assert.equal(record(retained.content[0]).signature, "fixture-refusal-signature");
+  assert.equal(record(retained.usage).output_tokens, 7080);
+});
+
+test("Claude-to-OpenAI streaming preserves an explicit content_filter", () => {
+  const state = { toolCalls: new Map(), toolNameMap: new Map() };
+  const chunks = claudeToOpenAIResponse(
+    { type: "message_delta", delta: { stop_reason: "content_filter" } },
+    state
+  );
+  assert.equal(chunks?.at(-1)?.choices?.[0]?.finish_reason, "content_filter");
+});
+
+test("Claude-to-OpenAI buffering preserves an explicit content_filter", () => {
+  const result = translateNonStreamingResponse(
+    {
+      id: "msg_filtered_nonstream",
+      type: "message",
+      role: "assistant",
+      model: "claude-opus-5-5",
+      content: [],
+      stop_reason: "content_filter",
+      usage: { input_tokens: 2, output_tokens: 3 },
+    },
+    FORMATS.CLAUDE,
+    FORMATS.OPENAI
+  );
+  const choices = record(result).choices;
+  assert.ok(Array.isArray(choices));
+  assert.equal(record(choices[0]).finish_reason, "content_filter");
+});
+
 test("a completed refusal keeps native Thread ownership without another request", async () => {
   let saves = 0;
   const text = events().map(frame).join("");

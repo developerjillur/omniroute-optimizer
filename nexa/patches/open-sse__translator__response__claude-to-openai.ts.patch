@@ -1,5 +1,5 @@
 diff --git a/open-sse/translator/response/claude-to-openai.ts b/open-sse/translator/response/claude-to-openai.ts
-index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..11579dd9c79ddaf88a9f206f0f624850067ac789 100644
+index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..fdbd3998d248fc70ef15dffc385ebe3082042347 100644
 --- a/open-sse/translator/response/claude-to-openai.ts
 +++ b/open-sse/translator/response/claude-to-openai.ts
 @@ -1,6 +1,14 @@
@@ -281,12 +281,19 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..11579dd9c79ddaf88a9f206f0f624850
                                }
                              : {}),
                          },
-@@ -469,6 +410,8 @@
+@@ -469,12 +410,13 @@
        return "stop";
      case "max_tokens":
        return "length";
 +    case "refusal":
++    case "content_filter":
 +      return "content_filter";
      case "tool_use":
        return "tool_calls";
      case "stop_sequence":
+       return "stop";
+-    case "refusal":
+-      return "content_filter";
+     case "model_context_window_exceeded":
+       return "length";
+     default:

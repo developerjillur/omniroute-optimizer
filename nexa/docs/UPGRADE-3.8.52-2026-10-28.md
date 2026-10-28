@@ -4,7 +4,8 @@ Canonical repository: `developerjillur/omniroute-optimizer`। Pristine upstream
 `ad6f33f66bda34eba98645d3bfdabbde294bc843` (`v3.8.52`)। আগের validated canonical
 source `968fe6b68dac7ccd34f4652c9f967ed1a8bb2cc0` ছিল `v3.8.51`-এর overlay।
 
-বর্তমান অবস্থা: source reconciliation হয়েছে; নতুন version-এর validation চলছে।
+Source acceptance-এর authoritative ফল exact commit-এর `native-validation.json`
+receipt ও বাধ্যতামূলক CI gates। অসমাপ্ত বা ব্যর্থ run গ্রহণ করা যায় না।
 Full build, package install, live migration বা deployment হয়নি। Installed build
 `15533a05c` এই কাজের ফলে বদলায়নি। আগের version-এর সবুজ CI নতুন version-এর
 compatibility প্রমাণ করে না।
@@ -88,7 +89,8 @@ compiler run inherited baseline হিসেবে গ্রহণ করা হ
 fixture প্রস্তুত আছে। নতুন runtime data ব্যবহার না করে এই fixture-এ credential
 bytes, API key, combo JSON, settings, usage/cache TTL, call-log metadata, memory
 content/search এবং Artifact file hash যাচাই হবে। Ledger timestamps সংরক্ষণ ও
-দ্বিতীয় run-এর mutation-free আচরণও পরীক্ষা হবে। এই lane-এর ফল এখনও pending।
+দ্বিতীয় run-এর mutation-free আচরণও পরীক্ষা হয়। এই lane-এর ফল exact source-এর
+CI receipt-এ যাচাই করতে হবে; আগের version-এর ফল দিয়ে এটি পূরণ হয় না।
 
 ## দ্বিতীয় বিস্তৃত measurement
 
@@ -143,3 +145,28 @@ Ratchet এখন abnormal compiler exit-এর partial diagnostic, global/confi
 error ও inconsistent exit status গ্রহণ করে না। Unmeasured standalone `--update`-ও
 ব্যর্থ হয়। Raw diagnostic এবং version budget history অক্ষত রেখে এই failure modes-এর
 পৃথক negative tests রাখা হয়েছে।
+
+## নতুন release-এর দুইটি contract সংশোধন
+
+[Upstream #18390](https://github.com/cheaper-inference/OmniRoute/issues/18390)-এর
+সঙ্গে pinned source মিলিয়ে `waitForCooldown.budgetMs`-এর schema/runtime mismatch
+নিশ্চিত হয়েছে। Runtime সেটি পড়লেও strict settings schema field-টি গ্রহণ করত না।
+এখন optional integer `0..300000` গ্রহণ করে; existing runtime floor, defaults এবং
+unknown-key rejection অপরিবর্তিত। `requestQueue.globalConcurrentRequests`-এর
+স্বীকৃতি Nexa overlay-তে আগেই ছিল। ছয়টি contract case, targeted failing baseline,
+green repeat ও production Node run এই দুই setting-এর compatibility যাচাই করবে।
+Live setting বা provider configuration পরিবর্তন করা হয়নি।
+
+Streaming Claude-to-OpenAI translator explicit `content_filter`-কে সাধারণ `stop`
+করছিল, যেখানে buffered translator সেটি ঠিক রাখে। এই mapping সমান করা হয়েছে এবং
+একটি duplicate `refusal` switch case বাদ দেওয়া হয়েছে। নতুন control tests actual
+filtered terminal, opaque thinking signature ও usage অপরিবর্তিত থাকা এবং দুই
+translator-এর filter status পরীক্ষা করে। [Upstream #17324](https://github.com/cheaper-inference/OmniRoute/issues/17324)-এর
+damaged-history retry loop live-এ reproduce করা হয়নি; এই source change পুরোনো
+conversation history repair বা refusal retry-এর দাবি করে না।
+
+Compiler message review-এ পুরোনো auto-update tests-এর নয়টি অসম্পূর্ণ config
+fixture-ও পাওয়া গেছে। Source/compose fixtures-এ বিদ্যমান required auxiliary
+defaults যোগ করা হয়েছে; command updater-এর production contract ও আগের সব
+assertion অক্ষত। এই সাতটি existing upstream test-ও broad compatibility lane-এ
+চলে। Test-এ spawn/exec mock থাকে; কোনো update command বাস্তবে চালানো হয় না।

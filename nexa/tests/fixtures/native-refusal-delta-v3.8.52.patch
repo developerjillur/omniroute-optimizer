@@ -994,15 +994,22 @@
                                }
                              : {}),
                          },
-@@ -469,6 +410,8 @@
+@@ -469,12 +410,13 @@
        return "stop";
      case "max_tokens":
        return "length";
 +    case "refusal":
++    case "content_filter":
 +      return "content_filter";
      case "tool_use":
        return "tool_calls";
      case "stop_sequence":
+       return "stop";
+-    case "refusal":
+-      return "content_filter";
+     case "model_context_window_exceeded":
+       return "length";
+     default:
 --- a/open-sse/utils/streamPayloadCollector.ts
 +++ b/open-sse/utils/streamPayloadCollector.ts
 @@ -512,7 +512,8 @@

@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
-  "trackedNexaFiles": 424,
-  "totalNexaBytes": 1871560,
+  "trackedNexaFiles": 429,
+  "totalNexaBytes": 1887443,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -363,9 +363,9 @@
     {
       "path": "nexa/deploy/tsc-ratchet.test.mjs",
       "mode": "100644",
-      "gitBlobSha": "77fb6d833b0723217422dc1d0209ad6d93738630",
-      "bytes": 6471,
-      "sha256": "1069b786ffbb91c1b2a3f340f1b1c054f67b78004247dff07593c62cbefe2c25"
+      "gitBlobSha": "ca5c3c194247660d4199beb0ebbae9293eeb1f5c",
+      "bytes": 6470,
+      "sha256": "0268fb9266f0f8b62419a1a14f89eee17f44762e6f0e291368fc3158306511de"
     },
     {
       "path": "nexa/docs/AGENT-BRIDGE-LOCAL-LIMITS-2026-10-02.md",
@@ -510,9 +510,9 @@
     {
       "path": "nexa/docs/UPGRADE-3.8.52-2026-10-28.md",
       "mode": "100644",
-      "gitBlobSha": "0d47a3e86b3671e1220f299f5d527c95afd00d36",
-      "bytes": 12977,
-      "sha256": "04cbad904ca686d2c67f1c50c4c1d704bb77b608d7e0eb9abcff5eeeecec0916"
+      "gitBlobSha": "e65cf9da0869ac3ce844c32109dc45da239cc9cf",
+      "bytes": 15639,
+      "sha256": "1a432cc8c24c3d6569fff175c2d30e79db0ea3af541b65a4d8882d280c136fc5"
     },
     {
       "path": "nexa/docs/USAGE-AUDIT-2026-10-14.md",
@@ -552,9 +552,9 @@
     {
       "path": "nexa/manifest.json",
       "mode": "100644",
-      "gitBlobSha": "013ff33f4e87d0304cfe143e2756a46f799bc2d8",
-      "bytes": 81435,
-      "sha256": "cd2e5afd64ad9cc75222234cc115f7609f2331a404794692b4463b28a67df815"
+      "gitBlobSha": "42504d31db37fb3c887e04780c6b59d9f6ad90fc",
+      "bytes": 81935,
+      "sha256": "17998dbf3772f744e330495e64f2088dc8571250b2f38fcafe29ed64df4e6030"
     },
     {
       "path": "nexa/new/bin/cli/utils/packageMigrations.mjs",
@@ -650,9 +650,9 @@
     {
       "path": "nexa/new/scripts/check/check-tsc-ratchet.mjs",
       "mode": "100644",
-      "gitBlobSha": "d84527a07cf5440443834da6f84ec4950fd72248",
-      "bytes": 5873,
-      "sha256": "987d18afb0437d71f0940ae48c9b404a6f2f293f350109045f600d4676fa27b5"
+      "gitBlobSha": "848262e303e2a32f179559b9f6df67ddd08b0c15",
+      "bytes": 5871,
+      "sha256": "724b8c716dd45fa16a59b35ab6885f4d0d283b54a97e1eccd484fdc6e5f79964"
     },
     {
       "path": "nexa/new/scripts/docs/annotate-loopback-only.mjs",
@@ -1217,9 +1217,9 @@
     {
       "path": "nexa/new/tests/unit/native-claude-refusal-terminal.test.ts",
       "mode": "100644",
-      "gitBlobSha": "b55850ddfec5a89dba0d5d8c0486a6b021b0afdd",
-      "bytes": 11682,
-      "sha256": "5b837203b6bd0a9dd01ab25168bdf5d96820456b88559ce0f07d997d74bd223b"
+      "gitBlobSha": "76e1558cd49b936d50796f130f72f8c0e6c864c3",
+      "bytes": 13668,
+      "sha256": "36d9fc2459ff21cda5564d5125cf3f6477ff759a670de60c3b4bc1c78d4b69d3"
     },
     {
       "path": "nexa/new/tests/unit/native-claude-thread-chatcore.test.ts",
@@ -1346,6 +1346,13 @@
       "gitBlobSha": "5f7d41afacc3ccacc6d4976bc37658cdf8835e87",
       "bytes": 4619,
       "sha256": "a3ac29e59a7792527d13c81b3d677de24c2773815d6eb617ba109caef8cf03e0"
+    },
+    {
+      "path": "nexa/new/tests/unit/resilience-settings-contract.test.ts",
+      "mode": "100644",
+      "gitBlobSha": "cbca24d0d8a367ebe398c0d8eeefdfaf36cfd1ee",
+      "bytes": 3416,
+      "sha256": "73e13e20b0ade7dec12d7350f5dae5edd795733c048a7a6765db831f4aec9c3a"
     },
     {
       "path": "nexa/new/tests/unit/security/audit-remediation-guards.test.ts",
@@ -1763,9 +1770,9 @@
     {
       "path": "nexa/patches/open-sse__translator__response__claude-to-openai.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "341a04c5ec713a397841432f800a5ca5220de597",
-      "bytes": 13531,
-      "sha256": "43c9e97e7e302750718e47c50a251ec9b03dfb6136d60f7188306950470648fa"
+      "gitBlobSha": "d0e134e3758c39aa253d85e53c3a9660dfca1a73",
+      "bytes": 13717,
+      "sha256": "7c878010339fb16318cd9c81fce6d9766526b2df47ee3e4dce20855f4481b7cc"
     },
     {
       "path": "nexa/patches/open-sse__utils__earlyStreamKeepalive.ts.patch",
@@ -2393,9 +2400,9 @@
     {
       "path": "nexa/patches/src__shared__validation__schemas__settings.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "fb4f1245a8d18d87ff925083369367f0935d4244",
-      "bytes": 1040,
-      "sha256": "6ed2a5c37143e1d9b601b7e5c082e634174f1f26537252c3a31273cc5d76a844"
+      "gitBlobSha": "e81bf5adffff86acc753d18cc9aa7da1b27bd429",
+      "bytes": 1310,
+      "sha256": "0b5b8e243abbbb285ac3817714e76b8dfbeb84d8db9f1a215322f6bcec5b6e6c"
     },
     {
       "path": "nexa/patches/src__sse__handlers__chat.ts.patch",
@@ -2466,6 +2473,13 @@
       "gitBlobSha": "a57ad1c92980f4236bc4a6f3861071aa565d9688",
       "bytes": 1799,
       "sha256": "a5ff4efec6bc745109c3c44f3d44fd3b0ed73e6427e0f9b5a835334bab055d34"
+    },
+    {
+      "path": "nexa/patches/tests__unit__auto-update.test.ts.patch",
+      "mode": "100644",
+      "gitBlobSha": "6297408ecdf41094e0e65af076202a660d16f42c",
+      "bytes": 2935,
+      "sha256": "9cd97dc7a09ad3bae1acb3b08c03d96697f36c3ed2cedbc3c944ba7bf30929b3"
     },
     {
       "path": "nexa/patches/tests__unit__call-log-cap.test.ts.patch",
@@ -2827,9 +2841,9 @@
     {
       "path": "nexa/tests/compare-upgrade-types.mjs",
       "mode": "100644",
-      "gitBlobSha": "d791331e690cee365373535c7b06cb0802123159",
-      "bytes": 1951,
-      "sha256": "fc857755421d616a14f171ab7370f56055ac079fa33d78b18060208e0e529d4d"
+      "gitBlobSha": "8287ecec29fa78bc0119296a16598e6ab0b7fe36",
+      "bytes": 1965,
+      "sha256": "325e00244b484a2dbf45b1f28773a5fe2e1bf5c7f989486e2ed8ee4de82a08f9"
     },
     {
       "path": "nexa/tests/effort-coverage.test.mjs",
@@ -2848,9 +2862,9 @@
     {
       "path": "nexa/tests/fixtures/native-refusal-delta-v3.8.52.patch",
       "mode": "100644",
-      "gitBlobSha": "3a57862a7c98f7bc871d6fd3c0b0e978baaf298e",
-      "bytes": 47312,
-      "sha256": "5b41e990a099850c37965ff0cd981ea8cb358ba2acf2207348aeb49b093f8bdf"
+      "gitBlobSha": "5b78a4cffef80d2b325d4fdc2dae7bac50ea51cf",
+      "bytes": 47498,
+      "sha256": "fbadc1d442c62876f72c59d3a330bac732c4abb07b37f3bd0c9c8c8f6beb84cd"
     },
     {
       "path": "nexa/tests/fixtures/native-refusal-delta.patch",
@@ -2865,6 +2879,13 @@
       "gitBlobSha": "54777320025bdcf2fea950bc94799aba1dae1ea5",
       "bytes": 24470,
       "sha256": "50396458667a4dafa1eccfa1e630d0b7a4437770655058d8f70ce54c9b6476da"
+    },
+    {
+      "path": "nexa/tests/fixtures/resilience-budget-v3.8.52.patch",
+      "mode": "100644",
+      "gitBlobSha": "e005b70110070966a4efbac77eb0c7842a5dd863",
+      "bytes": 465,
+      "sha256": "4d4554813b6113c5aa424b2de68a9cae8da3414702db3ce0a559ec98c97e24b4"
     },
     {
       "path": "nexa/tests/isolated-network.mjs",
@@ -2893,6 +2914,13 @@
       "gitBlobSha": "fcefabb5088384757eb98b3da4eb9e3fbc25e808",
       "bytes": 1586,
       "sha256": "17799dc4d3533935ddca59c588d631b0740e28842c6b972d8f8c466a58563f5c"
+    },
+    {
+      "path": "nexa/tests/resilience-budget-red.test.mjs",
+      "mode": "100644",
+      "gitBlobSha": "90bda44eab571038227d88d614b76d743ff53340",
+      "bytes": 1701,
+      "sha256": "e22992baa8695384936545571a9e074965d7b50bc09973890b0cb574b56f06cc"
     },
     {
       "path": "nexa/tests/retired-patches.test.mjs",
@@ -2951,6 +2979,13 @@
       "sha256": "710c7b19f01f9eb88bfebbb87e87e1946c88a30097bd4970d3b386db41912197"
     },
     {
+      "path": "nexa/tests/verify-resilience-budget-red.mjs",
+      "mode": "100644",
+      "gitBlobSha": "fabf8ba63768a3aa57d15d65af2a06e144209436",
+      "bytes": 985,
+      "sha256": "29f26e09a4e415ec7e1621959a202e4c027a17d292783944f6a6d7074045d64c"
+    },
+    {
       "path": "nexa/tests/verify-source-inventory.mjs",
       "mode": "100644",
       "gitBlobSha": "ca5dcd1e224fdd52d41eadc6be84b4080da61828",
@@ -2960,9 +2995,9 @@
     {
       "path": "nexa/tests/write-native-validation.mjs",
       "mode": "100644",
-      "gitBlobSha": "98b5fa0d8fc42820878a47da4af49129d0f863b9",
-      "bytes": 5248,
-      "sha256": "6578effed3230de08b604e5db4e4ff0f2de51ff244d0a26e322c6633be0fe770"
+      "gitBlobSha": "323b73f0cbf34bb268dbdbf6ba406bcd09b5da32",
+      "bytes": 5828,
+      "sha256": "f6bce3e9e3bcc4282369c37e6a4d7a004a84e64fdfab317f6eb32c580b661a5f"
     },
     {
       "path": "nexa/update.mjs",

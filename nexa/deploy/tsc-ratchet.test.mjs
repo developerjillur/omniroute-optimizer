@@ -120,10 +120,10 @@ test("missing and invalid budgets fail closed even after a completed compiler", 
 
 test("partial diagnostics from an abnormal exit cannot lower a release budget", () => {
   const baseline = { value: 100, previousReleaseBudgets: [{ value: 5830 }] };
-  const result = measure(
-    'console.log("a.ts(1,1): error TS1234: partial"); process.exit(1)',
-    { args: ["--update"], baseline }
-  );
+  const result = measure('console.log("a.ts(1,1): error TS1234: partial"); process.exit(1)', {
+    args: ["--update"],
+    baseline,
+  });
   assert.equal(result.status, 75);
   assert.match(result.stdout, /^tscErrors=SKIP reason=tsc-exit-1/m);
   assert.match(result.diagnostics, /error TS1234: partial/);

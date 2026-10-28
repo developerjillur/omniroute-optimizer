@@ -29,7 +29,7 @@ const after = parseTypeDiagnostics(completedOutput("tsc-diagnostics.log"), (file
 });
 const receipt = {
   ...compareTypeDiagnostics(before, after),
-  baselineRaised: false,
+  baselineModifiedByComparison: false,
   identity: "same file, diagnostic code, source statement and column; multiplicity cannot grow",
 };
 fs.writeFileSync(

@@ -2,7 +2,7 @@
 // scripts/check/check-tsc-ratchet.mjs
 // TypeScript-error ratchet — the report-accepted "tracked exception" for
 // `next.config.mjs typescript.ignoreBuildErrors: true`. The production build
-// still ignores TS errors (a full flip is a 2966-error / 620-file backlog), but
+// still ignores the inherited backlog recorded in the versioned baseline, but
 // this gate makes the backlog MONOTONICALLY BURN DOWN: new code may not add TS
 // errors, and the count can only ratchet down.
 //

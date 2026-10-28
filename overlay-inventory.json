@@ -1350,9 +1350,9 @@
     {
       "path": "nexa/new/tests/unit/resilience-settings-contract.test.ts",
       "mode": "100644",
-      "gitBlobSha": "5192744cac28bb31594cfda5cb8393d6fa3de50a",
+      "gitBlobSha": "d69fa63cd68f35533dadd86bc058ae1b5714299d",
       "bytes": 3709,
-      "sha256": "c4c1ddf1bea3783e02c60c35b8d7ed620a9c273a00e6bfb59d9ec3ace83fa337"
+      "sha256": "fb92f87e4e52d693cf8217cdf7f35d6bb92ff5e4d468f6e686d01973c0a1f9e7"
     },
     {
       "path": "nexa/new/tests/unit/security/audit-remediation-guards.test.ts",

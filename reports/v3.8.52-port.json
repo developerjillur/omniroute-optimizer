@@ -2235,6 +2235,141 @@
       "fullBuild": false,
       "deployment": false,
       "privateRuntimeDataUsed": false
+    },
+    {
+      "sourceCommit": "c0914911ecd0f6d3914f82882ad0d446b0355389",
+      "runUrl": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/40656582381",
+      "accepted": false,
+      "reason": "One new test diagnostic: deepEqual narrows parsed to the exact expected input shape before a subsequent optional-property access. Preserve every assertion and read the optional fields before the equality assertion.",
+      "counts": {
+        "tooling-node24.tap": {
+          "tests": 48,
+          "pass": 48,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "tooling-node26.tap": {
+          "tests": 48,
+          "pass": 48,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-production.tap": {
+          "tests": 178,
+          "pass": 178,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "production-migrations.tap": {
+          "tests": 7,
+          "pass": 7,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "stream-green.tap": {
+          "tests": 392,
+          "pass": 392,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "effort-primary.tap": {
+          "tests": 102,
+          "pass": 102,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-extended.tap": {
+          "tests": 171,
+          "pass": 171,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "upgrade-migrations.tap": {
+          "tests": 11,
+          "pass": 11,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "effort-production.tap": {
+          "tests": 102,
+          "pass": 102,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-green.tap": {
+          "tests": 164,
+          "pass": 164,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "resilience-budget-green.tap": {
+          "tests": 6,
+          "pass": 6,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "upgrade-compatibility.tap": {
+          "tests": 1197,
+          "pass": 1197,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-red.tap": {
+          "tests": 28,
+          "pass": 10,
+          "fail": 18,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "deployment-helpers.tap": {
+          "tests": 63,
+          "pass": 62,
+          "fail": 0,
+          "skipped": 1,
+          "cancelled": 0
+        },
+        "resilience-budget-red.tap": {
+          "tests": 6,
+          "pass": 4,
+          "fail": 2,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "cache-cost-red.tap": {
+          "tests": 1,
+          "pass": 0,
+          "fail": 1,
+          "skipped": 0,
+          "cancelled": 0
+        }
+      },
+      "fullTypes": {
+        "pristine": 6572,
+        "applied": 6511,
+        "ceiling": 6529,
+        "newIdentities": 1,
+        "completed": true
+      },
+      "functionalGates": "pass",
+      "coreTypes": "pass",
+      "lint": "pass",
+      "docsAll": "pass",
+      "formatting": "pass",
+      "resilienceRedAccepted": true,
+      "fullBuild": false,
+      "deployment": false
     }
   ],
   "compilerBudgetReconciliation": {

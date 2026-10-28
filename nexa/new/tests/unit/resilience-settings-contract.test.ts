@@ -78,7 +78,6 @@ test("omitted resilience settings retain the current runtime defaults", () => {
   assert.equal(updateResilienceSchema.safeParse({}).success, false);
   const input = { requestQueue: { globalConcurrentRequests: 0 } };
   const parsed = updateResilienceSchema.parse(input);
-  assert.deepEqual(parsed, input);
   assert.equal(Object.hasOwn(parsed, "waitForCooldown"), false);
   assert.deepEqual(
     normalizeRequestQueueSettings(parsed.requestQueue, queueDefaults),
@@ -88,4 +87,5 @@ test("omitted resilience settings retain the current runtime defaults", () => {
     normalizeWaitForCooldownSettings(parsed.waitForCooldown, waitDefaults),
     waitDefaults
   );
+  assert.deepEqual(parsed, input);
 });

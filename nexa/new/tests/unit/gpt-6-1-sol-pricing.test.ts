@@ -16,7 +16,7 @@ test("legacy long-context fallback rates are multiplied once and nested tiers ta
 });
 
 test("GPT 6.1 Sol has official API-equivalent rates for Codex base and effort aliases", () => {
-  const pricing = DEFAULT_PRICING as Record<string, Record<string, Record<string, number>>>;
+  const pricing = DEFAULT_PRICING as unknown as Record<string, Record<string, Record<string, number>>>;
   for (const suffix of ["", "-low", "-medium", "-high", "-xhigh", "-max", "-ultra"]) {
     const row = pricing.cx[`gpt-6.1-sol${suffix}`];
     assert.ok(row, `missing pricing for gpt-6.1-sol${suffix}`);

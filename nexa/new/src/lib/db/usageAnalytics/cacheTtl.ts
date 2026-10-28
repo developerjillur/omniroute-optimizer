@@ -1,22 +1,30 @@
 import { getDbInstance } from "../core";
 
 const TTL_COLUMNS = ["tokens_cache_creation_5m", "tokens_cache_creation_1h"] as const;
+const COST_COLUMNS = {
+  cost_tokens_input: "tokens_input",
+  cost_tokens_output: "tokens_output",
+  cost_tokens_cache_read: "tokens_cache_read",
+  cost_tokens_cache_creation: "tokens_cache_creation",
+  cost_tokens_reasoning: "tokens_reasoning",
+} as const;
 
 /** Older internal SQL-source callers omit the optional TTL columns. */
 export function withCacheTtlColumns(source: string, params: Record<string, unknown> = {}): string {
   const db = getDbInstance();
+  const optionalColumns = [...TTL_COLUMNS, ...Object.keys(COST_COLUMNS)];
   try {
     // LIMIT 0 resolves columns without scanning rows, including on lazy adapters.
-    db.prepare(`SELECT ${TTL_COLUMNS.join(", ")} FROM ${source} AS cache_ttl_source LIMIT 0`).all(
+    db.prepare(`SELECT ${optionalColumns.join(", ")} FROM ${source} AS cache_ttl_source LIMIT 0`).all(
       params
     );
     return source;
   } catch (error) {
     const message = String((error as Error).message);
-    if (!/no such column/i.test(message) || !TTL_COLUMNS.some((column) => message.includes(column)))
+    if (!/no such column/i.test(message) || !optionalColumns.some((column) => message.includes(column)))
       throw error;
   }
-  const missing = TTL_COLUMNS.filter((column) => {
+  const missing = optionalColumns.filter((column) => {
     try {
       db.prepare(`SELECT ${column} FROM ${source} AS cache_ttl_source LIMIT 0`).all(params);
       return false;
@@ -27,7 +35,23 @@ export function withCacheTtlColumns(source: string, params: Record<string, unkno
     }
   });
   if (missing.length === 0) return source;
-  return `(SELECT cache_ttl_source.*, ${missing.map((column) => `NULL AS ${column}`).join(", ")}
+  let providerCostPresent = true;
+  try {
+    db.prepare(`SELECT provider_cost_usd FROM ${source} AS cache_ttl_source LIMIT 0`).all(params);
+  } catch (error) {
+    if (!/no such column: provider_cost_usd/i.test(String((error as Error).message))) throw error;
+    providerCostPresent = false;
+  }
+  const additions = missing.map((column) => {
+    const tokenColumn = COST_COLUMNS[column as keyof typeof COST_COLUMNS];
+    const value = tokenColumn
+      ? providerCostPresent
+        ? `CASE WHEN provider_cost_usd IS NULL THEN ${tokenColumn} ELSE 0 END`
+        : tokenColumn
+      : "NULL";
+    return `${value} AS ${column}`;
+  });
+  return `(SELECT cache_ttl_source.*, ${additions.join(", ")}
     FROM ${source} AS cache_ttl_source)`;
 }
 

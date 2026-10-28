@@ -26,6 +26,11 @@ compatibility প্রমাণ করে না।
 - নতুন LLMLingua service upstream migration-এ `not_installed`, `auto_start=0`,
   `auto_update=0`, `provider_expose=0` দিয়ে seed হয়। এই update কোনো model download
   বা compression service শুরু করার অনুমতি দেয় না।
+- Native translated usage-এ Nexa-এর prompt count cache read/write-সহ inclusive।
+  নতুন upstream-এর creation-exclusion marker সরাসরি রেখে দিলে একই write সাধারণ
+  input rate এবং cache creation rate—দুইভাবে গণনা হতে পারে। Translated marker ও
+  5-minute/1-hour metadata এই inclusive producer-এর সঙ্গে মিলিয়ে রাখা হয়েছে;
+  native wire counters পাল্টানো হয় না। আলাদা failing/passing fixture এই seam পরীক্ষা করে।
 
 ## Validation এবং data boundary
 
@@ -46,3 +51,31 @@ read-only affected-count gate; কোনো affected row থাকলে promoti
 Live read-only snapshot-এ সংশ্লিষ্ট পাঁচটি scope-এর count শূন্য ছিল; future promotion-এর
 আগে আবার পরীক্ষা আবশ্যক। Existing database snapshot, cloned-data acceptance,
 package smoke, full build এবং live native acceptance আলাদা release gates।
+
+## Compiler backlog
+
+প্রথম সম্পূর্ণ pristine v3.8.52 measurement-এ ৬,৫৭২টি diagnostic পাওয়া গেছে:
+৬,০৯৮টি tests-এর মধ্যে, ৪৭৪টি অন্য paths-এ। পুরোনো v3.8.51-এর absolute ceiling
+৫,৮৩০ অপরিবর্তিত আছে। Applied measurement ও নতুন diagnostic-এর পার্থক্য review
+করতে হবে; inherited backlog-কে zero-error বা নতুন version-এর PASS বলা যাবে না।
+
+## Port regression review
+
+প্রথম বিস্তৃত v3.8.52 run-এ migration tests ১০/১০ এবং stream tests ৩৯২/৩৯২ পাস
+করেছে। Native ও compatibility suite ব্যর্থ হওয়ায় release আটকে আছে। Review-এ
+missing import/helper, merge-এর duplicate declaration, generic empty end-turn
+exemption, দ্বিতীয় pricing entry-তে হারানো legacy long-context fields এবং
+legacy analytics source-এর নতুন cost-column contract সংশোধন করা হয়েছে।
+পরের run-এর আগে এগুলোকে verified fix ধরা যাবে না।
+
+Cloud sync-এর success fixture এখন বৈধ HMAC response ব্যবহার করে; unsigned
+response rejection চালু থাকে। Agent Bridge stop-এর privilege-required branch
+internal dependency দিয়ে পরীক্ষা হয়, যাতে privileged CI host-এ সেটি skip না হয়।
+Mac-এর kernel listener coexistence test Linux source fixture-এ যাচাই হয় না;
+এটি acceptance receipt-এ আলাদা limitation হিসেবে থাকবে।
+
+TypeScript comparison-এ একই file, diagnostic code, source statement ও column-এর
+পুরোনো diagnostic চিহ্নিত করা হয়; line insertion-এ তার identity বদলায় না।
+Inferred union-এর message বদলালে আগের ও পরের message review artifact-এ থাকে।
+নতুন statement/code/column, বেশি occurrences, global compiler error বা অসমাপ্ত
+compiler run inherited baseline হিসেবে গ্রহণ করা হয় না। Absolute ceiling বাড়ানো হয়নি।

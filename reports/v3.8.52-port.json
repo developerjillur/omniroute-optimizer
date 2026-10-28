@@ -136,6 +136,13 @@
       "baselinePatchSha256": "cc02f4b92d513a98c3d0053975b4cc9764f0275e6a63799064bd08ae7f182886"
     },
     {
+      "target": "open-sse/executors/base/reasoningEffort.ts",
+      "patch": "open-sse__executors__base__reasoningEffort.ts.patch",
+      "disposition": "new-owner-patch",
+      "candidateSha256": "39e3d068e88da2332c300b6515a90e3cbcaeaa4234b22575d847945c2f2618da",
+      "baselinePatchSha256": null
+    },
+    {
       "target": "open-sse/executors/base.ts",
       "patch": "open-sse__executors__base.ts.patch",
       "disposition": "ported",
@@ -202,7 +209,7 @@
       "target": "open-sse/handlers/chatCore/nonStreamingResponse.ts",
       "patch": "open-sse__handlers__chatCore__nonStreamingResponse.ts.patch",
       "disposition": "new-owner-patch",
-      "candidateSha256": "abc484123954ed4d6fd4997938497a4c2333d5940d9c6e3f6f145c276c8b3344",
+      "candidateSha256": "b91583a988379a02ba1a392eaf434f68f03778453c1a7c43464cdb490237200d",
       "baselinePatchSha256": null
     },
     {
@@ -370,7 +377,7 @@
       "target": "open-sse/translator/response/claude-to-openai.ts",
       "patch": "open-sse__translator__response__claude-to-openai.ts.patch",
       "disposition": "ported",
-      "candidateSha256": "b4cd9b3cd521443d3ef928e070d2a921651d08a2ae35ff7a0ada03984a130b3d",
+      "candidateSha256": "7d53d7cdcbf497edce11f318a7a37635957feaca772781c7d2ec181d79641f01",
       "baselinePatchSha256": "c9bbf6df8cd08796a6ffb38df21e914f26f78f10312a3085f5a1c83acde6021d"
     },
     {
@@ -384,21 +391,21 @@
       "target": "open-sse/utils/proxyFetch.ts",
       "patch": "open-sse__utils__proxyFetch.ts.patch",
       "disposition": "ported",
-      "candidateSha256": "013856ee466a3c6f019b92a2dc17193de7bfd2f82e3379919aade17e6d6c7fcb",
+      "candidateSha256": "ead22e80bafd3ef686b653be23cbe778804bb3017f9f290c21a5c40987febd47",
       "baselinePatchSha256": "f620d0d897daf3279f5090203ccccd14dea76fd64fef8412aa59a6b6cfe043ee"
     },
     {
       "target": "open-sse/utils/stream.ts",
       "patch": "open-sse__utils__stream.ts.patch",
       "disposition": "ported",
-      "candidateSha256": "8d4a9fde05a3c18a4b1601eda1b3d8fe54a10814573849f85081c921147d2cd1",
+      "candidateSha256": "e5f8e3d087c58a6151b7cc8f8d50e989033fc11fccdc45d8111228c837a35cd7",
       "baselinePatchSha256": "9a04396e302b2ceea7f1a6cddc9c3c4d881f6b0e44224b313e9422272b9388f0"
     },
     {
       "target": "open-sse/utils/streamClaudeEmptyBody.ts",
       "patch": "open-sse__utils__streamClaudeEmptyBody.ts.patch",
       "disposition": "ported",
-      "candidateSha256": "45dc7faf6cac216d8464fbc71f5d432ec8a2548ac0226c9d8a7369087217b5ac",
+      "candidateSha256": "18ac23637b57cd0dddf45344a17a3d4cfee2972a1efa6782b25d55fb17be6c8a",
       "baselinePatchSha256": "21dd9c455543203ecf4c8db163d5925273b3274ea93bfc75ffb085227803cb01"
     },
     {
@@ -531,7 +538,7 @@
       "target": "src/app/(dashboard)/dashboard/tools/traffic-inspector/hooks/useSessionRecorder.ts",
       "patch": "src__app__(dashboard)__dashboard__tools__traffic-inspector__hooks__useSessionRecorder.ts.patch",
       "disposition": "ported",
-      "candidateSha256": "d0c341c61a181c895505e99e22a05a189f575bf3b4b2426e034b30ea363bfe42",
+      "candidateSha256": "b23c63876d6256f5c846b6c02147ec7696d33a0d9e7e2a611455ba2dfda09067",
       "baselinePatchSha256": "9e2329b0cf19037b490b3f012de207b17f3ed3e84a4c25e42420bf6228ce92a3"
     },
     {
@@ -923,7 +930,7 @@
       "target": "src/mitm/manager.ts",
       "patch": "src__mitm__manager.ts.patch",
       "disposition": "ported",
-      "candidateSha256": "3fbaa6cd4fab5ef0ccaa0d6ed1914de82de428d173526ebc68d05ccdb2682d2b",
+      "candidateSha256": "deddf7caf8b9d593b88de3b32b50ea7298a12f42b3a4743b2db70d2fc924bbc6",
       "baselinePatchSha256": "e66fe4426a8f40f585c68f62e67aa644635c2cbb06ab1d90e2fd347ae5f69563"
     },
     {
@@ -958,14 +965,14 @@
       "target": "src/shared/constants/pricing/frontier-labs.ts",
       "patch": "src__shared__constants__pricing__frontier-labs.ts.patch",
       "disposition": "ported",
-      "candidateSha256": "ea1dc218e8836736060dcca77d8222cc0c7da1a2b70bdb04a7ec6678e0f61d81",
+      "candidateSha256": "640c72491153fd37797b2b70c745e679a61ee02dbdd132a38339294fcb94994d",
       "baselinePatchSha256": "04e813732b9564e20b048ae99740b9ac5833ac5db3def5e0b92b653f7bcbb002"
     },
     {
       "target": "src/shared/constants/pricing/oauth-subscriptions.ts",
       "patch": "src__shared__constants__pricing__oauth-subscriptions.ts.patch",
       "disposition": "ported",
-      "candidateSha256": "057d630dcd109e653c4ff11347c8d7eba85f2c8088cbb41674d6cd37ce32f482",
+      "candidateSha256": "c73e9b240be2977a2467a0f7115357cc3cb8e8a1602ed545e054b313cc1bfc33",
       "baselinePatchSha256": "0f6745fb7384450ed67d3f692e0dbed41e62d0dc80091636e4fe6a10934e0aaf"
     },
     {
@@ -1021,7 +1028,7 @@
       "target": "src/sse/services/auth.ts",
       "patch": "src__sse__services__auth.ts.patch",
       "disposition": "ported",
-      "candidateSha256": "60ab54eb76c88e732690c7945fa676350ec1ee8fd4ae21448d27c0bc6cbc31af",
+      "candidateSha256": "897ca9b8af4e042d8d116b43a2c8df1a1528836ea40a959bee4c6df449b7595c",
       "baselinePatchSha256": "de5f9865674a745dce44c93d7559632af64c17deadf7c392a6947caff2f90b13"
     },
     {
@@ -1091,7 +1098,7 @@
       "target": "tests/unit/catalog-updates-v3x.test.ts",
       "patch": "tests__unit__catalog-updates-v3x.test.ts.patch",
       "disposition": "ported",
-      "candidateSha256": "3e01bc59a41388474d5786a0be21be7a04e308e42e00045c488f5965e979e6d0",
+      "candidateSha256": "a3b9266da69047870affc060f4216e14bc2c854eaa9fcbda6fcd53ae9925cf2c",
       "baselinePatchSha256": "1d8443b2afecb63de810e8099528a91e5db8f8dd75f940e8b67680d3329530aa"
     },
     {
@@ -1161,7 +1168,7 @@
       "target": "tests/unit/cloud-sync.test.ts",
       "patch": "tests__unit__cloud-sync.test.ts.patch",
       "disposition": "ported",
-      "candidateSha256": "7de012505ff17c3c42550b0d77b5cfe9cdc0dfb36d5de6373485336a6b939a84",
+      "candidateSha256": "a21ba4436b139970e349d8875716fbab4b5d745825189644ad6a2bc1387e0c3e",
       "baselinePatchSha256": "18387b75989d9425bb62d608453f49f8eccfdec40bad6e185efdaf61bf85c4a6"
     },
     {
@@ -1196,7 +1203,7 @@
       "target": "tests/unit/csp-lan-ws-5083.test.ts",
       "patch": "tests__unit__csp-lan-ws-5083.test.ts.patch",
       "disposition": "ported",
-      "candidateSha256": "ab9117bb39e3829cc3c2e28af7ef5c4b3fd255b41075e295c856ac295ce9b442",
+      "candidateSha256": "2544e96c20e11166015474f0ce4d9e95d315fc3277e6fbc1e6cb0d1ea02a225d",
       "baselinePatchSha256": "db03f7b04ebcd532ab0e19785efd6c21292a6f14a5147f9992c9613aa0ab7de6"
     },
     {
@@ -1702,6 +1709,36 @@
       "regions": 7,
       "reason": "Move the existing native request, suggestion, error retention and hidden-thinking contracts into the new upstream helper owners, preserving the upstream orchestration and policy wiring.",
       "sha256": "3dd18dfddff6f14cbb679ee72b856c62d3e6f0c671a5b04e2a31ed0429eca1de"
+    },
+    {
+      "atUtc": "2026-10-28T05:44:57.433315+00:00",
+      "target": "open-sse/executors/base/reasoningEffort.ts",
+      "decision": "Preserve verified native Codex effort ceilings while retaining upstream max behavior for other providers."
+    },
+    {
+      "atUtc": "2026-10-28T05:44:57.433506+00:00",
+      "target": "src/shared/constants/pricing/oauth-subscriptions.ts",
+      "decision": "Remove duplicate Sol alias keys and retain the existing long-context tariff fields in the effective Codex row."
+    },
+    {
+      "atUtc": "2026-10-28T05:44:57.433516+00:00",
+      "target": "open-sse/utils/proxyFetch.ts",
+      "decision": "Use upstream replay-safe helper with the same method/body contract at all retained TLS fallback sites."
+    },
+    {
+      "atUtc": "2026-10-28T05:44:57.433523+00:00",
+      "target": "open-sse/utils/streamClaudeEmptyBody.ts",
+      "decision": "Preserve strict empty response errors; only verified native refusal completion is exempted."
+    },
+    {
+      "atUtc": "2026-10-28T05:44:57.433530+00:00",
+      "target": "tests/unit/cloud-sync.test.ts",
+      "decision": "Use a signed fixture response without weakening signature verification."
+    },
+    {
+      "atUtc": "2026-10-28T05:44:57.433536+00:00",
+      "target": "tests/unit/catalog-updates-v3x.test.ts",
+      "decision": "Resolve the contradictory unknown-price assertion against existing configured native Sol estimates; assert the retained rates."
     }
   ]
 }

@@ -1,0 +1,23 @@
+diff --git a/open-sse/executors/base/reasoningEffort.ts b/open-sse/executors/base/reasoningEffort.ts
+index 7f37313cff12bde7c48b8163d57695c4f489d070..7ed9742e0092a3e19c249d0ccd2a94390d38d6e7 100644
+--- a/open-sse/executors/base/reasoningEffort.ts
++++ b/open-sse/executors/base/reasoningEffort.ts
+@@ -1,5 +1,6 @@
+ // Provider-aware reasoning_effort sanitation (xhigh/max normalization + reject strip).
+ // Extracted verbatim from base.ts. Deps are config/services only (no host import → no cycle).
++import { getCodexAliasEffortCap, splitCodexReasoningSuffix } from "../codex/reasoningSuffix.ts";
+ import { PROVIDER_CLAUDE } from "../../services/systemTransforms.ts";
+ import { isClaudeCodeCompatible } from "../../services/provider.ts";
+ import {
+@@ -714,6 +715,11 @@
+   // upstream, and if it 400s the user gets a clear signal. This prevents
+   // new models from being unusable for weeks until they're whitelisted (#8057).
+   if (effortStr === "max") {
++    // Keep native Codex's verified model ceiling separate from other providers.
++    const codexModel = splitCodexReasoningSuffix(modelStr.replace(/^(?:codex|cx)\//, "")).baseModel;
++    if ((provider === "codex" || provider === "cx") && getCodexAliasEffortCap(codexModel) === null) {
++      return writeEffortValue(b, supportsXHigh ? "xhigh" : "high", c);
++    }
+     if (supportsMax) return body; // explicitly known to accept max
+ 
+     // A model that explicitly advertises its accepted tiers is safe to normalize.

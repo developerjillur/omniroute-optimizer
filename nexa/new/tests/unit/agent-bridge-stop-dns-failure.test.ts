@@ -11,7 +11,6 @@ const manager = await import("../../src/mitm/manager.ts");
 const { getBridgeProcessState } = await import("../../src/mitm/processLifecycle.ts");
 const { readBridgeIntent, writeBridgeIntent } = await import("../../src/mitm/runtimeState.ts");
 const { resolveMitmDataDir } = await import("../../src/mitm/dataDir.ts");
-const { isMitmSudoPasswordRequired } = await import("../../src/mitm/sudoGate.ts");
 const { hasAnyDNSEntries, removeDNSEntries } = await import("../../src/mitm/dns/dnsConfig.ts");
 
 for (const failAt of ["default", "collect", "managed"]) {
@@ -80,11 +79,8 @@ for (const failAt of ["default", "collect", "managed"]) {
 }
 
 for (const missingPassword of [true, false]) {
-  test(`Stop keeps the listener when managed DNS ${missingPassword ? "needs elevation" : "remains after cleanup"}`, async (t) => {
-    if (missingPassword && !isMitmSudoPasswordRequired("")) {
-      t.skip("This host can edit DNS without a password");
-      return;
-    }
+  test(`Stop keeps the listener when managed DNS ${missingPassword ? "needs elevation" : "remains after cleanup"}`, async () => {
+    let dnsWrites = 0;
     let killed = false;
     const child = Object.assign(new EventEmitter(), {
       pid: process.pid,
@@ -103,10 +99,11 @@ for (const missingPassword of [true, false]) {
     writeBridgeIntent(dir, true);
     manager.__setServerProcessForTest(child as unknown as ChildProcess, process.pid);
     const deps = {
-      removeDNSEntry: async () => {},
-      removeDNSEntries: async () => {},
+      removeDNSEntry: async () => { dnsWrites++; },
+      removeDNSEntries: async () => { dnsWrites++; },
       collectManagedHosts: () => ["synthetic-claude.example.test"],
       hasManagedDnsEntries: () => true,
+      canRunPrivilegedMitmSteps: () => !missingPassword,
     };
     try {
       await assert.rejects(
@@ -114,6 +111,7 @@ for (const missingPassword of [true, false]) {
         /DNS|sudoPassword/i
       );
       assert.equal(killed, false);
+      assert.equal(dnsWrites, missingPassword ? 0 : 2);
       assert.equal(readBridgeIntent(dir), true);
       assert.equal(getBridgeProcessState().stopping, false);
     } finally {

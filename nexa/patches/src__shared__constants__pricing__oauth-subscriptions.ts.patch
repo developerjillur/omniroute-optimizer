@@ -1,5 +1,5 @@
 diff --git a/src/shared/constants/pricing/oauth-subscriptions.ts b/src/shared/constants/pricing/oauth-subscriptions.ts
-index 09e38703ad9652a539bfcc0b5e49006f31476a9e..ebbf188fc655665998d609ad70bb98d43c029d9e 100644
+index 09e38703ad9652a539bfcc0b5e49006f31476a9e..ceb128698695ced888b9847ce33feb7314501030 100644
 --- a/src/shared/constants/pricing/oauth-subscriptions.ts
 +++ b/src/shared/constants/pricing/oauth-subscriptions.ts
 @@ -3,6 +3,7 @@
@@ -10,17 +10,15 @@ index 09e38703ad9652a539bfcc0b5e49006f31476a9e..ebbf188fc655665998d609ad70bb98d4
    GPT_6_ASTRA_PRICING,
    CLAUDE_FABLE_5_1_PRICING,
    CLAUDE_OPUS_5_5_PRICING,
-@@ -194,6 +195,13 @@
-     },
-   },
-   cx: {
-+    "gpt-6.1-sol": GPT_6_1_SOL_PRICING,
-+    "gpt-6.1-sol-ultra": GPT_6_1_SOL_PRICING,
-+    "gpt-6.1-sol-max": GPT_6_1_SOL_PRICING,
-+    "gpt-6.1-sol-xhigh": GPT_6_1_SOL_PRICING,
-+    "gpt-6.1-sol-high": GPT_6_1_SOL_PRICING,
-+    "gpt-6.1-sol-medium": GPT_6_1_SOL_PRICING,
-+    "gpt-6.1-sol-low": GPT_6_1_SOL_PRICING,
-     "gpt-6-astra": GPT_6_ASTRA_CODEX_PRICING,
-     "gpt-6-astra-ultra": GPT_6_ASTRA_CODEX_PRICING,
-     "gpt-6-astra-max": GPT_6_ASTRA_CODEX_PRICING,
+@@ -112,10 +113,7 @@
+ // Keep GPT-6 Sol's 5-credit cached rate separate. Dollar equivalents below use
+ // this table's existing 25 credits/USD convention, not included-plan usage.
+ // https://learn.chatgpt.com/docs/pricing#token-rates (checked 2026-10-07)
+-const GPT_6_1_SOL_CODEX_PRICING = {
+-  ...GPT_6_SOL_CODEX_PRICING,
+-  cached: 0.1,
+-};
++const GPT_6_1_SOL_CODEX_PRICING = GPT_6_1_SOL_PRICING;
+ const GPT_6_LUNA_CODEX_PRICING = {
+   input: 0.1,
+   output: 0.5,

@@ -1,8 +1,8 @@
 diff --git a/src/sse/services/auth.ts b/src/sse/services/auth.ts
-index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d7450b3718a 100644
+index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..4b6c43f7e2238c3253a8d5ccf3775124510e6f80 100644
 --- a/src/sse/services/auth.ts
 +++ b/src/sse/services/auth.ts
-@@ -3,6 +3,19 @@
+@@ -3,6 +3,18 @@
  import { qoderSupportsCallerTools } from "@omniroute/open-sse/services/qoderCapabilities";
  import { randomUUID } from "crypto";
  import { getProviderSearchPool } from "@omniroute/open-sse/services/providerConnectionPool.ts";
@@ -18,11 +18,10 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
 +  GOOGLE_VERIFICATION_MESSAGE,
 +} from "@/lib/providers/googleAccountHealth";
 +import { setGoogleAccountVerification } from "./googleAccountVerification.ts";
-+import { nodeTypeFromId } from "@/lib/db/providerNodeSelect";
  import { hydrateConnectionProviderSpecificData } from "./compatibleNodeBaseUrl.ts"; // #13452
  import { extractGoogApiKeyHeader } from "./googApiKeyAuth.ts";
  import { isCooldownRetrySkipRefusalsEnabled } from "./cooldownAwareRetry.ts";
-@@ -55,6 +68,7 @@
+@@ -55,6 +67,7 @@
    DEFAULT_QUOTA_THRESHOLD_PERCENT,
    getCachedClaudeQuotaScopeDecision as readClaudeScope,
    getQuotaCache,
@@ -30,16 +29,15 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
    getQuotaWindowStatus,
    hydrateCodexQuotaCacheForRequest,
    isQuotaExhaustedForRequest,
-@@ -62,6 +76,8 @@
+@@ -62,6 +75,7 @@
    resolveClaudeQuotaCooldownMs as resolveClaudeCooldown,
  } from "@/domain/quotaCache";
  import { defersQuotaCutoff, hasCodexCreditOptIn } from "@/lib/providers/quotaCutoffOptIns";
-+import { isClaudeExtraUsageAllowed } from "@/lib/providers/claudeExtraUsage";
 +import { pickClaudeNewSession, isNativeClaudeSession } from "./claudeSessionSelection";
  import {
    getQuotaScopeLabelForProvider,
    isAntigravityQuotaProvider,
-@@ -962,6 +978,7 @@
+@@ -962,6 +976,7 @@
    } = {}
  ) {
    const providerSpecificData = await hydrateConnectionProviderSpecificData(connection);
@@ -47,7 +45,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
    const apiKeyHealth = providerSpecificData.apiKeyHealth as Record<string, KeyHealth> | undefined;
    if (apiKeyHealth) syncHealthFromDB(connection.id, apiKeyHealth);
    const releaseOAuthSession =
-@@ -1108,6 +1125,8 @@
+@@ -1108,6 +1123,8 @@
      // Fetched early so the session-affinity-pin override (#5903) can consult
      // the TTL before forcedConnectionId narrows the connection pool.
      const settings = await getSettings();
@@ -56,7 +54,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
      const sessionAffinityTtlMs = resolveSessionAffinityTtlMs(provider, options, settings);
  
      // Fix #922: Check for aliases (nvidia/nvidia_nim) to ensure credentials are found
-@@ -1134,6 +1153,7 @@
+@@ -1134,6 +1151,7 @@
      if (allowedConnections && allowedConnections.length > 0) {
        connections = connections.filter((conn) => allowedConnections.includes(conn.id));
      }
@@ -64,7 +62,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
      let explicitProbeKind: "probe" | "suppressed" | "skip" = "skip";
      if (forcedConnectionId && !connections.some((c) => c.id === forcedConnectionId)) {
        const pinnedRaw = await getCachedProviderConnectionById(forcedConnectionId);
-@@ -1173,7 +1193,7 @@
+@@ -1173,7 +1191,7 @@
  
      // #5903: an active session-affinity pin outranks a per-request reset-aware
      // forcedConnectionId (see sessionAffinityPin leaf for the full rationale).
@@ -73,7 +71,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
        forcedConnectionId =
          applySessionAffinityPin({
            forcedConnectionId,
-@@ -1212,8 +1232,9 @@
+@@ -1212,8 +1230,9 @@
          excludedConnectionIds,
          connections,
          allowRateLimitedConnections,
@@ -84,7 +82,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
            const conn = connections.find((candidate) => candidate.id === connectionId);
            return isQuotaExhaustedForRequest(
              connectionId,
-@@ -1271,6 +1292,7 @@
+@@ -1271,6 +1290,7 @@
          allConnections = allConnections.filter((conn) => allowedConnections.includes(conn.id));
        }
        const blockedByKeyPolicyCount = connectionsBeforeKeyPolicy - allConnections.length;
@@ -92,7 +90,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
        // A scoped pool may contain an allowed but inactive account. Excluding
        // unrelated siblings does not turn that account's unavailability into a
        // permission failure. Preserve 403 for an explicitly forbidden pin.
-@@ -1398,6 +1420,7 @@
+@@ -1398,6 +1418,7 @@
        requestedModel
      );
      // Filter out unavailable accounts and excluded connection
@@ -100,7 +98,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
      let availableConnections = connections.filter((c) => {
        if (excludedConnectionIds.has(c.id)) {
          connectionFilterStatus.set(c.id, "excluded");
-@@ -1420,6 +1443,13 @@
+@@ -1420,6 +1441,13 @@
          return false;
        }
        if (!allowSuppressedConnections && explicitProbeKind !== "probe") {
@@ -114,7 +112,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
          if (!allowRateLimitedConnections && isAccountUnavailable(c.rateLimitedUntil)) {
            connectionFilterStatus.set(c.id, "rateLimited");
            return false;
-@@ -1527,6 +1557,24 @@
+@@ -1527,6 +1555,24 @@
      });
  
      if (availableConnections.length === 0) {
@@ -139,7 +137,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
        const cooldownStates: CooldownInspectionState[] = connections.map((connection) => {
          const connectionCooldownMs = parseFutureDateMs(connection.rateLimitedUntil);
          const codexScopeCooldownMs =
-@@ -1666,7 +1714,7 @@
+@@ -1666,7 +1712,7 @@
        }
      }
  
@@ -148,7 +146,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
        policyEligibleConnections = peakHourEligibleConnections.filter((connection) => {
          const evaluation = evaluateQuotaLimitPolicy(provider, connection, requestedModel);
          quotaResults.set(connection.id, { blocked: evaluation.blocked, exhausted: false });
-@@ -1740,12 +1788,9 @@
+@@ -1740,12 +1786,9 @@
      const withQuota: typeof policyEligibleConnections = [];
      const exhaustedQuota: typeof policyEligibleConnections = [];
      for (const c of policyEligibleConnections) {
@@ -164,7 +162,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
        const existing = quotaResults.get(c.id);
        if (existing) existing.exhausted = exhausted;
        if (!exhausted) {
-@@ -1763,6 +1808,22 @@
+@@ -1763,6 +1806,22 @@
      }
  
      if (withQuota.length === 0 && exhaustedQuota.length > 0) {
@@ -187,7 +185,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
        const earliestResetAt = getEarliestFutureDate(
          exhaustedQuota.map((c) => {
            if (resolveProviderId(provider) === "claude") {
-@@ -1785,7 +1846,10 @@
+@@ -1785,7 +1844,10 @@
          allRateLimited: true,
          retryAfter,
          retryAfterHuman: formatRetryAfter(retryAfter),
@@ -199,7 +197,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
          lastErrorCode: 429,
        };
      }
-@@ -1829,6 +1893,7 @@
+@@ -1829,6 +1891,7 @@
      >;
      const providerOverride = providerStrategyOverrides[resolvedId] || {};
      const strategy = providerOverride.fallbackStrategy || settings.fallbackStrategy || "fill-first";
@@ -207,7 +205,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
  
      let commitSelectionSideEffects: (() => Promise<void> | void) | undefined;
      let connection = leasePolicy.activeLease
-@@ -1842,7 +1907,8 @@
+@@ -1842,7 +1905,8 @@
              provider,
              options.sessionKey,
              orderedConnections,
@@ -217,7 +215,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
            )
          : null;
      const affinityConnection = connection
-@@ -1853,7 +1919,8 @@
+@@ -1853,7 +1917,8 @@
              provider,
              options.sessionKey,
              orderedConnections,
@@ -227,7 +225,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
            );
      if (affinityConnection) {
        connection = affinityConnection;
-@@ -2027,10 +2094,17 @@
+@@ -2027,10 +2092,17 @@
        }
      } else {
        // Default: fill-first (already sorted by priority in getProviderConnections)
@@ -249,7 +247,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
        const selectedPriority = connection.priority || 999;
        const selectedAvailability = getOAuthSessionAvailability(connection.id, options.sessionKey);
        const moreAvailablePeer = [...orderedConnections]
-@@ -2048,6 +2122,17 @@
+@@ -2048,6 +2120,17 @@
              getOAuthSessionAvailability(candidate.id, options.sessionKey) > selectedAvailability
          );
        if (moreAvailablePeer) connection = moreAvailablePeer;
@@ -267,7 +265,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
      }
  
      let exclusiveLease: ExclusiveConnectionLease | undefined;
-@@ -2155,6 +2240,18 @@
+@@ -2155,6 +2238,18 @@
    );
  
    const resilience = resolveResilienceSettings(await getCachedSettings());
@@ -286,7 +284,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..b52fea58cd058c78f747a8a11eb76d74
    const { defaultThresholdPercent, warnThresholdPercent, providerWindowDefaults } =
      resilience.quotaPreflight;
    const providerWindowMap = providerWindowDefaults[provider] || {};
-@@ -2603,6 +2700,14 @@
+@@ -2603,6 +2698,14 @@
      // Request-scoped refusal: nothing about it belongs on this account or this model.
      if (isOpencodeFreeTierRefusalForProvider(provider, status, errorText))
        return { shouldFallback: true, cooldownMs: 0 };

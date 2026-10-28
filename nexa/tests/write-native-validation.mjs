@@ -14,7 +14,7 @@ assert.equal(process.version, "v24.15.0");
 assert.match(sourceCommit, /^[a-f0-9]{40}$/);
 const hash = (data) => createHash("sha256").update(data).digest("hex");
 
-function tap(name, expectedFailure = false) {
+function tap(name, expectedFailure = false, allowedSkips = []) {
   const data = fs.readFileSync(path.join(directory, name));
   const text = data.toString();
   const count = (field) => {
@@ -26,16 +26,18 @@ function tap(name, expectedFailure = false) {
     ["tests", "pass", "fail", "skipped", "cancelled"].map((field) => [field, count(field)])
   );
   assert.ok(counts.tests > 0);
-  assert.equal(counts.skipped, 0);
+  const skipped = [...text.matchAll(/^ok \d+ - (.+?) # SKIP.*$/gm)].map((match) => match[1]);
+  assert.deepEqual(skipped.sort(), [...allowedSkips].sort(), `${name}: only reviewed platform limitations may be skipped`);
+  assert.equal(counts.skipped, allowedSkips.length);
   assert.equal(counts.cancelled, 0);
   if (expectedFailure) {
     assert.ok(counts.fail > 0);
     assert.match(text, /ERR_ASSERTION/);
   } else {
     assert.equal(counts.fail, 0);
-    assert.equal(counts.pass, counts.tests);
+    assert.equal(counts.pass + counts.skipped, counts.tests);
   }
-  return { file: name, sha256: hash(data), counts };
+  return { file: name, sha256: hash(data), counts, ...(allowedSkips.length ? {notValidated: allowedSkips} : {}) };
 }
 
 const compilerData = fs.readFileSync(path.join(directory, "tsc-diagnostics.log"), "utf8");
@@ -61,6 +63,7 @@ const receipt = {
   primaryRuntime,
   productionRuntime: process.version,
   baseline: tap("native-red.tap", true),
+  translatedCacheCostBaseline: tap("cache-cost-red.tap", true),
   node26: {
     tooling: tap("tooling-node26.tap"),
     native: tap("native-green.tap"),
@@ -72,8 +75,12 @@ const receipt = {
   node24: {
     tooling: tap("tooling-node24.tap"),
     native: tap("native-production.tap"),
+    upgradeMigrations: tap("production-migrations.tap"),
     productionDnsShimLoaded: true,
   },
+  deploymentHelpers: tap("deployment-helpers.tap", false, [
+    "macOS wildcard Local listener coexists and receives other loopback HTTPS names",
+  ]),
   fullTypecheck: { completed: true, diagnostics, baseline },
   upgradeTypeComparison: JSON.parse(fs.readFileSync(path.join(directory, "upgrade-types.json"), "utf8")),
   gates: {

@@ -55,13 +55,17 @@ function wireBody(model: string, effort: string, format: InputFormat): JsonRecor
           )
         : { model, messages, reasoning_effort: effort };
     assert.equal(chat.reasoning_effort, effort);
-    body = openaiToOpenAIResponsesRequest(model, chat, true, null);
+    const translated = openaiToOpenAIResponsesRequest(model, chat, true, null);
+    assert.ok(translated && typeof translated === "object" && !Array.isArray(translated));
+    body = translated as JsonRecord;
   }
   const transformed = executor.transformRequest(model, body, true, {
     requestEndpointPath: "/v1/responses",
     providerSpecificData: {},
   });
-  return sanitizeReasoningEffortForProvider(transformed, "codex", model);
+  const sanitized = sanitizeReasoningEffortForProvider(transformed, "codex", model);
+  assert.ok(sanitized && typeof sanitized === "object" && !Array.isArray(sanitized));
+  return sanitized as JsonRecord;
 }
 
 test.after(() => resetDbInstance());
@@ -116,4 +120,10 @@ test("legacy and unverified models retain their existing safety ceilings", () =>
   for (const model of ["kr/gpt-5.6-sol", "kiro/gpt-5.6-terra-max"]) {
     assert.equal(normalizeResponsesReasoningEffort("max", model), "max");
   }
+});
+
+
+test("other providers retain upstream literal max behavior for unknown models", () => {
+  const body = { reasoning: { effort: "max" } };
+  assert.deepEqual(sanitizeReasoningEffortForProvider(body, "openai", "gpt-unverified"), body);
 });

@@ -1,5 +1,5 @@
 diff --git a/open-sse/handlers/chatCore/nonStreamingResponse.ts b/open-sse/handlers/chatCore/nonStreamingResponse.ts
-index 4bc902e317c14fbfb37efd942d937045f5c72fb9..65611a72d8780e54050d934e5221f400e946f671 100644
+index 4bc902e317c14fbfb37efd942d937045f5c72fb9..0ebab55be019ea86eb9e9884c5c367e8c43c3556 100644
 --- a/open-sse/handlers/chatCore/nonStreamingResponse.ts
 +++ b/open-sse/handlers/chatCore/nonStreamingResponse.ts
 @@ -1,3 +1,4 @@
@@ -7,7 +7,15 @@ index 4bc902e317c14fbfb37efd942d937045f5c72fb9..65611a72d8780e54050d934e5221f400
  /**
   * Non-streaming response path, lifted out of handleChatCore.
   * The body matches the barrel. Closed-over request state arrives through
-@@ -78,6 +79,8 @@
+@@ -42,6 +43,7 @@
+ };
+ 
+ import { HTTP_STATUS } from "../../config/constants.ts";
++import { FORMATS } from "../../translator/formats.ts";
+ import { buildMalformedResponseDiagnostic } from "../../utils/responseShapeDiagnostic.ts";
+ 
+ import { lockModel } from "../../services/accountFallback.ts";
+@@ -78,6 +80,8 @@
  export type NonStreamingDeps = Record<string, Loose> & { [k: string]: Loose };
  
  export async function runNonStreamingResponse(deps: NonStreamingDeps) {
@@ -16,7 +24,7 @@ index 4bc902e317c14fbfb37efd942d937045f5c72fb9..65611a72d8780e54050d934e5221f400
    const {
      apiKeyInfo,
      appendRequestLog,
-@@ -430,6 +433,7 @@
+@@ -430,6 +434,7 @@
          error: err.error || "Provider request failed",
          providerRequest: finalBody || translatedBody,
          providerResponse: persistedProviderErrorBody,
@@ -24,7 +32,7 @@ index 4bc902e317c14fbfb37efd942d937045f5c72fb9..65611a72d8780e54050d934e5221f400
          // On a client abort the client already disconnected before we got here, so this
          // body is what we WOULD have sent, not what was delivered. The dashboard reads
          // `clientResponse` as "what the client received", so logging it misleads —
-@@ -437,7 +441,7 @@
+@@ -437,7 +442,7 @@
          // the leg-based path must keep doing so.
          clientResponse: isLocalStreamLifecycleError(err.originalError)
            ? undefined
@@ -33,7 +41,7 @@ index 4bc902e317c14fbfb37efd942d937045f5c72fb9..65611a72d8780e54050d934e5221f400
          cacheSource: "upstream",
        });
        persistFailureUsage(err.status, err.errorCode || `upstream_${err.status}`);
-@@ -841,7 +845,9 @@
+@@ -841,7 +846,9 @@
      // this check runs after translation + sanitization + tool-call execution to catch
      // cases where a provider returns a structurally valid raw body that translates into
      // choices:[] or output:[] with no usable content (Responses API shape included).

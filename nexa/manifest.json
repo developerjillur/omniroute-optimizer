@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 310,
-    "patches": 186,
-    "new": 118,
+    "total": 312,
+    "patches": 187,
+    "new": 119,
     "tooling": 6,
     "upstreamCandidates": 28,
     "nexaSpecific": 99,
-    "needsReview": 183,
+    "needsReview": 185,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
   },
@@ -167,6 +167,14 @@
         "pr": 15323,
         "state": "OPEN"
       }
+    },
+    {
+      "file": "patches/open-sse__executors__base__reasoningEffort.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/executors/base/reasoningEffort.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
     },
     {
       "file": "patches/open-sse__executors__claudeIdentity.ts.patch",
@@ -2385,6 +2393,14 @@
       "layer": "new",
       "class": "needs-review",
       "target": "tests/unit/native-thread-error-classification.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/native-translated-cache-cost.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/native-translated-cache-cost.test.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },

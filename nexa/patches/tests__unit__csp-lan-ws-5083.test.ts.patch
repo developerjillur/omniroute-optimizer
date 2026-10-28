@@ -1,5 +1,5 @@
 diff --git a/tests/unit/csp-lan-ws-5083.test.ts b/tests/unit/csp-lan-ws-5083.test.ts
-index c74f78b262c64ea0a736adf3de0573980d6d1c05..9bae12602a63fb18b7e29f667606b4835d26ea82 100644
+index c74f78b262c64ea0a736adf3de0573980d6d1c05..278b93d3aa14508d48cca02e15d263d3455da2e9 100644
 --- a/tests/unit/csp-lan-ws-5083.test.ts
 +++ b/tests/unit/csp-lan-ws-5083.test.ts
 @@ -14,21 +14,33 @@
@@ -44,7 +44,7 @@ index c74f78b262c64ea0a736adf3de0573980d6d1c05..9bae12602a63fb18b7e29f667606b483
    // Bare `ws:` must be present as its own token (not just `ws://localhost`).
    assert.match(
      connectSrc,
-@@ -37,18 +49,35 @@
+@@ -37,18 +49,36 @@
    );
  });
  
@@ -67,24 +67,25 @@ index c74f78b262c64ea0a736adf3de0573980d6d1c05..9bae12602a63fb18b7e29f667606b483
 +});
 +
 +test("production connect-src permits explicit LAN origins without blanket schemes", async () => {
-+  const originalEnv = process.env.NODE_ENV;
++  const environment: Record<string, string | undefined> = process.env;
++  const originalEnv = environment.NODE_ENV;
 +  const originalExtras = process.env.OMNIROUTE_CSP_CONNECT_SRC;
-+  process.env.NODE_ENV = "production";
++  environment.NODE_ENV = "production";
 +  process.env.OMNIROUTE_CSP_CONNECT_SRC = "ws://192.168.1.20:20128";
 +  try {
 +    const connectSrc = await connectSrcDirective();
 +    assert.ok(connectSrc.includes("ws://192.168.1.20:20128"));
 +    assert.doesNotMatch(connectSrc, /(^|\s)(https:|ws:|wss:)(\s|$)/);
 +  } finally {
-+    if (originalEnv === undefined) delete process.env.NODE_ENV;
-+    else process.env.NODE_ENV = originalEnv;
++    if (originalEnv === undefined) delete environment.NODE_ENV;
++    else environment.NODE_ENV = originalEnv;
 +    if (originalExtras === undefined) delete process.env.OMNIROUTE_CSP_CONNECT_SRC;
 +    else process.env.OMNIROUTE_CSP_CONNECT_SRC = originalExtras;
 +  }
  });
  
  test("#5083 fix does NOT introduce a global Next.js middleware", () => {
-@@ -59,7 +88,11 @@
+@@ -59,7 +89,11 @@
    } catch {
      exists = false;
    }

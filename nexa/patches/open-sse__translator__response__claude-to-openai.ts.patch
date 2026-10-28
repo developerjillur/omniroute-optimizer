@@ -1,5 +1,5 @@
 diff --git a/open-sse/translator/response/claude-to-openai.ts b/open-sse/translator/response/claude-to-openai.ts
-index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..7a29b68ca41d07546b64a554b7eb1f3ec2cd7571 100644
+index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..11579dd9c79ddaf88a9f206f0f624850067ac789 100644
 --- a/open-sse/translator/response/claude-to-openai.ts
 +++ b/open-sse/translator/response/claude-to-openai.ts
 @@ -1,6 +1,14 @@
@@ -18,7 +18,21 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..7a29b68ca41d07546b64a554b7eb1f3e
  import { storeClaudeThinkingBlocks } from "../../services/claudeThinkingStore.ts";
  
  type OpenAIUsage = {
-@@ -79,40 +87,11 @@
+@@ -8,10 +16,12 @@
+   completion_tokens: number;
+   total_tokens: number;
+   reasoning_tokens?: number;
++  cacheCreation5m?: number;
++  cacheCreation1h?: number;
+   prompt_tokens_details?: {
+     cached_tokens?: number;
+     cache_creation_tokens?: number;
+-    // false: cache_creation_tokens is not included in prompt_tokens (#2215).
++    // Native metering uses an inclusive prompt count; retain its cache inclusion flag.
+     cache_creation_in_prompt?: boolean;
+   };
+   completion_tokens_details?: {
+@@ -79,40 +89,11 @@
        // shouldParseTextualReasoningTags) so it strips <think> markup out of
        // delta.content and re-emits it as delta.reasoning_content.
        state.thinkState = initThinkState(true, state.provider, state.model);
@@ -64,7 +78,7 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..7a29b68ca41d07546b64a554b7eb1f3e
        results.push(createChunk(state, { role: "assistant" }));
        break;
      }
-@@ -174,7 +153,11 @@
+@@ -174,7 +155,11 @@
          };
          if (state.thinkState) applyThinkTag(state.thinkState, textDelta);
          if (textDelta.reasoning_content) {
@@ -77,7 +91,7 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..7a29b68ca41d07546b64a554b7eb1f3e
          }
          if (textDelta.content) {
            results.push(createChunk(state, { content: textDelta.content }));
-@@ -201,7 +184,7 @@
+@@ -201,7 +186,7 @@
                    function: { arguments: delta.partial_json },
                  },
                ],
@@ -86,7 +100,7 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..7a29b68ca41d07546b64a554b7eb1f3e
            );
          }
        }
-@@ -216,7 +199,9 @@
+@@ -216,7 +201,9 @@
        if (state.thinkState?.active) {
          const flushed = flushThinkBuffer(state.thinkState);
          if (flushed.reasoningDelta) {
@@ -97,7 +111,7 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..7a29b68ca41d07546b64a554b7eb1f3e
          }
          if (flushed.contentDelta) {
            results.push(createChunk(state, { content: flushed.contentDelta }));
-@@ -240,76 +225,18 @@
+@@ -240,76 +227,18 @@
      }
  
      case "message_delta": {
@@ -185,7 +199,7 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..7a29b68ca41d07546b64a554b7eb1f3e
          }
        }
  
-@@ -358,10 +285,11 @@
+@@ -358,10 +287,11 @@
            const inputTokens = state.usage.input_tokens || 0;
            const outputTokens = state.usage.output_tokens || 0;
            const cachedTokens = state.usage.cache_read_input_tokens || 0;
@@ -201,7 +215,16 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..7a29b68ca41d07546b64a554b7eb1f3e
            // completion_tokens = output_tokens
            // total_tokens = prompt_tokens + completion_tokens
            const promptTokens = inputTokens;
-@@ -386,7 +314,8 @@
+@@ -369,6 +299,8 @@
+           const totalTokens = promptTokens + completionTokens;
+ 
+           finalChunk.usage = {
++            ...(state.usage.cacheCreation5m !== undefined ? {cacheCreation5m:state.usage.cacheCreation5m} : {}),
++            ...(state.usage.cacheCreation1h !== undefined ? {cacheCreation1h:state.usage.cacheCreation1h} : {}),
+             prompt_tokens: promptTokens,
+             completion_tokens: completionTokens,
+             total_tokens: totalTokens,
+@@ -386,11 +318,12 @@
            if (cachedTokens > 0 || cacheCreationTokens > 0) {
              finalChunk.usage.prompt_tokens_details = {};
              if (cachedTokens > 0) {
@@ -211,7 +234,12 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..7a29b68ca41d07546b64a554b7eb1f3e
              }
              if (cacheCreationTokens > 0) {
                finalChunk.usage.prompt_tokens_details.cache_creation_tokens = cacheCreationTokens;
-@@ -405,16 +334,20 @@
+-              finalChunk.usage.prompt_tokens_details.cache_creation_in_prompt = false;
++              finalChunk.usage.prompt_tokens_details.cache_creation_in_prompt = true;
+             }
+           }
+         }
+@@ -405,16 +338,22 @@
        flushThinkingContinuity(state);
        if (!state.finishReasonSent) {
          const finishReason =
@@ -226,6 +254,8 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..7a29b68ca41d07546b64a554b7eb1f3e
            state.usage && typeof state.usage === "object"
              ? {
                  usage: {
++                  ...(state.usage.cacheCreation5m !== undefined ? {cacheCreation5m:state.usage.cacheCreation5m} : {}),
++                  ...(state.usage.cacheCreation1h !== undefined ? {cacheCreation1h:state.usage.cacheCreation1h} : {}),
                    prompt_tokens: state.usage.input_tokens || 0,
                    completion_tokens: state.usage.output_tokens || 0,
 -                  total_tokens: (state.usage.input_tokens || 0) + (state.usage.output_tokens || 0),
@@ -235,7 +265,7 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..7a29b68ca41d07546b64a554b7eb1f3e
                    ...(typeof state.usage.reasoning_tokens === "number"
                      ? {
                          reasoning_tokens: state.usage.reasoning_tokens,
-@@ -426,7 +359,9 @@
+@@ -426,11 +365,13 @@
                    ...(cachedTokens > 0 || cacheCreationTokens > 0
                      ? {
                          prompt_tokens_details: {
@@ -246,7 +276,12 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..7a29b68ca41d07546b64a554b7eb1f3e
                            ...(cacheCreationTokens > 0
                              ? {
                                  cache_creation_tokens: cacheCreationTokens,
-@@ -469,6 +404,8 @@
+-                                cache_creation_in_prompt: false,
++                                cache_creation_in_prompt: true,
+                               }
+                             : {}),
+                         },
+@@ -469,6 +410,8 @@
        return "stop";
      case "max_tokens":
        return "length";

@@ -86,3 +86,33 @@ test("keeps root-only fixtures compatible when i18n is absent", async () => {
     "# Reference\n\n2 SQL migration\n"
   );
 });
+
+
+test("translated README rows retain module counts, markup and numeral style", async () => {
+  const { root, syncMigrationDocCounts } = await fixture({ count: 211 });
+  for (const [locale, old, expected] of [
+    ["bn", "209টি মাইগ্রেশন", "211টি মাইগ্রেশন"],
+    ["ar", "٢٠٩ migrations", "٢١١ migrations"],
+    ["fa", "۲۰۹ migrations", "۲۱۱ migrations"],
+  ]) {
+    const directory = path.join(root, "docs/i18n", locale);
+    fs.mkdirSync(directory);
+    const row = `<tr><td>Database</td><td>better-sqlite3 (SQLite, WAL) — <b data-year="1999">147</b> modules, ${old}</td></tr>`;
+    fs.writeFileSync(path.join(directory, "README.md"), `# ${locale}\n${row}\nOther 209 claims stay unchanged.\n`);
+    syncMigrationDocCounts();
+    assert.equal(fs.readFileSync(path.join(directory, "README.md"), "utf8"),
+      `# ${locale}\n${row.replace(old, expected)}\nOther 209 claims stay unchanged.\n`);
+  }
+  assert.deepEqual(syncMigrationDocCounts(), []);
+});
+
+test("malformed translated rows require review instead of changing an unrelated number", async () => {
+  const { root, syncMigrationDocCounts } = await fixture();
+  const directory = path.join(root, "docs/i18n/bn");
+  fs.mkdirSync(directory);
+  const file = path.join(directory, "README.md");
+  const content = "<tr><td>better-sqlite3 — 147 modules, 209 migrations, 9 extras</td></tr>";
+  fs.writeFileSync(file, content);
+  assert.throws(syncMigrationDocCounts, /Expected module and migration counts/);
+  assert.equal(fs.readFileSync(file, "utf8"), content);
+});

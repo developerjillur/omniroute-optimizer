@@ -1,5 +1,5 @@
 diff --git a/tests/unit/cloud-sync.test.ts b/tests/unit/cloud-sync.test.ts
-index 58803832f29f62581b06d57cb9519f2a24792e72..7e7a0a2d1bdcfd1aaa49dff8603dbd82a1d98e8c 100644
+index 58803832f29f62581b06d57cb9519f2a24792e72..2a7f55627482675a498d527f21c1b9be629e4084 100644
 --- a/tests/unit/cloud-sync.test.ts
 +++ b/tests/unit/cloud-sync.test.ts
 @@ -4,6 +4,7 @@
@@ -26,19 +26,37 @@ index 58803832f29f62581b06d57cb9519f2a24792e72..7e7a0a2d1bdcfd1aaa49dff8603dbd82
  }
  
  test.beforeEach(async () => {
-@@ -84,6 +87,11 @@
-     delete process.env.OMNIROUTE_CLOUD_SYNC_SECRETS;
+@@ -85,6 +88,11 @@
    } else {
      process.env.OMNIROUTE_CLOUD_SYNC_SECRETS = ORIGINAL_CLOUD_SECRETS;
-+  }
+   }
 +  if (ORIGINAL_RESPONSE_SECRET === undefined) {
 +    delete process.env.OMNIROUTE_CLOUD_SYNC_SECRET;
 +  } else {
 +    process.env.OMNIROUTE_CLOUD_SYNC_SECRET = ORIGINAL_RESPONSE_SECRET;
-   }
++  }
  });
  
-@@ -243,6 +251,8 @@
+ test("cloud route rejects enabling without upload consent before any network call", async () => {
+@@ -150,11 +158,16 @@
+ 
+ test("explicit enable can perform the initial upload while disabled", async () => {
+   process.env.CLOUD_URL = "https://cloud.example";
++  const responseSecret = "explicit-enable-signed-fixture";
++  process.env.OMNIROUTE_CLOUD_SYNC_SECRET = responseSecret;
+   await settingsDb.updateSettings({ cloudEnabled: false });
+   let calls = 0;
+   globalThis.fetch = async () => {
+     calls++;
+-    return new Response(JSON.stringify({ changes: {}, data: {} }));
++    const body = JSON.stringify({ changes: {}, data: {} });
++    return new Response(body, {
++      headers: { "X-Cloud-Sig": createHmac("sha256", responseSecret).update(body).digest("hex") },
++    });
+   };
+   const cloudSync = await loadCloudSync("explicit-enable");
+   const result = await cloudSync.syncToCloud("machine-1", null, { explicitEnable: true });
+@@ -243,6 +256,8 @@
  test("cloudSync syncs data upstream and refreshes only locally stale provider tokens", async () => {
    process.env.NEXT_PUBLIC_CLOUD_URL = "https://cloud.example";
    process.env.OMNIROUTE_CLOUD_SYNC_SECRETS = "true";
@@ -47,7 +65,7 @@ index 58803832f29f62581b06d57cb9519f2a24792e72..7e7a0a2d1bdcfd1aaa49dff8603dbd82
  
    const stale = await providersDb.createProviderConnection({
      provider: "openai",
-@@ -300,9 +310,13 @@
+@@ -300,9 +315,13 @@
          },
        },
      };

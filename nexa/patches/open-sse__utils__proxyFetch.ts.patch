@@ -1,5 +1,5 @@
 diff --git a/open-sse/utils/proxyFetch.ts b/open-sse/utils/proxyFetch.ts
-index 07d4b37662818d78838d5cf3ddbc619100eb77b8..3764ec1960d66e9d10a4bd1c9564acd0d4ae7013 100644
+index 07d4b37662818d78838d5cf3ddbc619100eb77b8..05476a8155f6527e7ccbd23fa545cb9281cfb991 100644
 --- a/open-sse/utils/proxyFetch.ts
 +++ b/open-sse/utils/proxyFetch.ts
 @@ -78,7 +78,7 @@
@@ -456,7 +456,7 @@ index 07d4b37662818d78838d5cf3ddbc619100eb77b8..3764ec1960d66e9d10a4bd1c9564acd0
      // Method gating covers response-start ambiguity; connection-error retries remain below.
      const canReplayResponseStartTimeout = isAmbiguousFailureReplaySafe(input, options);
      const maxAttempts = hasNonReplayableBody ? 1 : 2;
-+    const canReplayDirect = isTlsFallbackReplaySafe(input, options);
++    const canReplayDirect = isAmbiguousFailureReplaySafe(input, options);
      const _undiciDirect =
 -      deps.undiciFetch ?? (undiciFetch as unknown as (...args: unknown[]) => Promise<Response>);
 +      deps.undiciFetch ??
@@ -664,7 +664,7 @@ index 07d4b37662818d78838d5cf3ddbc619100eb77b8..3764ec1960d66e9d10a4bd1c9564acd0
 +          attempt === 0 &&
 +          maxRelayAttempts > 1 &&
 +          isTransportFailure &&
-+          (isTlsFallbackReplaySafe(input, options) ||
++          (isAmbiguousFailureReplaySafe(input, options) ||
 +            isKnownPreconnectFailure(relayError))
 +        ) {
            lastRelayError = relayError;
@@ -715,7 +715,7 @@ index 07d4b37662818d78838d5cf3ddbc619100eb77b8..3764ec1960d66e9d10a4bd1c9564acd0
 +        attempt === 0 &&
 +        maxProxyAttempts > 1 &&
 +        isTransportFailure &&
-+        (isTlsFallbackReplaySafe(input, options) ||
++        (isAmbiguousFailureReplaySafe(input, options) ||
 +          isKnownPreconnectFailure(error))
 +      ) {
          lastProxyError = error;

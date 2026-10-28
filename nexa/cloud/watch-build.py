@@ -25,7 +25,7 @@ while True:
               "Server free disk below 15 GiB" if current["diskFreeBytes"] < 15 * 1024**3 else "")
     report.update({"last": current, "containerState": state["Status"], "exitCode": state["ExitCode"], "at": time.time()})
     if reason and state["Running"]:
-        subprocess.run(["docker", "stop", "--time", "10", CONTAINER], check=True, stdout=subprocess.DEVNULL)
+        subprocess.run(["docker", "stop", "--timeout", "10", CONTAINER], check=True, stdout=subprocess.DEVNULL)
         report.update({"stoppedForPressure": True, "reason": reason})
     REPORT.write_text(json.dumps(report, indent=2) + "\n")
     if reason or not state["Running"]:

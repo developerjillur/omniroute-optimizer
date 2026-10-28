@@ -20,7 +20,7 @@ def environment(path):
 
 
 def request(base, path, *, payload=None, key=None, opener=None):
-    headers = {"Accept": "application/json"}
+    headers = {"Accept": "application/json", "User-Agent": "nexaomni-client/1.0"}
     if key:
         headers["Authorization"] = "Bearer " + key
     if payload is not None:
@@ -52,6 +52,9 @@ if __name__ == "__main__":
     for name, path in {"health": "/healthz", "unauthenticatedCatalog": "/v1/models", "unauthenticatedManagement": "/api/providers"}.items():
         status, value, seconds = request(args.base, path)
         report["checks"][name] = {"status": status, "seconds": seconds}
+    if report["checks"]["health"]["status"] != 200:
+        Path(args.evidence).write_text(json.dumps(report, indent=2) + "\n")
+        raise SystemExit("Public health failed before application authentication")
     status, _, seconds = request(args.base, "/v1/models", key="invalid-cloud-smoke-key")
     report["checks"]["invalidKey"] = {"status": status, "seconds": seconds}
     private = Path(args.credentials)
@@ -72,6 +75,7 @@ if __name__ == "__main__":
         fd = os.open(private, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
         with os.fdopen(fd, "w") as handle:
             handle.write("NEXAOMNI_BASE_URL=" + args.base + "/v1\nNEXAOMNI_API_KEY=" + key + "\n")
+            handle.write("NEXAOMNI_DASHBOARD_PASSWORD=" + env["INITIAL_PASSWORD"] + "\n")
         report["checks"]["keyCreation"] = {"status": status, "seconds": seconds}
     status, catalog, seconds = request(args.base, "/v1/models", key=key)
     report["checks"]["authenticatedCatalog"] = {"status": status, "seconds": seconds, "models": len(catalog.get("data", [])) if isinstance(catalog, dict) else 0}

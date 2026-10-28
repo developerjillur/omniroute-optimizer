@@ -50,6 +50,7 @@ def prepare(snapshot, destination):
             rows = source.execute('SELECT * FROM "' + table + '"').fetchall()
             if table == "key_value":
                 rows = [row for row in rows if row["namespace"] not in LOCAL_NAMESPACES]
+                rows = [row for row in rows if not (row["namespace"] == "settings" and row["key"] in {"password", "sessionsValidAfter", "revokedDashboardSessions"})]
             if rows:
                 columns = list(rows[0].keys())
                 query = ('INSERT INTO "' + table + '" (' + ','.join('"' + column + '"' for column in columns)

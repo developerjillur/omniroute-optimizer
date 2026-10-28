@@ -25,6 +25,7 @@ jobs:
           python3 nexa/tests/test_cloud_config.py
           python3 -m py_compile nexa/cloud/*.py
           bash -n nexa/cloud/build.sh
+          sh -n nexa/cloud/start-cloud.sh
           node nexa/tests/verify-source-inventory.mjs
           node --test nexa/tests/overlay-inventory.test.mjs nexa/tests/overlay-base-version.test.mjs
           touch "$RUNNER_TEMP/nexaomni-ci.env"

@@ -10,6 +10,8 @@ Build runtime `node:24.15.0-bookworm`, heap 6144 MiB, process-tree RSS 8192 MiB,
 
 `build.sh` overlay compatibility, dependency installation, core types, provider tests, deployment tests, full TypeScript ratchet, native Bridge tests, UI/security tests, production dashboard, CLI এবং package artifact checks চালায়। কোনো gate ব্যর্থ হলে runtime promotion বন্ধ থাকবে। Linux test result macOS native DNS/desktop acceptance প্রতিষ্ঠা করে না।
 
+Runtime-এর packaged entry `server-ws.mjs`; `start-cloud.sh` secrets, বাধ্যতামূলক API key ও secure-cookie configuration যাচাই করে এটি চালায়। Packaged SQL migrations এই version-এ `/app/src/lib/db/migrations`-এ আছে; `OMNIROUTE_MIGRATIONS_DIR` সেট করলে সেই path দিন। Runtime heap 2048 MiB, container limit 3 GiB এবং graceful stop period 45 seconds।
+
 Build container-এর mounts:
 
 ```text
@@ -18,7 +20,7 @@ Build container-এর mounts:
 /opt/nexaomni/evidence     -> /evidence
 ```
 
-Package-verified `dist/` থেকে `Dockerfile` দিয়ে runtime image বানান। Docker build context-এ শুধু `dist/` ও এই Dockerfile রাখুন; `.env`, private data, source history বা browser profiles দেবেন না। `compose.yaml` শুধু authenticated gateway-টি প্রকাশ করে। Management dashboard ও API একই service-এ চলে।
+Package-verified `dist/` থেকে `Dockerfile` দিয়ে runtime image বানান। Docker build context-এ শুধু `dist/`, এই Dockerfile ও `start-cloud.sh` রাখুন; `.env`, private data, source history বা browser profiles দেবেন না। `compose.yaml` শুধু authenticated gateway-টি প্রকাশ করে। Management dashboard ও API একই service-এ চলে।
 
 ## Configuration migration
 
@@ -31,7 +33,7 @@ python3 nexa/tests/test_cloud_config.py
 
 Exporter snapshot read-only রাখে এবং destination থাকলে overwrite করে না। Provider configuration, aliases, model overrides, quota configuration, database settings ও migration identities সংরক্ষিত হয়। Request history, conversation owners, active sessions ও local API keys বহন করা হয় না। Cloud-এর জন্য আলাদা API key তৈরি করতে হবে।
 
-`STORAGE_ENCRYPTION_KEY`-এর সঠিক মান encrypted provider credentials-এর সঙ্গে প্রয়োজন। সেটি secret channel-এ `/opt/nexaomni/private/runtime.env`-এ রাখুন; source control-এ নয়। নতুন JWT/API secret ব্যবহার করুন। Dashboard password hash সংরক্ষিত হয়; local password বদলানোর দরকার নেই। Data directory UID/GID 1000:1000 এবং mode 0700; database ও environment mode 0600।
+`STORAGE_ENCRYPTION_KEY`-এর সঠিক মান encrypted provider credentials-এর সঙ্গে প্রয়োজন। সেটি secret channel-এ `/opt/nexaomni/private/runtime.env`-এ রাখুন; source control-এ নয়। নতুন JWT/API secret ব্যবহার করুন। Local dashboard password ও session metadata export হয় না। Cloud-এর জন্য নতুন strong `INITIAL_PASSWORD` দিন; প্রথম login-এ bcrypt hash সংরক্ষিত হয়। সফল bootstrap test-এর private credentials file-এ cloud password ও API key থাকে। Data directory UID/GID 1000:1000 এবং mode 0700; database ও environment mode 0600।
 
 Claude ও Codex-এর rotating refresh tokens দুই runtime-এ ভাগ করা হয় না। ওই connections inactive metadata হিসেবে থাকে এবং credentials বাদ যায়। Cloud-এ আলাদা OAuth login শেষ করার পরে activate করতে হবে। Google-এর non-rotating OAuth ও API-key connections স্বাধীনভাবে স্থানান্তর হয়; successful migration নিজে থেকে upstream acceptance প্রমাণ করে না।
 
@@ -54,3 +56,9 @@ Public domain চালু হওয়ার পরে এই প্রতিট�
 `backup.py` consistent SQLite backup, matching environment এবং integrity receipt `/opt/nexaomni/backups/`-এ রাখে। Daily timer 01:30 UTC-এর পরে সর্বোচ্চ 300-second jitter-এ চলে; সর্বশেষ সাতটি marked backup থাকে। Backup-এর পুরো directory private রাখুন এবং আলাদা machine-এ একটি copy সংরক্ষণ করুন। Restore-এর আগে service বন্ধ করে current data অক্ষত নতুন rollback directory-তে রাখুন; database ও environment জোড়া মিলিয়ে ফিরিয়ে আনুন।
 
 Updates নতুন pinned source ও image দিয়ে করুন। পুরোনো image ও fresh consistent data backup রেখে candidate-এ migration ও বাস্তব inference যাচাই করুন। এই service-এর volume ব্যবহার করে দ্বিতীয় instance একসঙ্গে চালাবেন না। অন্য OmniRoute বা Vanalyzer service এই compose project-এর অংশ নয়।
+
+## HTTP clients
+
+2026-10-28-এর public পরীক্ষায় curl, Node ও OpenAI Python SDK-এর user agent accepted হয়েছে। Default `Python-urllib` agent Cloudflare Error 1010 পেতে পারে। নিজের HTTP client-এ application-এর পরিচয়সহ header দিন, যেমন `User-Agent: nexaomni-client/1.0`; `smoke.py` এটি ব্যবহার করে। [Cloudflare-এর নির্দেশনা](https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1010/) এই পদ্ধতিই উল্লেখ করে।
+
+`smoke.py` public health, unauthenticated rejection, actual dashboard password login, API key creation ও authenticated catalog যাচাই করে। `--environment`, `--credentials` ও `--evidence`-এ private file path দিন। Existing credentials থাকলে এটি নতুন key তৈরি করে না। Model-এর catalog entry বাস্তব completion-এর নিশ্চয়তা নয়; প্রয়োজনীয় provider/model আলাদাভাবে যাচাই করুন।

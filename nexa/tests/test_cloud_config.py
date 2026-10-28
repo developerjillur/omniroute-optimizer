@@ -33,6 +33,7 @@ class CloudConfigTest(unittest.TestCase):
                 INSERT INTO provider_connections VALUES('codex','codex',1,'local-access','rotating-refresh',NULL,NULL,NULL,'secret','ok',NULL);
                 CREATE TABLE key_value(namespace TEXT,key TEXT,value TEXT,PRIMARY KEY(namespace,key));
                 INSERT INTO key_value VALUES('settings','requireLogin','false');
+                INSERT INTO key_value VALUES('settings','password','local-password-hash');
                 INSERT INTO key_value VALUES('modelAliases','alias','"ag/model"');
                 INSERT INTO key_value VALUES('native_claude_thread_owners','session','private');
                 CREATE TABLE call_logs(id INTEGER,private_content TEXT);
@@ -55,6 +56,7 @@ class CloudConfigTest(unittest.TestCase):
             self.assertEqual(out.execute("SELECT COUNT(*) FROM api_keys").fetchone()[0], 0)
             self.assertEqual(out.execute("SELECT COUNT(*) FROM key_value WHERE namespace='native_claude_thread_owners'").fetchone()[0], 0)
             self.assertEqual(out.execute("SELECT value FROM key_value WHERE key='requireLogin'").fetchone()[0], "true")
+            self.assertEqual(out.execute("SELECT COUNT(*) FROM key_value WHERE namespace='settings' AND key='password'").fetchone()[0], 0)
             self.assertEqual(out.execute("SELECT COUNT(*) FROM _omniroute_migrations").fetchone()[0], 1)
             self.assertEqual(source.read_bytes(), before)
             self.assertEqual(target.stat().st_mode & 0o777, 0o600)

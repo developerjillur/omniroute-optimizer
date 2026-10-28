@@ -1,0 +1,320 @@
+{
+  "atUtc": "2026-10-28T17:45:28.344101+00:00",
+  "owner": "Jillur Rahman",
+  "status": "CORE_API_VERIFIED_ROTATING_OAUTH_PENDING",
+  "dashboard": "https://nexaomni.nexaconnect.cloud/",
+  "apiBase": "https://nexaomni.nexaconnect.cloud/v1",
+  "health": "https://nexaomni.nexaconnect.cloud/healthz",
+  "source": {
+    "upstreamVersion": "3.8.52",
+    "upstreamCommit": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
+    "reviewedOverlayBaseline": "614c46cca8a4480fb300ff6bc6d603f363cbcca9",
+    "cloudBranch": "feat/nexaomni-cloud",
+    "applicationBuildSha": "e02d6243",
+    "productionRoutingCodeChangedAfterReviewedBaseline": false,
+    "testFixtureRepairs": [
+      "ChildProcess EventEmitter lifecycle",
+      "deterministic quota polling clock"
+    ]
+  },
+  "deployment": {
+    "image": "nexaomni:3.8.52-614c46c",
+    "imageId": "sha256:fb4909f1a14bce2636f0300dc4043f10cc14721602f6b1d295e18c5ee09395a1",
+    "packageSha256": "64f3b0e9e4b2fd7061cfa5f12bcaa2f80038ba364de517445e91829d292d79d9",
+    "node": "24.15.0",
+    "user": "node",
+    "runtimeMemoryLimitMiB": 3072,
+    "runtimeHeapMiB": 2048,
+    "runtimeObservedMiB": 394.5,
+    "stopGraceSeconds": 45,
+    "dataRoot": "/opt/nexaomni/data",
+    "service": "nexaomni-gateway",
+    "managementPort": "127.0.0.1:18128"
+  },
+  "build": {
+    "successful": true,
+    "peakRssMiB": 6930,
+    "rssLimitMiB": 8192,
+    "webpackCompileMinutes": 6.9,
+    "staticPages": 639,
+    "compilerDiagnostics": 6510,
+    "diagnosticCeiling": 6529,
+    "compilerMeasurement": "Completed before two test-only fixture repairs; application routing sources unchanged",
+    "testFamilies": [
+      {
+        "family": "provider regressions",
+        "pass": 63,
+        "fail": 0
+      },
+      {
+        "family": "deployment safeguards",
+        "pass": 60,
+        "fail": 0,
+        "platformSkipped": 1
+      },
+      {
+        "family": "Bridge regressions after fixture repairs",
+        "pass": 674,
+        "fail": 0
+      },
+      {
+        "family": "UI regressions",
+        "pass": 39,
+        "files": 8,
+        "fail": 0
+      },
+      {
+        "family": "routing and native compatibility",
+        "pass": 79,
+        "fail": 0
+      },
+      {
+        "family": "security and trace handling",
+        "pass": 34,
+        "fail": 0
+      }
+    ],
+    "countsArePerFamilyNotClaimedUniqueAcrossFamilies": true
+  },
+  "publicSmoke": {
+    "base": "https://nexaomni.nexaconnect.cloud",
+    "checks": {
+      "health": {
+        "status": 200,
+        "seconds": 0.388
+      },
+      "unauthenticatedCatalog": {
+        "status": 401,
+        "seconds": 0.53
+      },
+      "unauthenticatedManagement": {
+        "status": 401,
+        "seconds": 0.132
+      },
+      "invalidKey": {
+        "status": 401,
+        "seconds": 0.482
+      },
+      "dashboardLogin": {
+        "status": 200,
+        "seconds": 1.024
+      },
+      "keyCreation": {
+        "status": 201,
+        "seconds": 0.469
+      },
+      "authenticatedCatalog": {
+        "status": 200,
+        "seconds": 2.019,
+        "models": 1142
+      }
+    },
+    "fastGoogleModels": [
+      "agy/gemini-3.8-flash-low",
+      "agy/gemini-3.5-flash-lite",
+      "agy/gemini-3.8-flash-tiered",
+      "agy/gemini-3-flash",
+      "agy/gemini-3.1-flash-lite",
+      "agy/gemini-3.8-flash-high",
+      "agy/gemini-3.8-flash-medium",
+      "agy/gemini-3.6-flash-low",
+      "antigravity/gemini-3.8-flash-high",
+      "antigravity/gemini-3.8-flash-medium",
+      "antigravity/gemini-3.8-flash-tiered",
+      "antigravity/gemini-3-flash",
+      "antigravity/gemini-3.1-flash-lite",
+      "antigravity/gemini-3.8-flash-low",
+      "antigravity/gemini-3.5-flash-lite",
+      "antigravity/gemini-3.1-flash-image"
+    ]
+  },
+  "inference": {
+    "initial": {
+      "status": 200,
+      "seconds": 2.64,
+      "body": {
+        "id": "chatcmpl-1793208725476-ad28a062",
+        "object": "chat.completion",
+        "created": 1793208725,
+        "model": "gemini-3-flash",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "NEXA_OK"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 84,
+          "completion_tokens": 5,
+          "total_tokens": 89
+        }
+      }
+    },
+    "compatibility": {
+      "stream": {
+        "status": 200,
+        "seconds": 1.752,
+        "firstContentSeconds": 1.729,
+        "events": 5,
+        "done": true,
+        "content": "NEXA_SSE_OK",
+        "errors": [],
+        "passed": true
+      },
+      "responses": {
+        "status": 200,
+        "seconds": 3.359,
+        "response": {
+          "id": "resp_chatcmpl-1793208861866-b8576f92",
+          "object": "response",
+          "created_at": 1793208861,
+          "model": "gemini-3-flash",
+          "status": "completed",
+          "background": false,
+          "error": null,
+          "output": [
+            {
+              "id": "msg_resp_chatcmpl-1793208861866-b8576f92_0",
+              "type": "message",
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "output_text",
+                  "text": "NEXA_RESPONSES_OK",
+                  "annotations": []
+                }
+              ]
+            }
+          ],
+          "output_text": "NEXA_RESPONSES_OK",
+          "usage": {
+            "input_tokens": 88,
+            "output_tokens": 9,
+            "total_tokens": 97
+          }
+        }
+      },
+      "messages": {
+        "status": 200,
+        "seconds": 2.161,
+        "response": {
+          "id": "chatcmpl-1793208864029-826f05c9",
+          "type": "message",
+          "role": "assistant",
+          "model": "gemini-3-flash",
+          "content": [
+            {
+              "type": "text",
+              "text": "NEXA_MESSAGES_OK"
+            }
+          ],
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 88,
+            "output_tokens": 9
+          }
+        }
+      },
+      "apiKeyCannotManageProviders": {
+        "status": 403,
+        "seconds": 0.478
+      },
+      "invalidModel": {
+        "status": 400,
+        "seconds": 0.371,
+        "response": "{\"error\":{\"message\":\"Unable to determine provider for model 'nexa-smoke-model-does-not-exist'. Use a provider/model prefix (e.g. openai/nexa-smoke-model-does-not-exist) or ensure the model is added as a combo entry.\",\"type\":\"invalid_request_error\",\"code\":\"bad_request\"}}"
+      }
+    },
+    "restart": {
+      "health": {
+        "status": 200,
+        "seconds": 0.89,
+        "models": null
+      },
+      "catalog": {
+        "status": 200,
+        "seconds": 2.074,
+        "models": 1140
+      },
+      "inference": {
+        "status": 200,
+        "seconds": 2.104,
+        "response": {
+          "id": "chatcmpl-1793209019024-dfbd0288",
+          "object": "chat.completion",
+          "created": 1793209019,
+          "model": "gemini-3-flash",
+          "choices": [
+            {
+              "index": 0,
+              "finish_reason": "stop",
+              "message": {
+                "role": "assistant",
+                "content": "NEXA_RESTART_OK"
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 87,
+            "completion_tokens": 8,
+            "total_tokens": 95
+          }
+        }
+      }
+    }
+  },
+  "database": {
+    "migrations": 211,
+    "integrity": "ok",
+    "activeConnections": 20,
+    "inactiveClaudeConnections": 4,
+    "inactiveCodexConnections": 1,
+    "apiKeys": 1,
+    "usageRows": 5,
+    "costLedgerRows": 5
+  },
+  "credentials": {
+    "newCloudDashboardPassword": true,
+    "newCloudApiKey": true,
+    "newJwtSecret": true,
+    "storageEncryptionKeyPreserved": true,
+    "privateValuesIncludedInReport": false
+  },
+  "backup": {
+    "timer": "nexaomni-backup.timer",
+    "calendarUtc": "01:30",
+    "jitterSeconds": 300,
+    "retain": 7,
+    "offServerCopyVerified": true,
+    "snapshotUtc": "2026-10-28T17:36:55Z",
+    "integrity": "ok",
+    "fileModes": "0600",
+    "directoryMode": "0700"
+  },
+  "existingServices": {
+    "localOmniRouteHealth": 200,
+    "previousCloudOmniRoute": "healthy",
+    "VanalyzerServices": "healthy"
+  },
+  "limits": [
+    "Five Claude/Codex connection records require independent cloud OAuth and contain no copied rotating tokens.",
+    "Real inference acceptance covers agy/gemini-3-flash; catalog entries do not establish all-provider or all-model inference acceptance.",
+    "Default Python-urllib user agent can receive Cloudflare 1010; the reference client sends nexaomni-client/1.0.",
+    "Mac native interception, local services and desktop are outside this cloud API deployment."
+  ],
+  "fixes": [
+    "Deterministic quota timing fixture",
+    "Realistic fake ChildProcess event lifecycle",
+    "Packaged server-ws entrypoint",
+    "Correct packaged SQL migration directory",
+    "Independent cloud password bootstrap",
+    "Application user agent for HTTP client",
+    "CI uses a secret-free compose environment",
+    "45-second graceful stop and bounded runtime resources"
+  ]
+}

@@ -79,6 +79,8 @@ dns.lookup = function bridgeUpstreamLookup(hostname, options, callback) {
         cache.set(family, { addresses, expiresAt, staleUntil: expiresAt + STALE_GRACE_MS });
       }
     }
+    // An authoritative failure invalidates a previously cached address too.
+    if (error && !transientErrors.has(error.code)) cache.delete(family);
     if (error && previous && transientErrors.has(error.code) && Date.now() < previous.staleUntil) {
       // Only a previously resolved address may bridge a short resolver outage.
       // The TLS connection still verifies the original Anthropic hostname.

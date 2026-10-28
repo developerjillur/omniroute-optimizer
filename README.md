@@ -6,7 +6,7 @@ Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। Om
 
 OmniRoute-এর Nexa fixes, regression tests, validation ও release evidence এখন এই repository থেকে পরিচালিত হবে। `nexa/`-ই custom source; pristine application base আলাদা isolated fixture-এ apply করে পরীক্ষা করা হয়। Live database, credentials, request bodies ও ব্যক্তিগত কথোপকথন এই repository-তে রাখা হয় না।
 
-বর্তমান কাজ `nexalance` reference `72230a52a` থেকে আগের validated overlay updates এনেছে এবং native refusal/summary, Thread error classification ও bounded upstream DNS recovery সংশোধন করছে। [বর্তমান audit receipt](reports/native-reliability-2026-10-28.json)-এ data coverage, যাচাই ও বাকি gates আলাদা আছে। [Native reliability CI](.github/workflows/native-reliability.yml) pinned application source ও synthetic fixtures ব্যবহার করে; ব্যক্তিগত runtime data প্রয়োজন হয় না। CI validation চলমান থাকলে সেটিকে release বা deployment বলা যাবে না।
+বর্তমান কাজ `nexalance` reference `72230a52a` থেকে আগের validated overlay updates এনেছে এবং native refusal/summary, Thread error classification ও bounded upstream DNS recovery সংশোধন করেছে। [বর্তমান audit receipt](reports/native-reliability-2026-10-28.json)-এ data coverage, যাচাই ও বাকি gates আলাদা আছে। [Native reliability CI](.github/workflows/native-reliability.yml) pinned application source ও synthetic fixtures ব্যবহার করে; ব্যক্তিগত runtime data প্রয়োজন হয় না। Accepted source validation-এ Node 26-এর 712টি regression, production Node 24-এর 157টি native regression, core typecheck, full lint ও docs-all PASS; full TypeScript ratchet `5803 ≤ 5830`। বর্তমান source SHA-এর definitive ফল [PR #1-এর checks](https://github.com/developerjillur/omniroute-optimizer/pull/1) ও commit-specific CI receipt-এ আছে। Full build ও deployment এখনও হয়নি।
 
 সব commit স্বাভাবিক Git hooks এবং Jillur Rahman-এর author/committer identity-তে হবে। `--no-verify` ব্যবহার করা হবে না। কোনো upstream repository-তে এই workflow push বা PR করে না।
 
@@ -30,7 +30,7 @@ Historical documents-এর পুরোনো status-এর পরে পাও
 | Reference overlay commit         | `72230a52a548b9fdc8dda0495c893f5193e5d64d` |
 | Pristine upstream base           | `c1e30b7676975feb298b49eff6ff58923c04b89e` |
 | Upstream version                 | `3.8.51`                                   |
-| Managed overlay files            | 389                                        |
+| Managed overlay files            | 390                                        |
 
 বর্তমান `nexa/`-তে reference overlay-এর সঙ্গে নতুন reliability fixes আছে; তাই সব file reference commit-এর হুবহু copy—এমন দাবি করা হচ্ছে না। প্রতিটি managed file-এর byte count, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এ 302টি entry: 181টি patch, 116টি নতুন application/test file ও 5টি tooling entry। অতিরিক্ত deployment, overlay tests ও documentation-ও inventory-তে রয়েছে।
 

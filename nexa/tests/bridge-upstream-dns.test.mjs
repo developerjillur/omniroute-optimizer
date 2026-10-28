@@ -118,6 +118,9 @@ test("authoritative DNS errors and cold-start failures are preserved", async () 
   const missing = f.lookup();
   f.queries[2].callback(Object.assign(new Error("not found"), { code: "ENOTFOUND" }));
   assert.equal((await missing).error.code, "ENOTFOUND");
+  const afterMissing = f.lookup();
+  f.queries[3].callback(Object.assign(new Error("timeout"), { code: "ETIMEOUT" }));
+  assert.equal((await afterMissing).error?.code, "ETIMEOUT");
 });
 
 test("IPv6 cache is independent and loopback responses cannot recurse into the bridge", async () => {

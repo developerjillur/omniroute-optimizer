@@ -32,7 +32,11 @@ jobs:
         with:
           node-version: "26.7.0"
       - name: Check overlay tooling
-        run: node --test --test-concurrency=1 nexa/tests/*.test.mjs nexa/deploy/tsc-ratchet.test.mjs
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --version > "$RUNNER_TEMP/primary-node-version.txt"
+          node --test --test-reporter=tap --test-concurrency=1 nexa/tests/*.test.mjs nexa/deploy/tsc-ratchet.test.mjs | tee "$RUNNER_TEMP/tooling-node26.tap"
       - name: Prepare the pinned pristine application
         shell: bash
         run: |
@@ -127,13 +131,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          node --test --test-concurrency=1 nexa/tests/*.test.mjs nexa/deploy/tsc-ratchet.test.mjs
+          node --require ./nexa/deploy/bridge-upstream-dns.cjs -e "console.log('Production DNS shim loaded')"
+          node --test --test-reporter=tap --test-concurrency=1 nexa/tests/*.test.mjs nexa/deploy/tsc-ratchet.test.mjs | tee "$RUNNER_TEMP/tooling-node24.tap"
           cd "$RUNNER_TEMP/omniroute-fixture"
           export DATA_DIR="$RUNNER_TEMP/native-production-data"
           export TMPDIR="$RUNNER_TEMP"
           node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 --test-force-exit tests/unit/native-claude-refusal-terminal.test.ts tests/unit/native-thread-error-classification.test.ts tests/unit/native-stream-summary.test.ts tests/unit/native-artifact-recovery.test.ts tests/unit/native-usage-fidelity.test.ts tests/unit/native-claude-thread-protocol.test.ts tests/unit/native-claude-thread-executor.test.ts tests/unit/native-claude-thread-chatcore.test.ts tests/unit/native-claude-thread-routing.test.ts tests/unit/agent-bridge-native-transport.test.ts tests/unit/agent-bridge-native-cache-continuity.test.ts tests/unit/agent-bridge-thread-cache.test.ts tests/unit/native-thinking-signature-switch.test.ts tests/unit/native-suggestion-empty-response.test.ts tests/unit/native-context-overflow-error.test.ts tests/unit/cache-ttl-stream.test.ts tests/unit/cache-ttl-extraction.test.ts tests/unit/translator-resp-claude-to-openai.test.ts | tee "$RUNNER_TEMP/native-production.tap"
       - name: Require committed formatting
         run: test ! -s "$RUNNER_TEMP/formatting.patch"
+      - name: Write the exact source validation receipt
+        run: node nexa/tests/write-native-validation.mjs
       - name: Preserve reviewable formatter changes
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -152,3 +159,6 @@ jobs:
             ${{ runner.temp }}/stream-green.tap
             ${{ runner.temp }}/native-production.tap
             ${{ runner.temp }}/tsc-diagnostics.log
+            ${{ runner.temp }}/tooling-node26.tap
+            ${{ runner.temp }}/tooling-node24.tap
+            ${{ runner.temp }}/native-validation.json

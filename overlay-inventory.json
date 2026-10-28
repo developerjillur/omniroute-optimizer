@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "c1e30b7676975feb298b49eff6ff58923c04b89e",
   "upstreamVersion": "3.8.51",
-  "trackedNexaFiles": 389,
-  "totalNexaBytes": 1705367,
+  "trackedNexaFiles": 390,
+  "totalNexaBytes": 1710839,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -146,9 +146,9 @@
     {
       "path": "nexa/deploy/bridge-upstream-dns.cjs",
       "mode": "100644",
-      "gitBlobSha": "0eee8e323b032e666af03a172b3b1bc1c479cc0d",
-      "bytes": 3643,
-      "sha256": "5da888549064a222eb7dc706b092b5f91dddd8903b6b8d926ba96a861648b8f3"
+      "gitBlobSha": "5eeb7fa6a465abd2516ba60e2891a489f87fd972",
+      "bytes": 3793,
+      "sha256": "a27b949c8484b86b14154e4e28c29a2cd7f16849b9f4035397806d0fc6011bb3"
     },
     {
       "path": "nexa/deploy/build-candidate.sh",
@@ -468,16 +468,16 @@
     {
       "path": "nexa/docs/NATIVE-REFUSAL-TERMINALS-2026-10-19.md",
       "mode": "100644",
-      "gitBlobSha": "cfc8e057d8f9e300b8d690449edb0ca24622e8e0",
-      "bytes": 4997,
-      "sha256": "8869a6a5975ac42e8b611a0d2f004b2e01d463af6865fa0796e196e2f393e475"
+      "gitBlobSha": "6e346bd8d45142ad877eb4459f06cd26ca4aa5b1",
+      "bytes": 5664,
+      "sha256": "7ad64f42022b6c1c8c07987ade71cffcd5e0945bec05cd5f6587a498d0526955"
     },
     {
       "path": "nexa/docs/NATIVE-RELIABILITY-AUDIT-2026-10-28.md",
       "mode": "100644",
-      "gitBlobSha": "e9d5ddc8bc90582aea53fa90ae9f2b64ad07ced0",
-      "bytes": 9047,
-      "sha256": "aabbfba7a3e391f9ee44f82fde9897166f71694adff2462a6107a4a7b3dddfe1"
+      "gitBlobSha": "b88f7ece272bc5f57728bfd04fb26a59dd6cbb20",
+      "bytes": 9782,
+      "sha256": "a753a528511969640ef4b8b95146dbda2d4df998ed007890d26a48528c31e9ce"
     },
     {
       "path": "nexa/docs/NATIVE-THINKING-SIGNATURE-SWITCH-2026-10-11.md",
@@ -2666,9 +2666,9 @@
     {
       "path": "nexa/tests/bridge-upstream-dns.test.mjs",
       "mode": "100644",
-      "gitBlobSha": "7fd4a333f8be60bd4d22b327866e3d8cc3cd5db2",
-      "bytes": 4752,
-      "sha256": "152017655aa0ae1a6a9aee9da21c8db8b6664e43086a62d12f009680a991ad4e"
+      "gitBlobSha": "151dd923a43412045c505ef52dab60a862a98ea8",
+      "bytes": 4933,
+      "sha256": "81ad8eb6f0fbe2f46e5374c82d5e6e32f8f4860eff04566fd52d97edd2083508"
     },
     {
       "path": "nexa/tests/fixtures/native-refusal-delta.patch",
@@ -2718,6 +2718,13 @@
       "gitBlobSha": "bdc869e0f1da114a88d3bf1425dae80ed97f652b",
       "bytes": 798,
       "sha256": "e216a59ab5c3bb89650ebb741d89028b71f18a78ccf62a2173eb3c7cf2618c86"
+    },
+    {
+      "path": "nexa/tests/write-native-validation.mjs",
+      "mode": "100644",
+      "gitBlobSha": "f33e0a9cb48da45d18b44bfc2f6c23da57ec7a5d",
+      "bytes": 3739,
+      "sha256": "e4adc9f6fbce82534119b2f6ff241ef90b4ad76dac434ecb7ae8bb209fc9bdb8"
     },
     {
       "path": "nexa/update.mjs",

@@ -77,7 +77,8 @@ query coalescing ছিল না।
 নতুন shim family অনুযায়ী concurrent lookup একত্র করে, সর্বোচ্চ 60 সেকেন্ড TTL
 cache রাখে এবং bounded resolver timeout ব্যবহার করে। কেবল আগে validated
 address সংক্ষিপ্ত transient DNS failure-এর সময় সর্বোচ্চ অতিরিক্ত 5 মিনিট
-ব্যবহারযোগ্য। Cold failure ও authoritative DNS failure ফিরিয়ে দেওয়া হয়।
+ব্যবহারযোগ্য। Cold failure ও authoritative DNS failure ফিরিয়ে দেওয়া হয়; authoritative negative
+response পুরোনো cached address-ও বাতিল করে।
 Loopback/Bridge address গ্রহণ করা হয় না; TLS original hostname verification
 চালু থাকে। এটি HTTP/model retry নয়।
 
@@ -106,11 +107,17 @@ correlated gateway request ছাড়া সেটিকে OmniRoute defect ব�
 ## Validation ও বাকি ধাপ
 
 - Canonical public source ও synthetic data নিয়ে pinned hosted fixture-এ কাজ
-  চলছে। Mac-এ warning memory pressure থাকায় application/build admission bypass
+  সম্পন্ন হয়েছে। Mac-এ অপর্যাপ্ত physical headroom থাকায় application/build admission bypass
   করা হয়নি। Heavy local jobs বা অন্য app/session বন্ধ করা হয়নি।
-- Baseline assertion reproduction, native/protocol/transport/cache/translator
-  regressions, core typecheck, lint ও documentation gates-এর ফল
-  [audit receipt](../../reports/native-reliability-2026-10-28.json)-এ আলাদা থাকে।
+- Accepted baseline: ২১ test, ১৫ assertion failure। Node `26.7.0`-এ ৭১২/৭১২
+  native/protocol/cache/stream regression PASS; Node `24.15.0`-এ ১৫৭/১৫৭ native
+  regression PASS। Skip/cancel ০। Core typecheck, full lint ও docs-all PASS;
+  full TypeScript ratchet `5803 ≤ 5830` PASS। নতুন focused fixtures-এ diagnostic ০।
+- [Audit receipt](../../reports/native-reliability-2026-10-28.json)-এ last completed
+  source SHA ও run URL আছে। বর্তমান commit-এর authoritative ফল
+  [PR #1-এর checks](https://github.com/developerjillur/omniroute-optimizer/pull/1)
+  ও `native-test-output/native-validation.json` artifact; এতে source/checkout
+  SHA, runtime, test counts ও hashes লেখা হয় সব gates সফল হওয়ার পরে।
 - Full production build/package/install/deployment হয়নি। Fresh native app/CLI
   tool cycle, compact/resume বা সব connector-এর নতুন acceptance-ও হয়নি।
 - Live fingerprint এখনও pre-fix baseline-এর সঙ্গে মেলে। এই repository-তে

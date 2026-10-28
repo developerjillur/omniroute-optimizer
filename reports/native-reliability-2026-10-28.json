@@ -16,23 +16,23 @@
   "findings": [
     {
       "id": "native-terminal",
-      "status": "source_fix_validation_pending",
+      "status": "source_correction_in_review",
       "detail": "Preserve refusal terminals and native retained summaries. Missing message_stop remains a transport error; no refusal retry or account rotation is added."
     },
     {
       "id": "native-signatures",
-      "status": "source_fix_validation_pending",
+      "status": "source_correction_in_review",
       "detail": "Retained native summaries must keep thinking signature deltas and actual stop details, and must not invent end_turn."
     },
     {
       "id": "thread-errors",
-      "status": "source_fix_validation_pending",
+      "status": "source_correction_in_review",
       "detail": "Both local and upstream missing Thread phrases are request-scoped, not unavailable models. Sparse history is never silently recreated."
     },
     {
       "id": "upstream-dns",
       "status": "offline_unit_red_green_pass",
-      "detail": "Coalesce concurrent lookups; cache bounded TTL; reuse a previously resolved address only through a brief transient resolver failure; retain TLS verification."
+      "detail": "Coalesce concurrent lookups; cache bounded TTL; reuse a previously resolved address only through a brief transient resolver failure; retain TLS verification. Authoritative negative responses invalidate the cached address before a later transient failure."
     },
     {
       "id": "cache-ttl-input",
@@ -65,11 +65,39 @@
       "coreHttp": 200,
       "bothIngressJobsRunning": true
     },
-    "nativeRegressions": "pending",
-    "coreTypecheck": "pending",
-    "fullLint": "pending",
-    "docsAll": "pending",
-    "hostedCi": "pending",
+    "nativeRegressions": {
+      "sourceCommit": "eb6a8a205908565dbc5d2e1c02d69b83260d456d",
+      "node26": {
+        "native": 157,
+        "nativeExtended": 169,
+        "streamAndEmpty": 386,
+        "total": 712,
+        "passed": 712,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "node24": {
+        "native": 157,
+        "passed": 157,
+        "failed": 0,
+        "skipped": 0
+      },
+      "baseline": {
+        "tests": 21,
+        "passed": 6,
+        "assertionFailures": 15,
+        "environmentError": false
+      }
+    },
+    "coreTypecheck": "passed",
+    "fullLint": "passed",
+    "docsAll": "passed",
+    "hostedCi": {
+      "conclusion": "success",
+      "runUrl": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/40630581579",
+      "sourceCommit": "eb6a8a205908565dbc5d2e1c02d69b83260d456d"
+    },
     "fullBuild": "not_run",
     "deployment": "not_performed",
     "freshNativeAppCliAcceptance": "not_run",
@@ -77,12 +105,62 @@
     "currentClients": {
       "desktop": "3.6556.2",
       "standaloneCli": "2.1.301"
-    }
+    },
+    "fullTypecheck": {
+      "completed": true,
+      "diagnostics": 5803,
+      "baseline": 5830,
+      "baselineUnchanged": true,
+      "newFocusedFixtureDiagnostics": 0
+    },
+    "perCommitReceipt": {
+      "workflow": ".github/workflows/native-reliability.yml",
+      "artifact": "native-test-output/native-validation.json",
+      "pullRequest": "https://github.com/developerjillur/omniroute-optimizer/pull/1",
+      "meaning": "The latest successful workflow receipt identifies the exact tested source, runtimes, test counts and artifact hashes, including later changes."
+    },
+    "installedRuntimeBuild": "15533a05c",
+    "globalHookReferences": {
+      "settingsFiles": 2,
+      "commands": 25,
+      "scriptReferences": 26,
+      "uniqueScriptPaths": 7,
+      "missingScriptReferences": 0,
+      "executionTested": false
+    },
+    "liveModelProbesDuringThisAudit": 0
   },
   "limits": [
     "Historical HTTP status and retained synthetic stop summaries cannot prove every native terminal outcome.",
     "The current Mac had warning memory pressure; application test/build admission was not bypassed.",
     "No zero-error, permanent uptime, invoice parity or full hosted-feature parity claim is made.",
     "Bounded native client log tails included startup MCP timeouts and older connector sync warnings; these are not attributed to the gateway without a correlated request."
+  ],
+  "lastSourceValidationUtc": "2026-10-28T04:17:22.684257+00:00",
+  "validationHistory": [
+    {
+      "run": 40627057864,
+      "result": "manifest abbreviation mismatch before application tests"
+    },
+    {
+      "run": 40627714344,
+      "result": "TAP receipt parser rejected default spec reporter"
+    },
+    {
+      "run": 40628135933,
+      "result": "focused/native 157 and core/lint/docs passed"
+    },
+    {
+      "run": 40628676897,
+      "result": "712 regressions passed; full compiler aborted and remained unmeasured"
+    },
+    {
+      "run": 40629547167,
+      "result": "712 regressions and 5808-error ratchet passed; new test-only environment contract rejected by docs gate"
+    },
+    {
+      "run": 40630581579,
+      "result": "712 regressions, Node24 native157, 5803-error ratchet, lint and docs passed"
+    }
   ]
 }

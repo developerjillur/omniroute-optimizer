@@ -3,10 +3,18 @@
 ## বর্তমান অবস্থা — ২০২৬-১০-২৮
 
 প্রস্তুত refusal fix এখন canonical `omniroute-optimizer` overlay-এ আছে।
-নতুন native regressions, core typecheck, lint ও documentation gates-এর hosted
-validation চলছে। আগের resource stop বা import/setup failure-কে RED reproduction
-বা PASS বলা হয়নি। এই source change এখনও production runtime-এ install হয়নি।
-Full build, deployment ও fresh native app/CLI acceptance আলাদা বাকি ধাপ।
+Accepted baseline-এ ২১টির মধ্যে ১৫টি assertion failure এবং candidate-এর ৭১২টি
+native/cache/stream regression PASS পাওয়া গেছে। Installed Node `24.15.0`-এও
+১৫৭টি native regression PASS। Core typecheck, full lint, docs-all এবং full
+TypeScript ratchet `5803 ≤ 5830` PASS; inherited backlog-টি zero-error check নয়।
+
+প্রতিটি বর্তমান source commit-এর চূড়ান্ত ফল [PR #1-এর checks](https://github.com/developerjillur/omniroute-optimizer/pull/1)
+ও `native-test-output/native-validation.json` CI artifact-এ থাকে। সেটি actual
+source/checkout SHA, runtime version, test count এবং TAP hash বহন করে। আগের
+resource stop বা import/setup failure-কে RED reproduction বা PASS বলা হয়নি।
+
+এই source change এখনও production runtime-এ install হয়নি। Full build,
+deployment ও fresh native app/CLI acceptance আলাদা বাকি ধাপ।
 
 ## প্রমাণিত failure
 

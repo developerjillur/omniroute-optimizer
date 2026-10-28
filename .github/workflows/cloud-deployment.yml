@@ -27,5 +27,6 @@ jobs:
           bash -n nexa/cloud/build.sh
           node nexa/tests/verify-source-inventory.mjs
           node --test nexa/tests/overlay-inventory.test.mjs nexa/tests/overlay-base-version.test.mjs
-          docker compose -f nexa/cloud/compose.yaml config --no-env-resolution --quiet
+          touch "$RUNNER_TEMP/nexaomni-ci.env"
+          NEXAOMNI_ENV_FILE="$RUNNER_TEMP/nexaomni-ci.env" docker compose -f nexa/cloud/compose.yaml config --quiet
           git diff --check

@@ -7,7 +7,7 @@
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
   "trackedNexaFiles": 441,
-  "totalNexaBytes": 1917338,
+  "totalNexaBytes": 1917360,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -104,9 +104,9 @@
     {
       "path": "nexa/cloud/compose.yaml",
       "mode": "100644",
-      "gitBlobSha": "5375eebdde278bf1a364c51f7d308773af2581d6",
-      "bytes": 1212,
-      "sha256": "2e4e802a6fadceb0464327c465267e4da5cd4cc7c2b88c8fd64b70cf2c55e839"
+      "gitBlobSha": "7629c8d70f1abddd6aea1fd9d2d3ac3f89628bcd",
+      "bytes": 1234,
+      "sha256": "d53fa91fd0b2d09bfa0240fcb4aec0a7a3ff188393e07baeeb1915af7ab51698"
     },
     {
       "path": "nexa/cloud/nexaomni-backup.service",

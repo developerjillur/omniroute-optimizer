@@ -5,7 +5,7 @@ services:
     container_name: nexaomni-gateway
     restart: unless-stopped
     init: true
-    env_file: /opt/nexaomni/private/runtime.env
+    env_file: ${NEXAOMNI_ENV_FILE:-/opt/nexaomni/private/runtime.env}
     volumes:
       - /opt/nexaomni/data:/app/data
     ports:

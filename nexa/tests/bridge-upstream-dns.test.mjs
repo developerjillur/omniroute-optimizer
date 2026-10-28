@@ -14,29 +14,52 @@ function fixture(source = candidate) {
   const queries = [];
   const delegated = [];
   const dns = {
-    lookup(...args) { delegated.push(args); },
+    lookup(...args) {
+      delegated.push(args);
+    },
     Resolver: class {
-      constructor(options) { this.options = options; }
-      setServers(servers) { this.servers = servers; }
+      constructor(options) {
+        this.options = options;
+      }
+      setServers(servers) {
+        this.servers = servers;
+      }
       resolve4(host, options, callback) {
-        if (typeof options === "function") { callback = options; options = undefined; }
+        if (typeof options === "function") {
+          callback = options;
+          options = undefined;
+        }
         queries.push({ family: 4, host, options, callback });
       }
       resolve6(host, options, callback) {
-        if (typeof options === "function") { callback = options; options = undefined; }
+        if (typeof options === "function") {
+          callback = options;
+          options = undefined;
+        }
         queries.push({ family: 6, host, options, callback });
       }
     },
   };
   vm.runInNewContext(source, {
-    require: (name) => name === "node:dns" ? dns : name === "node:net" ? net : assert.fail(name),
+    require: (name) => (name === "node:dns" ? dns : name === "node:net" ? net : assert.fail(name)),
     process: { nextTick: queueMicrotask },
     Date: { now: () => now },
   });
-  const lookup = (options = {}) => new Promise((resolve) => {
-    dns.lookup("api.anthropic.com", options, (error, value, family) => resolve({ error, value, family }));
-  });
-  return { dns, queries, delegated, lookup, advance: (ms) => { now += ms; } };
+  const lookup = (options = {}) =>
+    new Promise((resolve) => {
+      dns.lookup("api.anthropic.com", options, (error, value, family) =>
+        resolve({ error, value, family })
+      );
+    });
+  return {
+    dns,
+    queries,
+    delegated,
+    lookup,
+    advance: (ms) => {
+      now += ms;
+    },
+  };
 }
 
 test("concurrent Anthropic lookups share a single resolver query", async () => {

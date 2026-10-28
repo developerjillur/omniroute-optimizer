@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "c1e30b7676975feb298b49eff6ff58923c04b89e",
   "upstreamVersion": "3.8.51",
-  "trackedNexaFiles": 384,
-  "totalNexaBytes": 1682358,
+  "trackedNexaFiles": 385,
+  "totalNexaBytes": 1684827,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -146,9 +146,9 @@
     {
       "path": "nexa/deploy/bridge-upstream-dns.cjs",
       "mode": "100644",
-      "gitBlobSha": "e08ae1f250048f13b7919d0afebf55a253c3485e",
-      "bytes": 3505,
-      "sha256": "84ee4103bf40a425fc9fddddfec8ff05529b75e7795389051e32740358ef1ce4"
+      "gitBlobSha": "0eee8e323b032e666af03a172b3b1bc1c479cc0d",
+      "bytes": 3643,
+      "sha256": "5da888549064a222eb7dc706b092b5f91dddd8903b6b8d926ba96a861648b8f3"
     },
     {
       "path": "nexa/deploy/build-candidate.sh",
@@ -503,16 +503,16 @@
     {
       "path": "nexa/lib/overlay.mjs",
       "mode": "100644",
-      "gitBlobSha": "4dccf7606eebb372730296b05eb71246b4c32a86",
-      "bytes": 10468,
-      "sha256": "9867c153f8e3f9d7ca37461c40891d27f79b6e189eacc61eef05b5560538bbef"
+      "gitBlobSha": "29e455910d2f7bec4a578f095ebe2019909dc8d9",
+      "bytes": 10618,
+      "sha256": "ff7c185f2162f286c052eb09c8f9499a84e156130826c7a125ed521fc58c3ccc"
     },
     {
       "path": "nexa/manifest.json",
       "mode": "100644",
-      "gitBlobSha": "fdad6c57dd6c09ba85aeb151a96402b7e5b538a8",
-      "bytes": 78734,
-      "sha256": "169abba07630332792c1d9e7a805951d8df6d975b09a21cdac44658008d32d2a"
+      "gitBlobSha": "8235d6d22b6e177bad4c978635826d2eb0de19c9",
+      "bytes": 78765,
+      "sha256": "1994141ddc2e7c83879c3df312d8d47d8989859361efda5cb1b0a452987631da"
     },
     {
       "path": "nexa/new/bin/cli/utils/packageMigrations.mjs",
@@ -1154,9 +1154,9 @@
     {
       "path": "nexa/new/tests/unit/native-claude-refusal-terminal.test.ts",
       "mode": "100644",
-      "gitBlobSha": "954bf5ca1e4af180ad874234a8ac0d4cc73d278d",
-      "bytes": 9738,
-      "sha256": "a1c5451023c0a8086e39fc9bd6a916ced88814394c79686ff9cc789e1c6c098f"
+      "gitBlobSha": "fcf1e5c08f56d232745b7dd58798d4fb5dedb140",
+      "bytes": 10086,
+      "sha256": "5ff18db84cba8003b185554446e3329a3a7d7159c58cbafeb9e9226a92ccdd00"
     },
     {
       "path": "nexa/new/tests/unit/native-claude-thread-chatcore.test.ts",
@@ -1210,9 +1210,9 @@
     {
       "path": "nexa/new/tests/unit/native-stream-summary.test.ts",
       "mode": "100644",
-      "gitBlobSha": "101c7638ecebb71c4eee9818a2866d7cb6f38556",
-      "bytes": 3213,
-      "sha256": "b8c674a8505bc8df028114b3bf310cf2b9edcd16abc6df2f077186de61021021"
+      "gitBlobSha": "1b4afaea33ffb6ac8de5edefa7d76b588cc4faa5",
+      "bytes": 3447,
+      "sha256": "787a5d7409693116e0734e7051efc89be3556ab32d6e6f7b10bdc9139f0cee94"
     },
     {
       "path": "nexa/new/tests/unit/native-suggestion-empty-response.test.ts",
@@ -1231,9 +1231,9 @@
     {
       "path": "nexa/new/tests/unit/native-thread-error-classification.test.ts",
       "mode": "100644",
-      "gitBlobSha": "676beea45e20465bf01396842d314382bf619662",
-      "bytes": 1004,
-      "sha256": "ae88e034507967637d187b3796b1721b95112e5a44d50bde992b89eb4eed6df0"
+      "gitBlobSha": "9dbef202ecff3494baeb25387f55cb154899a1e5",
+      "bytes": 1028,
+      "sha256": "9c120ccca1d14e5ceb3816f7077e57af03ee24364ab6eb0aa97ef1f5a782ba50"
     },
     {
       "path": "nexa/new/tests/unit/native-usage-fidelity.test.ts",
@@ -1609,9 +1609,9 @@
     {
       "path": "nexa/patches/open-sse__services__errorClassifier.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "41283bb248078ec49500ec8d650959e866d31f63",
-      "bytes": 1365,
-      "sha256": "c7185c5cbf3532325e05bedacedcaf147db7bebbd0562a4cb81b5f238e51effe"
+      "gitBlobSha": "575ee0297ff8a085005a5c0de34a6fdf16555628",
+      "bytes": 1260,
+      "sha256": "46be65f21e48ee39e2ef382a6a9b6838ad16124b0213f97d06a42cca61d9ae50"
     },
     {
       "path": "nexa/patches/open-sse__services__genericQuotaFetcher.ts.patch",
@@ -2652,16 +2652,23 @@
     {
       "path": "nexa/tests/bridge-upstream-dns.test.mjs",
       "mode": "100644",
-      "gitBlobSha": "06c5c7b4d29f553f0a9ef9135fe447f1234a7e89",
-      "bytes": 4600,
-      "sha256": "cab3d68586077d6cc64ab5dc8b672fbdced74e3c30c29f06907f9aea060ef32f"
+      "gitBlobSha": "7fd4a333f8be60bd4d22b327866e3d8cc3cd5db2",
+      "bytes": 4752,
+      "sha256": "152017655aa0ae1a6a9aee9da21c8db8b6664e43086a62d12f009680a991ad4e"
     },
     {
       "path": "nexa/tests/fixtures/native-refusal-delta.patch",
       "mode": "100644",
-      "gitBlobSha": "e978979b2cb919527c66cd4c22383288e0f5b439",
-      "bytes": 11432,
-      "sha256": "b6c6dcd5110342bf9c06f9533f1e7abc78b78f39388b2ec642e7f5594195691e"
+      "gitBlobSha": "2e79c325c360524f7338bf5f586383ce97e63129",
+      "bytes": 11416,
+      "sha256": "6f25a15d9f46028d2534c276f7266859634320c2305de51f5f239ef8107f7085"
+    },
+    {
+      "path": "nexa/tests/overlay-base-version.test.mjs",
+      "mode": "100644",
+      "gitBlobSha": "22d0f50087b76aa0680cd28488832e10e59a4d84",
+      "bytes": 1499,
+      "sha256": "1841088f5ac571c1363dea8e0bc2138cb5bb6a1687e8079b1777ffcb957fff40"
     },
     {
       "path": "nexa/tests/overlay-doc-counts.test.mjs",
@@ -2680,9 +2687,9 @@
     {
       "path": "nexa/tests/verify-baseline-red.mjs",
       "mode": "100644",
-      "gitBlobSha": "5cd62842752557a8ef05c0965b3736159bd344a0",
-      "bytes": 784,
-      "sha256": "367ca586dfc4e45b9ba691eca92c5ee25ab225718131267c60e377130adf8877"
+      "gitBlobSha": "bdc869e0f1da114a88d3bf1425dae80ed97f652b",
+      "bytes": 798,
+      "sha256": "e216a59ab5c3bb89650ebb741d89028b71f18a78ccf62a2173eb3c7cf2618c86"
     },
     {
       "path": "nexa/update.mjs",

@@ -19,7 +19,11 @@ for (const message of [
 
 test("a genuine missing model retains model lockout classification", () => {
   assert.equal(
-    classifyProviderError(404, { error: { message: "Model fixture-missing does not exist" } }, "claude"),
+    classifyProviderError(
+      404,
+      { error: { message: "Model fixture-missing does not exist" } },
+      "claude"
+    ),
     PROVIDER_ERROR_TYPES.MODEL_NOT_FOUND
   );
 });

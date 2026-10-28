@@ -179,17 +179,16 @@
    return hasPartialLifecycle || !sawAnyUpstreamPayload;
 --- a/open-sse/services/errorClassifier.ts
 +++ b/open-sse/services/errorClassifier.ts
-@@ -13,7 +13,8 @@
- // successful completion (truncated at the token limit, or a tool-call turn) —
- // NOT a silent "fake success" failure. Used to avoid rewriting a valid HTTP 200
- // (e.g. a Claude Code `max_tokens: 1` connectivity ping) into a synthetic 502.
--const LEGIT_EMPTY_CLAUDE_STOP = new Set(["max_tokens", "tool_use"]);
-+// A refusal is intentionally terminal; never turn it into an error or retry.
-+const LEGIT_EMPTY_CLAUDE_STOP = new Set(["max_tokens", "tool_use", "refusal"]);
- const LEGIT_EMPTY_OPENAI_FINISH = new Set(["length", "tool_calls", "content_filter"]);
- 
- // #14160: first-party APIs where an empty completion carrying a NORMAL terminal
-@@ -364,7 +365,7 @@
+@@ -78,6 +78,8 @@
+     // to emit a tool_use block) is a legitimate terminal state, not a silent
+     // failure. Only flag empty content when no such terminal stop_reason is present.
+     const stopReason = typeof body.stop_reason === "string" ? body.stop_reason : "";
++    // Only a native message envelope can use the refusal terminal exemption.
++    if (body.type === "message" && stopReason === "refusal") return false;
+     // #14160: same exemption for the Claude wire shape on trusted first-party APIs.
+     if (trustedEmptyStop && NORMAL_STOP_CLAUDE_STOP.has(stopReason)) return false;
+     return !LEGIT_EMPTY_CLAUDE_STOP.has(stopReason);
+@@ -364,7 +366,7 @@
  // not provider/model health. Keep every expression bounded to avoid ReDoS on
  // upstream-controlled error bodies.
  const RESOURCE_NOT_FOUND_PATTERNS = [

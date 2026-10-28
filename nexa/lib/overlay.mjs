@@ -245,7 +245,9 @@ export function isApplied() {
 // ---- base version ----------------------------------------------------------
 
 export function baseVersion() {
-  const sha = git(["rev-parse", "--short", BASE_REF]);
+  // Abbreviation length depends on the checkout's object count and core.abbrev.
+  // A full object ID keeps generated manifests identical in shallow CI clones.
+  const sha = git(["rev-parse", BASE_REF]);
   let version = "?";
   try {
     version = JSON.parse(git(["show", `${BASE_REF}:package.json`])).version || "?";

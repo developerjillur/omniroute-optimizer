@@ -16,7 +16,7 @@ import { resetDbInstance } from "../../src/lib/db/core.ts";
 const encoder = new TextEncoder();
 const record = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" && !Array.isArray(value)
-    ? value as Record<string, unknown>
+    ? (value as Record<string, unknown>)
     : {};
 const frame = (data: Record<string, unknown>) =>
   `event: ${data.type}\ndata: ${JSON.stringify(data)}\n\n`;
@@ -79,11 +79,13 @@ async function wrap(text: string, format: string = FORMATS.CLAUDE) {
   let failures = 0;
   const controller = createStreamController({
     clientResponseFormat: format,
-    onError: () => { failures += 1; },
+    onError: () => {
+      failures += 1;
+    },
   });
   const readable = createDisconnectAwareStream(
     { readable: source(text), writable: new WritableStream() },
-    controller,
+    controller
   );
   return { text: await new Response(readable).text(), failures };
 }
@@ -114,23 +116,31 @@ for (const effort of ["low", "medium", "high", "xhigh", "max"]) {
       thread: { type: "continue", previous_message_id: "msg_fixture_previous" },
       messages: [{ role: "user", content: "fixture request" }],
     };
-    const transformed = source(text).pipeThrough(createSSEStream({
-      mode: "passthrough",
-      sourceFormat: FORMATS.CLAUDE,
-      clientResponseFormat: FORMATS.CLAUDE,
-      provider: "claude",
-      model: body.model,
-      body,
-      onComplete: (result) => { completed = result; },
-      onFailure: () => { transformFailures += 1; },
-    }));
+    const transformed = source(text).pipeThrough(
+      createSSEStream({
+        mode: "passthrough",
+        sourceFormat: FORMATS.CLAUDE,
+        clientResponseFormat: FORMATS.CLAUDE,
+        provider: "claude",
+        model: body.model,
+        body,
+        onComplete: (result) => {
+          completed = result;
+        },
+        onFailure: () => {
+          transformFailures += 1;
+        },
+      })
+    );
     let wrapperFailures = 0;
     const wrapped = createDisconnectAwareStream(
       { readable: transformed, writable: new WritableStream() },
       createStreamController({
         clientResponseFormat: FORMATS.CLAUDE,
-        onError: () => { wrapperFailures += 1; },
-      }),
+        onError: () => {
+          wrapperFailures += 1;
+        },
+      })
     );
     const result = await new Response(wrapped).text();
     assert.equal(wrapperFailures, 0);
@@ -153,19 +163,25 @@ for (const effort of ["low", "medium", "high", "xhigh", "max"]) {
 test("native refusal with no content block is a valid terminal, including the flush tail", async () => {
   const text = events("refusal", false).map(frame).join("");
   let completed: unknown;
-  const transformed = source(text).pipeThrough(createSSEStream({
-    mode: "passthrough",
-    sourceFormat: FORMATS.CLAUDE,
-    clientResponseFormat: FORMATS.CLAUDE,
-    provider: "claude",
-    model: "claude-opus-5-5",
-    body: { messages: [{ role: "user", content: "fixture request" }] },
-    onComplete: (result) => { completed = result; },
-  }));
-  const result = await new Response(createDisconnectAwareStream(
-    { readable: transformed, writable: new WritableStream() },
-    createStreamController({ clientResponseFormat: FORMATS.CLAUDE }),
-  )).text();
+  const transformed = source(text).pipeThrough(
+    createSSEStream({
+      mode: "passthrough",
+      sourceFormat: FORMATS.CLAUDE,
+      clientResponseFormat: FORMATS.CLAUDE,
+      provider: "claude",
+      model: "claude-opus-5-5",
+      body: { messages: [{ role: "user", content: "fixture request" }] },
+      onComplete: (result) => {
+        completed = result;
+      },
+    })
+  );
+  const result = await new Response(
+    createDisconnectAwareStream(
+      { readable: transformed, writable: new WritableStream() },
+      createStreamController({ clientResponseFormat: FORMATS.CLAUDE })
+    )
+  ).text();
   assert.equal(result, text);
   assert.equal(record(record(completed).responseBody).stop_reason, "refusal");
   assert.deepEqual(record(record(completed).responseBody).content, []);
@@ -205,31 +221,45 @@ test("a structured upstream error keeps its original diagnostic after a refusal"
 });
 
 test("buffered native refusal stays a refusal while an empty end_turn stays an error", () => {
-  assert.equal(isEmptyContentResponse({ type: "message", content: [], stop_reason: "refusal" }), false);
-  assert.equal(isEmptyContentResponse({ type: "message", content: [], stop_reason: "end_turn" }), true);
+  assert.equal(
+    isEmptyContentResponse({ type: "message", content: [], stop_reason: "refusal" }),
+    false
+  );
+  assert.equal(
+    isEmptyContentResponse({ type: "message", content: [], stop_reason: "end_turn" }),
+    true
+  );
   assert.equal(isEmptyContentResponse({ type: "message", content: [], stop_reason: null }), true);
+  assert.equal(isEmptyContentResponse({ type: "response", content: [], stop_reason: "refusal" }), true);
 });
 
 test("Claude-to-OpenAI streaming refusal maps to content_filter without text", () => {
   const state = { toolCalls: new Map(), toolNameMap: new Map() };
-  const chunks = claudeToOpenAIResponse({
-    type: "message_delta",
-    delta: { stop_reason: "refusal" },
-    usage: { output_tokens: 7080 },
-  }, state);
+  const chunks = claudeToOpenAIResponse(
+    {
+      type: "message_delta",
+      delta: { stop_reason: "refusal" },
+      usage: { output_tokens: 7080 },
+    },
+    state
+  );
   assert.equal(chunks?.at(-1)?.choices?.[0]?.finish_reason, "content_filter");
 });
 
 test("Claude-to-OpenAI buffered refusal maps to content_filter", () => {
-  const result = translateNonStreamingResponse({
-    id: "msg_refusal_nonstream",
-    type: "message",
-    role: "assistant",
-    model: "claude-opus-5-5",
-    content: [],
-    stop_reason: "refusal",
-    usage: { input_tokens: 2, output_tokens: 3 },
-  }, FORMATS.CLAUDE, FORMATS.OPENAI);
+  const result = translateNonStreamingResponse(
+    {
+      id: "msg_refusal_nonstream",
+      type: "message",
+      role: "assistant",
+      model: "claude-opus-5-5",
+      content: [],
+      stop_reason: "refusal",
+      usage: { input_tokens: 2, output_tokens: 3 },
+    },
+    FORMATS.CLAUDE,
+    FORMATS.OPENAI
+  );
   const choices = record(result).choices;
   assert.ok(Array.isArray(choices));
   assert.equal(record(choices[0]).finish_reason, "content_filter");
@@ -239,12 +269,15 @@ test("Claude-to-OpenAI buffered refusal maps to content_filter", () => {
 test("a completed refusal keeps native Thread ownership without another request", async () => {
   let saves = 0;
   const text = events().map(frame).join("");
-  const observed = observeNativeClaudeThreadResponse(new Response(source(text), {
-    headers: { "content-type": "text/event-stream" },
-  }), (id) => {
-    saves += 1;
-    assert.equal(id, "msg_native_refusal_fixture");
-  });
+  const observed = observeNativeClaudeThreadResponse(
+    new Response(source(text), {
+      headers: { "content-type": "text/event-stream" },
+    }),
+    (id) => {
+      saves += 1;
+      assert.equal(id, "msg_native_refusal_fixture");
+    }
+  );
   const result = await wrap(await observed.text());
   assert.equal(result.text, text);
   assert.equal(saves, 1);

@@ -55,6 +55,15 @@ function measure() {
     ],
     { cwd: ROOT, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 }
   );
+  // Preserve one measurement's diagnostics without replacing an earlier receipt.
+  if (process.env.NEXA_TSC_DIAGNOSTICS) {
+    fs.writeFileSync(
+      process.env.NEXA_TSC_DIAGNOSTICS,
+      JSON.stringify({ status: res.status, signal: res.signal, error: res.error?.code }) +
+        "\n" + (res.stdout || "") + (res.stderr || ""),
+      { flag: "wx" }
+    );
+  }
   if (res.error || res.status === null) {
     return { skip: true, reason: res.error ? `tsc-${res.error.code}` : `tsc-signal-${res.signal}` };
   }

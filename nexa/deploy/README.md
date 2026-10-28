@@ -16,6 +16,15 @@ Before deploying a new canonical change, prepare and validate an isolated
 application checkout using the exact reviewed optimizer commit. A source push or
 passing source-only CI is not a production build, install or deployment receipt.
 
+For a canonical release, retain both the optimizer commit and the application
+integration commit in the build receipt. In a new isolated pristine application
+checkout, copy and verify the reviewed overlay, then save that overlay with normal
+hooks before applying it. This makes the existing `build:release` Git-based
+`BUILD_SHA` identify the actual integrated source. Never commit an applied tree or
+stamp the pristine upstream SHA as though it identified new Nexa fixes. Preserve
+the installed DNS shim alongside the previous runtime for rollback; the installed
+updater's older source path must not silently replace the reviewed canonical shim.
+
 ## Runtime layout
 
 - Source: `~/Developer/OmniRoute`, clean `nexalance` branch.

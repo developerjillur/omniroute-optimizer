@@ -32,7 +32,7 @@ jobs:
         with:
           node-version: "26.7.0"
       - name: Check overlay tooling
-        run: node --test --test-concurrency=1 nexa/tests/*.test.mjs
+        run: node --test --test-concurrency=1 nexa/tests/*.test.mjs nexa/deploy/tsc-ratchet.test.mjs
       - name: Prepare the pinned pristine application
         shell: bash
         run: |
@@ -105,6 +105,9 @@ jobs:
         run: npm run typecheck:core
       - name: Full-project TypeScript ratchet
         timeout-minutes: 8
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+          NEXA_TSC_DIAGNOSTICS: ${{ runner.temp }}/tsc-diagnostics.log
         working-directory: ${{ runner.temp }}/omniroute-fixture
         run: node scripts/check/check-tsc-ratchet.mjs --ratchet
       - name: Full lint
@@ -113,6 +116,20 @@ jobs:
       - name: Documentation gates
         working-directory: ${{ runner.temp }}/omniroute-fixture
         run: npm run check:docs-all
+      - name: Select the installed production Node version
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24.15.0"
+      - name: Production Node native and DNS regressions
+        timeout-minutes: 4
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test --test-concurrency=1 nexa/tests/*.test.mjs nexa/deploy/tsc-ratchet.test.mjs
+          cd "$RUNNER_TEMP/omniroute-fixture"
+          export DATA_DIR="$RUNNER_TEMP/native-production-data"
+          export TMPDIR="$RUNNER_TEMP"
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 --test-force-exit tests/unit/native-claude-refusal-terminal.test.ts tests/unit/native-thread-error-classification.test.ts tests/unit/native-stream-summary.test.ts tests/unit/native-artifact-recovery.test.ts tests/unit/native-usage-fidelity.test.ts tests/unit/native-claude-thread-protocol.test.ts tests/unit/native-claude-thread-executor.test.ts tests/unit/native-claude-thread-chatcore.test.ts tests/unit/native-claude-thread-routing.test.ts tests/unit/agent-bridge-native-transport.test.ts tests/unit/agent-bridge-native-cache-continuity.test.ts tests/unit/agent-bridge-thread-cache.test.ts tests/unit/native-thinking-signature-switch.test.ts tests/unit/native-suggestion-empty-response.test.ts tests/unit/native-context-overflow-error.test.ts tests/unit/cache-ttl-stream.test.ts tests/unit/cache-ttl-extraction.test.ts tests/unit/translator-resp-claude-to-openai.test.ts | tee "$RUNNER_TEMP/native-production.tap"
       - name: Require committed formatting
         run: test ! -s "$RUNNER_TEMP/formatting.patch"
       - name: Preserve reviewable formatter changes
@@ -131,3 +148,5 @@ jobs:
             ${{ runner.temp }}/native-green.tap
             ${{ runner.temp }}/native-extended.tap
             ${{ runner.temp }}/stream-green.tap
+            ${{ runner.temp }}/native-production.tap
+            ${{ runner.temp }}/tsc-diagnostics.log

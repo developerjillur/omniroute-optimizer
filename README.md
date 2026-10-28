@@ -30,7 +30,7 @@ Historical documents-এর পুরোনো status-এর পরে পাও
 | Reference overlay commit         | `72230a52a548b9fdc8dda0495c893f5193e5d64d` |
 | Pristine upstream base           | `c1e30b7676975feb298b49eff6ff58923c04b89e` |
 | Upstream version                 | `3.8.51`                                   |
-| Managed overlay files            | 388                                        |
+| Managed overlay files            | 389                                        |
 
 বর্তমান `nexa/`-তে reference overlay-এর সঙ্গে নতুন reliability fixes আছে; তাই সব file reference commit-এর হুবহু copy—এমন দাবি করা হচ্ছে না। প্রতিটি managed file-এর byte count, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এ 302টি entry: 181টি patch, 116টি নতুন application/test file ও 5টি tooling entry। অতিরিক্ত deployment, overlay tests ও documentation-ও inventory-তে রয়েছে।
 

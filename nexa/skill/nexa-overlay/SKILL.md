@@ -42,7 +42,7 @@ promotion, post-mortems): `reference.md` in this skill dir.
   hook changes before committing. Do not skip hooks. Operator instructions take
   precedence over the historical hook-bypass advice.
 
-## Git structure
+## Git structure of the reference application repository
 
 - Remotes: `origin` → `git@github.com:developerjillur/OmniRoute.git` (SSH, push here) · `upstream` →
   `https://github.com/diegosouzapw/OmniRoute.git` (never push).
@@ -56,7 +56,7 @@ promotion, post-mortems): `reference.md` in this skill dir.
   Actions settings. Production build, full ratchet and deployment smoke gates
   remain required before a live release.
 
-## Workflow (run from repo root)
+## Workflow (run from the isolated application root)
 
 ```bash
 node nexa/status.mjs           # base version, pristine/applied state, patch health, drift

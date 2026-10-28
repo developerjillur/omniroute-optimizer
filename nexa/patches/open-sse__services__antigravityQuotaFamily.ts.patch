@@ -1,5 +1,5 @@
 diff --git a/open-sse/services/antigravityQuotaFamily.ts b/open-sse/services/antigravityQuotaFamily.ts
-index bfdbfa8d0..d186f3731 100644
+index 984645dd33a1ea96c6d7d7ffb0e921dafa51d862..87f9f7806a16a07594165d494faeb8851a80c12c 100644
 --- a/open-sse/services/antigravityQuotaFamily.ts
 +++ b/open-sse/services/antigravityQuotaFamily.ts
 @@ -1,6 +1,6 @@
@@ -10,7 +10,7 @@ index bfdbfa8d0..d186f3731 100644
  
  function normalizeModelId(model: string | null | undefined): string {
    return String(model || "")
-@@ -23,6 +23,11 @@ export function getAntigravityQuotaFamily(
+@@ -23,6 +23,11 @@
    const bare = slashIndex >= 0 ? normalized.slice(slashIndex + 1) : normalized;
  
    if (bare.startsWith("gemini-") || bare.includes("/gemini-") || bare.includes("gemini")) {
@@ -22,7 +22,7 @@ index bfdbfa8d0..d186f3731 100644
      return "gemini";
    }
    if (
-@@ -120,7 +125,9 @@ export function selectAntigravityQuotaWindowNames(
+@@ -134,7 +139,9 @@
    }
  
    const familyAggregates =
@@ -30,26 +30,6 @@ index bfdbfa8d0..d186f3731 100644
 +    requestedFamily === "gemini" ||
 +    requestedFamily === "gemini-flash" ||
 +    requestedFamily === "gemini-pro"
-       ? ["gemini_weekly"]
+       ? ["gemini_session", "gemini_weekly"]
        : requestedFamily === "claude"
-         ? ["claude_gpt_weekly"]
-@@ -137,9 +144,7 @@ export function selectAntigravityQuotaWindowNames(
-   // unrelated Gemini sibling can never dilute exact-model exhaustion. This is
-   // intentionally version-agnostic for newly discovered Gemini Flash releases.
-   if (exactWindows.length === 0) {
--    const flashMatch = bareModel.match(
--      /^(gemini-\d+(?:\.\d+)*-flash)(?:-(?:high|medium|low))?$/
--    );
-+    const flashMatch = bareModel.match(/^(gemini-\d+(?:\.\d+)*-flash)(?:-(?:high|medium|low))?$/);
-     if (flashMatch) {
-       const technicalTieredModel = `${flashMatch[1]}-tiered`;
-       exactWindows = quotaNames.filter((windowName) => {
-@@ -153,5 +158,7 @@ export function selectAntigravityQuotaWindowNames(
-   const scoped = [...exactWindows, ...aggregateWindows];
-   if (scoped.length > 0) return scoped;
- 
--  return quotaNames.filter((windowName) => getAntigravityQuotaFamily(windowName) === requestedFamily);
-+  return quotaNames.filter(
-+    (windowName) => getAntigravityQuotaFamily(windowName) === requestedFamily
-+  );
- }
+         ? ["claude_gpt_session", "claude_gpt_weekly"]

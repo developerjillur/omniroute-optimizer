@@ -1,8 +1,8 @@
 diff --git a/tests/unit/call-log-cap.test.ts b/tests/unit/call-log-cap.test.ts
-index baa68e57b..2ce2a14dd 100644
+index baa68e57b82c1550f8b1476f20b2182688ffb53f..2ce2a14dddd9a283fadf8e5c39b91da05429e6ca 100644
 --- a/tests/unit/call-log-cap.test.ts
 +++ b/tests/unit/call-log-cap.test.ts
-@@ -19,7 +19,12 @@ type CallLogRow = {
+@@ -19,7 +19,12 @@
    error_summary?: string | null;
  };
  type PayloadEnvelope = { body?: Record<string, unknown> };
@@ -16,7 +16,7 @@ index baa68e57b..2ce2a14dd 100644
  
  import { useDecollidedMigrationsDir } from "./helpers/decollidedMigrationsDir.ts";
  
-@@ -149,7 +154,10 @@ test("saveCallLog stores only summary metadata in SQLite and writes detailed art
+@@ -149,7 +154,10 @@
    assert.equal(detail?.comboName, "combo-a");
    assert.equal(detail?.comboStepId, "step-openai-a");
    assert.equal(detail?.comboExecutionKey, "combo-a:0:step-openai-a");
@@ -28,7 +28,7 @@ index baa68e57b..2ce2a14dd 100644
    assert.equal(
      (detail?.pipelinePayloads?.providerRequest as PayloadEnvelope | undefined)?.body?.translated,
      true
-@@ -232,7 +240,7 @@ test("getCallLogs resolves raw account labels from provider connections", async
+@@ -232,7 +240,7 @@
  });
  
  test("rotateCallLogs removes expired rows and orphaned artifacts but keeps fresh referenced artifacts", async () => {
@@ -37,7 +37,7 @@ index baa68e57b..2ce2a14dd 100644
    const oldRelPath = "2026-03-10/2026-03-10T00-00-00.000Z_old.json";
    const oldAbsPath = path.join(TEST_DATA_DIR, "call_logs", oldRelPath);
    fs.mkdirSync(path.dirname(oldAbsPath), { recursive: true });
-@@ -285,6 +293,7 @@ test("rotateCallLogs removes expired rows and orphaned artifacts but keeps fresh
+@@ -285,6 +293,7 @@
    assert.equal(fs.existsSync(oldAbsPath), true);
    assert.equal(fs.existsSync(freshAbsPath), true);
  
@@ -45,7 +45,7 @@ index baa68e57b..2ce2a14dd 100644
    callLogs.rotateCallLogs();
  
    const db = core.getDbInstance();
-@@ -459,7 +468,10 @@ test("getCallLogById falls back to legacy inline rows and request_detail_logs",
+@@ -459,7 +468,10 @@
    assert.deepEqual(detail?.requestBody, { recovered: "request" });
    assert.deepEqual(detail?.responseBody, { recovered: "response" });
    assert.deepEqual(detail?.error, { message: "legacy-error" });

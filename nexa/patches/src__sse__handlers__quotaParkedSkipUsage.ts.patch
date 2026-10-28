@@ -1,8 +1,8 @@
 diff --git a/src/sse/handlers/quotaParkedSkipUsage.ts b/src/sse/handlers/quotaParkedSkipUsage.ts
-index 164f4549b..bc0f330d0 100644
+index 164f4549b50df1ecf461638806e5e8b5d85132a6..bc0f330d096329d422f1e8b8f66e2ce8699bc119 100644
 --- a/src/sse/handlers/quotaParkedSkipUsage.ts
 +++ b/src/sse/handlers/quotaParkedSkipUsage.ts
-@@ -83,14 +83,15 @@ export async function recordGateRejection(
+@@ -83,14 +83,15 @@
    status: number,
    provider: string,
    model: string,

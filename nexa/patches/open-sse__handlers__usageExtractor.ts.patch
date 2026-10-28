@@ -1,19 +1,20 @@
 diff --git a/open-sse/handlers/usageExtractor.ts b/open-sse/handlers/usageExtractor.ts
+index d9f573220e082edad2ad0317bb898ce5da9725fa..1c64864974a7b1da8b4c5e8ec86a8bc4b6ca7720 100644
 --- a/open-sse/handlers/usageExtractor.ts
 +++ b/open-sse/handlers/usageExtractor.ts
 @@ -2,7 +2,9 @@
   * Extract usage from non-streaming response body
   * Handles different provider response formats
   */
--import { carryEstimatedUsageMarker } from "../utils/usageTracking.ts";
-+import { carryEstimatedUsageMarker, type UsageLike } from "../utils/usageTracking.ts";
+-import { carryEstimatedUsageMarker, pickReportedCostUsd } from "../utils/usageTracking.ts";
++import { carryEstimatedUsageMarker, pickReportedCostUsd, type UsageLike } from "../utils/usageTracking.ts";
 +import { getAnthropicMeteredUsage } from "../utils/anthropicUsage.ts";
 +import { getCacheCreationTtlFields } from "@/lib/usage/cacheCreationTtl";
  
  /**
   * True for an Anthropic Messages response body (`type: "message"`), whatever provider
-@@ -23,7 +25,20 @@
-   );
+@@ -28,7 +30,22 @@
+   return typeof value === "number" && Number.isFinite(value) && value >= 0;
  }
  
 -export function extractUsageFromResponse(responseBody, provider) {
@@ -25,6 +26,8 @@ diff --git a/open-sse/handlers/usageExtractor.ts b/open-sse/handlers/usageExtrac
 +  | "cache_read_input_tokens"
 +  | "cache_creation_input_tokens"
 +  | "reasoning_tokens"
++  | "provider_credits"
++  | "cost_usd"
 +  | "cost_in_usd_ticks"
 +  | "cacheCreation5m"
 +  | "cacheCreation1h"
@@ -34,15 +37,15 @@ diff --git a/open-sse/handlers/usageExtractor.ts b/open-sse/handlers/usageExtrac
    if (!responseBody || typeof responseBody !== "object") return null;
    const providerId = typeof provider === "string" ? provider.toLowerCase() : "";
    const isClaudeProvider =
-@@ -47,6 +62,7 @@
-       responseBody.usage.input_tokens_details?.cache_write_tokens ??
+@@ -53,6 +70,7 @@
        responseBody.usage.cache_write_tokens;
+     const reportedCostUsd = pickReportedCostUsd(responseBody.usage);
      const openAiUsage = {
 +      ...getCacheCreationTtlFields(responseBody.usage),
        prompt_tokens: responseBody.usage.prompt_tokens || 0,
        completion_tokens: responseBody.usage.completion_tokens || 0,
        // DeepSeek native API uses flat prompt_cache_hit_tokens (NOT
-@@ -94,18 +110,19 @@
+@@ -108,18 +126,19 @@
        responseBody.usage.output_tokens !== undefined) &&
      (isClaudeProvider || isAnthropicMessageUsage(responseBody, responseBody.usage))
    ) {
@@ -68,7 +71,7 @@ diff --git a/open-sse/handlers/usageExtractor.ts b/open-sse/handlers/usageExtrac
      // Native Claude ids always carry both cache counters. Other Claude-format
      // providers may have no prompt cache at all (devin-cli-agentic reports only
      // input/output), so emit a counter only when it was reported: the dashboard then
-@@ -114,12 +131,13 @@
+@@ -128,12 +147,13 @@
        isClaudeProvider || (value !== undefined && value !== null);
  
      return {
@@ -85,10 +88,10 @@ diff --git a/open-sse/handlers/usageExtractor.ts b/open-sse/handlers/usageExtrac
          ? { cache_creation_input_tokens: cacheCreation }
          : {}),
        ...(typeof reasoningTokens === "number" ? { reasoning_tokens: reasoningTokens } : {}),
-@@ -134,6 +152,7 @@
-     (responsesUsage.input_tokens !== undefined || responsesUsage.output_tokens !== undefined)
-   ) {
-     return {
+@@ -154,6 +174,7 @@
+       ...(isReportedAmount(responsesUsage.cost_in_usd_ticks)
+         ? { cost_in_usd_ticks: responsesUsage.cost_in_usd_ticks }
+         : {}),
 +      ...getCacheCreationTtlFields(responsesUsage),
        prompt_tokens: responsesUsage.input_tokens || 0,
        completion_tokens: responsesUsage.output_tokens || 0,

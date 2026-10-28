@@ -1,5 +1,5 @@
 diff --git a/src/app/(dashboard)/dashboard/costs/CostOverviewTab.tsx b/src/app/(dashboard)/dashboard/costs/CostOverviewTab.tsx
-index 80d3c976d..edfaca841 100644
+index 80d3c976d0d6deaaf2075eb6916b8dc983c66334..edfaca841ee7c9826405349dfd54127c7060382c 100644
 --- a/src/app/(dashboard)/dashboard/costs/CostOverviewTab.tsx
 +++ b/src/app/(dashboard)/dashboard/costs/CostOverviewTab.tsx
 @@ -1,6 +1,6 @@
@@ -10,7 +10,7 @@ index 80d3c976d..edfaca841 100644
  import { useSearchParams } from "next/navigation";
  import { useLocale, useTranslations } from "next-intl";
  import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
-@@ -42,6 +42,7 @@ import { ApiKeyUsageLimitCard } from "./components/ApiKeyUsageLimitCard";
+@@ -42,6 +42,7 @@
  import { MetricCard } from "./components/MetricCard";
  import { TopListCard } from "./components/TopListCard";
  import { useApiKeyUsageLimits } from "./useApiKeyUsageLimits";
@@ -18,7 +18,7 @@ index 80d3c976d..edfaca841 100644
  
  interface UsageAnalyticsSummary {
    totalCost: number;
-@@ -148,17 +149,6 @@ const EXPLORER_GROUP_OPTIONS: Array<{
+@@ -148,17 +149,6 @@
    { value: "serviceTier", labelKey: "groupServiceTier" },
  ];
  
@@ -36,7 +36,7 @@ index 80d3c976d..edfaca841 100644
  const SHORT_WEEKDAY_INDEX: Record<string, number> = {
    Sun: 0,
    Mon: 1,
-@@ -322,6 +312,7 @@ function downloadFile(content: string, filename: string, mimeType: string) {
+@@ -322,6 +312,7 @@
  
  export default function CostOverviewTab() {
    const t = useTranslations("costs");
@@ -44,7 +44,7 @@ index 80d3c976d..edfaca841 100644
    const locale = useLocale();
    const nodeMap = useProviderNodeMap();
    const searchParams = useSearchParams();
-@@ -331,15 +322,29 @@ export default function CostOverviewTab() {
+@@ -331,15 +322,29 @@
    const apiKeyFilter = useMemo(() => selectedApiKeyIds.join(","), [selectedApiKeyIds]);
    const currencyFormatter = useMemo(() => createCurrencyFormatter(locale), [locale]);
    const [range, setRange] = useState<CostRange>(() => parseCostRange(searchParams.get("range")));
@@ -83,10 +83,11 @@ index 80d3c976d..edfaca841 100644
    const [explorerGroupBy, setExplorerGroupBy] = useState<CostExplorerGroupBy>(() =>
      parseExplorerGroupBy(searchParams.get("groupBy"))
    );
-@@ -353,52 +358,6 @@ export default function CostOverviewTab() {
+@@ -352,52 +357,6 @@
+     loading: apiKeyUsageLimitsLoading,
      save: saveApiKeyUsageLimits,
    } = useApiKeyUsageLimits(selectedApiKeyId);
- 
+-
 -  useEffect(() => {
 -    let active = true;
 -
@@ -132,11 +133,10 @@ index 80d3c976d..edfaca841 100644
 -      active = false;
 -    };
 -  }, [apiKeyFilter, range, t]);
--
+ 
    const selectedRangeLabel = t(
      RANGE_OPTIONS.find((option) => option.value === range)?.labelKey || "range30d"
-   );
-@@ -503,6 +462,9 @@ export default function CostOverviewTab() {
+@@ -503,6 +462,9 @@
      return (
        <Card className="p-6">
          <EmptyState icon="payments" title={t("overviewTitle")} description={error} />
@@ -146,7 +146,7 @@ index 80d3c976d..edfaca841 100644
        </Card>
      );
    }
-@@ -516,6 +478,16 @@ export default function CostOverviewTab() {
+@@ -516,6 +478,16 @@
              <p className="text-sm text-text-muted mt-1">{t("overviewDescription")}</p>
            </div>
            <div className="flex flex-wrap items-center gap-3">
@@ -163,7 +163,7 @@ index 80d3c976d..edfaca841 100644
              {summary.streak > 0 && (
                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20">
                  <span className="material-symbols-outlined text-amber-400 text-sm">
-@@ -567,6 +539,39 @@ export default function CostOverviewTab() {
+@@ -567,6 +539,39 @@
              />
            </div>
          </div>

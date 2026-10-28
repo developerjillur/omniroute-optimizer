@@ -1,8 +1,8 @@
 diff --git a/src/shared/utils/classify429.ts b/src/shared/utils/classify429.ts
-index 18f4fe23c..b3795c1c1 100644
+index 7c68ad19dd6de2f676d4ad32e9f1e4225a5c787c..a02d0f9fb8397e0e5f698eac3a1f4c5f9e9060ed 100644
 --- a/src/shared/utils/classify429.ts
 +++ b/src/shared/utils/classify429.ts
-@@ -60,6 +60,15 @@ const QUOTA_PATTERNS: ReadonlyArray<RegExp> = [
+@@ -60,6 +60,15 @@
    /enable overages/i,
    /INSUFFICIENT_G1_CREDITS_BALANCE/i,
  
@@ -18,7 +18,7 @@ index 18f4fe23c..b3795c1c1 100644
    // Google APIs return this generic RESOURCE_EXHAUSTED message when a
    // billing-period quota has been consumed. Keep the reset-window qualifier
    // so transient Google rate limits are not treated as long-term exhaustion.
-@@ -335,6 +344,15 @@ export function classify429(response: {
+@@ -388,6 +397,15 @@
    if (text && TERMINAL_QUOTA_PATTERNS.some((pat) => pat.test(text))) {
      return "quota_exhausted";
    }

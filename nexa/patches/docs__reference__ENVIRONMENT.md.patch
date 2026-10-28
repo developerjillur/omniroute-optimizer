@@ -1,7 +1,8 @@
 diff --git a/docs/reference/ENVIRONMENT.md b/docs/reference/ENVIRONMENT.md
+index f45214832fd95009d4cd01c6f1b550257b553003..acbf07b53ba2c89d691e73158b4f700dc402bfcd 100644
 --- a/docs/reference/ENVIRONMENT.md
 +++ b/docs/reference/ENVIRONMENT.md
-@@ -1791,6 +1791,17 @@
+@@ -1870,6 +1870,17 @@
  | `CONDUCTOR_ORCHESTRATOR_TOKEN` | _(empty)_ | `src/lib/conductor/hubProxy.ts` | Credential for inbound A2A→hub task delegation (`POST /v1/tasks`); falls back to `CONDUCTOR_HUB_TOKEN` when unset. |
  | `CONDUCTOR_SPOKESPERSON_URL` | `http://127.0.0.1:7920` | `src/lib/conductor/faroProxy.ts` | Base URL of the spokesperson (Faro) service behind the dashboard chat proxy (`/api/conductor/ask`). |
  

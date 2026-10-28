@@ -1,8 +1,8 @@
 diff --git a/tests/integration/agent-bridge-cert-flow.test.ts b/tests/integration/agent-bridge-cert-flow.test.ts
-index 717e66dae..31beba887 100644
+index 1d1ef6ccd8ae3afe6330053867e03fc48ad7dc42..06d91d3b023c66b4118f79b21a9a53f6d6513085 100644
 --- a/tests/integration/agent-bridge-cert-flow.test.ts
 +++ b/tests/integration/agent-bridge-cert-flow.test.ts
-@@ -84,7 +84,9 @@ test("POST /cert: returns 404 when no cert file", async () => {
+@@ -96,7 +96,9 @@
      new Request("http://localhost/", {
        method: "POST",
        headers: { "content-type": "application/json" },

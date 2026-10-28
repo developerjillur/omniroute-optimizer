@@ -1,8 +1,8 @@
 diff --git a/tests/unit/reasoning-routing.test.ts b/tests/unit/reasoning-routing.test.ts
-index 5dd320579..4b59a871b 100644
+index 5dd320579e98e4c5d8c4e96b10819744df8d083b..4b59a871be6e0109a8a4edcb33efd4b12dab2a79 100644
 --- a/tests/unit/reasoning-routing.test.ts
 +++ b/tests/unit/reasoning-routing.test.ts
-@@ -388,11 +388,11 @@ test("static registry vocabulary outranks the operator override so the gate matc
+@@ -388,11 +388,11 @@
  
    // Case 3: registry model WITHOUT any declared vocabulary, operator
    // override WIDENS. The sanitizer forwards verbatim for undeclared models

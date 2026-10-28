@@ -1,14 +1,16 @@
 diff --git a/open-sse/config/providerModels.ts b/open-sse/config/providerModels.ts
+index 9a816761d98c6e3602f91e9f33b48d1d14356983..87cf67f0e813b0f4efcecb01290e21e37081b531 100644
 --- a/open-sse/config/providerModels.ts
 +++ b/open-sse/config/providerModels.ts
-@@ -1,5 +1,6 @@
- import { generateModels, generateAliasMap, type RegistryModel } from "./providerRegistry.ts";
- import { getVertexModelTargetFormat } from "./vertexModels.ts";
+@@ -4,6 +4,7 @@
+   getPublishedModelNpm,
+   surfaceTargetFormatForNpm,
+ } from "../utils/opencodePublishedCatalog.ts";
 +import { isClaudeHaiku55 } from "./claudeHaikuCapabilities.ts";
  
  // Lazy PROVIDER_MODELS: deferred until first property access to speed up startup.
  // The Proxy defers `generateModels()` from module-evaluation time to the first read.
-@@ -333,6 +334,7 @@
+@@ -414,6 +415,7 @@
    const claudeMatch = normalized.match(CLAUDE_MODEL_PATTERN);
    if (!claudeMatch) return false;
    const claudeScopedId = normalized.slice(claudeMatch.index ?? 0);

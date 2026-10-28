@@ -1,15 +1,16 @@
 diff --git a/src/lib/usage/costCalculator.ts b/src/lib/usage/costCalculator.ts
+index 3b72f21d9bd89980d2564f32325deb38d6c6c912..f6820e6a12bc804e04f48534b401b0af8e1ed014 100644
 --- a/src/lib/usage/costCalculator.ts
 +++ b/src/lib/usage/costCalculator.ts
-@@ -8,6 +8,7 @@
-  */
- 
+@@ -11,6 +11,7 @@
+ import { splitCodexReasoningSuffix } from "@omniroute/open-sse/executors/codex/reasoningSuffix.ts";
+ import { isCreditMeteredProvider } from "./creditMeteredProviders";
  import { isFlatRateProvider } from "./flatRateProviders";
 +import { getCacheCreationTtl } from "./cacheCreationTtl";
  
  /**
   * Normalize model name — strip provider path prefixes.
-@@ -35,6 +36,8 @@
+@@ -38,6 +39,8 @@
     * `provider` to be set.
     */
    flatRateAsZero?: boolean;
@@ -18,82 +19,71 @@ diff --git a/src/lib/usage/costCalculator.ts b/src/lib/usage/costCalculator.ts
  };
  
  /**
-@@ -56,7 +59,7 @@
-  * only xAI's `cost_in_usd_ticks` field is handled — see comment above.
-  */
- function extractExactCostUsd(
--  tokens: Record<string, number | undefined> | null | undefined
-+  tokens: Record<string, number | null | undefined> | null | undefined
- ): number | null {
-   const ticks = tokens?.cost_in_usd_ticks;
-   if (typeof ticks === "number" && Number.isFinite(ticks) && ticks >= 0) {
-@@ -97,9 +100,12 @@
+@@ -167,11 +170,14 @@
    // while still using the Responses API with service_tier="flex".
    if (tier === "flex") return 0.5;
  
-+  const modelKey = stripCodexEffortSuffix(normalizeModelName(String(model || "")).toLowerCase());
+-  if (tier !== "priority" && tier !== "fast") return 1;
+-
+   const modelKey = stripCodexEffortSuffix(
+     splitCodexReasoningSuffix(normalizeModelName(String(model || "")).toLowerCase()).baseModel
+   );
 +  if (modelKey === "gpt-6.1-sol") {
 +    if (tier === "ultrafast") return 6;
 +    if (tier === "priority" || tier === "fast") return 2;
 +  }
-   if (tier !== "priority" && tier !== "fast") return 1;
--
--  const modelKey = stripCodexEffortSuffix(normalizeModelName(String(model || "")).toLowerCase());
++  if (tier !== "priority" && tier !== "fast") return 1;
    const compactModelKey = modelKey.replace(/-/g, "");
    // Codex GPT-6 Fast is 2.5x Standard (https://developers.openai.com/codex/pricing).
    if (
-@@ -133,7 +139,7 @@
+@@ -200,14 +206,15 @@
   */
- export function computeCostFromPricing(
-   pricing: Record<string, unknown> | null | undefined,
--  tokens: Record<string, number | undefined> | null | undefined,
-+  tokens: Record<string, number | null | undefined> | null | undefined,
-   options: CostCalculationOptions = {}
- ): number {
-   if (!tokens) return 0;
-@@ -146,14 +152,33 @@
-   // per-token pricing rows exist only for estimation, so display surfaces opt in
-   // to show $0 instead of an inflated estimate (#5552).
-   if (options.flatRateAsZero && isFlatRateProvider(options.provider)) return 0;
--  const inputPrice = toNumber(pricing.input, 0);
--  const cachedPrice = toNumber(pricing.cached, inputPrice);
--  const outputPrice = toNumber(pricing.output, 0);
--  const reasoningPrice = toNumber(pricing.reasoning, outputPrice);
--  const cacheCreationPrice = toNumber(pricing.cache_creation, inputPrice);
-+  const inputTokens = tokens.input ?? tokens.prompt_tokens ?? tokens.input_tokens ?? 0;
-+  const longContext =
-+    options.longContext ?? inputTokens > toNumber(pricing.long_context_threshold, Infinity);
-+  const inputMultiplier = longContext ? toNumber(pricing.long_context_input_multiplier, 1) : 1;
-+  const outputMultiplier = longContext ? toNumber(pricing.long_context_output_multiplier, 1) : 1;
-+  const inputPrice = toNumber(pricing.input, 0) * inputMultiplier;
-+  const cachedPrice = toNumber(pricing.cached, toNumber(pricing.input, 0)) * inputMultiplier;
-+  const outputPrice = toNumber(pricing.output, 0) * outputMultiplier;
-+  const reasoningPrice =
-+    toNumber(pricing.reasoning, toNumber(pricing.output, 0)) * outputMultiplier;
-+  const cacheCreationPrice =
-+    toNumber(pricing.cache_creation, toNumber(pricing.input, 0)) * inputMultiplier;
+ function applyLongContextTier(
+   pricing: Record<string, unknown>,
+-  inputTokens: number
++  inputTokens: number,
++  selected?: boolean
+ ): Record<string, unknown> {
+   const tier = pricing.long_context;
+   if (!tier || typeof tier !== "object" || Array.isArray(tier)) return pricing;
+   const { threshold, inclusive, ...tierRates } = tier as Record<string, unknown>;
+   const limit = toNumber(threshold, Number.NaN);
+   if (!Number.isFinite(limit) || limit <= 0) return pricing;
+-  const crossed = inclusive === true ? inputTokens >= limit : inputTokens > limit;
++  const crossed = selected ?? (inclusive === true ? inputTokens >= limit : inputTokens > limit);
+   return crossed ? { ...pricing, ...tierRates } : pricing;
+ }
+ 
+@@ -243,12 +250,20 @@
+   // never a cost basis: pricing them would bill the request a second time.
+   if (isCreditMeteredProvider(options.provider)) return 0;
+   const inputTokens = tokens.input ?? tokens.prompt_tokens ?? tokens.input_tokens ?? 0;
+-  const rates = applyLongContextTier(pricing, inputTokens);
+-  const inputPrice = toNumber(rates.input, 0);
+-  const cachedPrice = toNumber(rates.cached, inputPrice);
+-  const outputPrice = toNumber(rates.output, 0);
+-  const reasoningPrice = toNumber(rates.reasoning, outputPrice);
+-  const cacheCreationPrice = toNumber(rates.cache_creation, inputPrice);
++  const rates = applyLongContextTier(pricing, inputTokens, options.longContext);
++  const legacyLongContext = !pricing.long_context &&
++    (options.longContext ?? inputTokens > toNumber(pricing.long_context_threshold, Infinity));
++  const inputMultiplier = legacyLongContext ? toNumber(pricing.long_context_input_multiplier, 1) : 1;
++  const outputMultiplier = legacyLongContext ? toNumber(pricing.long_context_output_multiplier, 1) : 1;
++  const inputPrice = toNumber(rates.input, 0) * inputMultiplier;
++  const cachedPrice = toNumber(rates.cached, inputPrice) * inputMultiplier;
++  const outputPrice = toNumber(rates.output, 0) * outputMultiplier;
++  const reasoningPrice = toNumber(rates.reasoning, outputPrice) * outputMultiplier;
++  const cacheCreationPrice = toNumber(rates.cache_creation, inputPrice) * inputMultiplier;
 +
-+  const nativeClaudePrice = ["claude", "cc", "anthropic"].includes(
-+    normalizeServiceTier(options.provider)
-+  );
-+  // Native Claude's one-hour writes use twice the configured input rate unless
-+  // explicitly overridden. Other providers retain their legacy fallback rate.
-+  const hourCacheCreationPrice =
-+    toNumber(
-+      pricing.cache_creation_1h,
-+      nativeClaudePrice
-+        ? toNumber(pricing.input, 0) * 2
-+        : toNumber(pricing.cache_creation, toNumber(pricing.input, 0))
-+    ) * inputMultiplier;
++  const nativeClaudePrice = ["claude", "cc", "anthropic"].includes(normalizeServiceTier(options.provider));
++  const hourCacheCreationPrice = toNumber(rates.cache_creation_1h,
++    nativeClaudePrice ? toNumber(rates.input, 0) * 2 : toNumber(rates.cache_creation, toNumber(rates.input, 0))) * inputMultiplier;
  
    let cost = 0;
--  const inputTokens = tokens.input ?? tokens.prompt_tokens ?? tokens.input_tokens ?? 0;
-   const cachedTokens =
-     tokens.cacheRead ?? tokens.cached_tokens ?? tokens.cache_read_input_tokens ?? 0;
-   const cacheCreationTokens = tokens.cacheCreation ?? tokens.cache_creation_input_tokens ?? 0;
-@@ -175,7 +200,13 @@
-     cost += reasoningTokens * ((reasoningPrice - outputPrice) / 1_000_000);
+   const promptDetails = tokens.prompt_tokens_details;
+@@ -300,7 +315,13 @@
    }
+   cost = Math.max(0, cost);
  
 -  if (cacheCreationTokens > 0) cost += cacheCreationTokens * (cacheCreationPrice / 1_000_000);
 +  if (cacheCreationTokens > 0) {
@@ -106,21 +96,3 @@ diff --git a/src/lib/usage/costCalculator.ts b/src/lib/usage/costCalculator.ts
  
    return cost * getCodexFastCostMultiplier(options.provider, options.model, options.serviceTier);
  }
-@@ -196,7 +227,7 @@
- export async function calculateCostDetailed(
-   provider: string,
-   model: string,
--  tokens: Record<string, number | undefined> | null | undefined,
-+  tokens: Record<string, number | null | undefined> | null | undefined,
-   options: CostCalculationOptions = {}
- ): Promise<CostCalculationResult> {
-   if (!tokens || !provider || !model) return { costUsd: 0, priced: true };
-@@ -248,7 +279,7 @@
- export async function calculateCost(
-   provider: string,
-   model: string,
--  tokens: Record<string, number | undefined> | null | undefined,
-+  tokens: Record<string, number | null | undefined> | null | undefined,
-   options: CostCalculationOptions = {}
- ): Promise<number> {
-   const result = await calculateCostDetailed(provider, model, tokens, options);

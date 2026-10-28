@@ -1,4 +1,5 @@
 diff --git a/src/lib/skills/toolLoopTypes.ts b/src/lib/skills/toolLoopTypes.ts
+index 8d11df2e1243afe5c3d58a0f5393bff697b73c84..61374c05b85fba86ad71046cb5f3763575071e65 100644
 --- a/src/lib/skills/toolLoopTypes.ts
 +++ b/src/lib/skills/toolLoopTypes.ts
 @@ -12,6 +12,8 @@

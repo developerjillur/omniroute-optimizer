@@ -1,26 +1,26 @@
 diff --git a/src/lib/system/autoUpdate.ts b/src/lib/system/autoUpdate.ts
-index fff71d510..a9765397a 100644
+index 7b59eb0c67b6a767447cdf75cfc7fe851d9309f5..7d29978092d4094dc41d474158c92686b99dfddd 100644
 --- a/src/lib/system/autoUpdate.ts
 +++ b/src/lib/system/autoUpdate.ts
-@@ -48,7 +48,7 @@ const FALLBACK_CWD = process.env.HOME || homedir() || "/tmp";
- export const PROJECT_ROOT: string = resolveProjectRoot(FALLBACK_CWD);
- 
- type ComposeCommand = "docker compose" | "docker-compose";
--export type AutoUpdateMode = "npm" | "docker-compose" | "source";
-+export type AutoUpdateMode = "npm" | "docker-compose" | "source" | "command";
+@@ -61,7 +61,7 @@
+  * image container (no `.git`, not under `node_modules`). See `./dockerUpdateTrigger.ts`.
+  */
+ export type AutoUpdateMode =
+-  "npm" | "docker-compose" | "source" | "docker-image" | "docker-trigger";
++  "npm" | "docker-compose" | "source" | "docker-image" | "docker-trigger" | "command";
  
  type ExecFileLike = typeof execFileAsync;
  type SpawnLike = typeof spawn;
-@@ -62,6 +62,8 @@ export type AutoUpdateConfig = {
-   gitRemote: string;
-   patchCommits: string[];
-   logPath: string;
+@@ -81,6 +81,8 @@
+   dockerTriggerFile: string | null;
+   /** Host-side compose command shown to the operator in `docker-image` mode. */
+   manualUpdateCommand: string | null;
 +  /** AUTO_UPDATE_MODE=command: executable run as `<command> <version>` (launchd/systemd/forks). */
 +  command: string;
  };
  
  export type AutoUpdateValidation = {
-@@ -79,7 +81,7 @@ export type AutoUpdateLaunchResult = {
+@@ -98,7 +100,7 @@
  };
  
  function normalizeMode(raw: string | undefined): AutoUpdateMode {
@@ -29,15 +29,15 @@ index fff71d510..a9765397a 100644
      return raw;
    }
    return "npm";
-@@ -217,6 +219,7 @@ export function getAutoUpdateConfig(
-     gitRemote: env.AUTO_UPDATE_GIT_REMOTE || "origin",
-     patchCommits: parsePatchCommits(env.AUTO_UPDATE_PATCH_COMMITS),
-     logPath: env.AUTO_UPDATE_LOG_PATH || path.join(dataDir, "logs", "auto-update.log"),
+@@ -267,6 +269,7 @@
+     dockerTriggerFile,
+     manualUpdateCommand:
+       mode === "docker-image" ? buildDockerImageUpdateCommand(env.AUTO_UPDATE_SERVICE) : null,
 +    command: (env.AUTO_UPDATE_COMMAND || "").trim(),
    };
  }
  
-@@ -243,6 +246,24 @@ export async function validateAutoUpdateRuntime(
+@@ -293,6 +296,24 @@
    execFileImpl: ExecFileLike = execFileAsync,
    existsImpl: (targetPath: string) => Promise<boolean> = pathExists
  ): Promise<AutoUpdateValidation> {
@@ -62,10 +62,12 @@ index fff71d510..a9765397a 100644
    if (config.mode === "source") {
      const gitDir = path.join(PROJECT_ROOT, ".git");
      if (!(await existsImpl(gitDir))) {
-@@ -336,6 +357,15 @@ export async function ensureGitTagExists(
+@@ -413,6 +434,15 @@
+   } catch {
+     throw new Error(`Git tag not found: ${targetTag}`);
    }
- }
- 
++}
++
 +/**
 + * AUTO_UPDATE_MODE=command: hand the update to an operator-provided executable (e.g. a launchd or
 + * systemd job that rebuilds a customized fork). It receives the target version as its only argument
@@ -73,12 +75,10 @@ index fff71d510..a9765397a 100644
 + */
 +export function buildCommandUpdateScript(latest: string, command: string): string {
 +  return ["set -eu", `exec ${shellQuote(command)} ${shellQuote(latest)}`].join("\n");
-+}
-+
+ }
+ 
  export function buildNpmUpdateScript(latest: string): string {
-   return [
-     "set -eu",
-@@ -457,7 +487,9 @@ export async function launchAutoUpdate({
+@@ -554,7 +584,9 @@
          })
        : config.mode === "source"
          ? buildSourceUpdateScript(latest, config.gitRemote)

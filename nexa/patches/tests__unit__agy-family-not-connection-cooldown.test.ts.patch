@@ -1,8 +1,8 @@
 diff --git a/tests/unit/agy-family-not-connection-cooldown.test.ts b/tests/unit/agy-family-not-connection-cooldown.test.ts
-index 9c4499e8c..40e3b7a30 100644
+index 9c4499e8cb7ff3c88145473134b04a2abcf4ac4b..40e3b7a304bb1f84f3d3cfe0b90d852e3430c6a2 100644
 --- a/tests/unit/agy-family-not-connection-cooldown.test.ts
 +++ b/tests/unit/agy-family-not-connection-cooldown.test.ts
-@@ -18,9 +18,8 @@ const quotaPreflight = await import("../../open-sse/services/quotaPreflight.ts")
+@@ -18,9 +18,8 @@
  const family = await import("../../open-sse/services/antigravityQuotaFamily.ts");
  const fallback = await import("../../open-sse/services/accountFallback.ts");
  const { markConnectionQuotaExhausted } = await import("../../open-sse/executors/antigravity.ts");
@@ -14,7 +14,7 @@ index 9c4499e8c..40e3b7a30 100644
  
  const CLAUDE_RESET = "2026-09-06T17:38:10.000Z";
  const GEMINI_RESET = "2026-09-09T09:59:00.000Z";
-@@ -40,7 +39,10 @@ test.after(() => {
+@@ -40,7 +39,10 @@
  });
  
  test("selectAntigravityQuotaWindowNames keeps Claude weekly off a Gemini request", () => {
@@ -26,7 +26,7 @@ index 9c4499e8c..40e3b7a30 100644
    assert.deepEqual(names.sort(), ["gemini-3.1-flash-lite", "gemini_weekly"].sort());
  });
  
-@@ -151,8 +153,11 @@ test("Antigravity RPM 429 stays exact-model and does not persist a family cooldo
+@@ -151,8 +153,11 @@
      "gemini-3-pro"
    );
  
@@ -39,7 +39,7 @@ index 9c4499e8c..40e3b7a30 100644
    assert.equal(sibling.connectionId, connId);
  
    const fresh = await providersDb.getProviderConnectionById(connId);
-@@ -185,8 +190,11 @@ test("Antigravity QPM 429 stays exact-model and does not persist a family cooldo
+@@ -185,8 +190,11 @@
      "gemini-3-pro"
    );
  
@@ -52,7 +52,7 @@ index 9c4499e8c..40e3b7a30 100644
    assert.equal(sibling.connectionId, connId);
  
    const fresh = await providersDb.getProviderConnectionById(connId);
-@@ -208,9 +216,8 @@ test("persisted family cooldown rehydrates after a process-local lockout wipe",
+@@ -208,9 +216,8 @@
    const connId = (conn as { id: string }).id;
    const until = new Date(Date.now() + 60 * 60 * 1000).toISOString();
  
@@ -64,7 +64,7 @@ index 9c4499e8c..40e3b7a30 100644
    await persistAntigravityFamilyCooldown({
      connectionId: connId,
      model: "claude-sonnet-4",
-@@ -233,9 +240,8 @@ test("persisted family cooldown rehydrates after a process-local lockout wipe",
+@@ -233,9 +240,8 @@
  
  test("preflight family lock covers both agy and antigravity spellings", async () => {
    fallback.clearAllModelLockouts();

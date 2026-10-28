@@ -1,4 +1,5 @@
 diff --git a/src/lib/db/comboForecast.ts b/src/lib/db/comboForecast.ts
+index 342e3e6e6889bc5e1246296d263abb4c5656e8f3..8866e0e65120c910fed8cb13a81f5ca2902057b6 100644
 --- a/src/lib/db/comboForecast.ts
 +++ b/src/lib/db/comboForecast.ts
 @@ -1,4 +1,5 @@

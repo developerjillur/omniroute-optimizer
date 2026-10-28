@@ -1,4 +1,5 @@
 diff --git a/open-sse/utils/streamClaudeEmptyBody.ts b/open-sse/utils/streamClaudeEmptyBody.ts
+index d387972b830a10305ec8d192d2fbecbdc6a86f90..e9dbaf62ea7b9e6355e126c467d860be8320ac40 100644
 --- a/open-sse/utils/streamClaudeEmptyBody.ts
 +++ b/open-sse/utils/streamClaudeEmptyBody.ts
 @@ -16,6 +16,7 @@
@@ -9,10 +10,10 @@ diff --git a/open-sse/utils/streamClaudeEmptyBody.ts b/open-sse/utils/streamClau
    hasError: boolean;
    hasContentBlock: boolean;
    hasMessageStart: boolean;
-@@ -28,6 +29,9 @@
-   sawAnyUpstreamPayload: boolean
- ): boolean {
-   if (lifecycle.hasError || lifecycle.hasContentBlock) return false;
+@@ -38,6 +39,9 @@
+   ) {
+     return false;
+   }
 +  // A refusal is a completed native stop, not an empty transport failure.
 +  if (lifecycle.stopReason === "refusal" && lifecycle.hasMessageDelta && lifecycle.hasMessageStop)
 +    return false;

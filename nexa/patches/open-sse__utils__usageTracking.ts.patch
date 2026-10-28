@@ -1,17 +1,18 @@
 diff --git a/open-sse/utils/usageTracking.ts b/open-sse/utils/usageTracking.ts
+index 47f65ed6eac99bc0b03e273697cb3406d6008a47..d5e4eed4b3f468b82ddbf00926ecb3d3e4e2ca16 100644
 --- a/open-sse/utils/usageTracking.ts
 +++ b/open-sse/utils/usageTracking.ts
-@@ -12,6 +12,8 @@
- } from "@/lib/usage/tokenAccounting";
+@@ -13,6 +13,8 @@
  import { FORMATS } from "../translator/formats.ts";
  import { pickCacheCreationTokens } from "./pickCacheCreationTokens.ts";
+ import { sharedSymbol } from "@/shared/utils/processSingleton";
 +import { getCacheCreationTtlFields } from "@/lib/usage/cacheCreationTtl";
 +import { normalizeAnthropicUsage } from "./anthropicUsage.ts";
  
  export { pickCacheCreationTokens };
  
-@@ -43,6 +45,8 @@
-   cost_in_usd_ticks?: number;
+@@ -47,6 +49,8 @@
+   cost_usd?: number;
    cache_read_input_tokens?: number;
    cache_creation_input_tokens?: number;
 +  cacheCreation5m?: number;
@@ -19,7 +20,7 @@ diff --git a/open-sse/utils/usageTracking.ts b/open-sse/utils/usageTracking.ts
    /** OpenRouter / Devin Desktop / codex-chatgpt-web alias for cache creation. */
    cache_write_tokens?: number;
    prompt_cache_hit_tokens?: number;
-@@ -63,7 +67,7 @@
+@@ -67,7 +71,7 @@
  }
  
  /** SSE/JSON chunk shapes this module inspects for embedded usage containers. */
@@ -28,7 +29,7 @@ diff --git a/open-sse/utils/usageTracking.ts b/open-sse/utils/usageTracking.ts
    type?: string;
    done?: boolean;
    prompt_eval_count?: number;
-@@ -71,7 +75,11 @@
+@@ -75,7 +79,11 @@
    usage?: UsageLike;
    usageMetadata?: UsageLike;
    message?: { usage?: UsageLike; [field: string]: unknown };
@@ -41,7 +42,7 @@ diff --git a/open-sse/utils/usageTracking.ts b/open-sse/utils/usageTracking.ts
    [field: string]: unknown;
  }
  
-@@ -394,6 +402,17 @@
+@@ -451,6 +459,17 @@
      return value.some((item) => hasRemoteContextReference(item, depth + 1));
    }
  
@@ -59,7 +60,7 @@ diff --git a/open-sse/utils/usageTracking.ts b/open-sse/utils/usageTracking.ts
    for (const [key, nested] of Object.entries(value)) {
      if (REMOTE_CONTEXT_REFERENCE_KEYS.has(key) && hasValue(nested)) {
        return true;
-@@ -583,8 +602,8 @@
+@@ -640,8 +659,8 @@
      return replaceUsage(payload.message, "usage", FORMATS.CLAUDE);
    }
    if (payload.type === "message_delta" && payload.usage) {
@@ -70,7 +71,7 @@ diff --git a/open-sse/utils/usageTracking.ts b/open-sse/utils/usageTracking.ts
      const delta = payload.usage;
      const deltaInput =
        tokenNumber(delta.input_tokens) +
-@@ -629,6 +648,7 @@
+@@ -686,6 +705,7 @@
    assignNumber("output_tokens", usage?.output_tokens);
    assignNumber("cache_read_input_tokens", usage?.cache_read_input_tokens);
    assignNumber("cache_creation_input_tokens", pickCacheCreationTokens(usage));
@@ -78,7 +79,7 @@ diff --git a/open-sse/utils/usageTracking.ts b/open-sse/utils/usageTracking.ts
    assignNumber(
      "cached_tokens",
      usage?.cached_tokens ??
-@@ -663,7 +683,10 @@
+@@ -728,7 +748,10 @@
    const estimated =
      !!source && typeof source === "object" && (source as UsageLike).estimated === true;
    if (estimated && rebuilt && typeof rebuilt === "object") {
@@ -90,7 +91,7 @@ diff --git a/open-sse/utils/usageTracking.ts b/open-sse/utils/usageTracking.ts
    }
    return rebuilt;
  }
-@@ -755,44 +778,14 @@
+@@ -833,44 +856,14 @@
      return null;
    }
  
@@ -141,15 +142,15 @@ diff --git a/open-sse/utils/usageTracking.ts b/open-sse/utils/usageTracking.ts
    }
  
    // OpenAI Responses API format (response.completed or response.done)
-@@ -803,6 +796,7 @@
-   ) {
-     const usage = chunk.response.usage;
+@@ -883,6 +876,7 @@
      return normalizeUsage({
+       provider_credits: usage.provider_credits,
+       cost_in_usd_ticks: usage.cost_in_usd_ticks,
 +      ...getCacheCreationTtlFields(usage),
        prompt_tokens: usage.input_tokens || usage.prompt_tokens || 0,
        completion_tokens: usage.output_tokens || usage.completion_tokens || 0,
        cached_tokens:
-@@ -824,6 +818,7 @@
+@@ -904,6 +898,7 @@
      (chunk.usage.prompt_tokens !== undefined || chunk.usage.input_tokens !== undefined)
    ) {
      const normalized = normalizeUsage({

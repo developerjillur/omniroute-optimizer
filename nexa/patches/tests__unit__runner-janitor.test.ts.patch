@@ -1,8 +1,8 @@
 diff --git a/tests/unit/runner-janitor.test.ts b/tests/unit/runner-janitor.test.ts
-index 6e6aee107..571377f55 100644
+index 6e6aee107a44448eb2c90e097cf37aa5a5507106..571377f554626f8d426137eb68683367ed31632f 100644
 --- a/tests/unit/runner-janitor.test.ts
 +++ b/tests/unit/runner-janitor.test.ts
-@@ -33,6 +33,11 @@ const HAVE_BUSY_TOOLS =
+@@ -33,6 +33,11 @@
  
  function fixture() {
    const base = mkdtempSync(path.join(os.tmpdir(), "janitor-fixture-"));
@@ -14,7 +14,7 @@ index 6e6aee107..571377f55 100644
    const old = new Date(Date.now() - 5 * HOUR);
    const mk = (name: string, dir: boolean, when: Date | null) => {
      const p = path.join(base, name);
-@@ -59,6 +64,9 @@ function run(args: string[], base: string, extraEnv: Record<string, string> = {}
+@@ -59,6 +64,9 @@
      stdio: ["ignore", "pipe", "pipe"],
      env: {
        ...process.env,

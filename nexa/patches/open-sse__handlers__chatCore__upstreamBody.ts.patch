@@ -1,8 +1,8 @@
 diff --git a/open-sse/handlers/chatCore/upstreamBody.ts b/open-sse/handlers/chatCore/upstreamBody.ts
-index c824da3d4..e1b3f1888 100644
+index 7e50e26a20d3f1cef624f856a998e79326b7e3d0..d85301c11847caedc4a76fa0ac1db59803967471 100644
 --- a/open-sse/handlers/chatCore/upstreamBody.ts
 +++ b/open-sse/handlers/chatCore/upstreamBody.ts
-@@ -9,6 +9,12 @@ import {
+@@ -9,6 +9,12 @@
    resolvePayloadRuleProtocols,
  } from "../../services/payloadRules.ts";
  import { getEffectiveToolLimit, getKnownToolLimit } from "../../services/toolLimitDetector.ts";
@@ -15,9 +15,9 @@ index c824da3d4..e1b3f1888 100644
  import { OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME } from "../../services/webSearchFallback.ts";
  import { OMNIROUTE_WEB_FETCH_FALLBACK_TOOL_NAME } from "../../services/webFetchInterception.ts";
  import { CLAUDE_OAUTH_TOOL_PREFIX } from "../../translator/request/openai-to-claude.ts";
-@@ -340,7 +346,15 @@ export async function prepareUpstreamBody(opts: PrepareUpstreamBodyOptions): Pro
-     log,
-   });
+@@ -461,7 +467,15 @@
+     }
+   }
    bodyToSend = defaultImageDetail(bodyToSend, isOpencodeClient);
 -  bodyToSend = truncateToolList(bodyToSend, provider, bypassDefaultToolLimit ?? false, log);
 +  const clientHeaders = opts.clientRawRequest?.headers;
@@ -32,7 +32,7 @@ index c824da3d4..e1b3f1888 100644
    const connectionCacheOverride = resolveConnectionCacheOverride(credentials?.providerSpecificData);
    bodyToSend = await injectPromptCacheKey(
      bodyToSend,
-@@ -349,5 +363,14 @@ export async function prepareUpstreamBody(opts: PrepareUpstreamBodyOptions): Pro
+@@ -470,5 +484,14 @@
      connectionCacheOverride
    );
  

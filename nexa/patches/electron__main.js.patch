@@ -1,8 +1,8 @@
 diff --git a/electron/main.js b/electron/main.js
-index 7daff0284..21027fff4 100644
+index 11b97f58f87bcbccd9ec800a1d095f123ce7b2f6..9df759f1d237319091d48f191120848217d7358e 100644
 --- a/electron/main.js
 +++ b/electron/main.js
-@@ -425,6 +425,10 @@ function createWindow({ showWhenReady = true } = {}) {
+@@ -439,6 +439,10 @@
        preload: path.join(__dirname, "preload.js"),
        contextIsolation: true,
        nodeIntegration: false,

@@ -1,4 +1,5 @@
 diff --git a/open-sse/translator/response/claude-to-openai.ts b/open-sse/translator/response/claude-to-openai.ts
+index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..7a29b68ca41d07546b64a554b7eb1f3ec2cd7571 100644
 --- a/open-sse/translator/response/claude-to-openai.ts
 +++ b/open-sse/translator/response/claude-to-openai.ts
 @@ -1,6 +1,14 @@
@@ -14,10 +15,10 @@ diff --git a/open-sse/translator/response/claude-to-openai.ts b/open-sse/transla
 +  applyThinkTag,
 +  flushThinkBuffer,
 +} from "../../utils/thinkTagParser.ts";
+ import { storeClaudeThinkingBlocks } from "../../services/claudeThinkingStore.ts";
  
  type OpenAIUsage = {
-   prompt_tokens: number;
-@@ -52,40 +60,11 @@
+@@ -79,40 +87,11 @@
        // shouldParseTextualReasoningTags) so it strips <think> markup out of
        // delta.content and re-emits it as delta.reasoning_content.
        state.thinkState = initThinkState(true, state.provider, state.model);
@@ -63,7 +64,7 @@ diff --git a/open-sse/translator/response/claude-to-openai.ts b/open-sse/transla
        results.push(createChunk(state, { role: "assistant" }));
        break;
      }
-@@ -139,7 +118,11 @@
+@@ -174,7 +153,11 @@
          };
          if (state.thinkState) applyThinkTag(state.thinkState, textDelta);
          if (textDelta.reasoning_content) {
@@ -76,7 +77,7 @@ diff --git a/open-sse/translator/response/claude-to-openai.ts b/open-sse/transla
          }
          if (textDelta.content) {
            results.push(createChunk(state, { content: textDelta.content }));
-@@ -160,7 +143,7 @@
+@@ -201,7 +184,7 @@
                    function: { arguments: delta.partial_json },
                  },
                ],
@@ -85,7 +86,7 @@ diff --git a/open-sse/translator/response/claude-to-openai.ts b/open-sse/transla
            );
          }
        }
-@@ -175,7 +158,9 @@
+@@ -216,7 +199,9 @@
        if (state.thinkState?.active) {
          const flushed = flushThinkBuffer(state.thinkState);
          if (flushed.reasoningDelta) {
@@ -96,7 +97,7 @@ diff --git a/open-sse/translator/response/claude-to-openai.ts b/open-sse/transla
          }
          if (flushed.contentDelta) {
            results.push(createChunk(state, { content: flushed.contentDelta }));
-@@ -199,76 +184,18 @@
+@@ -240,76 +225,18 @@
      }
  
      case "message_delta": {
@@ -184,7 +185,7 @@ diff --git a/open-sse/translator/response/claude-to-openai.ts b/open-sse/transla
          }
        }
  
-@@ -316,10 +243,11 @@
+@@ -358,10 +285,11 @@
            const inputTokens = state.usage.input_tokens || 0;
            const outputTokens = state.usage.output_tokens || 0;
            const cachedTokens = state.usage.cache_read_input_tokens || 0;
@@ -200,7 +201,7 @@ diff --git a/open-sse/translator/response/claude-to-openai.ts b/open-sse/transla
            // completion_tokens = output_tokens
            // total_tokens = prompt_tokens + completion_tokens
            const promptTokens = inputTokens;
-@@ -344,10 +272,12 @@
+@@ -386,7 +314,8 @@
            if (cachedTokens > 0 || cacheCreationTokens > 0) {
              finalChunk.usage.prompt_tokens_details = {};
              if (cachedTokens > 0) {
@@ -209,14 +210,9 @@ diff --git a/open-sse/translator/response/claude-to-openai.ts b/open-sse/transla
 +                cachedTokens;
              }
              if (cacheCreationTokens > 0) {
--              finalChunk.usage.prompt_tokens_details.cache_creation_tokens = cacheCreationTokens;
-+              finalChunk.usage.prompt_tokens_details.cache_creation_tokens =
-+                cacheCreationTokens;
-             }
-           }
-         }
-@@ -361,16 +291,20 @@
-     case "message_stop": {
+               finalChunk.usage.prompt_tokens_details.cache_creation_tokens = cacheCreationTokens;
+@@ -405,16 +334,20 @@
+       flushThinkingContinuity(state);
        if (!state.finishReasonSent) {
          const finishReason =
 -          state.finishReason || (state.toolCalls?.size > 0 ? "tool_calls" : "stop");
@@ -239,7 +235,7 @@ diff --git a/open-sse/translator/response/claude-to-openai.ts b/open-sse/transla
                    ...(typeof state.usage.reasoning_tokens === "number"
                      ? {
                          reasoning_tokens: state.usage.reasoning_tokens,
-@@ -382,7 +316,9 @@
+@@ -426,7 +359,9 @@
                    ...(cachedTokens > 0 || cacheCreationTokens > 0
                      ? {
                          prompt_tokens_details: {
@@ -248,9 +244,9 @@ diff --git a/open-sse/translator/response/claude-to-openai.ts b/open-sse/transla
 +                            ? { cached_tokens: cachedTokens }
 +                            : {}),
                            ...(cacheCreationTokens > 0
-                             ? { cache_creation_tokens: cacheCreationTokens }
-                             : {}),
-@@ -422,6 +358,8 @@
+                             ? {
+                                 cache_creation_tokens: cacheCreationTokens,
+@@ -469,6 +404,8 @@
        return "stop";
      case "max_tokens":
        return "length";

@@ -1,19 +1,17 @@
 diff --git a/src/app/api/system/version/route.ts b/src/app/api/system/version/route.ts
-index 5284d0007..7cd9e0e5c 100644
+index 2794b8ac1a29770d1d34fbb9dae7a6278b5b34e4..d9afa58365951ddcfff4963594c23e173a038fa4 100644
 --- a/src/app/api/system/version/route.ts
 +++ b/src/app/api/system/version/route.ts
-@@ -143,8 +143,8 @@ export async function POST(req: NextRequest) {
-     );
+@@ -186,7 +186,7 @@
    }
  
--  // If we are in docker-compose mode, use the detached shell script background updates
+   // If we are in docker-compose mode, use the detached shell script background updates
 -  if (config.mode === "docker-compose") {
-+  // docker-compose and command modes hand the work to a detached background process
 +  if (config.mode === "docker-compose" || config.mode === "command") {
      const launched = await launchAutoUpdate({ latest });
      if (!launched.started) {
        return NextResponse.json(
-@@ -161,7 +161,10 @@ export async function POST(req: NextRequest) {
+@@ -203,7 +203,10 @@
      clearLatestVersionCache();
      return NextResponse.json({
        success: true,

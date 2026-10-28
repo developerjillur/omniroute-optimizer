@@ -1,8 +1,8 @@
 diff --git a/src/app/(dashboard)/dashboard/settings/components/QuotaPreflightCard.tsx b/src/app/(dashboard)/dashboard/settings/components/QuotaPreflightCard.tsx
-index 2ba4a1ed1..5a28c540b 100644
+index 2ba4a1ed1a9f300112282ef7535ca977b77950d8..5a28c540bf60f059a121da98544009071fcc4da0 100644
 --- a/src/app/(dashboard)/dashboard/settings/components/QuotaPreflightCard.tsx
 +++ b/src/app/(dashboard)/dashboard/settings/components/QuotaPreflightCard.tsx
-@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
+@@ -6,6 +6,7 @@
  import { NumberField } from "./ResilienceFields";
  
  type QuotaPreflightSettings = {
@@ -10,7 +10,7 @@ index 2ba4a1ed1..5a28c540b 100644
    enabled: boolean;
    defaultThresholdPercent: number;
    warnThresholdPercent: number;
-@@ -45,6 +46,7 @@ export default function QuotaPreflightCard() {
+@@ -45,6 +46,7 @@
          const qp = resilience.quotaPreflight;
          if (qp) {
            setValue({
@@ -18,7 +18,7 @@ index 2ba4a1ed1..5a28c540b 100644
              enabled: qp.enabled === true,
              defaultThresholdPercent: Number(qp.defaultThresholdPercent ?? 2),
              warnThresholdPercent: Number(qp.warnThresholdPercent ?? 20),
-@@ -76,6 +78,7 @@ export default function QuotaPreflightCard() {
+@@ -76,6 +78,7 @@
        const qp = json.quotaPreflight;
        if (qp) {
          setValue({
@@ -26,10 +26,13 @@ index 2ba4a1ed1..5a28c540b 100644
            enabled: qp.enabled === true,
            defaultThresholdPercent: Number(qp.defaultThresholdPercent ?? 2),
            warnThresholdPercent: Number(qp.warnThresholdPercent ?? 20),
-@@ -140,6 +143,25 @@ export default function QuotaPreflightCard() {
-           />
-         </div>
- 
+@@ -137,6 +140,25 @@
+             checked={value.enabled}
+             disabled={saving}
+             onChange={() => save({ enabled: !value.enabled })}
++          />
++        </div>
++
 +        <div className="flex items-start sm:items-center justify-between gap-4 pt-2 border-t border-border/50">
 +          <div className="flex-1 min-w-0">
 +            <p className="font-medium text-sm sm:text-base">Cached quota filtering</p>
@@ -46,9 +49,6 @@ index 2ba4a1ed1..5a28c540b 100644
 +            onChange={() =>
 +              save({ cachedQuotaFilteringEnabled: !value.cachedQuotaFilteringEnabled })
 +            }
-+          />
-+        </div>
-+
-         {value.enabled && (
-           <>
-             <div className="flex items-start sm:items-center justify-between gap-4 pt-2 border-t border-border/50">
+           />
+         </div>
+ 

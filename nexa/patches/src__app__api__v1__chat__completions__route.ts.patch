@@ -1,8 +1,8 @@
 diff --git a/src/app/api/v1/chat/completions/route.ts b/src/app/api/v1/chat/completions/route.ts
-index 4fa2ad9e4..058a07fa3 100644
+index ee8d9fbe4e30db1d26ce9d087b64cc99be1243dc..bf0eacfacb594085990aebc845a14f49a2f435c5 100644
 --- a/src/app/api/v1/chat/completions/route.ts
 +++ b/src/app/api/v1/chat/completions/route.ts
-@@ -32,6 +32,11 @@ import {
+@@ -33,6 +33,11 @@
    readCompressionRequestHeader,
    withCompressionHeaderEcho,
  } from "@/shared/utils/compressionHeaderEcho";
@@ -13,8 +13,8 @@ index 4fa2ad9e4..058a07fa3 100644
 +} from "@/lib/nexa/reasoningElicitation";
  import { resolveModelAliasWithSeedFallbackOnBody } from "@/lib/modelAliasResolver";
  import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
- import {
-@@ -273,6 +278,15 @@ export async function POST(request) {
+ import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
+@@ -301,6 +306,15 @@
      // The parsed body is passed through UNTOUCHED — the actual stream/JSON framing
      // stays decided by chatCore/resolveStreamFlag (legacy streaming default and the
      // per-key `streamDefaultMode: "json"` opt-in are preserved).
@@ -30,7 +30,7 @@ index 4fa2ad9e4..058a07fa3 100644
      const parsedBodyIsRecord = isRecord(parsedBody);
      const acceptHeader = request.headers.get("accept") || "";
      const acceptForcesStream =
-@@ -313,15 +327,17 @@ export async function POST(request) {
+@@ -339,15 +353,17 @@
          extraHeaders: { "X-Correlation-Id": reqId },
          deadlineController: routeDeadlineController,
        });

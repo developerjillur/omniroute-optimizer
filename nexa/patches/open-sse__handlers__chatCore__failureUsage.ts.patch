@@ -1,4 +1,5 @@
 diff --git a/open-sse/handlers/chatCore/failureUsage.ts b/open-sse/handlers/chatCore/failureUsage.ts
+index 70223183604e6dc0633164386a2bb85606f4a3f2..60115c0a5c7c4f2caa002350e535f3b896df7ca9 100644
 --- a/open-sse/handlers/chatCore/failureUsage.ts
 +++ b/open-sse/handlers/chatCore/failureUsage.ts
 @@ -9,6 +9,7 @@

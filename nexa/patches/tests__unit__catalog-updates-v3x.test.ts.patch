@@ -1,8 +1,8 @@
 diff --git a/tests/unit/catalog-updates-v3x.test.ts b/tests/unit/catalog-updates-v3x.test.ts
-index e23338049..7f7fd4698 100644
+index 2fa3dab14209d77f1a38238bb437ff8c341e0b82..d3cbf00e7d7ba6b13f23cb410fc6a76406c3ef9c 100644
 --- a/tests/unit/catalog-updates-v3x.test.ts
 +++ b/tests/unit/catalog-updates-v3x.test.ts
-@@ -183,7 +183,7 @@ test("Every OpenAI registry model resolves a non-zero pricing row (alias: openai
+@@ -183,7 +183,7 @@
    }
  });
  
@@ -11,7 +11,7 @@ index e23338049..7f7fd4698 100644
    const { getPricingForModel } = await import("../../src/shared/constants/pricing.ts");
    const models = getModelsByProviderId("codex");
    assert.ok(models.length > 0, "codex must expose models");
-@@ -194,6 +194,10 @@ test("Every Codex registry model resolves a non-zero pricing row (alias: cx)", a
+@@ -194,6 +194,10 @@
        input?: number;
        output?: number;
      } | null;

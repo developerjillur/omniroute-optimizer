@@ -1,5 +1,5 @@
 diff --git a/src/app/(dashboard)/dashboard/tools/traffic-inspector/hooks/useSessionRecorder.ts b/src/app/(dashboard)/dashboard/tools/traffic-inspector/hooks/useSessionRecorder.ts
-index 4951367f3..fcf75520d 100644
+index 4951367f3dc59b9e509646341f1cbe1c67969082..fcf75520d54eb6db9163dd63a797272b51e5e255 100644
 --- a/src/app/(dashboard)/dashboard/tools/traffic-inspector/hooks/useSessionRecorder.ts
 +++ b/src/app/(dashboard)/dashboard/tools/traffic-inspector/hooks/useSessionRecorder.ts
 @@ -3,7 +3,7 @@
@@ -11,7 +11,7 @@ index 4951367f3..fcf75520d 100644
  const SNAPSHOT_FLUSH_MS = 500;
  const SNAPSHOT_FLUSH_BATCH = 10;
  
-@@ -29,7 +29,7 @@ export function useSessionRecorder() {
+@@ -29,7 +29,7 @@
    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
    const startTimeRef = useRef<number>(0);
    const mountedRef = useRef(true);
@@ -20,7 +20,7 @@ index 4951367f3..fcf75520d 100644
    const recordingSessionRef = useRef<SessionInfo | null>(null);
    const pendingSnapshotsRef = useRef<string[]>([]);
    const flushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-@@ -126,9 +126,7 @@ export function useSessionRecorder() {
+@@ -126,9 +126,7 @@
          }, 1000);
  
          // Open a dedicated WS to capture traffic events during the recording window
@@ -31,7 +31,7 @@ index 4951367f3..fcf75520d 100644
          recordingWsRef.current = ws;
  
          ws.onmessage = (ev: MessageEvent) => {
-@@ -150,7 +148,7 @@ export function useSessionRecorder() {
+@@ -150,7 +148,7 @@
            }
          };
  
@@ -40,7 +40,7 @@ index 4951367f3..fcf75520d 100644
        } catch {
          // ignore
        }
-@@ -185,16 +183,19 @@ export function useSessionRecorder() {
+@@ -185,16 +183,19 @@
      setSession(null);
    }, [session, fetchSessions, stopRecordingWs, flushSnapshots]);
  

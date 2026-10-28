@@ -1,7 +1,8 @@
 diff --git a/open-sse/utils/streamReadiness.ts b/open-sse/utils/streamReadiness.ts
+index 48e8666c46b2c332d552dad96b5890eec4a62eec..0f38041e129595a76a2c9cc9af0168f792e796a5 100644
 --- a/open-sse/utils/streamReadiness.ts
 +++ b/open-sse/utils/streamReadiness.ts
-@@ -267,6 +267,8 @@
+@@ -420,6 +420,8 @@
     * so #8649 can stand down without treating errors as model output.
     */
    sawError: () => boolean;
@@ -10,10 +11,10 @@ diff --git a/open-sse/utils/streamReadiness.ts b/open-sse/utils/streamReadiness.
  };
  
  /**
-@@ -290,9 +292,24 @@
-   let legitEmpty = false;
+@@ -451,9 +453,24 @@
    let sse = false;
    let error = false;
+   let progress = 0;
 +  let claudeStopReason: string | null = null;
  
    const inspect = (frame: string): void => {
@@ -34,9 +35,9 @@ diff --git a/open-sse/utils/streamReadiness.ts b/open-sse/utils/streamReadiness.
 +    }
      if (!sse && SSE_FIELD_LINE.test(frame)) sse = true;
      if (!error && frameHasStructuredStreamError(frame)) error = true;
-     if (!content && hasUsefulStreamContent(frame)) content = true;
-@@ -328,6 +345,7 @@
-     sawLegitEmptyTerminal: () => legitEmpty,
+     if (!content && hasUsefulStreamContent(frame, { contentProbe })) content = true;
+@@ -501,6 +518,7 @@
+     sawNormalStopTerminal: () => normalStop,
      sawSseFrame: () => sse,
      sawError: () => error,
 +    getClaudeStopReason: () => claudeStopReason,

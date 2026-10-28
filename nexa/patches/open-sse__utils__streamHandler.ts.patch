@@ -1,18 +1,19 @@
 diff --git a/open-sse/utils/streamHandler.ts b/open-sse/utils/streamHandler.ts
+index ef6323f30f21d5e4ca599847cfd6990367e35c4f..ef8ceea6e39aa9869d6bcd61f5e10808b91bb5cf 100644
 --- a/open-sse/utils/streamHandler.ts
 +++ b/open-sse/utils/streamHandler.ts
-@@ -6,6 +6,7 @@
- import { createCompletedResponsesToolHandoffWatcher } from "./responsesToolHandoff.ts";
- import { createStreamContentWatcher, type StreamContentWatcher } from "./streamReadiness.ts";
- import { hasOpenReasoning } from "./emptyTurnRetry.ts";
+@@ -14,6 +14,7 @@
+   buildSyntheticResponsesFailureId,
+   SYNTHETIC_RESPONSES_SEQUENCE_NUMBER,
+ } from "./responsesSequence.ts";
 +import { createAnthropicThinkingProgressWatcher } from "./anthropicStreamProgress.ts";
  
  // Stream handler with disconnect detection - shared for all providers
  
-@@ -601,8 +602,22 @@
-   clientTerminalSeen: boolean;
+@@ -608,8 +609,22 @@
    clientResponseFormat?: string | null;
    contentWatcher: StreamContentWatcher;
+   permitsEmptyTurn?: () => boolean;
 +  allowEmptyCompletion?: boolean;
  }): SilentCloseOutcome | null {
    if (!input.bytesWereForwarded) return null;
@@ -32,7 +33,7 @@ diff --git a/open-sse/utils/streamHandler.ts b/open-sse/utils/streamHandler.ts
  
    if (!input.clientTerminalSeen) {
      if (input.clientResponseFormat === FORMATS.CLAUDE && input.contentWatcher.sawContent()) {
-@@ -636,8 +651,8 @@
+@@ -643,8 +658,8 @@
      }
    }
  
@@ -41,26 +42,26 @@ diff --git a/open-sse/utils/streamHandler.ts b/open-sse/utils/streamHandler.ts
 +  // Only a verified optional suggestion completion may close without model text.
 +  if (input.clientTerminalSeen && input.allowEmptyCompletion === true) return null;
    if (watcher.sawSseFrame() && !watcher.sawContent() && !watcher.sawLegitEmptyTerminal()) {
-     return { kind: "error", reason: "Provider returned empty content" };
-   }
-@@ -648,7 +663,7 @@
+     // A translated/client stop is insufficient: the executed native protocol
+     // must also have supplied an ordinary terminal on a trusted origin.
+@@ -659,7 +674,7 @@
  export function createDisconnectAwareStream(
    transformStream,
    streamController,
--  options: { highWaterMark?: number } = {}
-+  options: { highWaterMark?: number; allowEmptyCompletion?: () => boolean } = {}
+-  options: { highWaterMark?: number; permitsEmptyTurn?: () => boolean } = {}
++  options: { highWaterMark?: number; permitsEmptyTurn?: () => boolean; allowEmptyCompletion?: () => boolean } = {}
  ) {
    const reader = transformStream.readable.getReader();
    const writer = transformStream.writable.getWriter();
-@@ -747,6 +762,7 @@
-               clientTerminalSeen,
+@@ -737,6 +752,7 @@
                clientResponseFormat: streamController.clientResponseFormat,
                contentWatcher,
+               permitsEmptyTurn: options.permitsEmptyTurn,
 +              allowEmptyCompletion: options.allowEmptyCompletion?.() === true,
              });
  
              if (silentClose?.kind === "truncated") {
-@@ -886,6 +902,8 @@
+@@ -885,6 +901,8 @@
      stallTimeoutMs?: number;
      activeTimeoutMs?: number;
      contentStallTimeoutMs?: number;
@@ -69,16 +70,15 @@ diff --git a/open-sse/utils/streamHandler.ts b/open-sse/utils/streamHandler.ts
      highWaterMark?: number;
    } = {}
  ) {
-@@ -907,7 +925,7 @@
-     return createDisconnectAwareStream(
-       { readable: transformedBody, writable: createNoopAbortWritable() },
+@@ -908,6 +926,7 @@
        streamController,
--      { highWaterMark: opts.highWaterMark }
-+      { highWaterMark: opts.highWaterMark, allowEmptyCompletion: opts.allowEmptyCompletion }
+       {
+         highWaterMark: opts.highWaterMark,
++        allowEmptyCompletion: opts.allowEmptyCompletion,
+         permitsEmptyTurn: () => hasTrustedEmptyTurn(providerResponse),
+       }
      );
-   }
- 
-@@ -989,6 +1007,9 @@
+@@ -988,6 +1007,9 @@
    let contentStallTimer: ReturnType<typeof setTimeout> | null = null;
    let contentStallFired = false;
    const upstreamContentWatcher = createStreamContentWatcher();
@@ -88,24 +88,20 @@ diff --git a/open-sse/utils/streamHandler.ts b/open-sse/utils/streamHandler.ts
    const upstreamContentDecoder = new TextDecoder();
    // Stall diagnostics: what the upstream had sent when the content watchdog
    // trips. Counters live at this tap because it is the only point seeing raw
-@@ -1149,6 +1170,12 @@
-         noteStallText(decoded);
+@@ -1154,7 +1176,7 @@
          upstreamContentWatcher.note(decoded);
-         if (upstreamContentWatcher.sawContent()) clearContentStall();
-+        else if (thinkingProgress?.note(decoded)) {
-+          // Hidden reasoning emits empty thinking deltas. Give each validated
-+          // progress event the same inactivity window; the active cap never resets.
-+          clearContentStall();
-+          armContentStall();
-+        }
-       }
-       controller.enqueue(chunk);
-     },
-@@ -1164,6 +1191,6 @@
-   return createDisconnectAwareStream(
-     { readable: transformedBody, writable: createNoopAbortWritable() },
+         if (upstreamContentWatcher.sawContent()) {
+           clearContentStall();
+-        } else if (upstreamContentWatcher.reasoningProgress() > reasoningBefore) {
++        } else if (upstreamContentWatcher.reasoningProgress() > reasoningBefore || thinkingProgress?.note(decoded)) {
+           clearContentStall();
+           armContentStall();
+         }
+@@ -1175,6 +1197,7 @@
      wrappedController,
--    { highWaterMark: opts.highWaterMark }
-+    { highWaterMark: opts.highWaterMark, allowEmptyCompletion: opts.allowEmptyCompletion }
+     {
+       highWaterMark: opts.highWaterMark,
++      allowEmptyCompletion: opts.allowEmptyCompletion,
+       permitsEmptyTurn: () => hasTrustedEmptyTurn(providerResponse),
+     }
    );
- }

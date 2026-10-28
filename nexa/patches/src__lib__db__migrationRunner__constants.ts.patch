@@ -1,0 +1,13 @@
+diff --git a/src/lib/db/migrationRunner/constants.ts b/src/lib/db/migrationRunner/constants.ts
+index fd7f4defd1dc15a8e0d30c41a03720accf1cdf9f..5031c51920510e2ce80596d431f88dfe5f89868f 100644
+--- a/src/lib/db/migrationRunner/constants.ts
++++ b/src/lib/db/migrationRunner/constants.ts
+@@ -226,6 +226,8 @@
+ ] as const;
+ 
+ export const LEGACY_VERSION_SLOT_MIGRATIONS = [
++  { version: "197", name: "native_claude_cache_details" },
++  { version: "198", name: "usage_history_cache_ttl" },
+   { version: "028", name: "evals_tables" },
+   { version: "029", name: "webhooks_templates" },
+   { version: "030", name: "mcp_scopes_api_keys" },

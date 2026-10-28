@@ -1,0 +1,961 @@
+--- a/open-sse/utils/streamReadiness.ts
++++ b/open-sse/utils/streamReadiness.ts
+@@ -420,6 +420,8 @@
+    * so #8649 can stand down without treating errors as model output.
+    */
+   sawError: () => boolean;
++  /** Native terminal reason from a real message_delta, never nested metadata. */
++  getClaudeStopReason: () => string | null;
+ };
+ 
+ /**
+@@ -451,9 +453,24 @@
+   let sse = false;
+   let error = false;
+   let progress = 0;
++  let claudeStopReason: string | null = null;
+ 
+   const inspect = (frame: string): void => {
+     if (!frame) return;
++    for (const line of frame.split(/\r?\n/)) {
++      const trimmed = line.trim();
++      if (!trimmed.startsWith("data:")) continue;
++      try {
++        const event: unknown = JSON.parse(trimmed.slice(5).trim());
++        if (!isRecord(event) || event.type !== "message_delta" || !isRecord(event.delta))
++          continue;
++        const reason = event.delta.stop_reason;
++        if (typeof reason === "string" && reason.length > 0 && reason.length <= 64)
++          claudeStopReason = reason;
++      } catch {
++        // Only an actual native terminal event can exempt a refusal from emptiness.
++      }
++    }
+     if (!sse && SSE_FIELD_LINE.test(frame)) sse = true;
+     if (!error && frameHasStructuredStreamError(frame)) error = true;
+     if (!content && hasUsefulStreamContent(frame, { contentProbe })) content = true;
+@@ -501,6 +518,7 @@
+     sawNormalStopTerminal: () => normalStop,
+     sawSseFrame: () => sse,
+     sawError: () => error,
++    getClaudeStopReason: () => claudeStopReason,
+   };
+ }
+ 
+--- a/open-sse/utils/streamHandler.ts
++++ b/open-sse/utils/streamHandler.ts
+@@ -14,6 +14,7 @@
+   buildSyntheticResponsesFailureId,
+   SYNTHETIC_RESPONSES_SEQUENCE_NUMBER,
+ } from "./responsesSequence.ts";
++import { createAnthropicThinkingProgressWatcher } from "./anthropicStreamProgress.ts";
+ 
+ // Stream handler with disconnect detection - shared for all providers
+ 
+@@ -608,8 +609,22 @@
+   clientResponseFormat?: string | null;
+   contentWatcher: StreamContentWatcher;
+   permitsEmptyTurn?: () => boolean;
++  allowEmptyCompletion?: boolean;
+ }): SilentCloseOutcome | null {
+   if (!input.bytesWereForwarded) return null;
++
++  const watcher = input.contentWatcher;
++  if (watcher.sawError()) return null;
++  // Native refusals may contain only hidden thinking. Preserve the refusal,
++  // but still report a transport that never delivered the final message_stop.
++  if (
++    input.clientResponseFormat === FORMATS.CLAUDE &&
++    watcher.getClaudeStopReason() === "refusal"
++  ) {
++    return input.clientTerminalSeen
++      ? null
++      : { kind: "error", reason: "Upstream stream ended without a terminal marker" };
++  }
+ 
+   if (!input.clientTerminalSeen) {
+     if (input.clientResponseFormat === FORMATS.CLAUDE && input.contentWatcher.sawContent()) {
+@@ -643,8 +658,8 @@
+     }
+   }
+ 
+-  const watcher = input.contentWatcher;
+-  if (watcher.sawError()) return null;
++  // Only a verified optional suggestion completion may close without model text.
++  if (input.clientTerminalSeen && input.allowEmptyCompletion === true) return null;
+   if (watcher.sawSseFrame() && !watcher.sawContent() && !watcher.sawLegitEmptyTerminal()) {
+     // A translated/client stop is insufficient: the executed native protocol
+     // must also have supplied an ordinary terminal on a trusted origin.
+@@ -659,7 +674,7 @@
+ export function createDisconnectAwareStream(
+   transformStream,
+   streamController,
+-  options: { highWaterMark?: number; permitsEmptyTurn?: () => boolean } = {}
++  options: { highWaterMark?: number; permitsEmptyTurn?: () => boolean; allowEmptyCompletion?: () => boolean } = {}
+ ) {
+   const reader = transformStream.readable.getReader();
+   const writer = transformStream.writable.getWriter();
+@@ -737,6 +752,7 @@
+               clientResponseFormat: streamController.clientResponseFormat,
+               contentWatcher,
+               permitsEmptyTurn: options.permitsEmptyTurn,
++              allowEmptyCompletion: options.allowEmptyCompletion?.() === true,
+             });
+ 
+             if (silentClose?.kind === "truncated") {
+@@ -885,6 +901,8 @@
+     stallTimeoutMs?: number;
+     activeTimeoutMs?: number;
+     contentStallTimeoutMs?: number;
++    allowEmptyCompletion?: () => boolean;
++    allowAnthropicThinkingProgress?: boolean;
+     highWaterMark?: number;
+   } = {}
+ ) {
+@@ -908,6 +926,7 @@
+       streamController,
+       {
+         highWaterMark: opts.highWaterMark,
++        allowEmptyCompletion: opts.allowEmptyCompletion,
+         permitsEmptyTurn: () => hasTrustedEmptyTurn(providerResponse),
+       }
+     );
+@@ -988,6 +1007,9 @@
+   let contentStallTimer: ReturnType<typeof setTimeout> | null = null;
+   let contentStallFired = false;
+   const upstreamContentWatcher = createStreamContentWatcher();
++  const thinkingProgress = opts.allowAnthropicThinkingProgress
++    ? createAnthropicThinkingProgressWatcher()
++    : null;
+   const upstreamContentDecoder = new TextDecoder();
+   // Stall diagnostics: what the upstream had sent when the content watchdog
+   // trips. Counters live at this tap because it is the only point seeing raw
+@@ -1154,7 +1176,7 @@
+         upstreamContentWatcher.note(decoded);
+         if (upstreamContentWatcher.sawContent()) {
+           clearContentStall();
+-        } else if (upstreamContentWatcher.reasoningProgress() > reasoningBefore) {
++        } else if (upstreamContentWatcher.reasoningProgress() > reasoningBefore || thinkingProgress?.note(decoded)) {
+           clearContentStall();
+           armContentStall();
+         }
+@@ -1175,6 +1197,7 @@
+     wrappedController,
+     {
+       highWaterMark: opts.highWaterMark,
++      allowEmptyCompletion: opts.allowEmptyCompletion,
+       permitsEmptyTurn: () => hasTrustedEmptyTurn(providerResponse),
+     }
+   );
+--- a/open-sse/utils/stream.ts
++++ b/open-sse/utils/stream.ts
+@@ -1,3 +1,4 @@
++import { isCompletedSilentSuggestion } from "./nativeSuggestion.ts";
+ import { translateResponse, initState } from "../translator/index.ts";
+ import { FORMATS } from "../translator/formats.ts";
+ import { appendRequestLog } from "@/lib/usageDb";
+@@ -16,7 +17,9 @@
+   normalizeUsage as normalizeTokenUsage,
+   sanitizeUsagePayloadForRequest,
+   type UsageLike,
++  type UsagePayloadLike,
+ } from "./usageTracking.ts";
++import { mergeAnthropicUsage, normalizeAnthropicUsage } from "./anthropicUsage.ts";
+ import {
+   parseSSELine,
+   parseSSEDataPayload,
+@@ -149,6 +152,7 @@
+ };
+ 
+ type StreamCompletePayload = {
++  nativeSuggestionSilence?: boolean;
+   status: number;
+   usage: unknown;
+   /** Minimal response body for call log (streaming: usage + note; non-streaming not used) */
+@@ -182,6 +186,7 @@
+ const DEFAULT_STREAM_BUFFER_BYTES = 16384;
+ 
+ type StreamOptions = {
++  nativeSuggestionRequest?: boolean;
+   mode?: string;
+   targetFormat?: string;
+   sourceFormat?: string;
+@@ -482,6 +487,7 @@
+ }
+ 
+ type ClaudeEmptyResponseLifecycle = {
++  stopReason: string | null;
+   hasMessageStart: boolean;
+   hasContentBlock: boolean;
+   hasMessageDelta: boolean;
+@@ -496,6 +502,7 @@
+ 
+ export function createClaudeEmptyResponseLifecycle(): ClaudeEmptyResponseLifecycle {
+   return {
++    stopReason: null,
+     hasMessageStart: false,
+     hasContentBlock: false,
+     hasMessageDelta: false,
+@@ -533,7 +540,7 @@
+     case "content_block_stop":
+       lifecycle.hasContentBlock = true;
+       break;
+-    case "message_delta":
++    case "message_delta": {
+       lifecycle.hasMessageDelta = true;
+       {
+         const delta = (payload as JsonRecord).delta;
+@@ -542,6 +549,7 @@
+         if (typeof reason === "string" && reason) lifecycle.stopReason = reason;
+       }
+       break;
++    }
+     case "message_stop":
+       lifecycle.hasMessageStop = true;
+       break;
+@@ -563,6 +571,13 @@
+ ): boolean {
+   const type = getClaudeEventType(payload);
+   if (!type || lifecycle.hasError || lifecycle.hasContentBlock) return false;
++  // The event name precedes its JSON data; wait for the actual terminal reason.
++  if (type === "message_delta" && !("delta" in asRecord(payload))) return false;
++  const stopReason =
++    type === "message_delta"
++      ? (asRecord(asRecord(payload).delta).stop_reason ?? lifecycle.stopReason)
++      : lifecycle.stopReason;
++  if (stopReason === "refusal") return false;
+   if (!hasClaudeAssistantLifecycle(lifecycle)) return false;
+   return type === "message_delta" || type === "message_stop";
+ }
+@@ -794,6 +809,7 @@
+     requestToolIdentityMap = null,
+     streamBufferBytes = DEFAULT_STREAM_BUFFER_BYTES,
+     pendingRequestId = null,
++    nativeSuggestionRequest = false,
+   } = options;
+   // Request-body-size metric (for monitoring payload size distribution & correlation with TTFT).
+   // The size is JSON-serialised byte count; stored as a performance mark detail so monitoring
+@@ -1026,8 +1042,39 @@
+   let streamTimedOut = false;
+   const claudeEmptyResponseLifecycle = createClaudeEmptyResponseLifecycle();
+   // #12398: `timing.firstByteAt` doubles as "any upstream chunk ever arrived".
++  let completedSilentSuggestion = false;
++  let nativeAnthropicUsage: Record<string, unknown> | null = null;
++  const extractStreamUsage = (payload: UsagePayloadLike | null | undefined) => {
++    const nativeUsage =
++      payload?.type === "message_start"
++        ? payload.message?.usage
++        : payload?.type === "message_delta"
++          ? payload.usage
++          : null;
++    if (nativeUsage && typeof nativeUsage === "object") {
++      nativeAnthropicUsage = mergeAnthropicUsage(nativeAnthropicUsage, nativeUsage);
++      return normalizeAnthropicUsage(nativeAnthropicUsage);
++    }
++    return extractUsage(payload);
++  };
++  const collectProviderPayload = (payload: unknown) => {
++    providerPayloadCollector.push(payload);
++    const event = asRecord(payload);
++    if (
++      nativeSuggestionRequest &&
++      targetFormat === FORMATS.OPENAI_RESPONSES &&
++      event.type === "response.completed"
++    ) {
++      const response = asRecord(event.response);
++      completedSilentSuggestion = isCompletedSilentSuggestion({
++        ...response,
++        status: response.status ?? "completed",
++      });
++    }
++  };
+   const shouldAbortClaudeStream = () =>
+     clientExpectsClaudeStream &&
++    !completedSilentSuggestion &&
+     shouldAbortEmptyClaudeStream(claudeEmptyResponseLifecycle, timing.firstByteAt !== null);
+   // `event:` framing is only part of the SSE protocol for OpenAI Responses API
+   // and Claude Messages API passthrough; a plain OpenAI Chat-Completions-format
+@@ -1153,7 +1200,12 @@
+ 
+   const clearSeen = { done: false };
+   const clearPendingRequestFromStream = () => {
+-    clearPendingRequestOnce(clearSeen, { model, provider, connectionId, pendingRequestId });
++    clearPendingRequestOnce(clearSeen, {
++      model,
++      provider,
++      connectionId,
++      pendingRequestId,
++    });
+   };
+ 
+   const emitClaudeEmptyStreamErrorAndAbort = (
+@@ -1166,7 +1218,10 @@
+       `[STREAM] Empty Claude stream at flush - emitting error (${provider || "provider"}:${model || "unknown"})`
+     );
+     const errorBody = buildErrorBody(502, msg);
+-    const errorEvent: Record<string, unknown> = { type: "error", error: errorBody.error };
++    const errorEvent: Record<string, unknown> = {
++      type: "error",
++      error: errorBody.error,
++    };
+     const errOutput = formatSSE(errorEvent, FORMATS.CLAUDE);
+     reqLogger?.appendConvertedChunk?.(errOutput);
+     clientPayloadCollector.push(errorEvent);
+@@ -1236,6 +1291,7 @@
+ 
+     if (
+       sourceFormat === FORMATS.CLAUDE &&
++      !completedSilentSuggestion &&
+       shouldInjectClaudeEmptyResponseBeforeCurrentEvent(claudeEmptyResponseLifecycle, itemSanitized)
+     ) {
+       emitClaudeEmptyStreamErrorAndAbort(controller);
+@@ -1391,7 +1447,7 @@
+     const failure = prepareTranslatedStreamFailure(payload);
+     if (!failure) return false;
+     failure.internalFailure.streamSnapshot ??= buildStreamFailureSnapshot(providerPayloadCollector);
+-    providerPayloadCollector.push(failure.providerPayload);
++    collectProviderPayload(failure.providerPayload);
+     const output = formatTranslatedStreamError(failure.record, sourceFormat);
+     reqLogger?.appendConvertedChunk?.(output);
+     forward(controller, encoder.encode(output));
+@@ -1542,7 +1598,7 @@
+             if (trimmed.startsWith("data:")) {
+               const providerPayload = parsedPassthroughData ?? parseSSELine(trimmed);
+               if (providerPayload) {
+-                providerPayloadCollector.push(providerPayload);
++                collectProviderPayload(providerPayload);
+                 if ((providerPayload as { done?: unknown }).done === true) {
+                   continue;
+                 }
+@@ -1652,7 +1708,7 @@
+                     passthroughResponsesId = responseId;
+                   }
+                   // Responses SSE: only extract usage, forward payload as-is
+-                  const extracted = extractUsage(parsed);
++                  const extracted = extractStreamUsage(parsed);
+                   if (extracted) {
+                     usage = extracted;
+                   }
+@@ -1919,21 +1975,8 @@
+                 } else if (isClaudeSSE) {
+                   // Claude SSE: extract usage, track content, forward as-is
+                   const thinkingSignatureInjected = injectThinkingSignature(parsed, provider);
+-                  const extracted = extractUsage(parsed);
+-                  if (extracted) {
+-                    // Non-destructive merge: never overwrite a positive value with 0
+-                    // message_start carries input_tokens, message_delta carries output_tokens;
+-                    if (!usage) usage = {};
+-                    const u = usage;
+-                    const eu = extracted as UsageTokenRecord;
+-                    if (eu.prompt_tokens > 0) u.prompt_tokens = eu.prompt_tokens;
+-                    if (eu.completion_tokens > 0) u.completion_tokens = eu.completion_tokens;
+-                    if (eu.total_tokens > 0) u.total_tokens = eu.total_tokens;
+-                    if (eu.cache_read_input_tokens)
+-                      u.cache_read_input_tokens = eu.cache_read_input_tokens;
+-                    if (eu.cache_creation_input_tokens)
+-                      u.cache_creation_input_tokens = eu.cache_creation_input_tokens;
+-                  }
++                  const extracted = extractStreamUsage(parsed);
++                  if (extracted) usage = extracted;
+                   if (
+                     shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
+                       claudeEmptyResponseLifecycle,
+@@ -1998,7 +2041,7 @@
+                         Object.keys(parsed.choices[0].delta).length === 0 &&
+                         !parsed.choices[0]?.finish_reason))
+                   ) {
+-                    const emptyChoicesUsage = extractUsage(parsed) ?? parsed.usage;
++                    const emptyChoicesUsage = extractStreamUsage(parsed) ?? parsed.usage;
+                     if (hasValidUsage(emptyChoicesUsage) && !passthroughForwardedUsageSummary) {
+                       usage = resolveTrailingUsageSummary(
+                         emptyChoicesUsage,
+@@ -2090,7 +2133,10 @@
+                       choices: [
+                         {
+                           ...parsed.choices[0],
+-                          delta: { ...parsed.choices[0].delta, content: undefined },
++                          delta: {
++                            ...parsed.choices[0].delta,
++                            content: undefined,
++                          },
+                           finish_reason: null,
+                         },
+                         ...parsed.choices.slice(1),
+@@ -2214,7 +2260,7 @@
+                       reasoningDelta
+                     );
+ 
+-                  const extracted = extractUsage(parsed);
++                  const extracted = extractStreamUsage(parsed);
+                   if (extracted) {
+                     usage = extracted;
+                   }
+@@ -2364,7 +2410,7 @@
+             reasoningObserver.note(parsed, Date.now());
+ 
+           if (shouldDropResponsesCommentary && dropCommentary(parsed as JsonRecord)) continue;
+-          providerPayloadCollector.push(parsed);
++          collectProviderPayload(parsed);
+           if (parsed && parsed.done) {
+             continue;
+           }
+@@ -2519,13 +2565,19 @@
+           }
+ 
+           // Extract usage
+-          const extracted = extractUsage(parsed);
++          const extracted = extractStreamUsage(parsed);
+           if (extracted) {
+             if (!state.usage) {
+               state.usage = extracted;
+             } else {
+               const su = state.usage as Record<string, number>;
+               const eu = extracted as Record<string, number>;
++              if (eu.cache_creation_input_tokens !== undefined) {
++                delete su.cacheCreation5m;
++                delete su.cacheCreation1h;
++              }
++              if (eu.cacheCreation5m !== undefined) su.cacheCreation5m = eu.cacheCreation5m;
++              if (eu.cacheCreation1h !== undefined) su.cacheCreation1h = eu.cacheCreation1h;
+               if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
+               if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
+               if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
+@@ -2601,10 +2653,20 @@
+                 reqLogger?.appendConvertedChunk?.(output);
+                 forward(controller, encoder.encode(output));
+               },
+-              pushProviderPayload: (payload: unknown) => providerPayloadCollector.push(payload),
++              pushProviderPayload: (payload: unknown) => collectProviderPayload(payload),
+               pushClientPayload: (payload: unknown) => clientPayloadCollector.push(payload),
+-              sanitizeUsagePayload: (payload: unknown) =>
+-                sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat),
++              sanitizeUsagePayload: (payload: unknown) => {
++                const changed = sanitizeUsagePayloadForRequest(
++                  payload as UsagePayloadLike,
++                  body,
++                  clientResponseFormat
++                );
++                if (isClaudeEventPayload(payload)) {
++                  const extracted = extractStreamUsage(payload as UsagePayloadLike);
++                  if (extracted) usage = extracted;
++                }
++                return changed;
++              },
+               setPassthroughResponsesId: (value: string) => {
+                 passthroughResponsesId = value;
+               },
+@@ -2667,7 +2729,7 @@
+               }
+               let bufferedPayload = parseSSELine(bufferedLine);
+               if (bufferedPayload) {
+-                providerPayloadCollector.push(bufferedPayload);
++                collectProviderPayload(bufferedPayload);
+                 bufferedProjectedFailure = projectStreamFailureEvent(bufferedPayload);
+                 if (bufferedProjectedFailure) {
+                   bufferedPayload = bufferedProjectedFailure.publicPayload;
+@@ -2680,6 +2742,10 @@
+                 }
+                 if (sanitizeUsagePayloadForRequest(bufferedPayload, body, clientResponseFormat))
+                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
++                if (isClaudeEventPayload(bufferedPayload)) {
++                  const extracted = extractStreamUsage(bufferedPayload as UsagePayloadLike);
++                  if (extracted) usage = extracted;
++                }
+                 if (
+                   shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
+                     claudeEmptyResponseLifecycle,
+@@ -2910,20 +2976,23 @@
+                   message.content = "";
+                 }
+ 
+-                const responseBody = {
+-                  choices: [
+-                    {
+-                      message,
+-                      finish_reason: passthroughHasToolCalls ? "tool_calls" : "stop",
+-                    },
+-                  ],
+-                  usage: {
+-                    prompt_tokens: prompt,
+-                    completion_tokens: completion,
+-                    total_tokens: prompt + completion,
+-                  },
+-                  _streamed: true,
+-                };
++                const responseBody =
++                  clientResponseFormat === FORMATS.CLAUDE
++                    ? { ...asRecord(clientPayloadCollector.getSummary()), _streamed: true }
++                    : {
++                        choices: [
++                          {
++                            message,
++                            finish_reason: passthroughHasToolCalls ? "tool_calls" : "stop",
++                          },
++                        ],
++                        usage: {
++                          prompt_tokens: prompt,
++                          completion_tokens: completion,
++                          total_tokens: prompt + completion,
++                        },
++                        _streamed: true,
++                      };
+                 onComplete({
+                   status: 200,
+                   usage,
+@@ -2944,7 +3013,7 @@
+                   // reasoning-heavy stream (live incident 2026-09-04) -- see
+                   // providerPayloadCollector's own `format:` construction comment above.
+                   providerPayload: providerPayloadCollector.build(
+-                    sourceFormat === FORMATS.OPENAI_RESPONSES
++                    sourceFormat === FORMATS.OPENAI_RESPONSES || sourceFormat === FORMATS.CLAUDE
+                       ? providerPayloadCollector.getSummary()
+                       : { object: "chat.completion", ...responseBody },
+                     { includeEvents: false }
+@@ -2961,7 +3030,8 @@
+                   // reasoning as providerPayload above; clientPayloadCollector's own `format:`
+                   // construction above gives it the same live, cap-independent reducer.
+                   clientPayload: clientPayloadCollector.build(
+-                    clientResponseFormat === FORMATS.OPENAI_RESPONSES
++                    clientResponseFormat === FORMATS.OPENAI_RESPONSES ||
++                      clientResponseFormat === FORMATS.CLAUDE
+                       ? clientPayloadCollector.getSummary()
+                       : responseBody,
+                     { includeEvents: false }
+@@ -3038,20 +3108,26 @@
+             if (parsed && !parsed.done) {
+               if (emitTranslatedFailureAndAbort(controller, parsed)) return;
+               if (targetFormat === FORMATS.OPENAI) normalizeArrayContentChunk(parsed);
+-              providerPayloadCollector.push(parsed);
++              collectProviderPayload(parsed);
+               // Extract usage from remaining buffer — if the usage-bearing event
+               // (e.g. response.completed) is the last SSE line, it ends up here
+               // in the flush handler where extractUsage was not called.
+               // Non-destructive merge: some providers send usage across multiple
+               // events (e.g. prompt_tokens in message_start, completion_tokens
+               // in message_delta). Direct assignment would lose earlier data.
+-              const extracted = extractUsage(parsed);
++              const extracted = extractStreamUsage(parsed);
+               if (extracted) {
+                 if (!state.usage) {
+                   state.usage = extracted;
+                 } else {
+                   const su = state.usage as Record<string, number>;
+                   const eu = extracted as Record<string, number>;
++                  if (eu.cache_creation_input_tokens !== undefined) {
++                    delete su.cacheCreation5m;
++                    delete su.cacheCreation1h;
++                  }
++                  if (eu.cacheCreation5m !== undefined) su.cacheCreation5m = eu.cacheCreation5m;
++                  if (eu.cacheCreation1h !== undefined) su.cacheCreation1h = eu.cacheCreation1h;
+                   if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
+                   if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
+                   if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
+@@ -3113,6 +3189,7 @@
+           // (all-empty `choices: []`) instead of completing with an empty 200.
+           if (
+             mode === STREAM_MODE.TRANSLATE &&
++            !completedSilentSuggestion &&
+             rejectEmptyChoicesStream({
+               forwardedValuableChunk,
+               hasValidUsage: hasValidUsage(state?.usage),
+@@ -3285,6 +3362,7 @@
+               };
+               onComplete({
+                 status: 200,
++                nativeSuggestionSilence: completedSilentSuggestion,
+                 usage: state?.usage,
+                 responseBody,
+                 ...timing.completionTiming(),
+@@ -3301,7 +3379,7 @@
+                 // reasoning-heavy stream (live incident 2026-09-04) -- see
+                 // providerPayloadCollector's own `format:` construction comment above.
+                 providerPayload: providerPayloadCollector.build(
+-                  targetFormat === FORMATS.OPENAI_RESPONSES
++                  targetFormat === FORMATS.OPENAI_RESPONSES || targetFormat === FORMATS.CLAUDE
+                     ? providerPayloadCollector.getSummary()
+                     : { object: "chat.completion", ...responseBody },
+                   { includeEvents: false }
+@@ -3365,7 +3443,8 @@
+   requestedThinking: boolean | undefined = undefined,
+   customToolNames: ReadonlySet<string> = new Set(),
+   requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null = null,
+-  streamBufferBytes: number = DEFAULT_STREAM_BUFFER_BYTES
++  streamBufferBytes: number = DEFAULT_STREAM_BUFFER_BYTES,
++  nativeSuggestionRequest = false
+ ) {
+   return createSSEStream({
+     mode: STREAM_MODE.TRANSLATE,
+@@ -3386,6 +3465,7 @@
+     customToolNames,
+     requestToolIdentityMap,
+     streamBufferBytes,
++    nativeSuggestionRequest,
+   });
+ }
+ 
+@@ -3404,6 +3484,9 @@
+ ) {
+   return createSSEStream({
+     mode: STREAM_MODE.PASSTHROUGH,
++    // Passthrough provider events have the client's native format. Leaving
++    // this unset selects an OpenAI reducer and drops Claude usage details.
++    sourceFormat: clientResponseFormat ?? undefined,
+     provider,
+     reqLogger,
+     toolNameMap,
+--- a/open-sse/utils/streamClaudeEmptyBody.ts
++++ b/open-sse/utils/streamClaudeEmptyBody.ts
+@@ -16,6 +16,7 @@
+  * here already scoped to a Claude-format response).
+  */
+ type ClaudeEmptyLifecycleLike = {
++  stopReason?: string | null;
+   hasError: boolean;
+   hasContentBlock: boolean;
+   hasMessageStart: boolean;
+@@ -38,6 +39,9 @@
+   ) {
+     return false;
+   }
++  // A refusal is a completed native stop, not an empty transport failure.
++  if (lifecycle.stopReason === "refusal" && lifecycle.hasMessageDelta && lifecycle.hasMessageStop)
++    return false;
+   const hasPartialLifecycle =
+     lifecycle.hasMessageStart || lifecycle.hasMessageDelta || lifecycle.hasMessageStop;
+   return hasPartialLifecycle || !sawAnyUpstreamPayload;
+--- a/open-sse/services/errorClassifier.ts
++++ b/open-sse/services/errorClassifier.ts
+@@ -80,6 +80,8 @@
+     // to emit a tool_use block) is a legitimate terminal state, not a silent
+     // failure. Only flag empty content when no such terminal stop_reason is present.
+     const stopReason = typeof body.stop_reason === "string" ? body.stop_reason : "";
++    // Only a native message envelope can use the refusal terminal exemption.
++    if (body.type === "message" && stopReason === "refusal") return false;
+     // #14160: same exemption for the Claude wire shape on trusted first-party APIs.
+     if (
+       (trustedEmptyStop && NORMAL_STOP_CLAUDE_STOP.has(stopReason)) ||
+@@ -370,6 +372,7 @@
+ // not provider/model health. Keep every expression bounded to avoid ReDoS on
+ // upstream-controlled error bodies.
+ const RESOURCE_NOT_FOUND_PATTERNS = [
++  /\bno thread state (?:was found|is available) for the requested [`"']?previous_message_id\b/i,
+   /\bfiles?\b[^\n]{0,160}\b(?:not found|does not exist)\b/i,
+   /\b(?:not found|does not exist)\b[^\n]{0,160}\bfiles?\b/i,
+   /\b(?:input[_ -]?file|file[_ -]?id|item|response|vector[_ -]?store|upload)\b[^\n]{0,160}\b(?:not found|does not exist)\b/i,
+--- a/open-sse/translator/response/claude-to-openai.ts
++++ b/open-sse/translator/response/claude-to-openai.ts
+@@ -1,6 +1,14 @@
+ import { register } from "../registry.ts";
+ import { FORMATS } from "../formats.ts";
+-import { initThinkState, applyThinkTag, flushThinkBuffer } from "../../utils/thinkTagParser.ts";
++import {
++  mergeAnthropicUsage,
++  normalizeAnthropicUsage,
++} from "../../utils/anthropicUsage.ts";
++import {
++  initThinkState,
++  applyThinkTag,
++  flushThinkBuffer,
++} from "../../utils/thinkTagParser.ts";
+ import { storeClaudeThinkingBlocks } from "../../services/claudeThinkingStore.ts";
+ 
+ type OpenAIUsage = {
+@@ -79,40 +87,11 @@
+       // shouldParseTextualReasoningTags) so it strips <think> markup out of
+       // delta.content and re-emits it as delta.reasoning_content.
+       state.thinkState = initThinkState(true, state.provider, state.model);
+-      const startUsage = chunk.message?.usage;
+-      if (startUsage && typeof startUsage === "object") {
+-        const inputTokens =
+-          typeof startUsage.input_tokens === "number"
+-            ? startUsage.input_tokens
+-            : typeof startUsage.prompt_tokens === "number"
+-              ? startUsage.prompt_tokens
+-              : 0;
+-        const outputTokens =
+-          typeof startUsage.output_tokens === "number"
+-            ? startUsage.output_tokens
+-            : typeof startUsage.completion_tokens === "number"
+-              ? startUsage.completion_tokens
+-              : 0;
+-        const cacheRead =
+-          typeof startUsage.cache_read_input_tokens === "number"
+-            ? startUsage.cache_read_input_tokens
+-            : 0;
+-        const cacheCreation =
+-          typeof startUsage.cache_creation_input_tokens === "number"
+-            ? startUsage.cache_creation_input_tokens
+-            : 0;
+-        if (inputTokens > 0 || outputTokens > 0 || cacheRead > 0 || cacheCreation > 0) {
+-          const billableInputTokens = inputTokens + cacheRead;
+-          state.usage = {
+-            prompt_tokens: billableInputTokens,
+-            completion_tokens: outputTokens,
+-            input_tokens: billableInputTokens,
+-            output_tokens: outputTokens,
+-          };
+-          if (cacheRead > 0) state.usage.cache_read_input_tokens = cacheRead;
+-          if (cacheCreation > 0) state.usage.cache_creation_input_tokens = cacheCreation;
+-        }
+-      }
++      state.nativeAnthropicUsage = mergeAnthropicUsage(
++        null,
++        chunk.message?.usage,
++      );
++      state.usage = normalizeAnthropicUsage(state.nativeAnthropicUsage);
+       results.push(createChunk(state, { role: "assistant" }));
+       break;
+     }
+@@ -174,7 +153,11 @@
+         };
+         if (state.thinkState) applyThinkTag(state.thinkState, textDelta);
+         if (textDelta.reasoning_content) {
+-          results.push(createChunk(state, { reasoning_content: textDelta.reasoning_content }));
++          results.push(
++            createChunk(state, {
++              reasoning_content: textDelta.reasoning_content,
++            }),
++          );
+         }
+         if (textDelta.content) {
+           results.push(createChunk(state, { content: textDelta.content }));
+@@ -201,7 +184,7 @@
+                   function: { arguments: delta.partial_json },
+                 },
+               ],
+-            })
++            }),
+           );
+         }
+       }
+@@ -216,7 +199,9 @@
+       if (state.thinkState?.active) {
+         const flushed = flushThinkBuffer(state.thinkState);
+         if (flushed.reasoningDelta) {
+-          results.push(createChunk(state, { reasoning_content: flushed.reasoningDelta }));
++          results.push(
++            createChunk(state, { reasoning_content: flushed.reasoningDelta }),
++          );
+         }
+         if (flushed.contentDelta) {
+           results.push(createChunk(state, { content: flushed.contentDelta }));
+@@ -240,76 +225,18 @@
+     }
+ 
+     case "message_delta": {
+-      // Extract usage from message_delta event (Claude native format)
+-      // Normalize to OpenAI format (prompt_tokens/completion_tokens) for consistent logging
+       if (chunk.usage && typeof chunk.usage === "object") {
+-        const previousUsage = state.usage && typeof state.usage === "object" ? state.usage : {};
+-        const previousInputTokens =
+-          typeof previousUsage.input_tokens === "number"
+-            ? previousUsage.input_tokens
+-            : typeof previousUsage.prompt_tokens === "number"
+-              ? previousUsage.prompt_tokens
+-              : 0;
+-        const previousCacheReadTokens =
+-          typeof previousUsage.cache_read_input_tokens === "number"
+-            ? previousUsage.cache_read_input_tokens
+-            : 0;
+-        const previousCacheCreationTokens =
+-          typeof previousUsage.cache_creation_input_tokens === "number"
+-            ? previousUsage.cache_creation_input_tokens
+-            : 0;
+-        const inputTokens =
+-          typeof chunk.usage.input_tokens === "number" ? chunk.usage.input_tokens : 0;
+-        const outputTokens =
+-          typeof chunk.usage.output_tokens === "number" ? chunk.usage.output_tokens : 0;
+-        const thinkingTokens =
+-          typeof chunk.usage.output_tokens_details?.thinking_tokens === "number"
+-            ? chunk.usage.output_tokens_details.thinking_tokens
+-            : undefined;
+-        const cacheReadTokens =
+-          typeof chunk.usage.cache_read_input_tokens === "number"
+-            ? chunk.usage.cache_read_input_tokens
+-            : 0;
+-        const cacheCreationTokens =
+-          typeof chunk.usage.cache_creation_input_tokens === "number"
+-            ? chunk.usage.cache_creation_input_tokens
+-            : 0;
+-
+-        // Use OpenAI format keys for consistent logging in stream.js
+-        // Issue #1426: Include cache_read tokens in prompt_tokens so cached input
+-        // is visible to downstream billing systems.
+-        // Issue #2215: Exclude cache_creation_input_tokens from prompt_tokens —
+-        // Anthropic's cache-creation pads short prompts up to a 1024-token
+-        // minimum, so a 2-token "hi" can be reported as ~2008 prompt_tokens and
+-        // inflate downstream billing ~250x. cache_creation is still exposed
+-        // separately via prompt_tokens_details.cache_creation_tokens below.
+-        const billableInputTokens =
+-          inputTokens > 0 || cacheReadTokens > 0 || cacheCreationTokens > 0
+-            ? inputTokens + cacheReadTokens
+-            : previousInputTokens;
+-        state.usage = {
+-          prompt_tokens: billableInputTokens,
+-          completion_tokens: outputTokens,
+-          input_tokens: billableInputTokens,
+-          output_tokens: outputTokens,
+-        };
+-
+-        // Anthropic includes thinking in output_tokens. Surface the separately
+-        // reported portion without adding it to completion_tokens a second time.
+-        if (thinkingTokens !== undefined) {
+-          state.usage.reasoning_tokens = thinkingTokens;
+-          state.usage.completion_tokens_details = { reasoning_tokens: thinkingTokens };
+-          state.usage.output_tokens_details = { thinking_tokens: thinkingTokens };
+-        }
+-
+-        // Store cache tokens if present (needed for prompt_tokens_details in final chunk)
+-        const effectiveCacheReadTokens = cacheReadTokens || previousCacheReadTokens;
+-        const effectiveCacheCreationTokens = cacheCreationTokens || previousCacheCreationTokens;
+-        if (effectiveCacheReadTokens > 0) {
+-          state.usage.cache_read_input_tokens = effectiveCacheReadTokens;
+-        }
+-        if (effectiveCacheCreationTokens > 0) {
+-          state.usage.cache_creation_input_tokens = effectiveCacheCreationTokens;
++        state.nativeAnthropicUsage = mergeAnthropicUsage(
++          state.nativeAnthropicUsage,
++          chunk.usage,
++        );
++        state.usage = normalizeAnthropicUsage(state.nativeAnthropicUsage);
++        const reasoning = state.usage.reasoning_tokens;
++        if (typeof reasoning === "number") {
++          state.usage.completion_tokens_details = {
++            reasoning_tokens: reasoning,
++          };
++          state.usage.output_tokens_details = { thinking_tokens: reasoning };
+         }
+       }
+ 
+@@ -358,10 +285,11 @@
+           const inputTokens = state.usage.input_tokens || 0;
+           const outputTokens = state.usage.output_tokens || 0;
+           const cachedTokens = state.usage.cache_read_input_tokens || 0;
+-          const cacheCreationTokens = state.usage.cache_creation_input_tokens || 0;
+-
+-          // prompt_tokens = input_tokens (input + cache_read, per #2215 —
+-          // cache_creation is exposed separately in prompt_tokens_details below).
++          const cacheCreationTokens =
++            state.usage.cache_creation_input_tokens || 0;
++
++          // Internal input_tokens is the inclusive input count; cache details
++          // identify its read/write portions without adding them a second time.
+           // completion_tokens = output_tokens
+           // total_tokens = prompt_tokens + completion_tokens
+           const promptTokens = inputTokens;
+@@ -386,7 +314,8 @@
+           if (cachedTokens > 0 || cacheCreationTokens > 0) {
+             finalChunk.usage.prompt_tokens_details = {};
+             if (cachedTokens > 0) {
+-              finalChunk.usage.prompt_tokens_details.cached_tokens = cachedTokens;
++              finalChunk.usage.prompt_tokens_details.cached_tokens =
++                cachedTokens;
+             }
+             if (cacheCreationTokens > 0) {
+               finalChunk.usage.prompt_tokens_details.cache_creation_tokens = cacheCreationTokens;
+@@ -405,16 +334,20 @@
+       flushThinkingContinuity(state);
+       if (!state.finishReasonSent) {
+         const finishReason =
+-          state.finishReason || (state.toolCalls?.size > 0 ? "tool_calls" : "stop");
++          state.finishReason ||
++          (state.toolCalls?.size > 0 ? "tool_calls" : "stop");
+         const cachedTokens = state.usage?.cache_read_input_tokens || 0;
+-        const cacheCreationTokens = state.usage?.cache_creation_input_tokens || 0;
++        const cacheCreationTokens =
++          state.usage?.cache_creation_input_tokens || 0;
+         const usageObj =
+           state.usage && typeof state.usage === "object"
+             ? {
+                 usage: {
+                   prompt_tokens: state.usage.input_tokens || 0,
+                   completion_tokens: state.usage.output_tokens || 0,
+-                  total_tokens: (state.usage.input_tokens || 0) + (state.usage.output_tokens || 0),
++                  total_tokens:
++                    (state.usage.input_tokens || 0) +
++                    (state.usage.output_tokens || 0),
+                   ...(typeof state.usage.reasoning_tokens === "number"
+                     ? {
+                         reasoning_tokens: state.usage.reasoning_tokens,
+@@ -426,7 +359,9 @@
+                   ...(cachedTokens > 0 || cacheCreationTokens > 0
+                     ? {
+                         prompt_tokens_details: {
+-                          ...(cachedTokens > 0 ? { cached_tokens: cachedTokens } : {}),
++                          ...(cachedTokens > 0
++                            ? { cached_tokens: cachedTokens }
++                            : {}),
+                           ...(cacheCreationTokens > 0
+                             ? {
+                                 cache_creation_tokens: cacheCreationTokens,
+@@ -469,6 +404,8 @@
+       return "stop";
+     case "max_tokens":
+       return "length";
++    case "refusal":
++      return "content_filter";
+     case "tool_use":
+       return "tool_calls";
+     case "stop_sequence":
+--- a/open-sse/utils/streamPayloadCollector.ts
++++ b/open-sse/utils/streamPayloadCollector.ts
+@@ -512,7 +512,8 @@
+   let messageId = "";
+   let model = fallbackModel || "claude";
+   let role = "assistant";
+-  let stopReason = "end_turn";
++  let stopReason: string | null = null;
++  let stopDetails: unknown = undefined;
+   let stopSequence: string | null = null;
+   // Context Editing (`anthropic-beta: context-management-2025-06-27`) surfaces
+   // `context_management.applied_edits[]` on the final `message_delta` snapshot. Preserve it
+@@ -539,6 +540,7 @@
+         model = toString(message.model, model);
+         role = toString(message.role, role);
+         mergeUsage(usage, message.usage);
++        if ("stop_details" in message) stopDetails = cloneLogPayload(message.stop_details);
+         return;
+       }
+ 
+@@ -580,6 +582,13 @@
+         const deltaType = toString(delta.type);
+         const existing = blocks.get(index);
+ 
++        if (deltaType === "signature_delta") {
++          if (existing?.type === "thinking" && typeof delta.signature === "string") {
++            existing.signature = (existing.signature ?? "") + delta.signature;
++          }
++          return;
++        }
++
+         if (deltaType === "input_json_delta") {
+           const toolUse =
+             existing && existing.type === "tool_use"
+@@ -622,7 +631,9 @@
+ 
+       if (eventType === "message_delta") {
+         const delta = asRecord(payload.delta);
+-        stopReason = toString(delta.stop_reason, stopReason);
++        if (typeof delta.stop_reason === "string") stopReason = delta.stop_reason;
++        if ("stop_details" in delta) stopDetails = cloneLogPayload(delta.stop_details);
++        else if ("stop_details" in payload) stopDetails = cloneLogPayload(payload.stop_details);
+         stopSequence =
+           typeof delta.stop_sequence === "string" ? String(delta.stop_sequence) : stopSequence;
+         mergeUsage(usage, payload.usage);
+@@ -649,7 +660,7 @@
+               : [];
+           }
+           if (block.type === "thinking") {
+-            return block.thinking
++            return block.thinking || block.signature
+               ? [
+                   {
+                     type: "thinking",
+@@ -681,6 +692,7 @@
+         model,
+         content,
+         stop_reason: stopReason,
++        ...(stopDetails !== undefined ? { stop_details: stopDetails } : {}),
+         ...(stopSequence ? { stop_sequence: stopSequence } : {}),
+         ...(Object.keys(usage).length > 0 ? { usage } : {}),
+         ...(contextManagement ? { context_management: contextManagement } : {}),

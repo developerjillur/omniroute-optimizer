@@ -1,7 +1,8 @@
 diff --git a/src/lib/db/settings/pricing.ts b/src/lib/db/settings/pricing.ts
+index cb325d4b99fc90bd7845384a041fa090d946dfc2..a18d996ba6a075810346070733905b518d59c418 100644
 --- a/src/lib/db/settings/pricing.ts
 +++ b/src/lib/db/settings/pricing.ts
-@@ -146,40 +146,50 @@
+@@ -148,40 +148,50 @@
    };
  
    const pLower = (provider || "").toLowerCase();

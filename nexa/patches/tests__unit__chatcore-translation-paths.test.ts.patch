@@ -1,8 +1,8 @@
 diff --git a/tests/unit/chatcore-translation-paths.test.ts b/tests/unit/chatcore-translation-paths.test.ts
-index 23c4d1473..cc434725c 100644
+index 94bf647e74e9efbf48a5c87f1b9b5bcb9cad5e90..57d7034846c5604aa59e71152a3e39f945526032 100644
 --- a/tests/unit/chatcore-translation-paths.test.ts
 +++ b/tests/unit/chatcore-translation-paths.test.ts
-@@ -1442,7 +1442,6 @@ for (const model of ["claude-opus-5", "claude-fable-5", "claude-fable-5-1"]) {
+@@ -1443,7 +1443,6 @@
      );
      assert.deepEqual(call.body.messages[2].content[0].cache_control, {
        type: "ephemeral",
@@ -10,7 +10,7 @@ index 23c4d1473..cc434725c 100644
      });
      assert.equal(
        call.body.system.some((block: { text?: string }) => block.text === "compact continuation"),
-@@ -1684,12 +1683,15 @@ test("chatCore preserves cache_control automatically for Claude Code single-mode
+@@ -1685,12 +1684,15 @@
    assert.deepEqual(call.body.system[2].cache_control, { type: "ephemeral", ttl: "5m" });
    assert.deepEqual(call.body.messages[0].content[0].cache_control, {
      type: "ephemeral",
@@ -28,7 +28,7 @@ index 23c4d1473..cc434725c 100644
    await settingsDb.updateSettings({ alwaysPreserveClientCache: "auto" });
    invalidateCacheControlSettingsCache();
  
-@@ -1740,10 +1742,9 @@ test("chatCore advances a message cache breakpoint for native Claude Code reques
+@@ -1741,10 +1743,9 @@
      responseFormat: "claude",
    });
  
@@ -42,7 +42,7 @@ index 23c4d1473..cc434725c 100644
    assert.equal(call.body.tools[0].cache_control, undefined);
  });
  test("chatCore auto cache policy becomes false for nondeterministic combos", async () => {
-@@ -1830,12 +1831,9 @@ test("chatCore disables raw Claude passthrough when cache preservation is off an
+@@ -1831,12 +1832,9 @@
      ),
      true
    );

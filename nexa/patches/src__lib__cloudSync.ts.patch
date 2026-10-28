@@ -1,8 +1,8 @@
 diff --git a/src/lib/cloudSync.ts b/src/lib/cloudSync.ts
-index 8f0867bd9..5b6d5c21c 100644
+index 76c3961b103596bb2d9215a9d55a76e8c0a2f75d..8ff7efa86579d942b980cd169555051b05c1733d 100644
 --- a/src/lib/cloudSync.ts
 +++ b/src/lib/cloudSync.ts
-@@ -75,13 +75,22 @@ export function verifyCloudSignature(rawBody: string, sigHeader: string | null):
+@@ -80,13 +80,22 @@
        );
        return false;
      }

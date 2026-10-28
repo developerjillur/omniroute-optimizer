@@ -1,5 +1,5 @@
 diff --git a/src/lib/usage/callContentProvenance.ts b/src/lib/usage/callContentProvenance.ts
-index ebdbad9ecc5767b7f1a1653d5d471d7f26a2c060..4314467f75130943acf7504b6f7340c873aae153 100644
+index 446721d1d17fa43c46226c03136084aad15050c0..5a79191881306377a673f21df12966f9ddb32382 100644
 --- a/src/lib/usage/callContentProvenance.ts
 +++ b/src/lib/usage/callContentProvenance.ts
 @@ -24,17 +24,20 @@
@@ -131,9 +131,9 @@ index ebdbad9ecc5767b7f1a1653d5d471d7f26a2c060..4314467f75130943acf7504b6f7340c8
    if (Array.isArray(content)) return partsContent(content);
    return "type" in itemRecord ? false : null;
  }
-@@ -191,10 +222,12 @@
-   const body = asRecord(clientBody);
+@@ -240,10 +271,12 @@
    if (!body) return null;
+   if (body._streamed === true) return streamedSummaryContent(body);
    if (Array.isArray(body.choices)) return choicesContent(body.choices);
 -  if ([body.content, body.text, body.output_text].some(hasNonBlankText)) return true;
 +  if ([body.content, body.text, body.output_text].some(hasNonBlankText))

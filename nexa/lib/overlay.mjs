@@ -15,6 +15,7 @@ import { fileURLToPath } from "node:url";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { verifyRetiredPatches } from "./retiredPatches.mjs";
 
 export const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const BASE_REF = "upstream-main";
@@ -37,11 +38,21 @@ export function git(args, { allowFail = false } = {}) {
 
 export function listPatches() {
   if (!fs.existsSync(PATCH_DIR)) return [];
-  return fs
+  const names = fs
     .readdirSync(PATCH_DIR)
     .filter((f) => f.endsWith(".patch"))
-    .sort()
-    .map((f) => path.join(PATCH_DIR, f));
+    .sort();
+  const registryPath = path.join(NEXA, "retired-patches.json");
+  const retired = fs.existsSync(registryPath)
+    ? verifyRetiredPatches(
+        JSON.parse(fs.readFileSync(registryPath, "utf8")),
+        git(["rev-parse", BASE_REF]),
+        names,
+        (name) => fs.readFileSync(path.join(PATCH_DIR, name)),
+        (target) => git(["rev-parse", `${BASE_REF}:${target}`])
+      )
+    : new Set();
+  return names.filter((name) => !retired.has(name)).map((name) => path.join(PATCH_DIR, name));
 }
 
 // The reliable target path of a patch = its `+++ b/<path>` line (slug reversal is unsafe

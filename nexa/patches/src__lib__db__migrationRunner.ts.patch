@@ -1,0 +1,35 @@
+diff --git a/src/lib/db/migrationRunner.ts b/src/lib/db/migrationRunner.ts
+index 869070bdb44102789e541eba45bda6fe0cd17916..1f46f583dc913456106407cd986903f4c93876f4 100644
+--- a/src/lib/db/migrationRunner.ts
++++ b/src/lib/db/migrationRunner.ts
+@@ -1,3 +1,4 @@
++import { resolveMigrationIdentity } from "./migrationIdentity";
+ /**
+  * Migration Runner — Versioned SQL Migrations for SQLite
+  *
+@@ -228,11 +229,10 @@
+     .filter((f) => f.endsWith(".sql"))
+     .sort()
+     .map((filename) => {
+-      const match = filename.match(/^(\d+)_(.+)\.sql$/);
+-      if (!match) return null;
++      const identity = resolveMigrationIdentity(filename);
++      if (!identity) return null;
+       return {
+-        version: match[1],
+-        name: match[2],
++        ...identity,
+         path: path.join(MIGRATIONS_DIR, filename),
+       };
+     })
+@@ -276,7 +276,9 @@
+   // collide with a numeric slot, and every downstream consumer here — the applied
+   // set, the gap reconciliation, the name-mismatch check — keys on the version
+   // string and needs no further change. Empty and filesystem-free when unset.
+-  return [...files, ...getExtraMigrationFiles()];
++  const numericFiles = files.filter((file) => /^\d+$/.test(file.version));
++  const distributionFiles = files.filter((file) => !/^\d+$/.test(file.version));
++  return [...numericFiles, ...distributionFiles, ...getExtraMigrationFiles()];
+ }
+ 
+ function filterSupersededDuplicateMigrations(

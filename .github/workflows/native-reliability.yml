@@ -13,7 +13,7 @@ permissions:
 jobs:
   native:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 55
     env:
       NODE_OPTIONS: --max-old-space-size=4096
       NODE_ENV: test
@@ -36,6 +36,7 @@ jobs:
         run: |
           set -euo pipefail
           node --version > "$RUNNER_TEMP/primary-node-version.txt"
+          node nexa/tests/verify-source-inventory.mjs
           node --test --test-reporter=tap --test-concurrency=1 nexa/tests/*.test.mjs nexa/deploy/tsc-ratchet.test.mjs | tee "$RUNNER_TEMP/tooling-node26.tap"
       - name: Prepare the pinned pristine application
         shell: bash
@@ -43,8 +44,8 @@ jobs:
           set -euo pipefail
           fixture="$RUNNER_TEMP/omniroute-fixture"
           git init "$fixture"
-          git -C "$fixture" remote add upstream https://github.com/diegosouzapw/OmniRoute.git
-          git -C "$fixture" fetch --depth=1 upstream c1e30b7676975feb298b49eff6ff58923c04b89e
+          git -C "$fixture" remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+          git -C "$fixture" fetch --depth=1 upstream ad6f33f66bda34eba98645d3bfdabbde294bc843
           git -C "$fixture" checkout --detach FETCH_HEAD
           git -C "$fixture" branch upstream-main HEAD
           test ! -e "$fixture/nexa"
@@ -54,13 +55,23 @@ jobs:
           node nexa/apply.mjs --check
           npm ci --ignore-scripts --no-audit --no-fund
           npm rebuild better-sqlite3 --foreground-scripts
-          node "$fixture/node_modules/prettier/bin/prettier.cjs" --write --print-width 100 --trailing-comma es5 "$GITHUB_WORKSPACE/nexa/deploy/bridge-upstream-dns.cjs" "$GITHUB_WORKSPACE/nexa/tests/bridge-upstream-dns.test.mjs" "$GITHUB_WORKSPACE/nexa/tests/overlay-base-version.test.mjs" "$GITHUB_WORKSPACE/nexa/tests/verify-baseline-red.mjs" "$GITHUB_WORKSPACE/nexa/new/tests/unit/native-claude-refusal-terminal.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/native-thread-error-classification.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/native-stream-summary.test.ts" "$GITHUB_WORKSPACE/.github/workflows/native-reliability.yml" "$GITHUB_WORKSPACE/README.md" "$GITHUB_WORKSPACE/reports/native-reliability-2026-10-28.json"
+          node "$fixture/node_modules/prettier/bin/prettier.cjs" --write --print-width 100 --trailing-comma es5 "$GITHUB_WORKSPACE/nexa/deploy/bridge-upstream-dns.cjs" "$GITHUB_WORKSPACE/nexa/tests/bridge-upstream-dns.test.mjs" "$GITHUB_WORKSPACE/nexa/tests/overlay-base-version.test.mjs" "$GITHUB_WORKSPACE/nexa/tests/verify-baseline-red.mjs" "$GITHUB_WORKSPACE/nexa/lib/retiredPatches.mjs" "$GITHUB_WORKSPACE/nexa/tests/retired-patches.test.mjs" "$GITHUB_WORKSPACE/nexa/tests/run-upgrade-compatibility.mjs" "$GITHUB_WORKSPACE/nexa/new/src/lib/db/migrationIdentity.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/db/native-upgrade-migration-identity.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/native-claude-refusal-terminal.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/native-thread-error-classification.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/native-stream-summary.test.ts" "$GITHUB_WORKSPACE/.github/workflows/native-reliability.yml" "$GITHUB_WORKSPACE/README.md" "$GITHUB_WORKSPACE/reports/native-reliability-2026-10-28.json"
           git -C "$GITHUB_WORKSPACE" diff --binary > "$RUNNER_TEMP/formatting.patch"
           cp -R "$GITHUB_WORKSPACE/nexa/." "$fixture/nexa/"
           node nexa/gen-manifest.mjs
           cmp nexa/manifest.json "$GITHUB_WORKSPACE/nexa/manifest.json"
+          npx --no-install fumadocs-mdx
+          NODE_OPTIONS=--max-old-space-size=6144 node nexa/tests/capture-pristine-types.mjs
           node nexa/apply.mjs
-      - name: Reproduce the original native terminal and Thread classification failures
+      - name: Verify additive migration and legacy ledger compatibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/omniroute-fixture"
+          export DATA_DIR="$RUNNER_TEMP/upgrade-migration-data"
+          export TMPDIR="$RUNNER_TEMP"
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 --test-force-exit tests/unit/db/native-upgrade-migration-identity.test.ts tests/unit/db-migration-version-uniqueness.test.ts tests/unit/db/no-migration-collisions.test.ts | tee "$RUNNER_TEMP/upgrade-migrations.tap"
+      - name: Compare pinned upstream native behavior with the preserved corrections
         timeout-minutes: 3
         shell: bash
         run: |
@@ -68,7 +79,7 @@ jobs:
           cd "$RUNNER_TEMP/omniroute-fixture"
           export DATA_DIR="$RUNNER_TEMP/native-baseline-data"
           export TMPDIR="$RUNNER_TEMP"
-          git apply --reverse nexa/tests/fixtures/native-refusal-delta.patch
+          git apply --reverse nexa/tests/fixtures/native-refusal-delta-v3.8.52.patch
           set +e
           node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 --test-force-exit tests/unit/native-claude-refusal-terminal.test.ts tests/unit/native-thread-error-classification.test.ts tests/unit/native-stream-summary.test.ts > "$RUNNER_TEMP/native-red.tap" 2>&1
           result=$?
@@ -76,7 +87,7 @@ jobs:
           tail -n 70 "$RUNNER_TEMP/native-red.tap"
           test "$result" -ne 0
           node "$GITHUB_WORKSPACE/nexa/tests/verify-baseline-red.mjs" "$RUNNER_TEMP/native-red.tap"
-          git apply nexa/tests/fixtures/native-refusal-delta.patch
+          git apply nexa/tests/fixtures/native-refusal-delta-v3.8.52.patch
       - name: Native, protocol, transport, cache and translator regressions
         timeout-minutes: 8
         shell: bash
@@ -104,6 +115,18 @@ jobs:
           export DATA_DIR="$RUNNER_TEMP/stream-green-data"
           export TMPDIR="$RUNNER_TEMP"
           node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 --test-force-exit tests/unit/14160-antigravity-empty-stop-completion.test.ts tests/unit/claude-empty-stream-error-3685.test.ts tests/unit/codex-tool-handoff-disconnect-499.test.ts tests/unit/combo-empty-content-failover-5085.test.ts tests/unit/compression/memory-mitigations-edge-cases.test.ts tests/unit/db-detailed-logs.test.ts tests/unit/empty-content-stopreason-3572.test.ts tests/unit/empty-stream-no-content-8649.test.ts tests/unit/error-classifier.test.ts tests/unit/issue-6623-opencode-mimo-reasoning-details-nonstream.test.ts tests/unit/reasoning-probe-truncated-response-10281.test.ts tests/unit/request-log-payloads.test.ts tests/unit/responses-continuation-client-payload-survives-cap-truncation.test.ts tests/unit/responses-continuation-passthrough-client-payload.test.ts tests/unit/responses-continuation-store.test.ts tests/unit/services-branch-hardening.test.ts tests/unit/silent-sse-close-7699.test.ts tests/unit/silent-sse-close-openai-10443.test.ts tests/unit/silent-sse-close-responses-no-terminal.test.ts tests/unit/stream-claude-delta-contract.test.ts tests/unit/stream-handler.test.ts tests/unit/stream-payload-collector-9315-truncated-provider-response.test.ts tests/unit/stream-payload-collector-cap.test.ts tests/unit/stream-payload-collector.test.ts tests/unit/stream-readiness-policy.test.ts tests/unit/stream-readiness.test.ts tests/unit/stream-utilities.test.ts tests/unit/stream-utils.test.ts | tee "$RUNNER_TEMP/stream-green.tap"
+      - name: All custom Node regressions and ported upstream regression files
+        timeout-minutes: 12
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/omniroute-fixture"
+          export DATA_DIR="$RUNNER_TEMP/upgrade-compatibility-data"
+          export TMPDIR="$RUNNER_TEMP"
+          node nexa/tests/run-upgrade-compatibility.mjs | tee "$RUNNER_TEMP/upgrade-compatibility.tap"
+      - name: Custom interface regressions
+        working-directory: ${{ runner.temp }}/omniroute-fixture
+        run: node node_modules/vitest/vitest.mjs run --config vitest.config.ts --maxWorkers=1 tests/unit/ui/agent-bridge-stop-password.test.tsx tests/unit/ui/cost-filter-refresh-integration.test.tsx tests/unit/ui/cost-live-refresh.test.tsx
       - name: Core typecheck
         working-directory: ${{ runner.temp }}/omniroute-fixture
         run: npm run typecheck:core
@@ -116,6 +139,8 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=6144
         working-directory: ${{ runner.temp }}/omniroute-fixture
         run: node scripts/check/check-tsc-ratchet.mjs --ratchet --diagnostics-out "${{ runner.temp }}/tsc-diagnostics.log"
+      - name: Compare pristine and applied compiler diagnostics
+        run: node nexa/tests/compare-upgrade-types.mjs
       - name: Full lint
         working-directory: ${{ runner.temp }}/omniroute-fixture
         run: npm run lint
@@ -162,3 +187,7 @@ jobs:
             ${{ runner.temp }}/tooling-node26.tap
             ${{ runner.temp }}/tooling-node24.tap
             ${{ runner.temp }}/native-validation.json
+            ${{ runner.temp }}/upgrade-migrations.tap
+            ${{ runner.temp }}/upgrade-compatibility.tap
+            ${{ runner.temp }}/pristine-tsc-diagnostics.log
+            ${{ runner.temp }}/upgrade-types.json

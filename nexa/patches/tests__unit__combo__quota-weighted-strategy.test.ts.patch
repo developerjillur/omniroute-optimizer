@@ -1,8 +1,8 @@
 diff --git a/tests/unit/combo/quota-weighted-strategy.test.ts b/tests/unit/combo/quota-weighted-strategy.test.ts
-index 3da2d0470..317079373 100644
+index c2174f4e8a033a548be5a2902018927c8bcbbe57..c1aad5fef8e029ab99dcd3c6c564aabc3dba401d 100644
 --- a/tests/unit/combo/quota-weighted-strategy.test.ts
 +++ b/tests/unit/combo/quota-weighted-strategy.test.ts
-@@ -418,7 +418,7 @@ test("pinned hard-empty connection stays dropped", async () => {
+@@ -490,7 +490,7 @@
  test("family filter: gemini request ignores Claude-empty windows", async () => {
    const provider = "agy";
    const conn = `fam-${randomUUID()}`;

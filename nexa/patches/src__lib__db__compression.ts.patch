@@ -1,8 +1,8 @@
 diff --git a/src/lib/db/compression.ts b/src/lib/db/compression.ts
-index f95cb8813..90a12fa01 100644
+index 8fc9968fb8d97a1773d4604dbb5378f558057187..baafbfd4949df6a1593c795d166a0fb0e4da9843 100644
 --- a/src/lib/db/compression.ts
 +++ b/src/lib/db/compression.ts
-@@ -349,6 +349,8 @@ const STACKED_PIPELINE_ENGINE_IDS = new Set([
+@@ -346,6 +346,8 @@
  ]);
  
  export function normalizeStackedPipeline(value: unknown): CompressionPipelineStep[] {

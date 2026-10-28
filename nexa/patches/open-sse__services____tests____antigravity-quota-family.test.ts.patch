@@ -1,8 +1,8 @@
 diff --git a/open-sse/services/__tests__/antigravity-quota-family.test.ts b/open-sse/services/__tests__/antigravity-quota-family.test.ts
-index 4be5e4f3e..57fd2f947 100644
+index 4be5e4f3ec5faf4e69cdb5235ab7a1b8777f6a9a..57fd2f947dcfb2da8d8a19f7e5fa31928701be13 100644
 --- a/open-sse/services/__tests__/antigravity-quota-family.test.ts
 +++ b/open-sse/services/__tests__/antigravity-quota-family.test.ts
-@@ -21,10 +21,14 @@ describe("Antigravity account quota-family cooldown", () => {
+@@ -21,10 +21,14 @@
      vi.useRealTimers();
    });
  
@@ -21,7 +21,7 @@ index 4be5e4f3e..57fd2f947 100644
      expect(getAntigravityQuotaFamily("claude-sonnet-4")).toBe("claude");
      expect(getAntigravityQuotaFamily("cloud/claude-opus-4")).toBe("claude");
      expect(getAntigravityQuotaFamily("some-new-model")).toBe("other");
-@@ -32,10 +36,15 @@ describe("Antigravity account quota-family cooldown", () => {
+@@ -32,10 +36,15 @@
  
    it("uses family-scoped lock key for Antigravity but preserves exact-model scope elsewhere", () => {
      expect(getQuotaScopedModelForProvider("antigravity", "gemini-3.7-flash-medium")).toBe(

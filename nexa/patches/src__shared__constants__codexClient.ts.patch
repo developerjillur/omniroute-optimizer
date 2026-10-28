@@ -1,9 +1,13 @@
 diff --git a/src/shared/constants/codexClient.ts b/src/shared/constants/codexClient.ts
-index 108f32a70361d14ae1c69ea3d59940f76709e133..19356a23af79b1f647c72694f6063cb311595a9c 100644
+index e8d2b854d22e63987056ae5475add08dd9777fa6..19356a23af79b1f647c72694f6063cb311595a9c 100644
 --- a/src/shared/constants/codexClient.ts
 +++ b/src/shared/constants/codexClient.ts
-@@ -5,3 +5,3 @@
+@@ -3,7 +3,7 @@
+ // refresh this so the fingerprint OpenAI sees from the OAuth/Responses face
+ // matches the real client version. Overridable per-deployment via
  // CODEX_CLIENT_VERSION.
--export const DEFAULT_CODEX_CLIENT_VERSION = "0.156.1";
+-export const DEFAULT_CODEX_CLIENT_VERSION = "0.159.2";
 +export const DEFAULT_CODEX_CLIENT_VERSION = "0.160.0";
  export const CODEX_CLI_RS_ORIGINATOR = "codex_cli_rs";
+ 
+ export function getCodexCliRsHeaders(

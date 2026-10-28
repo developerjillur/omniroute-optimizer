@@ -1,16 +1,16 @@
 diff --git a/open-sse/services/combo/executeTargetAttempt.ts b/open-sse/services/combo/executeTargetAttempt.ts
-index 5a13fe8dd..fa9e1ca0b 100644
+index 7087c4bf7cf73babdba26bb016f3d2b785478781..ab2a3c83b1fc11ce57227fc63ad3dafec206ef85 100644
 --- a/open-sse/services/combo/executeTargetAttempt.ts
 +++ b/open-sse/services/combo/executeTargetAttempt.ts
-@@ -26,6 +26,7 @@ import {
- } from "../../utils/error.ts";
+@@ -27,6 +27,7 @@
  import { recordComboFailure, clearComboFailureTracking } from "./failureTracker.ts";
+ import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
  import { recordComboRequest, getComboMetrics } from "../comboMetrics.ts";
 +import { resolveCompressionSettings } from "../../handlers/chatCore/compressionSettings.ts";
  import {
    expandComboSystemPromptIfPresent,
    resolveTargetFingerprint,
-@@ -265,7 +266,8 @@ export async function executeTargetAttempt(opts: {
+@@ -257,7 +258,8 @@
        deps.config.zeroLatencyOptimizationsEnabled === true &&
        i > 0 &&
        deps.config.fallbackCompressionMode &&

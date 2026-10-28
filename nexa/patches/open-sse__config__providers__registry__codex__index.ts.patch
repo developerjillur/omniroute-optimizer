@@ -1,8 +1,10 @@
 diff --git a/open-sse/config/providers/registry/codex/index.ts b/open-sse/config/providers/registry/codex/index.ts
-index c135d8b99c820bc637badd99ffbe7c19ab8be80e..d0dbb4dc0125c89b4b4b11f8ccb1328f1aef689f 100644
+index f773df5d944d23c079db74c86d3e1dbfc023d10f..3d0d74a4c1606c3da6ab905a15a5388e483d0ea3 100644
 --- a/open-sse/config/providers/registry/codex/index.ts
 +++ b/open-sse/config/providers/registry/codex/index.ts
-@@ -7,2 +7,7 @@
+@@ -5,6 +5,11 @@
+   getCodexDefaultHeaders,
+   resolvePublicCred,
  } from "../../shared.ts";
 +
 +const GPT_6_1_SOL_CODEX_CAPABILITIES = {
@@ -10,7 +12,11 @@ index c135d8b99c820bc637badd99ffbe7c19ab8be80e..d0dbb4dc0125c89b4b4b11f8ccb1328f
 +  supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max", "ultra"],
 +} as const;
  
-@@ -30,2 +35,20 @@
+ export const codexProvider: RegistryEntry = {
+   id: "codex",
+@@ -28,6 +33,24 @@
+     tokenUrl: "https://auth.openai.com/oauth/token",
+   },
    models: [
 +    // Verified live Codex catalog: 872K maximum context and low through ultra efforts.
 +    { id: "gpt-6.1-sol", name: "GPT 6.1 Sol", ...GPT_6_1_SOL_CODEX_CAPABILITIES },
@@ -31,3 +37,5 @@ index c135d8b99c820bc637badd99ffbe7c19ab8be80e..d0dbb4dc0125c89b4b4b11f8ccb1328f
 +    { id: "gpt-6.1-sol-medium", name: "GPT 6.1 Sol (Medium)", ...GPT_6_1_SOL_CODEX_CAPABILITIES },
 +    { id: "gpt-6.1-sol-low", name: "GPT 6.1 Sol (Low)", ...GPT_6_1_SOL_CODEX_CAPABILITIES },
      // Astra shares GPT-5.6's Codex limits: the live OAuth catalog reports
+     // max_context_window=872000 (context_window=272000 is the pricing tier).
+     { id: "gpt-6-astra", name: "GPT 6 Astra", ...GPT_5_6_CODEX_CAPABILITIES },

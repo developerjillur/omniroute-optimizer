@@ -1,8 +1,8 @@
 diff --git a/src/app/api/models/test/route.ts b/src/app/api/models/test/route.ts
-index b756b958f..6926250e6 100644
+index 021677388327494ef81a1e394cf5e9bf8e171936..29150b7d49914a5e28de5e66076c86a6c3115758 100644
 --- a/src/app/api/models/test/route.ts
 +++ b/src/app/api/models/test/route.ts
-@@ -71,6 +71,7 @@ export async function POST(request: Request) {
+@@ -93,6 +93,7 @@
            ? NVIDIA_SINGLE_TEST_TIMEOUT_MS
            : DEFAULT_MODEL_TEST_TIMEOUT_MS,
        streamChat: true,
@@ -10,7 +10,7 @@ index b756b958f..6926250e6 100644
      });
  
      if (result.status === "ok") {
-@@ -78,6 +79,7 @@ export async function POST(request: Request) {
+@@ -100,6 +101,7 @@
          status: "ok",
          latencyMs: result.latencyMs,
          responseText: result.responseText,
@@ -18,7 +18,7 @@ index b756b958f..6926250e6 100644
        });
      }
  
-@@ -86,6 +88,7 @@ export async function POST(request: Request) {
+@@ -108,6 +110,7 @@
        latencyMs: result.latencyMs,
        error: result.error || "Unknown error",
      };

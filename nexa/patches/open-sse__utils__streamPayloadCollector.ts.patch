@@ -1,3 +1,5 @@
+diff --git a/open-sse/utils/streamPayloadCollector.ts b/open-sse/utils/streamPayloadCollector.ts
+index 2df3cf49b55a3b667787f438705c030809e92302..46701fb9d2d9481f771e56a71e634addafe7ca1c 100644
 --- a/open-sse/utils/streamPayloadCollector.ts
 +++ b/open-sse/utils/streamPayloadCollector.ts
 @@ -512,7 +512,8 @@

@@ -1,7 +1,8 @@
 diff --git a/.env.example b/.env.example
+index b26ec8161e377c88756ad0f237357b5cf8790a70..9d0d450ebae9f1f6793a248abc21749dec9b4f55 100644
 --- a/.env.example
 +++ b/.env.example
-@@ -2797,6 +2797,14 @@
+@@ -3134,6 +3134,14 @@
  # ── MITM debug proxy (development only) ──
  # Used by: src/mitm/server.cjs — captures upstream traffic for inspection.
  # MITM_LOCAL_PORT=443
@@ -16,10 +17,10 @@ diff --git a/.env.example b/.env.example
  # MITM_DISABLE_TLS_VERIFY=0
  # Idle socket timeout (ms) for proxied connections; sockets idle past this are torn
  # down to avoid leaking half-open tunnels (src/mitm/socketTimeouts.ts, server.cjs).
-@@ -3483,3 +3491,11 @@
- #OMNIROUTE_SW_BUILD_ID=2026-08-28T12-00-00
- #SOURCE_VERSION=abcdef0123456789
- #NEXT_PUBLIC_SW_BUILD_ID=abcdef0123456789
+@@ -3863,3 +3871,11 @@
+ # Internal standalone-server signal override. Normally managed by the launcher.
+ # Used by: scripts/dev/standalone-server-ws.mjs.
+ # NEXT_MANUAL_SIG_HANDLE=1
 +
 +# Cloud sync accepts signed responses; unsigned compatibility is opt-in.
 +# OMNIROUTE_CLOUD_SYNC_ALLOW_UNVERIFIED=false

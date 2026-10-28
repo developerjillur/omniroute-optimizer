@@ -1,8 +1,8 @@
 diff --git a/tests/unit/cli-provider-test-routes-10570.test.ts b/tests/unit/cli-provider-test-routes-10570.test.ts
-index 56319745f..71760b7df 100644
+index 56319745f65fa573a30e688189444a2da3d751e5..71760b7df5d4ecf6a8dcf23d352248e796c2fa1c 100644
 --- a/tests/unit/cli-provider-test-routes-10570.test.ts
 +++ b/tests/unit/cli-provider-test-routes-10570.test.ts
-@@ -67,7 +67,7 @@ test("omniroute test resolves a connection and calls its server-owned test route
+@@ -67,7 +67,7 @@
        const url = new URL(String(input));
        const method = String(init?.method ?? "GET").toUpperCase();
        requests.push({ path: `${url.pathname}${url.search}`, method });
@@ -11,7 +11,7 @@ index 56319745f..71760b7df 100644
        if (url.pathname === "/api/providers") {
          return jsonResponse({
            connections: [
-@@ -96,7 +96,7 @@ test("omniroute test resolves a connection and calls its server-owned test route
+@@ -96,7 +96,7 @@
  
      assert.equal(exitCode, 0);
      assert.deepEqual(requests, [
@@ -20,7 +20,7 @@ index 56319745f..71760b7df 100644
        { path: "/api/providers?limit=200", method: "GET" },
        { path: "/api/providers/conn%2Fcustom%201/test", method: "POST" },
      ]);
-@@ -110,7 +110,7 @@ test("omniroute test --all-providers consumes the current connections response s
+@@ -110,7 +110,7 @@
        const url = new URL(String(input));
        const method = String(init?.method ?? "GET").toUpperCase();
        requests.push({ path: `${url.pathname}${url.search}`, method });
@@ -29,7 +29,7 @@ index 56319745f..71760b7df 100644
        if (url.pathname === "/api/providers") {
          return jsonResponse({
            connections: [
-@@ -140,7 +140,7 @@ test("omniroute test --all-providers consumes the current connections response s
+@@ -140,7 +140,7 @@
  
      assert.equal(exitCode, 0);
      assert.deepEqual(requests, [
@@ -38,7 +38,7 @@ index 56319745f..71760b7df 100644
        { path: "/api/providers?limit=200", method: "GET" },
        { path: "/api/providers/conn-all-1/test", method: "POST" },
      ]);
-@@ -168,7 +168,7 @@ test("providers test-all falls back to the server for unsupported custom API-key
+@@ -168,7 +168,7 @@
        const url = new URL(String(input));
        const method = String(init?.method ?? "GET").toUpperCase();
        requests.push({ path: url.pathname, method });
@@ -47,7 +47,7 @@ index 56319745f..71760b7df 100644
        if (url.pathname === `/api/providers/${connection.id}/test` && method === "POST") {
          return jsonResponse({ valid: true, error: null, latencyMs: 9 });
        }
-@@ -180,7 +180,7 @@ test("providers test-all falls back to the server for unsupported custom API-key
+@@ -180,7 +180,7 @@
  
      assert.equal(exitCode, 0);
      assert.deepEqual(requests, [

@@ -66,6 +66,8 @@ const receipt = {
     native: tap("native-green.tap"),
     nativeExtended: tap("native-extended.tap"),
     stream: tap("stream-green.tap"),
+    upgradeMigrations: tap("upgrade-migrations.tap"),
+    upgradeCompatibility: tap("upgrade-compatibility.tap"),
   },
   node24: {
     tooling: tap("tooling-node24.tap"),
@@ -73,6 +75,7 @@ const receipt = {
     productionDnsShimLoaded: true,
   },
   fullTypecheck: { completed: true, diagnostics, baseline },
+  upgradeTypeComparison: JSON.parse(fs.readFileSync(path.join(directory, "upgrade-types.json"), "utf8")),
   gates: {
     pristineBase: true,
     patchesApplicable: manifest.counts.patches,

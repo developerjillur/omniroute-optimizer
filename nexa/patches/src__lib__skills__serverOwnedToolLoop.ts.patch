@@ -1,4 +1,5 @@
 diff --git a/src/lib/skills/serverOwnedToolLoop.ts b/src/lib/skills/serverOwnedToolLoop.ts
+index a25523ff907ce70a99f81e04f02a07510b25edac..bfe375e52bc4380ace885dbb5e25a725eee5bccd 100644
 --- a/src/lib/skills/serverOwnedToolLoop.ts
 +++ b/src/lib/skills/serverOwnedToolLoop.ts
 @@ -31,6 +31,7 @@

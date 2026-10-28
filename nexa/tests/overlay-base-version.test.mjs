@@ -24,6 +24,10 @@ test("manifest base identity is stable across Git abbreviation settings", async 
   const modulePath = path.join(root, "nexa/lib/overlay.mjs");
   fs.mkdirSync(path.dirname(modulePath), { recursive: true });
   fs.copyFileSync(fileURLToPath(new URL("../lib/overlay.mjs", import.meta.url)), modulePath);
+  fs.copyFileSync(
+    fileURLToPath(new URL("../lib/retiredPatches.mjs", import.meta.url)),
+    path.join(path.dirname(modulePath), "retiredPatches.mjs")
+  );
   const { baseVersion } = await import(pathToFileURL(modulePath).href);
   for (const abbreviation of [4, 12]) {
     git("config", "core.abbrev", String(abbreviation));

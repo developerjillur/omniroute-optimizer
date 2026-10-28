@@ -1,7 +1,8 @@
 diff --git a/src/lib/usage/providerWindowCosts.ts b/src/lib/usage/providerWindowCosts.ts
+index ac2addc706c0deb665766535265e90ac8d90e7a4..17b8a21bd12fedf5c971426ecd5b7906b677288f 100644
 --- a/src/lib/usage/providerWindowCosts.ts
 +++ b/src/lib/usage/providerWindowCosts.ts
-@@ -9,9 +9,11 @@
+@@ -10,6 +10,7 @@
  import { getCostSummary } from "@/domain/costRules";
  import { getApiKeys } from "@/lib/db/apiKeys";
  import { getDbInstance } from "@/lib/db/core";
@@ -9,11 +10,15 @@ diff --git a/src/lib/usage/providerWindowCosts.ts b/src/lib/usage/providerWindow
  import { getAllProviderLimitsCache, getProviderLimitsCache } from "@/lib/db/providerLimits";
  import { getProviderQuotaWindowStart } from "@/lib/db/quotaResetEvents";
  import { calculateCost } from "@/lib/usage/costCalculator";
+@@ -18,6 +19,7 @@
+   RecordedCostMatcher,
+   type RecordedCostRow,
+ } from "./recordedCostMatcher";
 +import { GPT_6_1_SOL_LONG_CONTEXT_THRESHOLD } from "@/shared/constants/pricing/shared-tiers";
  
  const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
  const RECORDED_COST_MATCH_TOLERANCE_MS = 30_000;
-@@ -24,6 +26,7 @@
+@@ -30,6 +32,7 @@
  }
  
  interface AggregatedUsageCostRow {
@@ -21,7 +26,7 @@ diff --git a/src/lib/usage/providerWindowCosts.ts b/src/lib/usage/providerWindow
    apiKeyId: string | null;
    apiKeyName: string | null;
    provider: string;
-@@ -34,6 +37,8 @@
+@@ -40,6 +43,8 @@
    completionTokens: number;
    cacheReadTokens: number;
    cacheCreationTokens: number;
@@ -30,7 +35,7 @@ diff --git a/src/lib/usage/providerWindowCosts.ts b/src/lib/usage/providerWindow
    reasoningTokens: number;
    totalTokens: number;
    lastUsed: string | null;
-@@ -50,6 +55,8 @@
+@@ -64,6 +69,8 @@
    completionTokens: number;
    cacheReadTokens: number;
    cacheCreationTokens: number;
@@ -39,7 +44,7 @@ diff --git a/src/lib/usage/providerWindowCosts.ts b/src/lib/usage/providerWindow
    reasoningTokens: number;
    totalTokens: number;
    timestamp: string | null;
-@@ -153,7 +160,10 @@
+@@ -162,7 +169,10 @@
    connectionId: string | null,
    resetMs: number,
    nowMs: number
@@ -51,7 +56,7 @@ diff --git a/src/lib/usage/providerWindowCosts.ts b/src/lib/usage/providerWindow
    if (!connectionId) return null;
    const resetIso = new Date(resetMs).toISOString();
    const start = getProviderQuotaWindowStart(connectionId, resetIso, nowMs);
-@@ -339,7 +349,7 @@
+@@ -348,7 +358,7 @@
  
  function fetchAggregatedUsageRows(filter: UsageHistoryFilter): AggregatedUsageCostRow[] {
    return getDbInstance()
@@ -60,7 +65,7 @@ diff --git a/src/lib/usage/providerWindowCosts.ts b/src/lib/usage/providerWindow
        `
        SELECT
          NULLIF(api_key_id, '') as apiKeyId,
-@@ -347,11 +357,15 @@
+@@ -356,11 +366,15 @@
          LOWER(provider) as provider,
          LOWER(model) as model,
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
@@ -75,8 +80,8 @@ diff --git a/src/lib/usage/providerWindowCosts.ts b/src/lib/usage/providerWindow
 +        COALESCE(SUM(${cacheTtlTokenSql().hour}), 0) as cacheCreation1hTokens,
          COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
          COALESCE(SUM(tokens_input + tokens_output), 0) as totalTokens,
-         MAX(timestamp) as lastUsed
-@@ -362,16 +376,17 @@
+         MAX(timestamp) as lastUsed,
+@@ -377,16 +391,17 @@
          COALESCE(NULLIF(api_key_name, ''), ''),
          LOWER(provider),
          LOWER(model),
@@ -97,7 +102,7 @@ diff --git a/src/lib/usage/providerWindowCosts.ts b/src/lib/usage/providerWindow
        `
        SELECT
          COALESCE(NULLIF(api_key_id, ''), '') as apiKeyId,
-@@ -381,7 +396,7 @@
+@@ -396,7 +411,7 @@
        GROUP BY COALESCE(NULLIF(api_key_id, ''), '')
        `
      )
@@ -106,7 +111,7 @@ diff --git a/src/lib/usage/providerWindowCosts.ts b/src/lib/usage/providerWindow
  
    const counts = new Map<string, number>();
    for (const row of rows) {
-@@ -396,7 +411,7 @@
+@@ -411,7 +426,7 @@
    apiKeyId: string
  ): UsageCostRow[] {
    return getDbInstance()
@@ -115,7 +120,7 @@ diff --git a/src/lib/usage/providerWindowCosts.ts b/src/lib/usage/providerWindow
        `
        SELECT
          id,
-@@ -409,6 +424,8 @@
+@@ -424,6 +439,8 @@
          COALESCE(tokens_output, 0) as completionTokens,
          COALESCE(tokens_cache_read, 0) as cacheReadTokens,
          COALESCE(tokens_cache_creation, 0) as cacheCreationTokens,
@@ -123,8 +128,8 @@ diff --git a/src/lib/usage/providerWindowCosts.ts b/src/lib/usage/providerWindow
 +        ${cacheTtlTokenSql().hour} as cacheCreation1hTokens,
          COALESCE(tokens_reasoning, 0) as reasoningTokens,
          COALESCE(tokens_input + tokens_output, 0) as totalTokens,
-         timestamp
-@@ -418,7 +435,7 @@
+         timestamp,
+@@ -434,7 +451,7 @@
        ORDER BY timestamp ASC, id ASC
        `
      )
@@ -133,7 +138,7 @@ diff --git a/src/lib/usage/providerWindowCosts.ts b/src/lib/usage/providerWindow
  }
  
  function getRecordedCostSummariesByApiKey(
-@@ -435,7 +452,7 @@
+@@ -451,7 +468,7 @@
      };
      const placeholders = appendNamedPlaceholders(params, "apiKey", apiKeyIds);
      const rows = getDbInstance()
@@ -142,7 +147,7 @@ diff --git a/src/lib/usage/providerWindowCosts.ts b/src/lib/usage/providerWindow
          `
          SELECT
            api_key_id as apiKeyId,
-@@ -448,7 +465,11 @@
+@@ -464,7 +481,11 @@
          GROUP BY api_key_id
        `
        )
@@ -155,7 +160,7 @@ diff --git a/src/lib/usage/providerWindowCosts.ts b/src/lib/usage/providerWindow
  
      const summaries = new Map<string, RecordedCostSummary>();
      for (const row of rows) {
-@@ -492,7 +513,7 @@
+@@ -508,7 +529,7 @@
      };
      const placeholders = appendNamedPlaceholders(params, "apiKey", apiKeyIds);
      const rows = getDbInstance()
@@ -164,7 +169,7 @@ diff --git a/src/lib/usage/providerWindowCosts.ts b/src/lib/usage/providerWindow
          `
          SELECT
            id as rowId,
-@@ -506,7 +527,7 @@
+@@ -522,7 +543,7 @@
          ORDER BY api_key_id ASC, timestamp ASC, rowid ASC
        `
        )
@@ -172,26 +177,26 @@ diff --git a/src/lib/usage/providerWindowCosts.ts b/src/lib/usage/providerWindow
 +      .all(params) as RecordedCostRow[];
  
      const byApiKey = new Map<string, RecordedCostRow[]>();
-     for (const row of rows) {
-@@ -571,6 +592,8 @@
+     let processed = 0;
+@@ -561,6 +582,8 @@
        output: toNumber(row.completionTokens),
        cacheRead: toNumber(row.cacheReadTokens),
        cacheCreation: toNumber(row.cacheCreationTokens),
-+      cacheCreation5m: toNumber(row.cacheCreation5mTokens),
-+      cacheCreation1h: toNumber(row.cacheCreation1hTokens),
++      cacheCreation5m: toNumber(row.costCacheCreation5mTokens ?? row.cacheCreation5mTokens),
++      cacheCreation1h: toNumber(row.costCacheCreation1hTokens ?? row.cacheCreation1hTokens),
        reasoning: toNumber(row.reasoningTokens),
      },
      { serviceTier: row.serviceTier }
-@@ -587,9 +610,11 @@
-         output: toNumber(row.completionTokens),
-         cacheRead: toNumber(row.cacheReadTokens),
-         cacheCreation: toNumber(row.cacheCreationTokens),
-+        cacheCreation5m: toNumber(row.cacheCreation5mTokens),
-+        cacheCreation1h: toNumber(row.cacheCreation1hTokens),
-         reasoning: toNumber(row.reasoningTokens),
-       },
--      { serviceTier: row.serviceTier }
-+      { serviceTier: row.serviceTier, longContext: row.longContext === 1 }
-     )
+@@ -579,9 +602,11 @@
+           output: toNumber(row.costCompletionTokens),
+           cacheRead: toNumber(row.costCacheReadTokens),
+           cacheCreation: toNumber(row.costCacheCreationTokens),
++          cacheCreation5m: toNumber(row.costCacheCreation5mTokens ?? row.cacheCreation5mTokens),
++          cacheCreation1h: toNumber(row.costCacheCreation1hTokens ?? row.cacheCreation1hTokens),
+           reasoning: toNumber(row.costReasoningTokens),
+         },
+-        { serviceTier: row.serviceTier }
++        { serviceTier: row.serviceTier, longContext: row.longContext === 1 }
+       ))
    );
  }

@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "c1e30b7676975feb298b49eff6ff58923c04b89e",
   "upstreamVersion": "3.8.51",
-  "trackedNexaFiles": 385,
-  "totalNexaBytes": 1684827,
+  "trackedNexaFiles": 388,
+  "totalNexaBytes": 1700865,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -104,9 +104,9 @@
     {
       "path": "nexa/deploy/README.md",
       "mode": "100644",
-      "gitBlobSha": "f48030a2ea6d6261a838b4a756e802a7178c7fa0",
-      "bytes": 10814,
-      "sha256": "40ed58c2bd677a1f68d01bc535d57c286f894f43dbe77b3c9b705a010c2c10b8"
+      "gitBlobSha": "911cfe8cb8a6aba5fd38597b178d693752f8ad7e",
+      "bytes": 11498,
+      "sha256": "7aac236673495b32158941bcb2af2bd45280688fe740b94d7076ec9a431d68fe"
     },
     {
       "path": "nexa/deploy/bootstrap-launchdaemon.sh",
@@ -464,6 +464,20 @@
       "gitBlobSha": "106385e1a51236289e7c40e0a96617d93e01e355",
       "bytes": 15629,
       "sha256": "5a9cd5d23dba7316f028e2149ed5c907265a28aa4adcbfec243407aa4f2926c4"
+    },
+    {
+      "path": "nexa/docs/NATIVE-REFUSAL-TERMINALS-2026-10-19.md",
+      "mode": "100644",
+      "gitBlobSha": "cfc8e057d8f9e300b8d690449edb0ca24622e8e0",
+      "bytes": 4997,
+      "sha256": "8869a6a5975ac42e8b611a0d2f004b2e01d463af6865fa0796e196e2f393e475"
+    },
+    {
+      "path": "nexa/docs/NATIVE-RELIABILITY-AUDIT-2026-10-28.md",
+      "mode": "100644",
+      "gitBlobSha": "e9d5ddc8bc90582aea53fa90ae9f2b64ad07ced0",
+      "bytes": 9047,
+      "sha256": "aabbfba7a3e391f9ee44f82fde9897166f71694adff2462a6107a4a7b3dddfe1"
     },
     {
       "path": "nexa/docs/NATIVE-THINKING-SIGNATURE-SWITCH-2026-10-11.md",
@@ -1154,9 +1168,9 @@
     {
       "path": "nexa/new/tests/unit/native-claude-refusal-terminal.test.ts",
       "mode": "100644",
-      "gitBlobSha": "fcf1e5c08f56d232745b7dd58798d4fb5dedb140",
-      "bytes": 10086,
-      "sha256": "5ff18db84cba8003b185554446e3329a3a7d7159c58cbafeb9e9226a92ccdd00"
+      "gitBlobSha": "309f31be8765269c4f0e0b8f241f7b0c0bcbc90b",
+      "bytes": 10098,
+      "sha256": "116debe4b6412563ac5e32e4bfd0c093c49874e8957130f9cc1900eb1fb8ef14"
     },
     {
       "path": "nexa/new/tests/unit/native-claude-thread-chatcore.test.ts",
@@ -2631,9 +2645,9 @@
     {
       "path": "nexa/skill/nexa-overlay/SKILL.md",
       "mode": "100644",
-      "gitBlobSha": "34cd330074f0c02a3532045e85596ca658eba775",
-      "bytes": 10726,
-      "sha256": "018b98121b504d44964c9efa052e74632b06da463b94ae5f11baf2527327110a"
+      "gitBlobSha": "5ec29038c1da86bb55eb42748fafd62f3cc4df86",
+      "bytes": 11385,
+      "sha256": "9edb2c4d3722d06fe6a156b9a3821f1c9d0b520d29bcff90ff3de44e946cde5a"
     },
     {
       "path": "nexa/skill/nexa-overlay/reference.md",
@@ -2662,6 +2676,13 @@
       "gitBlobSha": "2e79c325c360524f7338bf5f586383ce97e63129",
       "bytes": 11416,
       "sha256": "6f25a15d9f46028d2534c276f7266859634320c2305de51f5f239ef8107f7085"
+    },
+    {
+      "path": "nexa/tests/isolated-network.mjs",
+      "mode": "100644",
+      "gitBlobSha": "93e539f109b9354f523afbc2a6703a35133fd546",
+      "bytes": 639,
+      "sha256": "c8ff7fd5b0ba5cd2bd49ac324d3d02ca051a83be96c0b32274fb5c867ffa7291"
     },
     {
       "path": "nexa/tests/overlay-base-version.test.mjs",

@@ -230,7 +230,10 @@ test("buffered native refusal stays a refusal while an empty end_turn stays an e
     true
   );
   assert.equal(isEmptyContentResponse({ type: "message", content: [], stop_reason: null }), true);
-  assert.equal(isEmptyContentResponse({ type: "response", content: [], stop_reason: "refusal" }), true);
+  assert.equal(
+    isEmptyContentResponse({ type: "response", content: [], stop_reason: "refusal" }),
+    true
+  );
 });
 
 test("Claude-to-OpenAI streaming refusal maps to content_filter without text", () => {

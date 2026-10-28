@@ -2,7 +2,19 @@
 
 Owner: Jillur Rahman / NexaLance
 
-This directory is the versioned deployment source for the local production service. The portable kit is a historical setup reference; the installed `omni-ctl` command prefers `~/Developer/OmniRoute/nexa/deploy/omni-updater.sh`.
+This directory is the versioned deployment source for the local production service.
+Since 2026-10-28, `developerjillur/omniroute-optimizer` is the canonical management
+repository for Nexa fixes and release evidence. Its overlay is validated against
+the pinned pristine application base in an isolated fixture. The complete
+`~/Developer/OmniRoute` checkout is a reference/application checkout, not a second
+place to author fixes independently.
+
+The portable kit is a historical setup reference. The currently installed
+`omni-ctl` still prefers `~/Developer/OmniRoute/nexa/deploy/omni-updater.sh`; no
+installed command or production runtime was changed by the 2026-10-28 audit.
+Before deploying a new canonical change, prepare and validate an isolated
+application checkout using the exact reviewed optimizer commit. A source push or
+passing source-only CI is not a production build, install or deployment receipt.
 
 ## Runtime layout
 

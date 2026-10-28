@@ -57,6 +57,7 @@ jobs:
           cmp nexa/manifest.json "$GITHUB_WORKSPACE/nexa/manifest.json"
           node nexa/apply.mjs
       - name: Reproduce the original native terminal and Thread classification failures
+        timeout-minutes: 3
         shell: bash
         run: |
           set -euo pipefail
@@ -65,7 +66,7 @@ jobs:
           export TMPDIR="$RUNNER_TEMP"
           git apply --reverse nexa/tests/fixtures/native-refusal-delta.patch
           set +e
-          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-concurrency=1 --test-force-exit tests/unit/native-claude-refusal-terminal.test.ts tests/unit/native-thread-error-classification.test.ts tests/unit/native-stream-summary.test.ts > "$RUNNER_TEMP/native-red.tap" 2>&1
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 --test-force-exit tests/unit/native-claude-refusal-terminal.test.ts tests/unit/native-thread-error-classification.test.ts tests/unit/native-stream-summary.test.ts > "$RUNNER_TEMP/native-red.tap" 2>&1
           result=$?
           set -e
           tail -n 70 "$RUNNER_TEMP/native-red.tap"
@@ -73,13 +74,14 @@ jobs:
           node "$GITHUB_WORKSPACE/nexa/tests/verify-baseline-red.mjs" "$RUNNER_TEMP/native-red.tap"
           git apply nexa/tests/fixtures/native-refusal-delta.patch
       - name: Native, protocol, transport, cache and translator regressions
+        timeout-minutes: 8
         shell: bash
         run: |
           set -euo pipefail
           cd "$RUNNER_TEMP/omniroute-fixture"
           export DATA_DIR="$RUNNER_TEMP/native-green-data"
           export TMPDIR="$RUNNER_TEMP"
-          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-concurrency=1 --test-force-exit tests/unit/native-claude-refusal-terminal.test.ts tests/unit/native-thread-error-classification.test.ts tests/unit/native-stream-summary.test.ts tests/unit/native-artifact-recovery.test.ts tests/unit/native-usage-fidelity.test.ts tests/unit/native-claude-thread-protocol.test.ts tests/unit/native-claude-thread-executor.test.ts tests/unit/native-claude-thread-chatcore.test.ts tests/unit/native-claude-thread-routing.test.ts tests/unit/agent-bridge-native-transport.test.ts tests/unit/agent-bridge-native-cache-continuity.test.ts tests/unit/agent-bridge-thread-cache.test.ts tests/unit/native-thinking-signature-switch.test.ts tests/unit/native-suggestion-empty-response.test.ts tests/unit/native-context-overflow-error.test.ts tests/unit/cache-ttl-stream.test.ts tests/unit/cache-ttl-extraction.test.ts tests/unit/translator-resp-claude-to-openai.test.ts
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 --test-force-exit tests/unit/native-claude-refusal-terminal.test.ts tests/unit/native-thread-error-classification.test.ts tests/unit/native-stream-summary.test.ts tests/unit/native-artifact-recovery.test.ts tests/unit/native-usage-fidelity.test.ts tests/unit/native-claude-thread-protocol.test.ts tests/unit/native-claude-thread-executor.test.ts tests/unit/native-claude-thread-chatcore.test.ts tests/unit/native-claude-thread-routing.test.ts tests/unit/agent-bridge-native-transport.test.ts tests/unit/agent-bridge-native-cache-continuity.test.ts tests/unit/agent-bridge-thread-cache.test.ts tests/unit/native-thinking-signature-switch.test.ts tests/unit/native-suggestion-empty-response.test.ts tests/unit/native-context-overflow-error.test.ts tests/unit/cache-ttl-stream.test.ts tests/unit/cache-ttl-extraction.test.ts tests/unit/translator-resp-claude-to-openai.test.ts | tee "$RUNNER_TEMP/native-green.tap"
       - name: Core typecheck
         working-directory: ${{ runner.temp }}/omniroute-fixture
         run: npm run typecheck:core
@@ -97,3 +99,11 @@ jobs:
         with:
           name: formatting-changes
           path: ${{ runner.temp }}/formatting.patch
+      - name: Preserve synthetic regression output
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: native-test-output
+          path: |
+            ${{ runner.temp }}/native-red.tap
+            ${{ runner.temp }}/native-green.tap

@@ -17,10 +17,9 @@ function measure(compiler) {
   fs.mkdirSync(path.join(directory, "config/quality"), { recursive: true });
   fs.writeFileSync(path.join(directory, "config/quality/tsc-error-baseline.json"), '{"value":1}');
   const diagnostics = path.join(directory, "diagnostics.log");
-  const result = spawnSync(process.execPath, [checker, "--ratchet"], {
+  const result = spawnSync(process.execPath, [checker, "--ratchet", "--diagnostics-out", diagnostics], {
     cwd: directory,
     encoding: "utf8",
-    env: { ...process.env, NEXA_TSC_DIAGNOSTICS: diagnostics },
   });
   return { ...result, diagnostics: fs.existsSync(diagnostics) ? fs.readFileSync(diagnostics, "utf8") : "" };
 }
@@ -49,4 +48,11 @@ test("a terminated compiler retains partial diagnostics and cannot pass the ratc
   assert.match(result.stdout, /^tscErrors=SKIP reason=tsc-signal-SIGTERM/m);
   assert.match(result.diagnostics, /fixture termination diagnostic/);
   assert.match(result.diagnostics, /error TS1234: partial/);
+});
+test("a missing diagnostic destination is rejected before measurement", () => {
+  const result = spawnSync(process.execPath, [checker, "--ratchet", "--diagnostics-out"], {
+    encoding: "utf8",
+  });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /requires an output file/);
 });

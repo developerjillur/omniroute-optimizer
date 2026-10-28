@@ -7,7 +7,7 @@
   "upstreamBase": "c1e30b7676975feb298b49eff6ff58923c04b89e",
   "upstreamVersion": "3.8.51",
   "trackedNexaFiles": 389,
-  "totalNexaBytes": 1704807,
+  "totalNexaBytes": 1705367,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -356,9 +356,9 @@
     {
       "path": "nexa/deploy/tsc-ratchet.test.mjs",
       "mode": "100644",
-      "gitBlobSha": "3ad36c3f778f818f4dd1f383d1bd58636a0d4610",
-      "bytes": 2728,
-      "sha256": "d8e701640627e2f9261570a4e0c5260c1eacf1e1aa3841b528f995514cca09f6"
+      "gitBlobSha": "6cd8741be38ff3c5da1a9f258ce1f402fcd45e3f",
+      "bytes": 2994,
+      "sha256": "3abca838254d57c9c7914bc76a772a5ef20579b0fd48bd34c929426f58bf077a"
     },
     {
       "path": "nexa/docs/AGENT-BRIDGE-LOCAL-LIMITS-2026-10-02.md",
@@ -622,9 +622,9 @@
     {
       "path": "nexa/new/scripts/check/check-tsc-ratchet.mjs",
       "mode": "100644",
-      "gitBlobSha": "675f398a9934e23a452bac8056468f996bcd2ddf",
-      "bytes": 4786,
-      "sha256": "d57924ec41050fa3366fc92b93921ea774e5698b4673aae34d49a0fccc14953f"
+      "gitBlobSha": "dc6479e9e953c5a41127890ffd40ad04fedec68b",
+      "bytes": 5080,
+      "sha256": "889b1af7ce54b7bdb0e8869f8d710fd3d29c465bb68657b446cb58183c125cfc"
     },
     {
       "path": "nexa/new/scripts/docs/annotate-loopback-only.mjs",

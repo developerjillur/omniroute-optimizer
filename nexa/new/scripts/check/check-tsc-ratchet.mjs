@@ -24,6 +24,12 @@ const QUIET = process.argv.includes("--quiet");
 const RATCHET = process.argv.includes("--ratchet");
 const UPDATE = process.argv.includes("--update");
 const BASELINE_PATH = path.join(ROOT, "config/quality/tsc-error-baseline.json");
+const diagnosticsIndex = process.argv.indexOf("--diagnostics-out");
+const diagnosticsPath = diagnosticsIndex < 0 ? null : process.argv[diagnosticsIndex + 1];
+if (diagnosticsIndex >= 0 && (!diagnosticsPath || diagnosticsPath.startsWith("--"))) {
+  console.error("--diagnostics-out requires an output file");
+  process.exit(2);
+}
 
 function log(msg) {
   if (!QUIET) process.stderr.write(`${msg}\n`);
@@ -56,9 +62,9 @@ function measure() {
     { cwd: ROOT, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 }
   );
   // Preserve one measurement's diagnostics without replacing an earlier receipt.
-  if (process.env.NEXA_TSC_DIAGNOSTICS) {
+  if (diagnosticsPath) {
     fs.writeFileSync(
-      process.env.NEXA_TSC_DIAGNOSTICS,
+      diagnosticsPath,
       JSON.stringify({ status: res.status, signal: res.signal, error: res.error?.code }) +
         "\n" + (res.stdout || "") + (res.stderr || ""),
       { flag: "wx" }

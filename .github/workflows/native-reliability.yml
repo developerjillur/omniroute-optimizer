@@ -103,13 +103,15 @@ jobs:
       - name: Core typecheck
         working-directory: ${{ runner.temp }}/omniroute-fixture
         run: npm run typecheck:core
+      - name: Generate the pinned documentation declarations
+        working-directory: ${{ runner.temp }}/omniroute-fixture
+        run: npx --no-install fumadocs-mdx
       - name: Full-project TypeScript ratchet
         timeout-minutes: 8
         env:
           NODE_OPTIONS: --max-old-space-size=6144
-          NEXA_TSC_DIAGNOSTICS: ${{ runner.temp }}/tsc-diagnostics.log
         working-directory: ${{ runner.temp }}/omniroute-fixture
-        run: node scripts/check/check-tsc-ratchet.mjs --ratchet
+        run: node scripts/check/check-tsc-ratchet.mjs --ratchet --diagnostics-out "${{ runner.temp }}/tsc-diagnostics.log"
       - name: Full lint
         working-directory: ${{ runner.temp }}/omniroute-fixture
         run: npm run lint

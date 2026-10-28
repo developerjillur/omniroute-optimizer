@@ -82,9 +82,31 @@ jobs:
           export DATA_DIR="$RUNNER_TEMP/native-green-data"
           export TMPDIR="$RUNNER_TEMP"
           node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 --test-force-exit tests/unit/native-claude-refusal-terminal.test.ts tests/unit/native-thread-error-classification.test.ts tests/unit/native-stream-summary.test.ts tests/unit/native-artifact-recovery.test.ts tests/unit/native-usage-fidelity.test.ts tests/unit/native-claude-thread-protocol.test.ts tests/unit/native-claude-thread-executor.test.ts tests/unit/native-claude-thread-chatcore.test.ts tests/unit/native-claude-thread-routing.test.ts tests/unit/agent-bridge-native-transport.test.ts tests/unit/agent-bridge-native-cache-continuity.test.ts tests/unit/agent-bridge-thread-cache.test.ts tests/unit/native-thinking-signature-switch.test.ts tests/unit/native-suggestion-empty-response.test.ts tests/unit/native-context-overflow-error.test.ts tests/unit/cache-ttl-stream.test.ts tests/unit/cache-ttl-extraction.test.ts tests/unit/translator-resp-claude-to-openai.test.ts | tee "$RUNNER_TEMP/native-green.tap"
+      - name: Remaining native cache, usage and transport regressions
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/omniroute-fixture"
+          export DATA_DIR="$RUNNER_TEMP/native-extended-data"
+          export TMPDIR="$RUNNER_TEMP"
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 --test-force-exit tests/unit/agent-bridge-native-buffered.test.ts tests/unit/agent-bridge-quota-recovery.test.ts tests/unit/cache-ttl-metering.test.ts tests/unit/cache-ttl-pricing-api.test.ts tests/unit/cache-ttl-tool-loop.test.ts tests/unit/claude-usage-effort.test.ts tests/unit/cli-package-migrations.test.mjs tests/unit/db/cache-ttl-analytics-route.test.ts tests/unit/db/cache-ttl-archive.test.ts tests/unit/db/cache-ttl-forecast.test.ts tests/unit/db/cache-ttl-history-analytics.test.ts tests/unit/db/native-claude-usage-persistence.test.ts tests/unit/db/pricing-provider-alias-defaults.test.ts tests/unit/gpt-6-1-sol-pricing-analytics.test.ts tests/unit/gpt-6-1-sol-pricing.test.ts tests/unit/haiku-5-5-native-effort.test.ts tests/unit/inference-transport-no-replay.test.ts tests/unit/native-cache-health.test.ts tests/unit/native-claude-cache-identity.test.ts tests/unit/prompt-cache-ttl-cost.test.ts tests/unit/provider-models-config.test.ts tests/unit/reasoning-cost-double-billing.test.ts tests/unit/server-owned-tool-loop.test.ts tests/unit/ui/native-cache-panel.test.ts tests/unit/xai-exact-cost-2453.test.ts | tee "$RUNNER_TEMP/native-extended.tap"
+      - name: Existing stream, empty-content and diagnostic regressions
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/omniroute-fixture"
+          export DATA_DIR="$RUNNER_TEMP/stream-green-data"
+          export TMPDIR="$RUNNER_TEMP"
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 --test-force-exit tests/unit/14160-antigravity-empty-stop-completion.test.ts tests/unit/claude-empty-stream-error-3685.test.ts tests/unit/codex-tool-handoff-disconnect-499.test.ts tests/unit/combo-empty-content-failover-5085.test.ts tests/unit/compression/memory-mitigations-edge-cases.test.ts tests/unit/db-detailed-logs.test.ts tests/unit/empty-content-stopreason-3572.test.ts tests/unit/empty-stream-no-content-8649.test.ts tests/unit/error-classifier.test.ts tests/unit/issue-6623-opencode-mimo-reasoning-details-nonstream.test.ts tests/unit/reasoning-probe-truncated-response-10281.test.ts tests/unit/request-log-payloads.test.ts tests/unit/responses-continuation-client-payload-survives-cap-truncation.test.ts tests/unit/responses-continuation-passthrough-client-payload.test.ts tests/unit/responses-continuation-store.test.ts tests/unit/services-branch-hardening.test.ts tests/unit/silent-sse-close-7699.test.ts tests/unit/silent-sse-close-openai-10443.test.ts tests/unit/silent-sse-close-responses-no-terminal.test.ts tests/unit/stream-claude-delta-contract.test.ts tests/unit/stream-handler.test.ts tests/unit/stream-payload-collector-9315-truncated-provider-response.test.ts tests/unit/stream-payload-collector-cap.test.ts tests/unit/stream-payload-collector.test.ts tests/unit/stream-readiness-policy.test.ts tests/unit/stream-readiness.test.ts tests/unit/stream-utilities.test.ts tests/unit/stream-utils.test.ts | tee "$RUNNER_TEMP/stream-green.tap"
       - name: Core typecheck
         working-directory: ${{ runner.temp }}/omniroute-fixture
         run: npm run typecheck:core
+      - name: Full-project TypeScript ratchet
+        timeout-minutes: 8
+        working-directory: ${{ runner.temp }}/omniroute-fixture
+        run: node scripts/check/check-tsc-ratchet.mjs --ratchet
       - name: Full lint
         working-directory: ${{ runner.temp }}/omniroute-fixture
         run: npm run lint
@@ -107,3 +129,5 @@ jobs:
           path: |
             ${{ runner.temp }}/native-red.tap
             ${{ runner.temp }}/native-green.tap
+            ${{ runner.temp }}/native-extended.tap
+            ${{ runner.temp }}/stream-green.tap

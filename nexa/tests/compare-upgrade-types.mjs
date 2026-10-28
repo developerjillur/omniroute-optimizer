@@ -20,7 +20,11 @@ const before = JSON.parse(
 assert.equal(before.length, (beforeLog.match(/error TS\d+:/g) || []).length);
 const sourceFiles = new Map();
 const after = parseTypeDiagnostics(completedOutput("tsc-diagnostics.log"), (file, row) => {
-  if (!sourceFiles.has(file)) sourceFiles.set(file, fs.readFileSync(path.join(directory, "omniroute-fixture", file), "utf8").split(/\r?\n/));
+  if (!sourceFiles.has(file))
+    sourceFiles.set(
+      file,
+      fs.readFileSync(path.join(directory, "omniroute-fixture", file), "utf8").split(/\r?\n/)
+    );
   return sourceFiles.get(file)[row - 1];
 });
 const receipt = {

@@ -43,10 +43,9 @@ const result = spawnSync(
     "--test",
     "--test-reporter=tap",
     "--test-concurrency=1",
-    "--test-force-exit",
     ...tests,
   ],
-  { stdio: "inherit", env: process.env }
+  { stdio: "inherit", env: process.env, timeout: 6 * 60_000, killSignal: "SIGTERM" }
 );
 if (result.error) throw result.error;
 process.exitCode = result.signal ? 75 : (result.status ?? 75);

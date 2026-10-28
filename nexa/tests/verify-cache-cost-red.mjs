@@ -13,6 +13,10 @@ for (const [name, expected] of Object.entries({
   assert.equal(actual, expected, `cache cost baseline ${name}`);
 }
 assert.match(text, /ERR_ASSERTION/);
-assert.match(text, /inclusive-cache-marker/, "the baseline must reach the actual cache inclusion regression");
+assert.match(
+  text,
+  /inclusive-cache-marker/,
+  "the baseline must reach the actual cache inclusion regression"
+);
 assert.doesNotMatch(text, /ERR_MODULE_NOT_FOUND|ERR_DLOPEN_FAILED|SyntaxError:|hookFailed/);
 console.log(JSON.stringify({ cacheCostRegressionReproduced: true, assertionFailures: 1 }));

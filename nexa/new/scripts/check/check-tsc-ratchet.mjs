@@ -79,10 +79,10 @@ function measure() {
   return { skip: false, count };
 }
 
-function readBaseline() {
+function readBaselineRecord() {
   try {
     const raw = JSON.parse(fs.readFileSync(BASELINE_PATH, "utf8"));
-    return typeof raw.value === "number" ? raw.value : null;
+    return raw && Number.isSafeInteger(raw.value) && raw.value >= 0 ? raw : null;
   } catch {
     return null;
   }
@@ -95,9 +95,15 @@ if (result.skip) {
 }
 
 const measured = result.count;
-const baseline = readBaseline();
+const baselineRecord = readBaselineRecord();
+const baseline = baselineRecord?.value ?? null;
 process.stdout.write(`tscErrors=${measured}\n`);
 log(`[tsc-ratchet] measured=${measured} baseline=${baseline ?? "none"}`);
+
+if ((RATCHET || UPDATE) && baselineRecord === null) {
+  log("[tsc-ratchet] baseline missing or invalid; a measurement cannot authorize a new budget.");
+  process.exit(75);
+}
 
 if (UPDATE) {
   if (baseline !== null && measured > baseline) {
@@ -110,6 +116,7 @@ if (UPDATE) {
     BASELINE_PATH,
     JSON.stringify(
       {
+        ...baselineRecord,
         _comment:
           "TypeScript-error ratchet baseline. direction: down (can only shrink). Update via `npm run check:tsc-ratchet -- --update` ONLY when the measured count drops. Owner: OmniRoute maintainers. Removal target: reach 0, then re-enable next.config typescript.ignoreBuildErrors:false.",
         value: measured,

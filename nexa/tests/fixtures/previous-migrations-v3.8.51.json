@@ -774,5 +774,15 @@
       "filename": "196_token_limits_unique_per_window.sql",
       "gitBlob": "1eefa55204fdae22de6ffa7450e7eda9e6805b5d"
     }
+  ],
+  "bootstrap": [
+    {
+      "filename": "core.ts",
+      "gitBlob": "6ad02cdbb676af71caa0b503e103bfc8793d2d67"
+    },
+    {
+      "filename": "schemaColumns.ts",
+      "gitBlob": "60f6eef9627bf36f28796752a5254d76a6342d87"
+    }
   ]
 }

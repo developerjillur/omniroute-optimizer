@@ -196,6 +196,22 @@ test("refusal does not exempt an upstream close before message_stop", async () =
   assert.doesNotMatch(result.text, /"stop_reason":"max_tokens"/);
 });
 
+test("an actual native max_tokens terminal preserves an opaque-thinking truncation", async () => {
+  const result = await wrap(events("max_tokens").map(frame).join(""));
+  assert.equal(result.failures,0);
+  assert.match(result.text,/"stop_reason":"max_tokens"/);
+  assert.doesNotMatch(result.text,/Provider returned empty content/);
+});
+
+test("nested message_stop metadata cannot complete a native refusal", async () => {
+  const parts: Record<string,unknown>[] = events();
+  parts.pop();
+  parts[0].metadata = {type:"message_stop"};
+  const result = await wrap(parts.map(frame).join(""));
+  assert.equal(result.failures,1);
+  assert.doesNotMatch(result.text,/"stop_reason":"max_tokens"/);
+});
+
 test("nested refusal-looking metadata cannot exempt an empty end_turn", async () => {
   const parts: Record<string, unknown>[] = events("end_turn");
   parts[0].metadata = { type: "message_delta", delta: { stop_reason: "refusal" } };
@@ -204,17 +220,28 @@ test("nested refusal-looking metadata cannot exempt an empty end_turn", async ()
   assert.match(result.text, /Provider returned empty content/);
 });
 
-for (const visible of [false,true]) {
+for (const visible of [false, true]) {
   test(`${visible ? "visible" : "empty"} native text blocks retain the empty-response boundary`, async () => {
-    const parts: Record<string,unknown>[] = events("end_turn",false);
-    parts.splice(1,0,
-      {type:"content_block_start",index:0,content_block:{type:"text",text:""}},
-      ...(visible ? [{type:"content_block_delta",index:0,delta:{type:"text_delta",text:"fixture-visible"}}] : []),
-      {type:"content_block_stop",index:0});
+    const parts: Record<string, unknown>[] = events("end_turn", false);
+    parts.splice(
+      1,
+      0,
+      { type: "content_block_start", index: 0, content_block: { type: "text", text: "" } },
+      ...(visible
+        ? [
+            {
+              type: "content_block_delta",
+              index: 0,
+              delta: { type: "text_delta", text: "fixture-visible" },
+            },
+          ]
+        : []),
+      { type: "content_block_stop", index: 0 }
+    );
     const result = await wrap(parts.map(frame).join(""));
-    assert.equal(result.failures,visible ? 0 : 1);
-    if (visible) assert.match(result.text,/fixture-visible/);
-    else assert.match(result.text,/Provider returned empty content/);
+    assert.equal(result.failures, visible ? 0 : 1);
+    if (visible) assert.match(result.text, /fixture-visible/);
+    else assert.match(result.text, /Provider returned empty content/);
   });
 }
 

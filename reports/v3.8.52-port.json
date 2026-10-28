@@ -398,7 +398,7 @@
       "target": "open-sse/utils/stream.ts",
       "patch": "open-sse__utils__stream.ts.patch",
       "disposition": "ported",
-      "candidateSha256": "49dcb8c28702113b020b39f7d97657d453a097620934566dc6187c20e586edf4",
+      "candidateSha256": "e5f8e3d087c58a6151b7cc8f8d50e989033fc11fccdc45d8111228c837a35cd7",
       "baselinePatchSha256": "9a04396e302b2ceea7f1a6cddc9c3c4d881f6b0e44224b313e9422272b9388f0"
     },
     {
@@ -412,7 +412,7 @@
       "target": "open-sse/utils/streamHandler.ts",
       "patch": "open-sse__utils__streamHandler.ts.patch",
       "disposition": "ported",
-      "candidateSha256": "de5dfd6e86511e830e69202a59b995de11126099e22df9c1b0a44813ef20b6b6",
+      "candidateSha256": "10458d5c64e195cd6c48336cea5ebae58a37e474d4797284fd3c064fad33e7ad",
       "baselinePatchSha256": "fda56f1bbe14f900e377bcb00943ef6a8b8201e344024c9326a481668473bd51"
     },
     {
@@ -426,7 +426,7 @@
       "target": "open-sse/utils/streamReadiness.ts",
       "patch": "open-sse__utils__streamReadiness.ts.patch",
       "disposition": "ported",
-      "candidateSha256": "75ec95d9188169c6dc1ee9d94e85fda235a38cefef5b8dd8a38c16556f1ab9e3",
+      "candidateSha256": "e87af87457110098bd95df2f17293a86250430bb61caeea7ac6d7db158869205",
       "baselinePatchSha256": "983882698b66055b644b804f411c9d5bfda083f9793a1fc83a2b7435fbc21064"
     },
     {
@@ -1739,6 +1739,11 @@
       "atUtc": "2026-10-28T05:44:57.433536+00:00",
       "target": "tests/unit/catalog-updates-v3x.test.ts",
       "decision": "Resolve the contradictory unknown-price assertion against existing configured native Sol estimates; assert the retained rates."
+    },
+    {
+      "atUtc": "2026-10-28T06:48:37.889202+00:00",
+      "target": "open-sse/utils/streamHandler.ts",
+      "decision": "Use native content probing without treating opaque signatures as output; actual top-level native stops govern legitimacy, while max_tokens and non-native behavior remain preserved."
     }
   ],
   "validationAttempts": [
@@ -1795,6 +1800,54 @@
         "committed formatting",
         "full historical-schema preservation fixture"
       ]
+    },
+    {
+      "sourceCommit": "d806ca646098d9fdd81f937ebf1c340a719f3468",
+      "runUrl": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/40642844559",
+      "accepted": false,
+      "native": {
+        "pass": 158,
+        "tests": 159
+      },
+      "nativeProduction": {
+        "pass": 159,
+        "tests": 160
+      },
+      "stream": {
+        "pass": 392,
+        "tests": 392
+      },
+      "efforts": {
+        "node26": 102,
+        "node24": 102,
+        "completeMarkersVerified": true
+      },
+      "fullTypes": {
+        "pristine": 6572,
+        "applied": 6529,
+        "newIdentities": 0,
+        "changedTypeMessageGroups": 217,
+        "ceilingAtThisAttempt": 5830
+      },
+      "cacheCostRedTargetVerified": true,
+      "coreTypecheck": "pass",
+      "lint": "pass",
+      "docsAll": "pass",
+      "historyFixtureStatus": "rejected environment setup: the old release heals account identity columns before migration 127",
+      "extendedSuiteStatus": "reported 157 passing cases, but 14 previously reported trailing cases are absent; not accepted as complete coverage",
+      "remainingNativeIssue": "outer wrapper still counted an opaque thinking signature as output",
+      "privateRuntimeDataUsed": false
     }
-  ]
+  ],
+  "compilerBudgetReconciliation": {
+    "version": "3.8.52",
+    "value": 6529,
+    "pristine": 6572,
+    "newDiagnosticIdentities": 0,
+    "previousReleaseRecordPreserved": true,
+    "direction": "down",
+    "operatorApproved": true,
+    "fullBuildAuthorized": false,
+    "deploymentAuthorized": false
+  }
 }

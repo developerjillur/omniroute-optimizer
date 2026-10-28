@@ -55,9 +55,10 @@ package smoke, full build এবং live native acceptance আলাদা relea
 ## Compiler backlog
 
 প্রথম সম্পূর্ণ pristine v3.8.52 measurement-এ ৬,৫৭২টি diagnostic পাওয়া গেছে:
-৬,০৯৮টি tests-এর মধ্যে, ৪৭৪টি অন্য paths-এ। পুরোনো v3.8.51-এর absolute ceiling
-৫,৮৩০ অপরিবর্তিত আছে। Applied measurement ও নতুন diagnostic-এর পার্থক্য review
-করতে হবে; inherited backlog-কে zero-error বা নতুন version-এর PASS বলা যাবে না।
+৬,০৯৮টি tests-এর মধ্যে, ৪৭৪টি অন্য paths-এ। Source comparison-এ applied count
+৬,৫২৯ এবং নতুন diagnostic identity ০। Operator অনুমোদিত v3.8.52 budget ৬,৫২৯;
+v3.8.51-এর সম্পূর্ণ ৫,৮৩০ record `previousReleaseBudgets`-এ সংরক্ষিত। Budget-এর
+পরবর্তী পরিবর্তন কেবল নিচের দিকে হবে। এটি inherited backlog; zero-error দাবি নয়।
 
 ## Port regression review
 
@@ -78,7 +79,7 @@ TypeScript comparison-এ একই file, diagnostic code, source statement ও 
 পুরোনো diagnostic চিহ্নিত করা হয়; line insertion-এ তার identity বদলায় না।
 Inferred union-এর message বদলালে আগের ও পরের message review artifact-এ থাকে।
 নতুন statement/code/column, বেশি occurrences, global compiler error বা অসমাপ্ত
-compiler run inherited baseline হিসেবে গ্রহণ করা হয় না। Absolute ceiling বাড়ানো হয়নি।
+compiler run inherited baseline হিসেবে গ্রহণ করা হয় না। এই পর্যায়ে absolute ceiling বাড়ানো হয়নি।
 
 ## পূর্ণ পুরোনো schema থেকে synthetic upgrade
 
@@ -104,4 +105,24 @@ assertion পর্যন্ত পৌঁছানো বাধ্যতাম�
 পূর্ণ compiler measurement ৬,৫২৯; pristine ৬,৫৭২। সংরক্ষিত source statement/code/column
 তুলনায় নতুন identity পাওয়া যায়নি; CI comparison-এর working-directory error
 সংশোধন করা হয়েছে এবং পরের CI-তে সেটি পুনরায় যাচাই আবশ্যক। বর্তমান ceiling
-৫,৮৩০ অপরিবর্তিত এবং release এখনও blocked।
+এই attempt-এ ৫,৮৩০ ছিল এবং release blocked ছিল; পরের source-এ অনুমোদিত version budget ৬,৫২৯।
+
+## সম্পূর্ণ execution ও পুরোনো bootstrap
+
+Run `40642844559`-এ Node 26 ও installed-version Node 24-এর effort suites-এ
+১০২/১০২ case এবং execution-completion marker পাস। Paired compiler comparison-এ
+৬,৫২৯ বনাম pristine ৬,৫৭২, নতুন diagnostic identity ০। Cache-cost RED fixture
+নির্দিষ্ট inclusive marker assertion-এ পৌঁছেছে; green translated cost case-ও পাস।
+তবু native wrapper-এর opaque-signature empty boundary ও historical fixture setup
+ব্যর্থ হওয়ায় run গ্রহণ করা হয়নি।
+
+Historical fixture এখন একই pinned release-এর `core.ts`-এর static schema এবং
+`schemaColumns.ts`-এর startup healers-এর Git blob-ও যাচাই করে। Tables তৈরি,
+legacy columns heal, indexes তৈরি, তারপর versioned migrations—এই পুরোনো startup
+ক্রম অনুসরণ করা হয়। কোনো অনুপস্থিত column বানিয়ে assertion এড়ানো হয় না।
+
+Native wrapper-এ opaque thinking/signature progress হিসেবে গণ্য হয়। Actual
+`message_delta` ও top-level `message_stop` দিয়ে native terminal যাচাই হয়; nested
+metadata terminal হতে পারে না। সত্যিকারের `max_tokens` truncation অক্ষত থাকে।
+কয়েকটি trailing case report-এ না পাওয়ায় CI থেকে forced worker exit বাদ দেওয়া
+হয়েছে; bounded timeout থাকছে, এবং অসমাপ্ত report গ্রহণ করা হবে না।

@@ -1,0 +1,88 @@
+diff --git a/src/app/api/v1/antigravity/route.ts b/src/app/api/v1/antigravity/route.ts
+index aba16415ee38cb576839b3b3351310c9bb7f796c..a93faf9fc1b58a4e32ce5b2eca072dd667083fba 100644
+--- a/src/app/api/v1/antigravity/route.ts
++++ b/src/app/api/v1/antigravity/route.ts
+@@ -3,2 +3,12 @@ import { initTranslators } from "@omniroute/open-sse/translator/index.ts";
+ import { withChatAdmission } from "@/shared/middleware/withChatAdmission";
++import {
++  collectNativeGeminiResponse,
++  NativeGeminiResponseError,
++} from "@/sse/handlers/nativeGeminiResponse";
++import {
++  extractUsage,
++  normalizeUsage,
++  type UsagePayloadLike,
++} from "@omniroute/open-sse/utils/usageTracking.ts";
++import { calculateCost } from "@/lib/usage/costCalculator";
+
+@@ -45,4 +55,69 @@ export async function OPTIONS() {
+ async function postHandler(request: Request): Promise<Response> {
++  const started = Date.now();
+   await ensureInitialized();
+-  return await handleChat(request);
++  let body: unknown;
++  try {
++    body = await request.clone().json();
++  } catch {
++    return handleChat(request);
++  }
++  if (
++    !body ||
++    typeof body !== "object" ||
++    Array.isArray(body) ||
++    (body as Record<string, unknown>).stream !== false
++  ) {
++    return handleChat(request, null, body);
++  }
++  const response = await handleChat(request, null, { ...body, stream: true });
++  if (!response.ok) return response;
++  const headers = new Headers(response.headers);
++  headers.set("Content-Type", "application/json");
++  headers.delete("Content-Length");
++  headers.delete("Content-Encoding");
++  try {
++    if (!response.headers.get("content-type")?.includes("text/event-stream")) {
++      throw new NativeGeminiResponseError(
++        "native_invalid_response",
++        "Native upstream did not return its event protocol"
++      );
++    }
++    const payload = await collectNativeGeminiResponse(response, request.signal);
++    const usage = extractUsage(payload as UsagePayloadLike);
++    const input = Number(usage?.prompt_tokens ?? usage?.input_tokens);
++    const output = Number(usage?.completion_tokens ?? usage?.output_tokens);
++    headers.delete("x-omniroute-tokens-in");
++    headers.delete("x-omniroute-tokens-out");
++    headers.delete("x-omniroute-response-cost");
++    if (Number.isSafeInteger(input) && input >= 0)
++      headers.set("x-omniroute-tokens-in", String(input));
++    if (Number.isSafeInteger(output) && output >= 0)
++      headers.set("x-omniroute-tokens-out", String(output));
++    headers.set("x-omniroute-latency-ms", String(Date.now() - started));
++    const provider = headers.get("x-omniroute-provider");
++    const model = headers.get("x-omniroute-model");
++    if (provider && model && usage) {
++      try {
++        const cost = await calculateCost(provider, model, normalizeUsage(usage));
++        if (Number.isFinite(cost) && cost >= 0)
++          headers.set("x-omniroute-response-cost", cost.toFixed(10));
++      } catch {
++        /* An unavailable estimate must not replace native output. */
++      }
++    }
++    return Response.json(payload, { status: response.status, headers });
++  } catch (error) {
++    if (request.signal.aborted) return new Response(null, { status: 499, headers });
++    const known = error instanceof NativeGeminiResponseError;
++    return Response.json(
++      {
++        error: {
++          type: "upstream_error",
++          code: known ? error.code : "native_invalid_response",
++          message: known ? error.message : "Native response could not be collected",
++        },
++      },
++      { status: known && error.code === "native_timeout" ? 504 : 502, headers }
++    );
++  }
+ }

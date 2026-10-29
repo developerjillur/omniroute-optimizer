@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createPassthroughStreamWithLogger } from "../../open-sse/utils/stream.ts";
+import { createStreamController, pipeWithDisconnect } from "../../open-sse/utils/streamHandler.ts";
 import { parseNonStreamingResponseBody } from "../../open-sse/handlers/chatCore/nonStreamingResponseParse.ts";
 import { translateNonStreamingResponse } from "../../open-sse/handlers/responseTranslator.ts";
 import { translateRequest } from "../../open-sse/translator/index.ts";
@@ -14,18 +15,20 @@ const candidate = {
 async function passthrough(
   events: unknown[],
   format: string,
-  fragment: boolean,
-  terminalNewline = true
+  fragment: boolean | number,
+  terminalNewline = true,
+  guarded = false
 ) {
   const captured: Array<Record<string, unknown>> = [];
   const wire =
     events.map((value) => "data: " + JSON.stringify(value)).join("\n\n") +
     (terminalNewline ? "\n\n" : "");
   const bytes = new TextEncoder().encode(wire);
+  const chunkWidth = typeof fragment === "number" ? fragment : fragment ? 3 : bytes.length;
   const source = new ReadableStream<Uint8Array>({
     start(controller) {
-      for (let at = 0; at < bytes.length; at += fragment ? 3 : bytes.length) {
-        controller.enqueue(bytes.subarray(at, at + (fragment ? 3 : bytes.length)));
+      for (let at = 0; at < bytes.length; at += chunkWidth) {
+        controller.enqueue(bytes.subarray(at, at + chunkWidth));
       }
       controller.close();
     },
@@ -44,7 +47,15 @@ async function passthrough(
     null,
     format
   );
-  const text = await new Response(source.pipeThrough(transform)).text();
+  const readable = guarded
+    ? pipeWithDisconnect(
+        new Response(source),
+        transform,
+        createStreamController({ clientResponseFormat: format }),
+        { stallTimeoutMs: 0, activeTimeoutMs: 0 }
+      )
+    : source.pipeThrough(transform);
+  const text = await new Response(readable).text();
   const values = text
     .split("\n")
     .filter((line) => line.startsWith("data:") && line.slice(5).trim() !== "[DONE]")
@@ -94,6 +105,63 @@ test("native function calls, thought signatures and trailing usage survive uncha
   const result = await passthrough(events, "antigravity", true);
   assert.deepEqual(result.values, events);
   assert.equal(result.text.includes('"tool_calls"'), false);
+  assert.equal(result.text.includes("[DONE]"), false);
+});
+
+for (const newline of [true, false]) {
+  test(`outer stream guard recognizes the native Gemini terminal (newline=${newline})`, async () => {
+    const payload = { response: { candidates: [candidate], usageMetadata: usage } };
+    const result = await passthrough([payload], "antigravity", true, newline, true);
+    assert.deepEqual(result.values, [payload]);
+    assert.equal(result.text.includes('"error"'), false);
+  });
+}
+
+test("outer native guard retains a terminal larger than its generic tail window", async () => {
+  const payload = {
+    response: {
+      candidates: [
+        {
+          content: { role: "model", parts: [{ text: "x".repeat(128 * 1024) }] },
+          finishReason: "STOP",
+        },
+      ],
+      usageMetadata: usage,
+    },
+  };
+  const result = await passthrough([payload], "antigravity", 8192, true, true);
+  assert.deepEqual(result.values, [payload]);
+  assert.equal(result.text.includes('"error"'), false);
+});
+
+test("a finishReason string inside model text cannot complete a truncated native stream", async () => {
+  const payload = {
+    response: {
+      candidates: [
+        {
+          content: {
+            role: "model",
+            parts: [{ text: 'NEXA_NATIVE_OK with literal "finishReason":"STOP"' }],
+          },
+        },
+      ],
+    },
+  };
+  try {
+    const result = await passthrough([payload], "antigravity", true, true, true);
+    assert.ok(
+      result.values.some((value) => value.error),
+      "truncated stream must expose an error"
+    );
+  } catch (error) {
+    assert.match(String(error), /terminal|upstream.*stream/i);
+  }
+});
+
+test("standard Gemini native events also use their own terminal instead of OpenAI DONE", async () => {
+  const payload = { candidates: [candidate], usageMetadata: usage };
+  const result = await passthrough([payload], "gemini", true, true, true);
+  assert.deepEqual(result.values, [payload]);
   assert.equal(result.text.includes("[DONE]"), false);
 });
 

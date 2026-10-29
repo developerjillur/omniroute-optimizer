@@ -2,16 +2,13 @@ diff --git a/open-sse/handlers/chatCore/nonStreamingResponseParse.ts b/open-sse/
 index 617ad02c00db7516092f63751c0b6983e4d2bc9e..aea71a3a3d097000f0f4de9686e0f4cf0323ffb7 100644
 --- a/open-sse/handlers/chatCore/nonStreamingResponseParse.ts
 +++ b/open-sse/handlers/chatCore/nonStreamingResponseParse.ts
-@@ -14,6 +14,7 @@
- import { normalizePayloadForLog } from "@/lib/logPayloads";
+@@ -15,4 +15,5 @@ import { normalizePayloadForLog } from "@/lib/logPayloads";
  import { extractSSEErrorMessage } from "../sseParser.ts";
  import { readNonStreamingResponseBody } from "./nonStreamingResponseBody.ts";
 +import { FORMATS } from "../../translator/formats.ts";
  import {
    normalizeNonStreamingEventPayload,
-   parseNonStreamingSSEPayload,
-@@ -132,7 +133,14 @@ export async function parseNonStreamingResponseBody(opts: {
-     return {
+@@ -133,5 +134,12 @@ export async function parseNonStreamingResponseBody(opts: {
        kind: "ok",
        responseBody,
 -      responsePayloadFormat: targetFormat,
@@ -25,4 +22,3 @@ index 617ad02c00db7516092f63751c0b6983e4d2bc9e..aea71a3a3d097000f0f4de9686e0f4cf
 +          : targetFormat,
        looksLikeSSE: false,
        normalizedProviderPayload,
-     };

@@ -1,25 +1,39 @@
 diff --git a/open-sse/utils/streamReadiness.ts b/open-sse/utils/streamReadiness.ts
-index 48e8666c46b2c332d552dad96b5890eec4a62eec..01f1d1f389542075f6c407b8d2256e03a4f64ca2 100644
+index 48e8666c46b2c332d552dad96b5890eec4a62eec..d35bb6e488cdbb489513d047421711d533ee5f6c 100644
 --- a/open-sse/utils/streamReadiness.ts
 +++ b/open-sse/utils/streamReadiness.ts
-@@ -420,6 +420,10 @@
-    * so #8649 can stand down without treating errors as model output.
+@@ -71,5 +71,5 @@ function hasThinkingLiveness(value: Record<string, unknown>): boolean {
+  * The default (`contentProbe: false`) keeps the release semantics untouched.
+  */
+-type UsefulContentOptions = { contentProbe?: boolean };
++type UsefulContentOptions = { contentProbe?: boolean; nativeGeminiLifecycle?: boolean };
+
+ function hasUsefulValue(value: unknown, contentProbe = false): boolean {
+@@ -421,4 +421,10 @@ export type StreamContentWatcher = {
     */
    sawError: () => boolean;
 +  /** Native terminal reason from a real message_delta, never nested metadata. */
 +  getClaudeStopReason: () => string | null;
 +  /** Actual top-level native message_stop, never nested metadata or an event label alone. */
 +  sawClaudeMessageStop?: () => boolean;
++  /** Structured Gemini/Cloud Code candidate terminal, never text inside a part. */
++  sawGeminiTerminal?: () => boolean;
  };
- 
- /**
-@@ -451,9 +455,29 @@
-   let sse = false;
+
+@@ -444,5 +450,5 @@ export function createStreamContentWatcher(
+     ? CONTENT_PROBE_LEGIT_EMPTY_TERMINAL_REASONS
+     : LEGIT_EMPTY_TERMINAL_REASONS;
+-  const MAX_BUFFERED = 64 * 1024;
++  const MAX_BUFFERED = options.nativeGeminiLifecycle ? 2 * 1024 * 1024 : 64 * 1024;
+   let pending = "";
+   let content = false;
+@@ -452,7 +458,41 @@ export function createStreamContentWatcher(
    let error = false;
    let progress = 0;
 +  let claudeStopReason: string | null = null;
 +  let claudeMessageStop = false;
- 
++  let geminiTerminal = false;
+
    const inspect = (frame: string): void => {
      if (!frame) return;
 +    for (const line of frame.split(/\r?\n/)) {
@@ -28,6 +42,19 @@ index 48e8666c46b2c332d552dad96b5890eec4a62eec..01f1d1f389542075f6c407b8d2256e03
 +      try {
 +        const event: unknown = JSON.parse(trimmed.slice(5).trim());
 +        if (!isRecord(event)) continue;
++        const gemini = isRecord(event.response) ? event.response : event;
++        if (
++          Array.isArray(gemini.candidates) &&
++          gemini.candidates.some(
++            (candidate) =>
++              isRecord(candidate) &&
++              typeof candidate.finishReason === "string" &&
++              candidate.finishReason.length > 0 &&
++              candidate.finishReason.length <= 64
++          )
++        ) {
++          geminiTerminal = true;
++        }
 +        if (event.type === "message_stop") {
 +          claudeMessageStop = true;
 +          continue;
@@ -42,13 +69,11 @@ index 48e8666c46b2c332d552dad96b5890eec4a62eec..01f1d1f389542075f6c407b8d2256e03
 +    }
      if (!sse && SSE_FIELD_LINE.test(frame)) sse = true;
      if (!error && frameHasStructuredStreamError(frame)) error = true;
-     if (!content && hasUsefulStreamContent(frame, { contentProbe })) content = true;
-@@ -501,6 +525,8 @@
-     sawNormalStopTerminal: () => normalStop,
+@@ -502,4 +542,7 @@ export function createStreamContentWatcher(
      sawSseFrame: () => sse,
      sawError: () => error,
 +    getClaudeStopReason: () => claudeStopReason,
 +    sawClaudeMessageStop: () => claudeMessageStop,
++    sawGeminiTerminal: () => geminiTerminal,
    };
  }
- 

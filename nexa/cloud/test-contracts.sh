@@ -6,6 +6,7 @@ export OMNIROUTE_SKIP_SYSTEM_TRUST=1 OMNIROUTE_SKIP_DNS_WRITE=1 OMNIROUTE_SSE_CO
 node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts \
   --import ./tests/_setup/isolateDataDir.ts --test --test-concurrency=1 \
   tests/unit/native-gemini-cloud-contract.test.ts \
+  tests/unit/native-gemini-buffer.test.ts \
   tests/unit/antigravity-streaming-passthrough.test.ts \
   tests/unit/antigravity-native-toolcall-collect.test.ts \
   tests/unit/antigravity-format-detection.test.ts \

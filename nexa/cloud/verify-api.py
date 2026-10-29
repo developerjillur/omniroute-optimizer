@@ -192,6 +192,7 @@ def main():
         metadata, values, raw = exchange(base, path, key, body)
         observed = inspect(values, protocol, stream)
         passed = metadata["http_status"] == 200 and bool(observed["finish_reasons"]) and not metadata.get("transport_error")
+        passed = passed and all(reason in {"STOP", "stop", "end_turn", "stop_sequence", "message_stop", "completed"} for reason in observed["finish_reasons"])
         passed = passed and not any(value.get("error") for value in values)
         if protocol == "antigravity":
             passed = passed and bool(values) and observed["native_envelopes"] and "[DONE]" not in raw

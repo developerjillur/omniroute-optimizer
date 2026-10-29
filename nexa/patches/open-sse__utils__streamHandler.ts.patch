@@ -1,29 +1,36 @@
 diff --git a/open-sse/utils/streamHandler.ts b/open-sse/utils/streamHandler.ts
-index ef6323f30f21d5e4ca599847cfd6990367e35c4f..74fb132a06d0469085e543aa7f593c898d827dad 100644
+index ef6323f30f21d5e4ca599847cfd6990367e35c4f..5157f1b6d71cdaf6cc719e23cdda6eb113ffd470 100644
 --- a/open-sse/utils/streamHandler.ts
 +++ b/open-sse/utils/streamHandler.ts
-@@ -14,6 +14,7 @@
-   buildSyntheticResponsesFailureId,
+@@ -15,4 +15,5 @@ import {
    SYNTHETIC_RESPONSES_SEQUENCE_NUMBER,
  } from "./responsesSequence.ts";
 +import { createAnthropicThinkingProgressWatcher } from "./anthropicStreamProgress.ts";
- 
+
  // Stream handler with disconnect detection - shared for all providers
- 
-@@ -608,10 +609,29 @@
-   clientResponseFormat?: string | null;
+@@ -609,8 +610,40 @@ function resolveSilentCloseOutcome(input: {
    contentWatcher: StreamContentWatcher;
    permitsEmptyTurn?: () => boolean;
 +  allowEmptyCompletion?: boolean;
  }): SilentCloseOutcome | null {
    if (!input.bytesWereForwarded) return null;
- 
+
 -  if (!input.clientTerminalSeen) {
 +  const watcher = input.contentWatcher;
 +  const nativeClaude = input.clientResponseFormat === FORMATS.CLAUDE;
-+  const terminalSeen = nativeClaude ? watcher.sawClaudeMessageStop?.() === true : input.clientTerminalSeen;
++  const nativeGemini =
++    input.clientResponseFormat === FORMATS.GEMINI ||
++    input.clientResponseFormat === FORMATS.ANTIGRAVITY;
++  const terminalSeen = nativeClaude
++    ? watcher.sawClaudeMessageStop?.() === true
++    : nativeGemini
++      ? watcher.sawGeminiTerminal?.() === true
++      : input.clientTerminalSeen;
 +  const legitimateEmpty = nativeClaude
-+    ? terminalSeen && ["length", "tool_calls", "content_filter", "max_tokens", "tool_use"].includes(watcher.getClaudeStopReason() || "")
++    ? terminalSeen &&
++      ["length", "tool_calls", "content_filter", "max_tokens", "tool_use"].includes(
++        watcher.getClaudeStopReason() || ""
++      )
 +    : watcher.sawLegitEmptyTerminal();
 +  if (watcher.sawError()) return null;
 +  // Native refusals may contain only hidden thinking. Preserve the refusal,
@@ -38,13 +45,14 @@ index ef6323f30f21d5e4ca599847cfd6990367e35c4f..74fb132a06d0469085e543aa7f593c89
 +  }
 +
 +  if (!terminalSeen) {
++    if (nativeGemini && watcher.sawContent()) {
++      return { kind: "error", reason: "Upstream stream ended without a terminal marker" };
++    }
      if (input.clientResponseFormat === FORMATS.CLAUDE && input.contentWatcher.sawContent()) {
        // #7699 — upstream dropped after content reached the client on a Claude
-       // stream. Keep the partial response: emit a clean max_tokens completion
-@@ -643,12 +663,12 @@
-     }
+@@ -644,10 +677,10 @@ function resolveSilentCloseOutcome(input: {
    }
- 
+
 -  const watcher = input.contentWatcher;
 -  if (watcher.sawError()) return null;
 -  if (watcher.sawSseFrame() && !watcher.sawContent() && !watcher.sawLegitEmptyTerminal()) {
@@ -57,66 +65,78 @@ index ef6323f30f21d5e4ca599847cfd6990367e35c4f..74fb132a06d0469085e543aa7f593c89
 +    if (!(terminalSeen && input.permitsEmptyTurn?.())) {
        return { kind: "error", reason: "Provider returned empty content" };
      }
-   }
-@@ -659,13 +679,15 @@
- export function createDisconnectAwareStream(
+@@ -660,5 +693,9 @@ export function createDisconnectAwareStream(
    transformStream,
    streamController,
 -  options: { highWaterMark?: number; permitsEmptyTurn?: () => boolean } = {}
-+  options: { highWaterMark?: number; permitsEmptyTurn?: () => boolean; allowEmptyCompletion?: () => boolean } = {}
++  options: {
++    highWaterMark?: number;
++    permitsEmptyTurn?: () => boolean;
++    allowEmptyCompletion?: () => boolean;
++  } = {}
  ) {
    const reader = transformStream.readable.getReader();
-   const writer = transformStream.writable.getWriter();
+@@ -666,5 +703,10 @@ export function createDisconnectAwareStream(
    const terminalDecoder = new TextDecoder();
    const contentDecoder = new TextDecoder();
 -  const contentWatcher = createStreamContentWatcher();
 +  const contentWatcher = createStreamContentWatcher({
 +    contentProbe: streamController.clientResponseFormat === FORMATS.CLAUDE,
++    nativeGeminiLifecycle:
++      streamController.clientResponseFormat === FORMATS.GEMINI ||
++      streamController.clientResponseFormat === FORMATS.ANTIGRAVITY,
 +  });
    const completedToolHandoffWatcher = createCompletedResponsesToolHandoffWatcher();
    const toolHandoffDecoder = new TextDecoder();
-   let terminalTail = "";
-@@ -693,10 +715,9 @@
-     terminalTail += terminalDecoder.decode(chunk, { stream: true });
+@@ -694,8 +736,11 @@ export function createDisconnectAwareStream(
      // Scan before bounding retained state: a compaction terminal frame can
      // exceed the tail budget because encrypted_content is carried inline.
 -    clientTerminalSeen = hasClientTerminalSseMarker(
 -      terminalTail,
 -      streamController.clientResponseFormat
 -    );
-+    clientTerminalSeen = streamController.clientResponseFormat === FORMATS.CLAUDE
-+      ? contentWatcher.sawClaudeMessageStop?.() === true
-+      : hasClientTerminalSseMarker(terminalTail, streamController.clientResponseFormat);
++    clientTerminalSeen =
++      streamController.clientResponseFormat === FORMATS.CLAUDE
++        ? contentWatcher.sawClaudeMessageStop?.() === true
++        : streamController.clientResponseFormat === FORMATS.GEMINI ||
++            streamController.clientResponseFormat === FORMATS.ANTIGRAVITY
++          ? contentWatcher.sawGeminiTerminal?.() === true
++          : hasClientTerminalSseMarker(terminalTail, streamController.clientResponseFormat);
      if (terminalTail.length > 4096) {
        terminalTail = terminalTail.slice(-4096);
-     }
-@@ -737,6 +758,7 @@
-               clientResponseFormat: streamController.clientResponseFormat,
+@@ -732,4 +777,12 @@ export function createDisconnectAwareStream(
+           if (done) {
+             contentWatcher.finish();
++            if (
++              (streamController.clientResponseFormat === FORMATS.GEMINI ||
++                streamController.clientResponseFormat === FORMATS.ANTIGRAVITY) &&
++              contentWatcher.sawGeminiTerminal?.() === true
++            ) {
++              clientTerminalSeen = true;
++              streamController.markClientTerminalSeen?.();
++            }
+             const silentClose = resolveSilentCloseOutcome({
+               bytesWereForwarded,
+@@ -738,4 +791,5 @@ export function createDisconnectAwareStream(
                contentWatcher,
                permitsEmptyTurn: options.permitsEmptyTurn,
 +              allowEmptyCompletion: options.allowEmptyCompletion?.() === true,
              });
- 
-             if (silentClose?.kind === "truncated") {
-@@ -885,6 +907,8 @@
-     stallTimeoutMs?: number;
+
+@@ -886,4 +940,6 @@ export function pipeWithDisconnect(
      activeTimeoutMs?: number;
      contentStallTimeoutMs?: number;
 +    allowEmptyCompletion?: () => boolean;
 +    allowAnthropicThinkingProgress?: boolean;
      highWaterMark?: number;
    } = {}
- ) {
-@@ -908,6 +932,7 @@
-       streamController,
+@@ -909,4 +965,5 @@ export function pipeWithDisconnect(
        {
          highWaterMark: opts.highWaterMark,
 +        allowEmptyCompletion: opts.allowEmptyCompletion,
          permitsEmptyTurn: () => hasTrustedEmptyTurn(providerResponse),
        }
-     );
-@@ -988,6 +1013,9 @@
-   let contentStallTimer: ReturnType<typeof setTimeout> | null = null;
+@@ -989,4 +1046,7 @@ export function pipeWithDisconnect(
    let contentStallFired = false;
    const upstreamContentWatcher = createStreamContentWatcher();
 +  const thinkingProgress = opts.allowAnthropicThinkingProgress
@@ -124,21 +144,19 @@ index ef6323f30f21d5e4ca599847cfd6990367e35c4f..74fb132a06d0469085e543aa7f593c89
 +    : null;
    const upstreamContentDecoder = new TextDecoder();
    // Stall diagnostics: what the upstream had sent when the content watchdog
-   // trips. Counters live at this tap because it is the only point seeing raw
-@@ -1154,7 +1182,7 @@
-         upstreamContentWatcher.note(decoded);
+@@ -1155,5 +1215,8 @@ export function pipeWithDisconnect(
          if (upstreamContentWatcher.sawContent()) {
            clearContentStall();
 -        } else if (upstreamContentWatcher.reasoningProgress() > reasoningBefore) {
-+        } else if (upstreamContentWatcher.reasoningProgress() > reasoningBefore || thinkingProgress?.note(decoded)) {
++        } else if (
++          upstreamContentWatcher.reasoningProgress() > reasoningBefore ||
++          thinkingProgress?.note(decoded)
++        ) {
            clearContentStall();
            armContentStall();
-         }
-@@ -1175,6 +1203,7 @@
-     wrappedController,
+@@ -1176,4 +1239,5 @@ export function pipeWithDisconnect(
      {
        highWaterMark: opts.highWaterMark,
 +      allowEmptyCompletion: opts.allowEmptyCompletion,
        permitsEmptyTurn: () => hasTrustedEmptyTurn(providerResponse),
      }
-   );

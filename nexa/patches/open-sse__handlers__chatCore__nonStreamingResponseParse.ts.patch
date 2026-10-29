@@ -1,0 +1,24 @@
+diff --git a/open-sse/handlers/chatCore/nonStreamingResponseParse.ts b/open-sse/handlers/chatCore/nonStreamingResponseParse.ts
+index 617ad02c00db7516092f63751c0b6983e4d2bc9e..aea71a3a3d097000f0f4de9686e0f4cf0323ffb7 100644
+--- a/open-sse/handlers/chatCore/nonStreamingResponseParse.ts
++++ b/open-sse/handlers/chatCore/nonStreamingResponseParse.ts
+@@ -15,4 +15,5 @@ import { normalizePayloadForLog } from "@/lib/logPayloads";
+ import { extractSSEErrorMessage } from "../sseParser.ts";
+ import { readNonStreamingResponseBody } from "./nonStreamingResponseBody.ts";
++import { FORMATS } from "../../translator/formats.ts";
+ import {
+   normalizeNonStreamingEventPayload,
+@@ -133,5 +134,12 @@ export async function parseNonStreamingResponseBody(opts: {
+       kind: "ok",
+       responseBody,
+-      responsePayloadFormat: targetFormat,
++      // The Antigravity executor's legacy buffered collector returns OpenAI JSON,
++      // even though its declared upstream protocol is Cloud Code/Gemini.
++      responsePayloadFormat:
++        (targetFormat === FORMATS.ANTIGRAVITY || targetFormat === FORMATS.GEMINI) &&
++        responseBody.object === "chat.completion" &&
++        Array.isArray(responseBody.choices)
++          ? FORMATS.OPENAI
++          : targetFormat,
+       looksLikeSSE: false,
+       normalizedProviderPayload,

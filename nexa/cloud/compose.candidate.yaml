@@ -1,0 +1,23 @@
+name: nexaomni-acceptance
+services:
+  gateway:
+    image: ${NEXAOMNI_CANDIDATE_IMAGE:?Set a verified candidate image}
+    pull_policy: never
+    container_name: nexaomni-candidate
+    restart: "no"
+    init: true
+    stop_grace_period: 45s
+    env_file: ${NEXAOMNI_CANDIDATE_ENV:?Set the private candidate environment}
+    volumes:
+      - ${NEXAOMNI_CANDIDATE_DATA:?Set isolated candidate data}:/app/data
+    ports:
+      - 127.0.0.1:${NEXAOMNI_CANDIDATE_PORT:-18129}:20128
+    mem_limit: 3g
+    cpus: 2
+    pids_limit: 256
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    labels: { traefik.enable: "false" }
+    logging:
+      driver: json-file
+      options: { max-size: 5m, max-file: "2" }

@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "profile": "nexaomni-vanalyzer",
+  "application_base": "3.8.52",
+  "upstream_commit": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
+  "api_origin": "https://nexaomni.nexaconnect.cloud",
+  "authentication": "Authorization: Bearer <server-side private key>",
+  "gemini_media": {
+    "endpoint": "/v1/antigravity",
+    "model": "agy/gemini-3.8-flash-low",
+    "stream_flag_must_be_explicit": true,
+    "media_part": "request.contents[].parts[].fileData",
+    "uri_field": "fileUri",
+    "mime_type": "video/mp4",
+    "clip_field": "request.contents[].parts[].videoMetadata",
+    "clip_offsets": [
+      "startOffset",
+      "endOffset"
+    ],
+    "structured_output": "request.generationConfig.responseSchema",
+    "json_candidates": "response.candidates",
+    "sse_candidates": "data.response.candidates",
+    "usage": "response.usageMetadata",
+    "terminal": "response.candidates[].finishReason",
+    "done_sentinel": false,
+    "native_json_max_bytes": 4194304,
+    "native_json_errors": [
+      "native_incomplete",
+      "native_timeout",
+      "native_response_limit",
+      "native_upstream_error",
+      "native_invalid_response",
+      "native_empty_response",
+      "native_cancelled"
+    ],
+    "quality": "model-generated; accuracy and complete speech coverage need independent verification",
+    "sse_usage_semantics": "Cumulative metadata snapshots; use the final valid snapshot and do not add duplicate events"
+  },
+  "native_protocols": {
+    "anthropic_messages": "/v1/messages",
+    "openai_responses": "/v1/responses",
+    "openai_chat": "/v1/chat/completions"
+  },
+  "required_release_gates": [
+    "overlay inventory and pristine base",
+    "migration preflight and cloned-data migration",
+    "core types and completed full diagnostic ratchet",
+    "native protocol regressions",
+    "production package and isolated candidate",
+    "authenticated real media JSON and SSE completion",
+    "post-promotion API and Plan B acceptance"
+  ],
+  "persistence": {
+    "data": "/opt/nexaomni/data",
+    "private_environment": "/opt/nexaomni/private/runtime.env",
+    "rollback_requires_matching_database_and_encryption_key": true
+  },
+  "response_headers": {
+    "request_id": "x-omniroute-request-id",
+    "provider": "x-omniroute-provider",
+    "model": "x-omniroute-model",
+    "selected_connection": "x-omniroute-selected-connection-id",
+    "native_json_input_tokens": "x-omniroute-tokens-in",
+    "native_json_output_tokens": "x-omniroute-tokens-out",
+    "stream_usage": "Read terminal body usageMetadata; headers can precede final token counts"
+  },
+  "error_profiles": {
+    "invalid_gateway_key": {
+      "http_statuses": [
+        401,
+        403
+      ],
+      "next_action": "check_server_side_gateway_key"
+    },
+    "invalid_model": {
+      "http_statuses": [
+        400,
+        404,
+        422
+      ],
+      "next_action": "select_an_available_model_in_a_configured_provider"
+    },
+    "unconfigured_provider": {
+      "http_statuses": [
+        401,
+        403
+      ],
+      "code": "provider_not_configured",
+      "next_action": "select_or_configure_the_requested_provider"
+    },
+    "native_timeout": {
+      "http_statuses": [
+        504
+      ],
+      "next_action": "retry_with_a_bounded_budget_or_narrower_window"
+    },
+    "native_incomplete": {
+      "http_statuses": [
+        502
+      ],
+      "next_action": "retry_with_a_bounded_budget; never_cache_as_complete"
+    },
+    "native_response_limit": {
+      "http_statuses": [
+        502
+      ],
+      "next_action": "narrow_the_requested_output"
+    },
+    "native_empty_response": {
+      "http_statuses": [
+        502
+      ],
+      "next_action": "retry_with_a_bounded_budget; never_cache_as_complete"
+    },
+    "client_cancelled": {
+      "http_statuses": [
+        499
+      ],
+      "next_action": "no_automatic_retry_without_a_new_caller_request"
+    }
+  },
+  "session_identity": {
+    "header": "X-Session-Id",
+    "same_conversation": "reuse the same ID",
+    "independent_conversation": "use a new ID",
+    "vanalyzer": "vanalyzer-video-<video_id>",
+    "strict_account_isolation": "API key allowedConnections with exactly one connection",
+    "pin_validation": "fresh conversation plus requested connection header; verify actual selected connection"
+  }
+}

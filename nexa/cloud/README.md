@@ -1,6 +1,10 @@
 # NexaOmni cloud deployment
 
-এই deployment local `omni.local` ও server-এর অন্য OmniRoute service থেকে স্বাধীন। Application base `v3.8.52` / `ad6f33f66bda34eba98645d3bfdabbde294bc843`; routing ও reliability overlay `614c46cca8a4480fb300ff6bc6d603f363cbcca9` থেকে নেওয়া। Cloud tools এই directory-তে সংরক্ষিত। Full build-এর সময় ধরা পড়া `mitm-unexpected-child-exit` test fixture-এর event lifecycle সংশোধনের একটি patch যোগ হয়েছে; production routing code বদলায়নি।
+Native media contract, bounded API acceptance ও Vanalyzer profile: [API-CONTRACT.md](API-CONTRACT.md), [machine-readable contract](api-contract.json), [configuration example](vanalyzer.env.example)। Production build gate এখন `test-contracts.sh`-এর native Gemini, buffered JSON ও video transport regressions-ও চালায়। Native event-কে OpenAI chunk হিসেবে drop করা এবং legacy buffered payload-এর ভুল format classification source-এ সংশোধিত; live acceptance আলাদা dated receipt-এ রাখতে হবে।
+
+নতুন update-এর source/resource admission, Google-only isolated candidate, promotion ও rollback: [UPDATE.md](UPDATE.md)। JSON native path এখন bounded native event collection ব্যবহার করে, যাতে opaque parts ও metadata অক্ষত থাকে।
+
+এই deployment local `omni.local` ও server-এর অন্য OmniRoute service থেকে স্বাধীন। Application base `v3.8.52` / `ad6f33f66bda34eba98645d3bfdabbde294bc843`। প্রথম cloud release-এর routing ও reliability overlay `614c46cca8a4480fb300ff6bc6d603f363cbcca9` থেকে নেওয়া হয়েছিল; তখনকার অতিরিক্ত পরিবর্তন test fixture-এ সীমাবদ্ধ ছিল। বর্তমান source-এ উপরের native media fixes-ও রয়েছে। Source commit, package ও deployed image-এর পরিচয় প্রতিটি নতুন release receipt-এ আলাদা রাখতে হবে। Cloud tools এই directory-তে সংরক্ষিত।
 
 ## Source ও build
 
@@ -52,6 +56,8 @@ Compose:   /opt/nexaomni/compose.yaml
 Public domain চালু হওয়ার পরে এই প্রতিটি ফল আলাদা করে সংরক্ষণ করতে হবে: HTTPS certificate ও redirect, health, অননুমোদিত request প্রত্যাখ্যান, dashboard login, authenticated catalog, explicit provider-এর non-streaming ও SSE completion, invalid model/invalid key error, restart-এর পরে configuration ও key durability। Catalog-এ model থাকা real inference acceptance-এর বিকল্প নয়। Provider rejection, quota ও login failure নিজের status-সহ report করুন।
 
 ## Backup ও update
+
+Cloud-native release-এর measured ফল `reports/`-এ থাকে। Account routing পুনরায় যাচাইয়ের জন্য `verify-connections.py` ব্যবহার করুন; [API contract](API-CONTRACT.md)-এ session affinity ও strict connection isolation-এর নিয়ম আছে।
 
 `backup.py` consistent SQLite backup, matching environment এবং integrity receipt `/opt/nexaomni/backups/`-এ রাখে। Daily timer 01:30 UTC-এর পরে সর্বোচ্চ 300-second jitter-এ চলে; সর্বশেষ সাতটি marked backup থাকে। Backup-এর পুরো directory private রাখুন এবং আলাদা machine-এ একটি copy সংরক্ষণ করুন। Restore-এর আগে service বন্ধ করে current data অক্ষত নতুন rollback directory-তে রাখুন; database ও environment জোড়া মিলিয়ে ফিরিয়ে আনুন।
 

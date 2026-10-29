@@ -1,0 +1,49 @@
+--- a/vanalyzer/plan_b.py
++++ b/vanalyzer/plan_b.py
+@@ -130,6 +130,7 @@
+                 "media_transport": "native_video_file_uri", "max_duration_seconds": self.max_duration,
+                 "chunk_seconds": self.chunk_seconds, "budget_seconds": self.budget,
+                 "whole_source_recovery_max_seconds":600,"timing_recovery":"clock_HH_MM_SS",
++                "account_affinity":"per_video", "session_header":"X-Session-Id",
+                 "cooldown_seconds": max(0, math.ceil(self.cooldown_until-time.monotonic())),
+                 "output_source": "ai_transcription", "timestamps": "model_estimated"}
+
+@@ -169,7 +170,8 @@
+         chunks, usage, finish, total = [], {}, None, 0
+         try:
+             with session.post(self.url+"/antigravity", json=body, headers={"Authorization": "Bearer "+self.key,
+-                    "User-Agent": "Vanalyzer/1.5 PlanB", "Accept": "application/json"},
++                    "User-Agent": "Vanalyzer/1.5.1 PlanB", "Accept": "application/json",
++                    "X-Session-Id": "vanalyzer-video-"+vid},
+                     timeout=(min(4, remaining), remaining), stream=True, allow_redirects=False) as response:
+                 if response.status_code != 200:
+                     if response.status_code == 429:
+--- a/vanalyzer/__init__.py
++++ b/vanalyzer/__init__.py
+@@ -1 +1 @@
+-__version__ = "1.5.0"
++__version__ = "1.5.1"
+--- a/tests/test_plan_b.py
++++ b/tests/test_plan_b.py
+@@ -286,6 +286,21 @@
+     assert part['fileData']=={'fileUri':'https://www.youtube.com/watch?v='+VID,'mimeType':'video/mp4'}
+     assert part['videoMetadata']=={'startOffset':'10s','endOffset':'20s'}
+     assert options['json']['stream'] is False
++    assert options['headers']['X-Session-Id']=='vanalyzer-video-'+VID
++
++
++def test_independent_videos_do_not_share_gateway_session_affinity(monkeypatch):
++    item=provider(monkeypatch)
++    reply=Reply({'choices':[{'message':{'content':window(0,20).model_dump_json()},'finish_reason':'stop'}]},headers={'content-type':'application/json'})
++    reply.iter_content=lambda size:iter([json.dumps(reply.value).encode()])
++    session=Session(reply);monkeypatch.setattr('vanalyzer.plan_b.requests.Session',lambda:session)
++    for vid in [VID,VID,'wFbgrPmVXb0']:
++        value=window(0,20).model_dump();value['video_id']=vid
++        reply.value={'choices':[{'message':{'content':json.dumps(value)},'finish_reason':'stop'}]}
++        item._request(vid,'Inspect media',TranscriptWindow,time.monotonic()+10,0,20)
++    sessions=[options['headers']['X-Session-Id'] for _,options in session.calls]
++    assert sessions[0]==sessions[1] and sessions[0]!=sessions[2]
++    assert item.key not in ''.join(sessions)
+
+
+ def test_native_nonstreaming_json_is_validated(monkeypatch):

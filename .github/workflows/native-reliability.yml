@@ -3,7 +3,7 @@ name: Native reliability
 on:
   workflow_dispatch:
   pull_request:
-    branches: [main]
+    branches: [main, feat/nexaomni-cloud]
   push:
     branches: [main]
 
@@ -291,6 +291,11 @@ jobs:
           export DATA_DIR="$RUNNER_TEMP/production-migration-data"
           export TMPDIR="$RUNNER_TEMP"
           node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/db/native-upgrade-migration-identity.test.ts tests/unit/db/native-upgrade-history-preservation.test.ts | tee "$RUNNER_TEMP/production-migrations.tap"
+      - name: Verify cloud native media protocol contracts
+        id: cloud_api
+        run: |
+          set -euo pipefail
+          bash "$RUNNER_TEMP/omniroute-fixture/nexa/cloud/test-contracts.sh" "$RUNNER_TEMP/omniroute-fixture" | tee "$RUNNER_TEMP/cloud-protocol.tap"
       - name: Require committed formatting
         id: formatting
         continue-on-error: true
@@ -303,7 +308,7 @@ jobs:
           python3 - <<'PYCODE'
           import json, os
           steps = json.loads(os.environ["UPGRADE_GATE_OUTCOMES"])
-          expected = ['resilience_budget', 'effort_tests', 'production_efforts', 'cache_cost_baseline', 'production_migrations', 'deployment_helpers', 'migrations', 'baseline', 'native_tests', 'extended_tests', 'stream_tests', 'compatibility', 'interface_tests', 'core_types', 'docs_types', 'full_types', 'compare_types', 'lint', 'docs', 'production_tooling', 'production', 'formatting']
+          expected = ['resilience_budget', 'effort_tests', 'production_efforts', 'cache_cost_baseline', 'production_migrations', 'deployment_helpers', 'migrations', 'baseline', 'native_tests', 'extended_tests', 'stream_tests', 'compatibility', 'interface_tests', 'core_types', 'docs_types', 'full_types', 'compare_types', 'lint', 'docs', 'production_tooling', 'production', 'cloud_api', 'formatting']
           failed = {name: steps.get(name, {}).get("outcome", "missing") for name in expected if steps.get(name, {}).get("outcome") != "success"}
           print(json.dumps({"failedGates": failed}, indent=2))
           if failed: raise SystemExit(1)

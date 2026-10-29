@@ -4,7 +4,15 @@ on:
   push:
     paths:
       - "nexa/cloud/**"
+      - "nexa/new/tests/unit/native-gemini-cloud-contract.test.ts"
+      - "nexa/patches/open-sse__utils__stream.ts.patch"
+      - "nexa/patches/open-sse__handlers__responseTranslator*.patch"
+      - "nexa/patches/open-sse__handlers__chatCore__nonStreamingResponseParse.ts.patch"
+      - "nexa/deploy/build-candidate.sh"
       - "nexa/tests/test_cloud_config.py"
+      - "nexa/tests/test_cloud_api.py"
+      - "nexa/tests/test_cloud_candidate.py"
+      - "nexa/tests/test_cloud_watch.py"
       - "nexa/patches/tests__unit__mitm-unexpected-child-exit.test.ts.patch"
       - "nexa/manifest.json"
       - "overlay-inventory.json"
@@ -23,6 +31,9 @@ jobs:
       - name: Verify configuration isolation and source integrity
         run: |
           python3 nexa/tests/test_cloud_config.py
+          python3 nexa/tests/test_cloud_api.py
+          python3 nexa/tests/test_cloud_candidate.py
+          python3 nexa/tests/test_cloud_watch.py
           python3 -m py_compile nexa/cloud/*.py
           bash -n nexa/cloud/build.sh
           sh -n nexa/cloud/start-cloud.sh
@@ -30,4 +41,5 @@ jobs:
           node --test nexa/tests/overlay-inventory.test.mjs nexa/tests/overlay-base-version.test.mjs
           touch "$RUNNER_TEMP/nexaomni-ci.env"
           NEXAOMNI_ENV_FILE="$RUNNER_TEMP/nexaomni-ci.env" docker compose -f nexa/cloud/compose.yaml config --quiet
+          NEXAOMNI_CANDIDATE_IMAGE=nexaomni:ci NEXAOMNI_CANDIDATE_ENV="$RUNNER_TEMP/nexaomni-ci.env" NEXAOMNI_CANDIDATE_DATA="$RUNNER_TEMP/candidate-data" docker compose -f nexa/cloud/compose.candidate.yaml config --quiet
           git diff --check

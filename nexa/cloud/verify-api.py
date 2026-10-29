@@ -67,11 +67,14 @@ def exchange(base, path, key=None, body=None):
             pass
     lower = {k.lower(): v for k, v in response_headers.items()}
     connection = lower.get("x-omniroute-selected-connection-id", "")
+    token_headers = {name: int(lower[header]) if re.fullmatch(r"\d+", lower.get(header, "")) else None
+                     for name, header in [("input_tokens", "x-omniroute-tokens-in"), ("output_tokens", "x-omniroute-tokens-out")]}
     metadata = {"http_status": status, "seconds": round(time.monotonic() - started, 3), "bytes": len(raw),
                 "events": len(values), "content_type": lower.get("content-type"),
                 "provider": lower.get("x-omniroute-provider"), "model": lower.get("x-omniroute-model"),
                 "request_id": lower.get("x-omniroute-request-id"),
-                "connection_reference": hashlib.sha256(connection.encode()).hexdigest()[:12] if connection else None}
+                "connection_reference": hashlib.sha256(connection.encode()).hexdigest()[:12] if connection else None,
+                "cache_status": lower.get("x-omniroute-cache"), "token_headers": token_headers}
     return metadata, values, text
 
 
@@ -199,6 +202,7 @@ def main():
             passed = passed and any(isinstance(item, dict) and item.get("promptTokenCount", 0) > 0 for item in observed["usage"])
             if not stream:
                 passed = passed and metadata["provider"] in {"antigravity", "agy"} and str(metadata["model"]).startswith("gemini-")
+                passed = passed and (metadata.get("token_headers", {}).get("input_tokens") or 0) > 0
         if media:
             try:
                 output = json.loads(observed["text"])
@@ -246,8 +250,13 @@ def main():
         if provider in providers:
             for stream in [False, True]:
                 check(provider + ("_sse" if stream else "_json"), protocol, model, stream)
-    metadata, _, _ = exchange(base, "/v1/chat/completions", key, {"model": "unavailable-acceptance-provider/not-a-model", "messages": [{"role": "user", "content": MARKER}], "stream": False})
+    selected_model = args.gemini_model if "gemini" in providers else args.claude_model if "claude" in providers else args.codex_model
+    invalid_model = selected_model.split("/", 1)[0] + "/not-a-model"
+    metadata, _, _ = exchange(base, "/v1/chat/completions", key, {"model": invalid_model, "messages": [{"role": "user", "content": MARKER}], "stream": False})
     record("invalid_model_rejected", metadata, metadata["http_status"] in {400, 404, 422})
+    metadata, values, _ = exchange(base, "/v1/chat/completions", key, {"model": "unavailable-acceptance-provider/not-a-model", "messages": [{"role": "user", "content": MARKER}], "stream": False})
+    error_code = values[0].get("error", {}).get("code") if values else None
+    record("unconfigured_provider_rejected", metadata, metadata["http_status"] in {401, 403} and error_code == "provider_not_configured", error_code=error_code)
     return 0 if report["passed"] else 1
 
 

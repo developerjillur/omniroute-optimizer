@@ -1,0 +1,1627 @@
+{
+  "schema_version": "1.0",
+  "observed_at_utc": "2026-10-29T03:09:32.699178+00:00",
+  "status": "live_acceptance_passed",
+  "scope": "NexaOmni Google native media and OpenAI compatibility; configured Google/Claude/Codex OAuth connections; Vanalyzer Plan B session integration",
+  "source": {
+    "repository": "developerjillur/omniroute-optimizer",
+    "branch": "fix/cloud-native-media-parity",
+    "pull_request": "https://github.com/developerjillur/omniroute-optimizer/pull/2",
+    "upstream_base": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
+    "runtime_overlay_commit": "ed3b79bd38e83a00dfd2dd8caa4773f33efc5df0",
+    "application_integration_commit": "897c808dbbe61785a1aac20ca3c1c96e0331d9dc",
+    "native_comparison": {
+      "native_reference": "614c46cca8a4480fb300ff6bc6d603f363cbcca9",
+      "native_reference_files": 429,
+      "missing_baseline_files": [],
+      "changed_baseline_files": [
+        "nexa/deploy/build-candidate.sh",
+        "nexa/manifest.json",
+        "nexa/new/tests/unit/agent-bridge-quota-recovery.test.ts",
+        "nexa/patches/open-sse__utils__stream.ts.patch",
+        "nexa/patches/open-sse__utils__streamHandler.ts.patch",
+        "nexa/patches/open-sse__utils__streamReadiness.ts.patch",
+        "nexa/tests/fixtures/native-refusal-delta-v3.8.52.patch",
+        "nexa/tests/write-native-validation.mjs"
+      ],
+      "inherited_native_history": true
+    },
+    "t7_reference_modified": false,
+    "runtime_code_unchanged_since_runtime_overlay_commit": true
+  },
+  "deployment": {
+    "nexaomni": {
+      "image": "nexaomni:3.8.52-native-ed3b79b",
+      "imageId": "sha256:889b8ab4b1c856cac4ebf2d77065f5fcd0c67d16a5ab9b1e5c19c77e0681e46b",
+      "bytes": 409721172,
+      "package": "omniroute-3.8.52.tgz",
+      "packageSha256": "34d36029256c3ec7891ac30291252f59408255a7d8403cf7bbd0cf9f8bf676b0",
+      "overlayCommit": "ed3b79bd38e83a00dfd2dd8caa4773f33efc5df0",
+      "applicationCommit": "897c808dbbe61785a1aac20ca3c1c96e0331d9dc",
+      "buildSeconds": 88.643,
+      "privateEnvironmentBakedIn": false,
+      "hostAvailableGiBAtStart": 20.02
+    },
+    "vanalyzer": {
+      "seconds": 8.261,
+      "schemaChange": false,
+      "browserRestarted": false,
+      "services": {
+        "vanalyzer": {
+          "image": "vanalyzer:1.5.1",
+          "imageId": "sha256:7f1901e5af7bb619c36079cd22aa43e183c6466379eeeaff592b93924ca90a3b",
+          "health": "healthy"
+        },
+        "vanalyzer-context": {
+          "image": "vanalyzer-context:0.2.1",
+          "imageId": "sha256:d0a9c5dfe82fe4023018d63298b07978bea9e16a8c88ad5b1e6b1eed7fd2963a",
+          "health": "healthy"
+        },
+        "vanalyzer-browser": {
+          "image": "vanalyzer-browser:0.1.5",
+          "imageId": "sha256:75ebbb39b0c6cfff12a2e29798c52327d51167295e335441a1d231943c7a5bcc",
+          "health": "healthy"
+        }
+      }
+    },
+    "post_promotion_capabilities": {
+      "version": "1.5.1",
+      "pending": 0,
+      "active": 0,
+      "plan_b": {
+        "enabled": true,
+        "model": "agy/gemini-3.8-flash-low",
+        "account_affinity": "per_video",
+        "session_header": "X-Session-Id"
+      }
+    },
+    "provider_configuration_and_key_identity_retained": true,
+    "other_provider_configurations_retained_but_not_probed": [
+      "zai",
+      "glm",
+      "glmt",
+      "openrouter"
+    ]
+  },
+  "before": [
+    {
+      "case": "native_json",
+      "http_status": 200,
+      "bytes": 285,
+      "events": 1,
+      "visible_characters": 14,
+      "finish_reasons": [
+        "stop"
+      ],
+      "event_keys": [
+        "choices",
+        "created",
+        "id",
+        "model",
+        "object",
+        "usage"
+      ]
+    },
+    {
+      "case": "native_sse",
+      "http_status": 200,
+      "bytes": 0,
+      "events": 0,
+      "visible_characters": 0,
+      "finish_reasons": [],
+      "event_keys": []
+    },
+    {
+      "case": "openai_json",
+      "http_status": 200,
+      "bytes": 293,
+      "events": 1,
+      "visible_characters": 14,
+      "finish_reasons": [
+        "stop"
+      ],
+      "event_keys": [
+        "choices",
+        "created",
+        "id",
+        "model",
+        "object",
+        "usage"
+      ]
+    },
+    {
+      "case": "openai_sse",
+      "http_status": 200,
+      "bytes": 1033,
+      "events": 5,
+      "visible_characters": 14,
+      "finish_reasons": [
+        "stop"
+      ],
+      "event_keys": [
+        "choices",
+        "created",
+        "id",
+        "model",
+        "object",
+        "usage"
+      ]
+    },
+    {
+      "case": "native_media_json",
+      "http_status": 200,
+      "bytes": 368,
+      "events": 1,
+      "visible_characters": 97,
+      "finish_reasons": [
+        "stop"
+      ],
+      "event_keys": [
+        "choices",
+        "created",
+        "id",
+        "model",
+        "object",
+        "usage"
+      ]
+    },
+    {
+      "case": "native_media_sse",
+      "http_status": 200,
+      "bytes": 0,
+      "events": 0,
+      "visible_characters": 0,
+      "finish_reasons": [],
+      "event_keys": []
+    }
+  ],
+  "candidate_api": {
+    "base": "http://127.0.0.1:18129",
+    "checks": [
+      {
+        "name": "health",
+        "http_status": 200,
+        "seconds": 0.03,
+        "bytes": 3,
+        "events": 0,
+        "content_type": "text/plain; charset=utf-8",
+        "provider": null,
+        "model": null,
+        "request_id": null,
+        "connection_reference": null,
+        "cache_status": null,
+        "token_headers": {
+          "input_tokens": null,
+          "output_tokens": null
+        },
+        "passed": true,
+        "model_count": null
+      },
+      {
+        "name": "authentication_required",
+        "http_status": 401,
+        "seconds": 0.025,
+        "bytes": 121,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": null,
+        "model": null,
+        "request_id": null,
+        "connection_reference": null,
+        "cache_status": null,
+        "token_headers": {
+          "input_tokens": null,
+          "output_tokens": null
+        },
+        "passed": true,
+        "model_count": null
+      },
+      {
+        "name": "invalid_key",
+        "http_status": 401,
+        "seconds": 0.024,
+        "bytes": 113,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": null,
+        "model": null,
+        "request_id": null,
+        "connection_reference": null,
+        "cache_status": null,
+        "token_headers": {
+          "input_tokens": null,
+          "output_tokens": null
+        },
+        "passed": true,
+        "model_count": null
+      },
+      {
+        "name": "authenticated_catalog",
+        "http_status": 200,
+        "seconds": 1.052,
+        "bytes": 208269,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": null,
+        "model": null,
+        "request_id": null,
+        "connection_reference": null,
+        "cache_status": null,
+        "token_headers": {
+          "input_tokens": null,
+          "output_tokens": null
+        },
+        "passed": true,
+        "model_count": 512
+      },
+      {
+        "name": "antigravity_json",
+        "http_status": 200,
+        "seconds": 2.18,
+        "bytes": 499,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": "antigravity",
+        "model": "gemini-3.8-flash-low",
+        "request_id": "1793240951272-50d1dfd007c5-9",
+        "connection_reference": "f611bad2cd9c",
+        "cache_status": "MISS",
+        "token_headers": {
+          "input_tokens": 15,
+          "output_tokens": 8
+        },
+        "passed": true,
+        "visible_characters": 15,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "native_envelopes": true,
+        "tool_calls": 0,
+        "usage": [
+          {
+            "promptTokenCount": 15,
+            "candidatesTokenCount": 8,
+            "totalTokenCount": 23
+          }
+        ]
+      },
+      {
+        "name": "antigravity_sse",
+        "http_status": 200,
+        "seconds": 3.31,
+        "bytes": 1247,
+        "events": 2,
+        "content_type": "text/event-stream; charset=utf-8",
+        "provider": "antigravity",
+        "model": "gemini-3.8-flash-low",
+        "request_id": "1793240953450-596e6cdb07bc-a",
+        "connection_reference": "f611bad2cd9c",
+        "cache_status": "MISS",
+        "token_headers": {
+          "input_tokens": 0,
+          "output_tokens": 0
+        },
+        "passed": true,
+        "visible_characters": 15,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "native_envelopes": true,
+        "tool_calls": 0,
+        "usage": [
+          {
+            "promptTokenCount": 15,
+            "candidatesTokenCount": 8,
+            "totalTokenCount": 98,
+            "thoughtsTokenCount": 75
+          },
+          {
+            "promptTokenCount": 15,
+            "candidatesTokenCount": 8,
+            "totalTokenCount": 98,
+            "thoughtsTokenCount": 75
+          }
+        ]
+      },
+      {
+        "name": "openai_json",
+        "http_status": 200,
+        "seconds": 2.181,
+        "bytes": 294,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": "antigravity",
+        "model": "gemini-3.8-flash-low",
+        "request_id": "ec1e5269-b84b-409e-86a3-08be670c08df",
+        "connection_reference": "823c6423bb89",
+        "cache_status": "MISS",
+        "token_headers": {
+          "input_tokens": 91,
+          "output_tokens": 8
+        },
+        "passed": true,
+        "visible_characters": 15,
+        "finish_reasons": [
+          "stop"
+        ],
+        "native_envelopes": null,
+        "tool_calls": 0,
+        "usage": []
+      },
+      {
+        "name": "openai_sse",
+        "http_status": 200,
+        "seconds": 2.088,
+        "bytes": 879,
+        "events": 4,
+        "content_type": "text/event-stream; charset=utf-8",
+        "provider": null,
+        "model": null,
+        "request_id": null,
+        "connection_reference": null,
+        "cache_status": null,
+        "token_headers": {
+          "input_tokens": null,
+          "output_tokens": null
+        },
+        "passed": true,
+        "visible_characters": 15,
+        "finish_reasons": [
+          "stop"
+        ],
+        "native_envelopes": null,
+        "tool_calls": 0,
+        "usage": []
+      },
+      {
+        "name": "video_schema_json",
+        "http_status": 200,
+        "seconds": 16.766,
+        "bytes": 838,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": "antigravity",
+        "model": "gemini-3.8-flash-low",
+        "request_id": "1793240961035-8023457ede24-d",
+        "connection_reference": "f611bad2cd9c",
+        "cache_status": "MISS",
+        "token_headers": {
+          "input_tokens": 478,
+          "output_tokens": 79
+        },
+        "passed": true,
+        "visible_characters": 270,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "native_envelopes": true,
+        "tool_calls": 0,
+        "usage": [
+          {
+            "promptTokenCount": 478,
+            "candidatesTokenCount": 79,
+            "totalTokenCount": 557,
+            "cachedContentTokenCount": 0
+          }
+        ]
+      },
+      {
+        "name": "video_schema_sse",
+        "http_status": 200,
+        "seconds": 15.593,
+        "bytes": 2091,
+        "events": 5,
+        "content_type": "text/event-stream; charset=utf-8",
+        "provider": "antigravity",
+        "model": "gemini-3.8-flash-low",
+        "request_id": "1793240977805-33c96ccbb07b-e",
+        "connection_reference": "f611bad2cd9c",
+        "cache_status": "MISS",
+        "token_headers": {
+          "input_tokens": 0,
+          "output_tokens": 0
+        },
+        "passed": true,
+        "visible_characters": 271,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "native_envelopes": true,
+        "tool_calls": 0,
+        "usage": [
+          {
+            "promptTokenCount": 478,
+            "candidatesTokenCount": 12,
+            "totalTokenCount": 490,
+            "cachedContentTokenCount": 0
+          },
+          {
+            "promptTokenCount": 478,
+            "candidatesTokenCount": 36,
+            "totalTokenCount": 514,
+            "cachedContentTokenCount": 0
+          },
+          {
+            "promptTokenCount": 478,
+            "candidatesTokenCount": 63,
+            "totalTokenCount": 541,
+            "cachedContentTokenCount": 0
+          },
+          {
+            "promptTokenCount": 478,
+            "candidatesTokenCount": 78,
+            "totalTokenCount": 556,
+            "cachedContentTokenCount": 0
+          },
+          {
+            "promptTokenCount": 478,
+            "candidatesTokenCount": 78,
+            "totalTokenCount": 556,
+            "cachedContentTokenCount": 0
+          }
+        ]
+      },
+      {
+        "name": "native_tool_call",
+        "http_status": 200,
+        "seconds": 2.731,
+        "bytes": 551,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": "antigravity",
+        "model": "gemini-3.8-flash-low",
+        "request_id": "1793240993394-43645dd243c0-f",
+        "connection_reference": "f611bad2cd9c",
+        "cache_status": "MISS",
+        "token_headers": {
+          "input_tokens": 57,
+          "output_tokens": 15
+        },
+        "passed": true,
+        "visible_characters": 0,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "native_envelopes": true,
+        "tool_calls": 1,
+        "usage": [
+          {
+            "promptTokenCount": 57,
+            "candidatesTokenCount": 15,
+            "totalTokenCount": 72
+          }
+        ]
+      },
+      {
+        "name": "native_tool_response",
+        "http_status": 200,
+        "seconds": 3.046,
+        "bytes": 511,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": "antigravity",
+        "model": "gemini-3.8-flash-low",
+        "request_id": "1793240996129-f9283207102d-g",
+        "connection_reference": "f611bad2cd9c",
+        "cache_status": "MISS",
+        "token_headers": {
+          "input_tokens": 87,
+          "output_tokens": 8
+        },
+        "passed": true,
+        "visible_characters": 15,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "native_envelopes": true,
+        "tool_calls": 0,
+        "usage": [
+          {
+            "promptTokenCount": 87,
+            "candidatesTokenCount": 8,
+            "totalTokenCount": 95
+          }
+        ]
+      },
+      {
+        "name": "invalid_model_rejected",
+        "http_status": 400,
+        "seconds": 0.04,
+        "bytes": 167,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": null,
+        "model": null,
+        "request_id": null,
+        "connection_reference": null,
+        "cache_status": null,
+        "token_headers": {
+          "input_tokens": null,
+          "output_tokens": null
+        },
+        "passed": true
+      },
+      {
+        "name": "unconfigured_provider_rejected",
+        "http_status": 401,
+        "seconds": 0.037,
+        "bytes": 155,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": null,
+        "model": null,
+        "request_id": null,
+        "connection_reference": null,
+        "cache_status": null,
+        "token_headers": {
+          "input_tokens": null,
+          "output_tokens": null
+        },
+        "passed": true,
+        "error_code": "provider_not_configured"
+      }
+    ],
+    "word_accuracy_verified": false,
+    "passed": true
+  },
+  "public_api": {
+    "base": "https://nexaomni.nexaconnect.cloud",
+    "checks": [
+      {
+        "name": "health",
+        "http_status": 200,
+        "seconds": 0.093,
+        "bytes": 3,
+        "events": 0,
+        "content_type": "text/plain; charset=utf-8",
+        "provider": null,
+        "model": null,
+        "request_id": null,
+        "connection_reference": null,
+        "cache_status": null,
+        "token_headers": {
+          "input_tokens": null,
+          "output_tokens": null
+        },
+        "passed": true,
+        "model_count": null
+      },
+      {
+        "name": "authentication_required",
+        "http_status": 401,
+        "seconds": 0.062,
+        "bytes": 121,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": null,
+        "model": null,
+        "request_id": null,
+        "connection_reference": null,
+        "cache_status": null,
+        "token_headers": {
+          "input_tokens": null,
+          "output_tokens": null
+        },
+        "passed": true,
+        "model_count": null
+      },
+      {
+        "name": "invalid_key",
+        "http_status": 401,
+        "seconds": 0.057,
+        "bytes": 113,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": null,
+        "model": null,
+        "request_id": null,
+        "connection_reference": null,
+        "cache_status": null,
+        "token_headers": {
+          "input_tokens": null,
+          "output_tokens": null
+        },
+        "passed": true,
+        "model_count": null
+      },
+      {
+        "name": "authenticated_catalog",
+        "http_status": 200,
+        "seconds": 1.495,
+        "bytes": 694888,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": null,
+        "model": null,
+        "request_id": null,
+        "connection_reference": null,
+        "cache_status": null,
+        "token_headers": {
+          "input_tokens": null,
+          "output_tokens": null
+        },
+        "passed": true,
+        "model_count": 1459
+      },
+      {
+        "name": "antigravity_json",
+        "http_status": 200,
+        "seconds": 4.203,
+        "bytes": 499,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": "antigravity",
+        "model": "gemini-3.8-flash-low",
+        "request_id": "1793241115065-4dc2357293e7-1",
+        "connection_reference": "b37e8a233859",
+        "cache_status": "MISS",
+        "token_headers": {
+          "input_tokens": 15,
+          "output_tokens": 8
+        },
+        "passed": true,
+        "visible_characters": 15,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "native_envelopes": true,
+        "tool_calls": 0,
+        "usage": [
+          {
+            "promptTokenCount": 15,
+            "candidatesTokenCount": 8,
+            "totalTokenCount": 23
+          }
+        ]
+      },
+      {
+        "name": "antigravity_sse",
+        "http_status": 200,
+        "seconds": 3.872,
+        "bytes": 1411,
+        "events": 2,
+        "content_type": "text/event-stream; charset=utf-8",
+        "provider": "antigravity",
+        "model": "gemini-3.8-flash-low",
+        "request_id": "1793241119021-e3ecbb2e8b60-2",
+        "connection_reference": "b37e8a233859",
+        "cache_status": "MISS",
+        "token_headers": {
+          "input_tokens": 0,
+          "output_tokens": 0
+        },
+        "passed": true,
+        "visible_characters": 15,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "native_envelopes": true,
+        "tool_calls": 0,
+        "usage": [
+          {
+            "promptTokenCount": 15,
+            "candidatesTokenCount": 8,
+            "totalTokenCount": 125,
+            "thoughtsTokenCount": 102
+          },
+          {
+            "promptTokenCount": 15,
+            "candidatesTokenCount": 8,
+            "totalTokenCount": 125,
+            "thoughtsTokenCount": 102
+          }
+        ]
+      },
+      {
+        "name": "openai_json",
+        "http_status": 200,
+        "seconds": 3.101,
+        "bytes": 294,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": "antigravity",
+        "model": "gemini-3.8-flash-low",
+        "request_id": "5700e4b0-7bee-4f5b-ac19-9d89f8b51500",
+        "connection_reference": "f611bad2cd9c",
+        "cache_status": "MISS",
+        "token_headers": {
+          "input_tokens": 91,
+          "output_tokens": 8
+        },
+        "passed": true,
+        "visible_characters": 15,
+        "finish_reasons": [
+          "stop"
+        ],
+        "native_envelopes": null,
+        "tool_calls": 0,
+        "usage": []
+      },
+      {
+        "name": "openai_sse",
+        "http_status": 200,
+        "seconds": 2.714,
+        "bytes": 1035,
+        "events": 5,
+        "content_type": "text/event-stream; charset=utf-8",
+        "provider": null,
+        "model": null,
+        "request_id": null,
+        "connection_reference": null,
+        "cache_status": null,
+        "token_headers": {
+          "input_tokens": null,
+          "output_tokens": null
+        },
+        "passed": true,
+        "visible_characters": 15,
+        "finish_reasons": [
+          "stop"
+        ],
+        "native_envelopes": null,
+        "tool_calls": 0,
+        "usage": []
+      },
+      {
+        "name": "video_schema_json",
+        "http_status": 200,
+        "seconds": 25.96,
+        "bytes": 798,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": "antigravity",
+        "model": "gemini-3.8-flash-low",
+        "request_id": "1793241128714-594dbeb7e6c4-5",
+        "connection_reference": "b37e8a233859",
+        "cache_status": "MISS",
+        "token_headers": {
+          "input_tokens": 476,
+          "output_tokens": 73
+        },
+        "passed": true,
+        "visible_characters": 230,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "native_envelopes": true,
+        "tool_calls": 0,
+        "usage": [
+          {
+            "promptTokenCount": 476,
+            "candidatesTokenCount": 73,
+            "totalTokenCount": 549,
+            "cachedContentTokenCount": 0
+          }
+        ]
+      },
+      {
+        "name": "video_schema_sse",
+        "http_status": 200,
+        "seconds": 19.71,
+        "bytes": 2937,
+        "events": 5,
+        "content_type": "text/event-stream; charset=utf-8",
+        "provider": "antigravity",
+        "model": "gemini-3.8-flash-low",
+        "request_id": "1793241154672-b40bf7dc0362-6",
+        "connection_reference": "b37e8a233859",
+        "cache_status": "MISS",
+        "token_headers": {
+          "input_tokens": 0,
+          "output_tokens": 0
+        },
+        "passed": true,
+        "visible_characters": 252,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "native_envelopes": true,
+        "tool_calls": 0,
+        "usage": [
+          {
+            "promptTokenCount": 476,
+            "candidatesTokenCount": 19,
+            "totalTokenCount": 612,
+            "thoughtsTokenCount": 117,
+            "cachedContentTokenCount": 0
+          },
+          {
+            "promptTokenCount": 476,
+            "candidatesTokenCount": 43,
+            "totalTokenCount": 636,
+            "thoughtsTokenCount": 117,
+            "cachedContentTokenCount": 0
+          },
+          {
+            "promptTokenCount": 476,
+            "candidatesTokenCount": 72,
+            "totalTokenCount": 665,
+            "thoughtsTokenCount": 117,
+            "cachedContentTokenCount": 0
+          },
+          {
+            "promptTokenCount": 476,
+            "candidatesTokenCount": 77,
+            "totalTokenCount": 670,
+            "thoughtsTokenCount": 117,
+            "cachedContentTokenCount": 0
+          },
+          {
+            "promptTokenCount": 476,
+            "candidatesTokenCount": 77,
+            "totalTokenCount": 670,
+            "cachedContentTokenCount": 0,
+            "thoughtsTokenCount": 117
+          }
+        ]
+      },
+      {
+        "name": "native_tool_call",
+        "http_status": 200,
+        "seconds": 2.409,
+        "bytes": 552,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": "antigravity",
+        "model": "gemini-3.8-flash-low",
+        "request_id": "1793241174391-e692b4e99917-7",
+        "connection_reference": "b37e8a233859",
+        "cache_status": "MISS",
+        "token_headers": {
+          "input_tokens": 57,
+          "output_tokens": 15
+        },
+        "passed": true,
+        "visible_characters": 0,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "native_envelopes": true,
+        "tool_calls": 1,
+        "usage": [
+          {
+            "promptTokenCount": 57,
+            "candidatesTokenCount": 15,
+            "totalTokenCount": 72
+          }
+        ]
+      },
+      {
+        "name": "native_tool_response",
+        "http_status": 200,
+        "seconds": 3.152,
+        "bytes": 511,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": "antigravity",
+        "model": "gemini-3.8-flash-low",
+        "request_id": "1793241176790-12900f4b276a-8",
+        "connection_reference": "b37e8a233859",
+        "cache_status": "MISS",
+        "token_headers": {
+          "input_tokens": 87,
+          "output_tokens": 8
+        },
+        "passed": true,
+        "visible_characters": 15,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "native_envelopes": true,
+        "tool_calls": 0,
+        "usage": [
+          {
+            "promptTokenCount": 87,
+            "candidatesTokenCount": 8,
+            "totalTokenCount": 95
+          }
+        ]
+      },
+      {
+        "name": "claude_json",
+        "http_status": 200,
+        "seconds": 2.289,
+        "bytes": 451,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": "cc",
+        "model": "claude-sonnet-5-5",
+        "request_id": "32b3d310-9d87-4133-9dae-5cf19b4feab2",
+        "connection_reference": "da1fa6847b35",
+        "cache_status": "MISS",
+        "token_headers": {
+          "input_tokens": 56,
+          "output_tokens": 16
+        },
+        "passed": true,
+        "visible_characters": 15,
+        "finish_reasons": [
+          "end_turn"
+        ],
+        "native_envelopes": null,
+        "tool_calls": 0,
+        "usage": []
+      },
+      {
+        "name": "claude_sse",
+        "http_status": 200,
+        "seconds": 1.578,
+        "bytes": 1452,
+        "events": 9,
+        "content_type": "text/event-stream; charset=utf-8",
+        "provider": null,
+        "model": null,
+        "request_id": null,
+        "connection_reference": null,
+        "cache_status": null,
+        "token_headers": {
+          "input_tokens": null,
+          "output_tokens": null
+        },
+        "passed": true,
+        "visible_characters": 15,
+        "finish_reasons": [
+          "message_stop"
+        ],
+        "native_envelopes": null,
+        "tool_calls": 0,
+        "usage": []
+      },
+      {
+        "name": "codex_json",
+        "http_status": 200,
+        "seconds": 7.863,
+        "bytes": 644,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": "cx",
+        "model": "gpt-6.1-sol",
+        "request_id": "f9c99f9b-33de-4e2e-b055-6a3030a92d5e",
+        "connection_reference": "0237339801fb",
+        "cache_status": "MISS",
+        "token_headers": {
+          "input_tokens": 31,
+          "output_tokens": 10
+        },
+        "passed": true,
+        "visible_characters": 15,
+        "finish_reasons": [
+          "completed"
+        ],
+        "native_envelopes": null,
+        "tool_calls": 0,
+        "usage": []
+      },
+      {
+        "name": "codex_sse",
+        "http_status": 200,
+        "seconds": 3.374,
+        "bytes": 8792,
+        "events": 15,
+        "content_type": "text/event-stream; charset=utf-8",
+        "provider": "cx",
+        "model": "gpt-6.1-sol",
+        "request_id": "1793241191672-b2cc23e9cd08-c",
+        "connection_reference": "0237339801fb",
+        "cache_status": "MISS",
+        "token_headers": {
+          "input_tokens": 0,
+          "output_tokens": 0
+        },
+        "passed": true,
+        "visible_characters": 15,
+        "finish_reasons": [
+          "completed"
+        ],
+        "native_envelopes": null,
+        "tool_calls": 0,
+        "usage": []
+      },
+      {
+        "name": "invalid_model_rejected",
+        "http_status": 400,
+        "seconds": 0.073,
+        "bytes": 167,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": null,
+        "model": null,
+        "request_id": null,
+        "connection_reference": null,
+        "cache_status": null,
+        "token_headers": {
+          "input_tokens": null,
+          "output_tokens": null
+        },
+        "passed": true
+      },
+      {
+        "name": "unconfigured_provider_rejected",
+        "http_status": 401,
+        "seconds": 0.068,
+        "bytes": 155,
+        "events": 1,
+        "content_type": "application/json",
+        "provider": null,
+        "model": null,
+        "request_id": null,
+        "connection_reference": null,
+        "cache_status": null,
+        "token_headers": {
+          "input_tokens": null,
+          "output_tokens": null
+        },
+        "passed": true,
+        "error_code": "provider_not_configured"
+      }
+    ],
+    "word_accuracy_verified": false,
+    "passed": true
+  },
+  "native_connection_acceptance": {
+    "scope": "One fresh native JSON inference per active OAuth connection; independent X-Session-Id prevents old affinity overriding a requested connection; actual selected connection must match",
+    "started_at": "2026-10-29T02:53:49.073266+00:00",
+    "results": [
+      {
+        "provider": "agy",
+        "priority": 1,
+        "model": "agy/gemini-3.8-flash-low",
+        "connection_reference": "69bb77e3db70",
+        "http_status": 200,
+        "connection_verified": true,
+        "exact_echo": true,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "request_id": "1793242430680-832b067bf839-1n",
+        "visible_characters": 18,
+        "passed": true,
+        "seconds": 4.271
+      },
+      {
+        "provider": "agy",
+        "priority": 2,
+        "model": "agy/gemini-3.8-flash-low",
+        "connection_reference": "39cfed35ef10",
+        "http_status": 200,
+        "connection_verified": true,
+        "exact_echo": true,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "request_id": "1793242433411-c9a56f654675-1o",
+        "visible_characters": 18,
+        "passed": true,
+        "seconds": 3.145
+      },
+      {
+        "provider": "agy",
+        "priority": 3,
+        "model": "agy/gemini-3.8-flash-low",
+        "connection_reference": "b37e8a233859",
+        "http_status": 200,
+        "connection_verified": true,
+        "exact_echo": true,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "request_id": "1793242436555-8b23de0d83bb-1p",
+        "visible_characters": 18,
+        "passed": true,
+        "seconds": 2.903
+      },
+      {
+        "provider": "agy",
+        "priority": 4,
+        "model": "agy/gemini-3.8-flash-low",
+        "connection_reference": "82c494758437",
+        "http_status": 200,
+        "connection_verified": true,
+        "exact_echo": true,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "request_id": "1793242439454-66fe07270bc3-1q",
+        "visible_characters": 18,
+        "passed": true,
+        "seconds": 3.602
+      },
+      {
+        "provider": "agy",
+        "priority": 5,
+        "model": "agy/gemini-3.8-flash-low",
+        "connection_reference": "f611bad2cd9c",
+        "http_status": 200,
+        "connection_verified": true,
+        "exact_echo": true,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "request_id": "1793242443075-671d97660658-1r",
+        "visible_characters": 18,
+        "passed": true,
+        "seconds": 2.322
+      },
+      {
+        "provider": "agy",
+        "priority": 6,
+        "model": "agy/gemini-3.8-flash-low",
+        "connection_reference": "823c6423bb89",
+        "http_status": 200,
+        "connection_verified": true,
+        "exact_echo": true,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "request_id": "1793242445375-c75a2fa05abd-1s",
+        "visible_characters": 18,
+        "passed": true,
+        "seconds": 2.757
+      },
+      {
+        "provider": "agy",
+        "priority": 7,
+        "model": "agy/gemini-3.8-flash-low",
+        "connection_reference": "393bfe01b58a",
+        "http_status": 200,
+        "connection_verified": true,
+        "exact_echo": true,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "request_id": "1793242448133-f9aa72946682-1t",
+        "visible_characters": 18,
+        "passed": true,
+        "seconds": 4.073
+      },
+      {
+        "provider": "agy",
+        "priority": 8,
+        "model": "agy/gemini-3.8-flash-low",
+        "connection_reference": "c232b94d486f",
+        "http_status": 200,
+        "connection_verified": true,
+        "exact_echo": true,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "request_id": "1793242452209-81e11119e0a4-1u",
+        "visible_characters": 18,
+        "passed": true,
+        "seconds": 3.666
+      },
+      {
+        "provider": "antigravity",
+        "priority": 1,
+        "model": "antigravity/gemini-3.8-flash-low",
+        "connection_reference": "35a42fe69d14",
+        "http_status": 200,
+        "connection_verified": true,
+        "exact_echo": true,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "request_id": "1793242455873-7ca688575975-1v",
+        "visible_characters": 18,
+        "passed": true,
+        "seconds": 4.039
+      },
+      {
+        "provider": "antigravity",
+        "priority": 2,
+        "model": "antigravity/gemini-3.8-flash-low",
+        "connection_reference": "522a92148b59",
+        "http_status": 200,
+        "connection_verified": true,
+        "exact_echo": true,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "request_id": "1793242459915-68e057bad82f-1w",
+        "visible_characters": 18,
+        "passed": true,
+        "seconds": 3.291
+      },
+      {
+        "provider": "antigravity",
+        "priority": 3,
+        "model": "antigravity/gemini-3.8-flash-low",
+        "connection_reference": "beb79a620cc9",
+        "http_status": 200,
+        "connection_verified": true,
+        "exact_echo": true,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "request_id": "1793242463213-2ee57d7baf40-1x",
+        "visible_characters": 18,
+        "passed": true,
+        "seconds": 3.045
+      },
+      {
+        "provider": "antigravity",
+        "priority": 4,
+        "model": "antigravity/gemini-3.8-flash-low",
+        "connection_reference": "2f488dccd24e",
+        "http_status": 200,
+        "connection_verified": true,
+        "exact_echo": true,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "request_id": "1793242466246-98259fcbd3e1-1y",
+        "visible_characters": 18,
+        "passed": true,
+        "seconds": 3.782
+      },
+      {
+        "provider": "antigravity",
+        "priority": 5,
+        "model": "antigravity/gemini-3.8-flash-low",
+        "connection_reference": "2e8c230351bd",
+        "http_status": 200,
+        "connection_verified": true,
+        "exact_echo": true,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "request_id": "1793242470032-45c8f9f11235-1z",
+        "visible_characters": 18,
+        "passed": true,
+        "seconds": 2.789
+      },
+      {
+        "provider": "antigravity",
+        "priority": 6,
+        "model": "antigravity/gemini-3.8-flash-low",
+        "connection_reference": "cd9d8bcf19ff",
+        "http_status": 200,
+        "connection_verified": true,
+        "exact_echo": true,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "request_id": "1793242472814-c6e60f7c4d93-20",
+        "visible_characters": 18,
+        "passed": true,
+        "seconds": 2.466
+      },
+      {
+        "provider": "antigravity",
+        "priority": 7,
+        "model": "antigravity/gemini-3.8-flash-low",
+        "connection_reference": "9119c7eeec69",
+        "http_status": 200,
+        "connection_verified": true,
+        "exact_echo": true,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "request_id": "1793242475286-6c8b9d9dfd47-21",
+        "visible_characters": 18,
+        "passed": true,
+        "seconds": 2.39
+      },
+      {
+        "provider": "antigravity",
+        "priority": 8,
+        "model": "antigravity/gemini-3.8-flash-low",
+        "connection_reference": "3dae6e6e10d2",
+        "http_status": 200,
+        "connection_verified": true,
+        "exact_echo": true,
+        "finish_reasons": [
+          "STOP"
+        ],
+        "request_id": "1793242477677-9b927edf11c9-22",
+        "visible_characters": 18,
+        "passed": true,
+        "seconds": 3.294
+      },
+      {
+        "provider": "claude",
+        "priority": 1,
+        "model": "claude/claude-sonnet-5-5",
+        "connection_reference": "da1fa6847b35",
+        "http_status": 200,
+        "connection_verified": true,
+        "exact_echo": true,
+        "finish_reasons": [
+          "end_turn"
+        ],
+        "request_id": "e4a64970-b084-4554-b4bd-2dec4f04d341",
+        "visible_characters": 18,
+        "passed": true,
+        "seconds": 2.003
+      },
+      {
+        "provider": "claude",
+        "priority": 2,
+        "model": "claude/claude-sonnet-5-5",
+        "connection_reference": "6ed30a5a222f",
+        "http_status": 200,
+        "connection_verified": true,
+        "exact_echo": true,
+        "finish_reasons": [
+          "end_turn"
+        ],
+        "request_id": "525296f9-2cdb-4de9-a720-93a962cc07d3",
+        "visible_characters": 18,
+        "passed": true,
+        "seconds": 1.858
+      },
+      {
+        "provider": "codex",
+        "priority": 1,
+        "model": "codex/gpt-6.1-sol",
+        "connection_reference": "0237339801fb",
+        "http_status": 200,
+        "connection_verified": true,
+        "exact_echo": true,
+        "finish_reasons": [
+          "completed"
+        ],
+        "request_id": "9b9d3838-d536-4b59-80f6-3ce917039250",
+        "visible_characters": 18,
+        "passed": true,
+        "seconds": 4.064
+      }
+    ],
+    "passed": true,
+    "finished_at": "2026-10-29T02:54:48.844342+00:00"
+  },
+  "connection_summary": {
+    "antigravity": {
+      "connections": 8,
+      "passed": 8
+    },
+    "agy": {
+      "connections": 8,
+      "passed": 8
+    },
+    "claude": {
+      "connections": 2,
+      "passed": 2
+    },
+    "codex": {
+      "connections": 1,
+      "passed": 1
+    }
+  },
+  "connection_median_seconds": 3.145,
+  "scoped_key_crosscheck": {
+    "tested": 19,
+    "exact_echoes": 19,
+    "actual_identities_verified": 19,
+    "original_application_keys": 1,
+    "final_application_keys": 1,
+    "all_temporary_keys_deleted": true,
+    "scope": "One temporary key per connection with a one-connection allowlist; SQL usage traces verified; current Gemini 3.8 model"
+  },
+  "session_integration": {
+    "finding": "Without explicit native conversation IDs, independent requests shared an affinity fingerprint; an old session pin can outrank a later requested account hint",
+    "fix": "X-Session-Id: vanalyzer-video-<video_id>; stable within a video, separate between videos",
+    "source_patch": "../integrations/vanalyzer-session.patch",
+    "separate_session_native_identity_checks": 19
+  },
+  "fresh_plan_b": {
+    "execution": "Isolated candidate of the exact deployed Vanalyzer 1.5.1 image, real production gateway and browser metadata, no caption-cache access",
+    "transcript": {
+      "scope": "Fresh provider generation without transcript-cache access",
+      "video_id": "9F_vMwkmbpc",
+      "word_accuracy_verified": false,
+      "passed": true,
+      "segment_count": 65,
+      "language": "bn",
+      "characters": 2418,
+      "source": "ai_transcription",
+      "timing_precision": "model_estimated",
+      "quality": {
+        "status": "ai_generated_unverified",
+        "verified_against_audio": false,
+        "full_video_coverage": null,
+        "source_accuracy": null,
+        "warning": "Gemini-generated speech transcription; wording, timing and coverage need review."
+      },
+      "generation": {
+        "strategy": "windowed",
+        "model": "agy/gemini-3.8-flash-low",
+        "transport": "native_video_file_uri",
+        "duration_seconds": 221.0,
+        "duration_basis": "youtube_player",
+        "timestamp_basis": "normalized_to_source",
+        "windows": [
+          {
+            "start_seconds": 0,
+            "end_seconds": 221.0,
+            "status": "ok",
+            "model_reported_complete": true,
+            "timestamp_basis": "clip_relative_shifted_to_source"
+          }
+        ],
+        "requests": [
+          {
+            "provider": "youtube_browser_metadata",
+            "duration_basis": "youtube_player",
+            "duration_seconds": 221.0,
+            "elapsed_ms": 3570
+          },
+          {
+            "usage": {
+              "promptTokenCount": 1013,
+              "candidatesTokenCount": 2957,
+              "totalTokenCount": 3970,
+              "cachedContentTokenCount": 0
+            },
+            "model": "agy/gemini-3.8-flash-low",
+            "input": "youtube_video_file_uri",
+            "start_seconds": 0,
+            "end_seconds": 221.0,
+            "finish_reason": "STOP",
+            "response_mode": "json",
+            "elapsed_ms": 25963
+          }
+        ],
+        "independently_verified": false
+      },
+      "cached": false,
+      "seconds": 29.543
+    },
+    "post_promotion_public_semantic_job": {
+      "scope": "Fresh public Vanalyzer semantic context job through updated NexaOmni",
+      "submitted_status": 202,
+      "job_id": "a55081ae8216493ab30bff2320f7ac35",
+      "window": [
+        85,
+        95
+      ],
+      "passed": true,
+      "state": "completed",
+      "seconds": 32.711,
+      "manifest_keys": [
+        "analysis",
+        "artifacts",
+        "captions",
+        "contact_sheets",
+        "created_at",
+        "frames",
+        "job_id",
+        "manifest_url",
+        "media",
+        "packet",
+        "recovery",
+        "request",
+        "result_kind",
+        "retention",
+        "sampling",
+        "schema_version",
+        "source_url",
+        "video_id",
+        "warnings"
+      ],
+      "result_kind": "semantic_context",
+      "semantic_keys": [
+        "end_seconds",
+        "independently_verified",
+        "limitations",
+        "method",
+        "motion_analysis",
+        "observations",
+        "ocr",
+        "requests",
+        "semantic_model",
+        "source_metadata",
+        "start_seconds",
+        "status",
+        "summary"
+      ],
+      "frames": 0,
+      "media_absent": true,
+      "observations": 4
+    }
+  },
+  "validation": {
+    "core_typecheck": "passed",
+    "full_compiler": {
+      "completed": true,
+      "diagnostics": 6510,
+      "existing_ceiling": 6529,
+      "new_diagnostic_identity_comparison": "passed in GitHub source checks"
+    },
+    "protocol_tests": {
+      "tests": 85,
+      "pass": 85,
+      "fail": 0
+    },
+    "native_bridge_tests": {
+      "tests": 674,
+      "pass": 674,
+      "fail": 0
+    },
+    "native_ui_tests": {
+      "tests": 39,
+      "pass": 39,
+      "fail": 0
+    },
+    "provider_routing_tests": {
+      "tests": 63,
+      "pass": 63,
+      "fail": 0
+    },
+    "routing_protocol_tests": {
+      "tests": 79,
+      "pass": 79,
+      "fail": 0
+    },
+    "security_tests": {
+      "tests": 34,
+      "pass": 34,
+      "fail": 0
+    },
+    "deployment_helpers": {
+      "tests": 61,
+      "pass": 60,
+      "fail": 0,
+      "skipped": 1,
+      "skip_reason": "macOS wildcard Local listener fixture cannot run on Linux"
+    },
+    "cloud_python_helpers": {
+      "tests": 15,
+      "pass": 15
+    },
+    "vanalyzer_python": {
+      "tests": 164,
+      "pass": 164,
+      "seconds": 11.44,
+      "warnings": 1,
+      "warning": "Starlette TestClient httpx deprecation"
+    },
+    "production_pages": 639,
+    "package_policy": "passed; explicitly recorded custom canary build",
+    "ci_repairs": {
+      "previous_run": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/40804220424",
+      "previous_failed_gates": [
+        "baseline fixture context",
+        "two explicit-any test lint errors"
+      ],
+      "exact_pristine_fixture_roundtrip_files": 7,
+      "pristine_regression": {
+        "tests": 28,
+        "expected_assertion_failures": 18,
+        "setup_errors": 0
+      },
+      "corrected_regression": {
+        "tests": 28,
+        "pass": 28
+      },
+      "target_lint_and_format": "passed",
+      "source_ci_location": "See the exact commit checks on PR 2; runtime acceptance is recorded separately"
+    }
+  },
+  "resources": {
+    "production_build_peak_mib": 6867,
+    "process_group_limit_mib": 8192,
+    "minimum_host_available_gib": 13.59,
+    "swap_growth_bytes": 0,
+    "stopped_for_resource_pressure": false,
+    "runtime_image_bytes": 409721172
+  },
+  "rollback": {
+    "old_nexaomni_image_retained": "nexaomni:3.8.52-614c46c",
+    "old_vanalyzer_images_retained": [
+      "vanalyzer:1.5.0",
+      "vanalyzer-context:0.2.0"
+    ],
+    "consistent_database_and_matching_environment_retained": true,
+    "nexaomni_off_server_snapshot_integrity": "ok; immutable read of standalone consistent snapshot",
+    "schema_change": false,
+    "runbook": "../UPDATE.md"
+  },
+  "limits": [
+    "These are measured protocol/schema and connection checks; not universal support for every provider or model.",
+    "Generated transcription, semantic observations and timing have not been independently checked against the audio/video; word accuracy and complete speech coverage remain unmeasured.",
+    "The inherited TypeScript diagnostic count is not zero.",
+    "Optional browser-module static dependency warnings remain; configured Codex JSON/SSE inference passed.",
+    "No new fresh 100-video benchmark is claimed for the session-only patch; earlier 100-video results remain dated historical evidence."
+  ]
+}

@@ -1,7 +1,7 @@
 name: nexaomni
 services:
   gateway:
-    image: nexaomni:3.8.52-614c46c
+    image: nexaomni:3.8.52-native-ed3b79b
     pull_policy: never
     container_name: nexaomni-gateway
     restart: unless-stopped

@@ -17,6 +17,8 @@ Source inventory-এর প্রতিটি byte/hash এবং নতুন f
 
 Build admission: host-এ অন্তত 10 GiB headroom-এর সঙ্গে build-এর 8 GiB RSS budget থাকতে হবে, swap growth ও disk headroom মাপতে হবে। Node 24.15.0, one worker, heap 6144 MiB, process-group RSS cap 8192 MiB, Docker memory 10 GiB/CPU 4 ব্যবহার করুন। Existing dependency cache কেবল exact `package-lock.json` মেলা সাপেক্ষে reuse করুন। Heavy jobs ধারাবাহিকভাবে চলবে।
 
+Shared `node_modules` read-only mount করলে Vitest-এর `.vite` ও `.vite-temp` paths-এ task-এর নিজস্ব writable directories nested mount করুন। Dependency files বদলাবেন না। Environment-only failure-এর পরে একই source/dependency hash বহাল থাকলে completed gate receipt রেখে ব্যর্থ ধাপ থেকে resume করা যায়; source বদলালে সংশ্লিষ্ট gates আবার চালাতে হবে।
+
 Named build-এ `nexalance.job` label দিন। Host guard-এর আলাদা receipt রাখুন:
 
 ```sh

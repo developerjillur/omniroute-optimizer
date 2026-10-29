@@ -57,6 +57,8 @@ Public domain চালু হওয়ার পরে এই প্রতিট�
 
 ## Backup ও update
 
+Cloud-native release-এর measured ফল `reports/`-এ থাকে। Account routing পুনরায় যাচাইয়ের জন্য `verify-connections.py` ব্যবহার করুন; [API contract](API-CONTRACT.md)-এ session affinity ও strict connection isolation-এর নিয়ম আছে।
+
 `backup.py` consistent SQLite backup, matching environment এবং integrity receipt `/opt/nexaomni/backups/`-এ রাখে। Daily timer 01:30 UTC-এর পরে সর্বোচ্চ 300-second jitter-এ চলে; সর্বশেষ সাতটি marked backup থাকে। Backup-এর পুরো directory private রাখুন এবং আলাদা machine-এ একটি copy সংরক্ষণ করুন। Restore-এর আগে service বন্ধ করে current data অক্ষত নতুন rollback directory-তে রাখুন; database ও environment জোড়া মিলিয়ে ফিরিয়ে আনুন।
 
 Updates নতুন pinned source ও image দিয়ে করুন। পুরোনো image ও fresh consistent data backup রেখে candidate-এ migration ও বাস্তব inference যাচাই করুন। এই service-এর volume ব্যবহার করে দ্বিতীয় instance একসঙ্গে চালাবেন না। অন্য OmniRoute বা Vanalyzer service এই compose project-এর অংশ নয়।

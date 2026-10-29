@@ -116,6 +116,7 @@ const receipt = {
   node24: {
     tooling: tap("tooling-node24.tap"),
     native: tap("native-production.tap"),
+    cloudProtocol: tap("cloud-protocol.tap"),
     nativeEfforts: tap("effort-production.tap"),
     upgradeMigrations: tap("production-migrations.tap"),
     productionDnsShimLoaded: true,

@@ -52,13 +52,19 @@ class NativeAcceptanceTests(unittest.TestCase):
             def exchange(base, path, key=None, body=None):
                 status = 200
                 if path == "/v1/models" and key != "synthetic-acceptance-key": status = 401
-                if body and body.get("model", "").startswith("unavailable-"): status = 404
-                return {"http_status": status, "seconds": 0, "provider": None, "model": None}, [], ""
+                values = []
+                if body and body.get("model", "").startswith("unavailable-"):
+                    status, values = 401, [{"error": {"code": "provider_not_configured"}}]
+                elif body and body.get("model", "").endswith("/not-a-model"):
+                    status = 400
+                return {"http_status": status, "seconds": 0, "provider": None, "model": None}, values, ""
             with patch.object(api, "exchange", exchange), patch.object(sys, "argv", ["verify-api", "--credentials", str(credentials), "--output", str(output)]):
                 self.assertEqual(api.main(), 1)
             result = json.loads(output.read_text())
             self.assertFalse(result["passed"])
             self.assertFalse(next(row for row in result["checks"] if row["name"] == "antigravity_sse")["passed"])
+            for name in ["invalid_model_rejected", "unconfigured_provider_rejected"]:
+                self.assertTrue(next(row for row in result["checks"] if row["name"] == name)["passed"])
             self.assertNotIn("synthetic-acceptance-key", output.read_text())
 
 

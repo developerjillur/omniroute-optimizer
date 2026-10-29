@@ -4,7 +4,7 @@ if [ "$#" -gt 0 ]; then cd "$1"; fi
 export NODE_ENV=test DISABLE_SQLITE_AUTO_BACKUP=true MITM_AUTO_RECOVER=false
 export OMNIROUTE_SKIP_SYSTEM_TRUST=1 OMNIROUTE_SKIP_DNS_WRITE=1 OMNIROUTE_SSE_COMMENTS=false
 node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts \
-  --import ./tests/_setup/isolateDataDir.ts --test --test-concurrency=1 \
+  --import ./tests/_setup/isolateDataDir.ts --test --test-reporter=tap --test-concurrency=1 \
   tests/unit/native-gemini-cloud-contract.test.ts \
   tests/unit/native-gemini-buffer.test.ts \
   tests/unit/antigravity-streaming-passthrough.test.ts \

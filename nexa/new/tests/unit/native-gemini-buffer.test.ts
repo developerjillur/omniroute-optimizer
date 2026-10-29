@@ -62,7 +62,15 @@ test("native JSON retains opaque signatures, call identity and provider metadata
       false
     )
   );
-  const native = output.response as Record<string, any>;
+  const native = output.response as {
+    modelVersion: string;
+    responseId: string;
+    candidates: Array<{
+      content: { parts: unknown[] };
+      groundingMetadata: { groundingChunks: Array<{ web: { title: string } }> };
+    }>;
+    usageMetadata: { cachedContentTokenCount: number };
+  };
   assert.equal(output.requestId, "outer-id");
   assert.equal(native.modelVersion, "gemini-test");
   assert.equal(native.responseId, "native-response");
@@ -103,7 +111,8 @@ test("native length and safety reasons are preserved instead of rewritten to STO
       },
     ])
   );
-  assert.equal((value.response as any).candidates[0].finishReason, "MAX_TOKENS");
+  const native = value.response as { candidates: Array<{ finishReason: string }> };
+  assert.equal(native.candidates[0].finishReason, "MAX_TOKENS");
 });
 
 test("a source safety block without candidates remains a source safety block", async () => {

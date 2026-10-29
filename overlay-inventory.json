@@ -7,7 +7,7 @@
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
   "trackedNexaFiles": 462,
-  "totalNexaBytes": 2073580,
+  "totalNexaBytes": 2073960,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -139,9 +139,9 @@
     {
       "path": "nexa/cloud/integrations/vanalyzer-session.patch",
       "mode": "100644",
-      "gitBlobSha": "e32e2ebae2595a7536d7746234558c834ec7343c",
-      "bytes": 2376,
-      "sha256": "11d2b3aedfbfff9c55f7422298c20b8bf3a8317c2bca218a262e3efe2f80beca"
+      "gitBlobSha": "db9e322a91483d14239cb387ce1b0682c91b9596",
+      "bytes": 2756,
+      "sha256": "a2575808c42626d9993a4980b716fbefb27fdb0eb323f772f385ba75d7b6d039"
     },
     {
       "path": "nexa/cloud/nexaomni-backup.service",

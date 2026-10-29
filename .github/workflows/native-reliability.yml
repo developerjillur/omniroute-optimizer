@@ -3,7 +3,7 @@ name: Native reliability
 on:
   workflow_dispatch:
   pull_request:
-    branches: [main]
+    branches: [main, feat/nexaomni-cloud]
   push:
     branches: [main]
 

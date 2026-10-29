@@ -2,6 +2,7 @@ name: nexaomni-acceptance
 services:
   gateway:
     image: ${NEXAOMNI_CANDIDATE_IMAGE:?Set a verified candidate image}
+    pull_policy: never
     container_name: nexaomni-candidate
     restart: "no"
     init: true

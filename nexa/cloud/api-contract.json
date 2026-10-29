@@ -13,13 +13,24 @@
     "uri_field": "fileUri",
     "mime_type": "video/mp4",
     "clip_field": "request.contents[].parts[].videoMetadata",
-    "clip_offsets": ["startOffset", "endOffset"],
+    "clip_offsets": [
+      "startOffset",
+      "endOffset"
+    ],
     "structured_output": "request.generationConfig.responseSchema",
     "json_candidates": "response.candidates",
     "sse_candidates": "data.response.candidates",
     "usage": "response.usageMetadata",
     "terminal": "response.candidates[].finishReason",
     "done_sentinel": false,
+    "native_json_max_bytes": 4194304,
+    "native_json_errors": [
+      "native_incomplete",
+      "native_timeout",
+      "native_response_limit",
+      "native_upstream_error",
+      "native_invalid_response"
+    ],
     "quality": "model-generated; accuracy and complete speech coverage need independent verification"
   },
   "native_protocols": {

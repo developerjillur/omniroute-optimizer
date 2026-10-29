@@ -19,7 +19,7 @@ index c5e8b0fff07ceaed549fd926614713dbc20a09d9..b8c11cbe86f1ddacdf622c6e352b7d08
    parseSSEDataPayload,
 @@ -149,6 +152,7 @@ type StreamLogger = {
  };
- 
+
  type StreamCompletePayload = {
 +  nativeSuggestionSilence?: boolean;
    status: number;
@@ -27,7 +27,7 @@ index c5e8b0fff07ceaed549fd926614713dbc20a09d9..b8c11cbe86f1ddacdf622c6e352b7d08
    /** Minimal response body for call log (streaming: usage + note; non-streaming not used) */
 @@ -182,6 +186,7 @@ type StreamCompletePayload = {
  const DEFAULT_STREAM_BUFFER_BYTES = 16384;
- 
+
  type StreamOptions = {
 +  nativeSuggestionRequest?: boolean;
    mode?: string;
@@ -35,7 +35,7 @@ index c5e8b0fff07ceaed549fd926614713dbc20a09d9..b8c11cbe86f1ddacdf622c6e352b7d08
    sourceFormat?: string;
 @@ -482,12 +487,12 @@ function toResponsesCompletedWithToolCalls(parsed: JsonRecord, toolCalls: ToolCa
  }
- 
+
  type ClaudeEmptyResponseLifecycle = {
 +  stopReason: string | null;
    hasMessageStart: boolean;
@@ -48,7 +48,7 @@ index c5e8b0fff07ceaed549fd926614713dbc20a09d9..b8c11cbe86f1ddacdf622c6e352b7d08
    warningLogged: boolean;
  };
 @@ -496,12 +501,12 @@ const SYNTHETIC_CLAUDE_EMPTY_RESPONSE_TEXT = "";
- 
+
  export function createClaudeEmptyResponseLifecycle(): ClaudeEmptyResponseLifecycle {
    return {
 +    stopReason: null,
@@ -141,7 +141,7 @@ index c5e8b0fff07ceaed549fd926614713dbc20a09d9..b8c11cbe86f1ddacdf622c6e352b7d08
    // `event:` framing is only part of the SSE protocol for OpenAI Responses API
    // and Claude Messages API passthrough; a plain OpenAI Chat-Completions-format
 @@ -1153,7 +1198,12 @@ export function createSSEStream(options: StreamOptions = {}) {
- 
+
    const clearSeen = { done: false };
    const clearPendingRequestFromStream = () => {
 -    clearPendingRequestOnce(clearSeen, { model, provider, connectionId, pendingRequestId });
@@ -152,7 +152,7 @@ index c5e8b0fff07ceaed549fd926614713dbc20a09d9..b8c11cbe86f1ddacdf622c6e352b7d08
 +      pendingRequestId,
 +    });
    };
- 
+
    const emitClaudeEmptyStreamErrorAndAbort = (
 @@ -1166,7 +1216,10 @@ export function createSSEStream(options: StreamOptions = {}) {
        `[STREAM] Empty Claude stream at flush - emitting error (${provider || "provider"}:${model || "unknown"})`
@@ -167,7 +167,7 @@ index c5e8b0fff07ceaed549fd926614713dbc20a09d9..b8c11cbe86f1ddacdf622c6e352b7d08
      reqLogger?.appendConvertedChunk?.(errOutput);
      clientPayloadCollector.push(errorEvent);
 @@ -1236,6 +1289,7 @@ export function createSSEStream(options: StreamOptions = {}) {
- 
+
      if (
        sourceFormat === FORMATS.CLAUDE &&
 +      !completedSilentSuggestion &&
@@ -177,7 +177,7 @@ index c5e8b0fff07ceaed549fd926614713dbc20a09d9..b8c11cbe86f1ddacdf622c6e352b7d08
 @@ -1253,6 +1307,44 @@ export function createSSEStream(options: StreamOptions = {}) {
      forward(controller, encoder.encode(output));
    };
- 
+
 +  const noteNativeGeminiPayload = (payload: unknown): boolean => {
 +    if (clientResponseFormat !== FORMATS.GEMINI && clientResponseFormat !== FORMATS.ANTIGRAVITY) {
 +      return false;
@@ -304,7 +304,7 @@ index c5e8b0fff07ceaed549fd926614713dbc20a09d9..b8c11cbe86f1ddacdf622c6e352b7d08
 @@ -2214,7 +2299,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                        reasoningDelta
                      );
- 
+
 -                  const extracted = extractUsage(parsed);
 +                  const extracted = extractStreamUsage(parsed);
                    if (extracted) {
@@ -312,7 +312,7 @@ index c5e8b0fff07ceaed549fd926614713dbc20a09d9..b8c11cbe86f1ddacdf622c6e352b7d08
                    }
 @@ -2364,7 +2449,7 @@ export function createSSEStream(options: StreamOptions = {}) {
              reasoningObserver.note(parsed, Date.now());
- 
+
            if (shouldDropResponsesCommentary && dropCommentary(parsed as JsonRecord)) continue;
 -          providerPayloadCollector.push(parsed);
 +          collectProviderPayload(parsed);
@@ -321,7 +321,7 @@ index c5e8b0fff07ceaed549fd926614713dbc20a09d9..b8c11cbe86f1ddacdf622c6e352b7d08
            }
 @@ -2519,13 +2604,19 @@ export function createSSEStream(options: StreamOptions = {}) {
            }
- 
+
            // Extract usage
 -          const extracted = extractUsage(parsed);
 +          const extracted = extractStreamUsage(parsed);
@@ -405,7 +405,7 @@ index c5e8b0fff07ceaed549fd926614713dbc20a09d9..b8c11cbe86f1ddacdf622c6e352b7d08
 @@ -2910,20 +3017,23 @@ export function createSSEStream(options: StreamOptions = {}) {
                    message.content = "";
                  }
- 
+
 -                const responseBody = {
 -                  choices: [
 -                    {
@@ -530,7 +530,7 @@ index c5e8b0fff07ceaed549fd926614713dbc20a09d9..b8c11cbe86f1ddacdf622c6e352b7d08
 +    nativeSuggestionRequest,
    });
  }
- 
+
 @@ -3404,6 +3525,9 @@ export function createPassthroughStreamWithLogger(
  ) {
    return createSSEStream({

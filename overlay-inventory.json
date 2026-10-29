@@ -7,7 +7,7 @@
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
   "trackedNexaFiles": 451,
-  "totalNexaBytes": 1964608,
+  "totalNexaBytes": 1964548,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -1784,9 +1784,9 @@
     {
       "path": "nexa/patches/open-sse__handlers__responseTranslator.ts__cloud-native.patch",
       "mode": "100644",
-      "gitBlobSha": "fa9d3624013085d2ab119db46351669228ec037f",
-      "bytes": 675,
-      "sha256": "d16ab04c8b954c0d83dc958d38e4edbe330bcfd0abf1260e1b2312c1e9235674"
+      "gitBlobSha": "1afa8a1d2a4546dac41b4290242d90d53af83f17",
+      "bytes": 628,
+      "sha256": "c93325c47ed0d6016d3625754109e4343116f6095968e7c5c3440c6410c7662e"
     },
     {
       "path": "nexa/patches/open-sse__handlers__sseParser.ts.patch",
@@ -1924,9 +1924,9 @@
     {
       "path": "nexa/patches/open-sse__utils__stream.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "4d818ddd26415afe93d76392ec213f896fc9cba3",
-      "bytes": 26692,
-      "sha256": "abf0a5808ddcac0e0b956df7688191179e457931d9643faf9c55141acbf982f1"
+      "gitBlobSha": "66aafa3fa049a67267bb7de71a4ceaa0b54d1920",
+      "bytes": 26679,
+      "sha256": "6d02fb59f5b13ec5a2c5a57589269fe38e3c571e65578c303717522b6dea2deb"
     },
     {
       "path": "nexa/patches/open-sse__utils__streamClaudeEmptyBody.ts.patch",

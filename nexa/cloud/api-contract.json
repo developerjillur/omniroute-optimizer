@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "profile": "nexaomni-vanalyzer",
+  "application_base": "3.8.52",
+  "upstream_commit": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
+  "api_origin": "https://nexaomni.nexaconnect.cloud",
+  "authentication": "Authorization: Bearer <server-side private key>",
+  "gemini_media": {
+    "endpoint": "/v1/antigravity",
+    "model": "agy/gemini-3.8-flash-low",
+    "stream_flag_must_be_explicit": true,
+    "media_part": "request.contents[].parts[].fileData",
+    "uri_field": "fileUri",
+    "mime_type": "video/mp4",
+    "clip_field": "request.contents[].parts[].videoMetadata",
+    "clip_offsets": ["startOffset", "endOffset"],
+    "structured_output": "request.generationConfig.responseSchema",
+    "json_candidates": "response.candidates",
+    "sse_candidates": "data.response.candidates",
+    "usage": "response.usageMetadata",
+    "terminal": "response.candidates[].finishReason",
+    "done_sentinel": false,
+    "quality": "model-generated; accuracy and complete speech coverage need independent verification"
+  },
+  "native_protocols": {
+    "anthropic_messages": "/v1/messages",
+    "openai_responses": "/v1/responses",
+    "openai_chat": "/v1/chat/completions"
+  },
+  "required_release_gates": [
+    "overlay inventory and pristine base",
+    "migration preflight and cloned-data migration",
+    "core types and completed full diagnostic ratchet",
+    "native protocol regressions",
+    "production package and isolated candidate",
+    "authenticated real media JSON and SSE completion",
+    "post-promotion API and Plan B acceptance"
+  ],
+  "persistence": {
+    "data": "/opt/nexaomni/data",
+    "private_environment": "/opt/nexaomni/private/runtime.env",
+    "rollback_requires_matching_database_and_encryption_key": true
+  }
+}

@@ -8,6 +8,7 @@ mkdir -p "$DATA_DIR"
 unset OMNIROUTE_BUILD_BACKEND_ONLY OMNIROUTE_BUILD_PROFILE OMNIROUTE_SKIP_STANDALONE
 npx --no-install fumadocs-mdx
 npm run typecheck:core
+bash "$(dirname "${BASH_SOURCE[0]}")/../cloud/test-contracts.sh"
 node --import tsx/esm --test --test-concurrency=1 tests/unit/nexa-google-account-health.test.ts tests/unit/nexa-google-account-routing.test.ts tests/unit/nexa-google-quota-token-refresh.test.ts tests/unit/nexa-model-test-connection.test.ts tests/unit/model-test-route.test.ts tests/unit/model-test-runner.test.ts tests/unit/probe-testall-isolation.test.ts tests/unit/token-refresh-serialized-stale-rotation.test.ts
 node --test --test-concurrency=1 nexa/deploy/bootstrap-launchdaemon.test.mjs nexa/deploy/native-ingress.test.mjs nexa/deploy/ensure-free-space.test.mjs nexa/deploy/stop-owned-bridge.test.mjs nexa/deploy/run-bounded-build.test.mjs nexa/deploy/bridge-gate.test.mjs nexa/deploy/dashboard-gate.test.mjs nexa/deploy/build-candidate.test.mjs nexa/deploy/tsc-ratchet.test.mjs tests/unit/deployment-policy.test.mjs
 node scripts/check/check-tsc-ratchet.mjs --ratchet | tee "$OUTDIR/tsc-ratchet.log"

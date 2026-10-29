@@ -1,0 +1,15 @@
+diff --git a/open-sse/handlers/responseTranslator.ts b/open-sse/handlers/responseTranslator.ts
+index dd61cd2bdeee0d7e6d6909fde64bef9a12c47ef8..4a87714e10d89584aa429cb3f16b48d5946dd314 100644
+--- a/open-sse/handlers/responseTranslator.ts
++++ b/open-sse/handlers/responseTranslator.ts
+@@ -181,6 +181,10 @@ export function translateNonStreamingResponse(
+     if (targetFormat === FORMATS.OPENAI) {
+       restoreOpenAIToolNames(responseBody, toolNameMap);
+     }
++    if (sourceFormat === FORMATS.ANTIGRAVITY) {
++      const root = toRecord(responseBody);
++      return Array.isArray(root.candidates) ? { response: root } : responseBody;
++    }
+     return responseBody;
+   }
+ 

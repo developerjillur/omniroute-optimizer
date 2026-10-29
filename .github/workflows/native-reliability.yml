@@ -291,6 +291,9 @@ jobs:
           export DATA_DIR="$RUNNER_TEMP/production-migration-data"
           export TMPDIR="$RUNNER_TEMP"
           node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/db/native-upgrade-migration-identity.test.ts tests/unit/db/native-upgrade-history-preservation.test.ts | tee "$RUNNER_TEMP/production-migrations.tap"
+      - name: Verify cloud native media protocol contracts
+        id: cloud_api
+        run: bash "$RUNNER_TEMP/omniroute-fixture/nexa/cloud/test-contracts.sh" "$RUNNER_TEMP/omniroute-fixture"
       - name: Require committed formatting
         id: formatting
         continue-on-error: true

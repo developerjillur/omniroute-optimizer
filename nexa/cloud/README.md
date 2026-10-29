@@ -1,6 +1,8 @@
 # NexaOmni cloud deployment
 
-এই deployment local `omni.local` ও server-এর অন্য OmniRoute service থেকে স্বাধীন। Application base `v3.8.52` / `ad6f33f66bda34eba98645d3bfdabbde294bc843`; routing ও reliability overlay `614c46cca8a4480fb300ff6bc6d603f363cbcca9` থেকে নেওয়া। Cloud tools এই directory-তে সংরক্ষিত। Full build-এর সময় ধরা পড়া `mitm-unexpected-child-exit` test fixture-এর event lifecycle সংশোধনের একটি patch যোগ হয়েছে; production routing code বদলায়নি।
+Native media contract, bounded API acceptance ও Vanalyzer profile: [API-CONTRACT.md](API-CONTRACT.md), [machine-readable contract](api-contract.json), [configuration example](vanalyzer.env.example)। Production build gate এখন `test-contracts.sh`-এর native Gemini, buffered JSON ও video transport regressions-ও চালায়। Native event-কে OpenAI chunk হিসেবে drop করা এবং legacy buffered payload-এর ভুল format classification source-এ সংশোধিত; live acceptance আলাদা dated receipt-এ রাখতে হবে।
+
+এই deployment local `omni.local` ও server-এর অন্য OmniRoute service থেকে স্বাধীন। Application base `v3.8.52` / `ad6f33f66bda34eba98645d3bfdabbde294bc843`। প্রথম cloud release-এর routing ও reliability overlay `614c46cca8a4480fb300ff6bc6d603f363cbcca9` থেকে নেওয়া হয়েছিল; তখনকার অতিরিক্ত পরিবর্তন test fixture-এ সীমাবদ্ধ ছিল। বর্তমান source-এ উপরের native media fixes-ও রয়েছে। Source commit, package ও deployed image-এর পরিচয় প্রতিটি নতুন release receipt-এ আলাদা রাখতে হবে। Cloud tools এই directory-তে সংরক্ষিত।
 
 ## Source ও build
 

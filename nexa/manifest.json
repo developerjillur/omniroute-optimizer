@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 316,
-    "patches": 189,
-    "new": 121,
+    "total": 319,
+    "patches": 191,
+    "new": 122,
     "tooling": 6,
     "upstreamCandidates": 28,
     "nexaSpecific": 100,
-    "needsReview": 188,
+    "needsReview": 191,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
   },
@@ -263,6 +263,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/open-sse__handlers__chatCore__nonStreamingResponseParse.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/handlers/chatCore/nonStreamingResponseParse.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/open-sse__handlers__chatCore__passthroughHelpers.ts.patch",
       "layer": "patch",
       "class": "nexa-specific",
@@ -299,6 +307,14 @@
       "layer": "patch",
       "class": "nexa-specific",
       "target": "open-sse/handlers/chatCore/upstreamBody.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__handlers__responseTranslator.ts__cloud-native.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/handlers/responseTranslator.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -2377,6 +2393,14 @@
       "layer": "new",
       "class": "needs-review",
       "target": "tests/unit/native-deferred-tool-placeholder.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/native-gemini-cloud-contract.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/native-gemini-cloud-contract.test.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },

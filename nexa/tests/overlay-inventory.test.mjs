@@ -13,7 +13,10 @@ test("canonical inventory matches every tracked overlay file and its exact bytes
   const tracked = execFileSync("git", ["ls-files", "-z", "--", "nexa/"], {
     cwd: root,
     encoding: "utf8",
-  }).split("\0").filter(Boolean).sort();
+  })
+    .split("\0")
+    .filter(Boolean)
+    .sort();
   const files = inventory.files;
   assert.equal(inventory.trackedNexaFiles, tracked.length);
   assert.deepEqual(files.map((item) => item.path).sort(), tracked);

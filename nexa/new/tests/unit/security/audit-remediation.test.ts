@@ -17,9 +17,8 @@ const dns = (await import("node:dns")).default;
 const { resolveDisabledGuardrails } = await import("../../../src/lib/guardrails/registry.ts");
 const { sanitizeHeaders } = await import("../../../src/mitm/sanitizeHeaders.ts");
 const { verifyCloudSignature } = await import("../../../src/lib/cloudSync.ts");
-const { safeOutboundFetch, SafeOutboundFetchError } = await import(
-  "../../../src/shared/network/safeOutboundFetch.ts"
-);
+const { safeOutboundFetch, SafeOutboundFetchError } =
+  await import("../../../src/shared/network/safeOutboundFetch.ts");
 
 // ── M1: client-supplied guardrail disables require a per-key opt-in ──────────
 test("M1: client body/header guardrail-disables are IGNORED without the per-key opt-in", () => {

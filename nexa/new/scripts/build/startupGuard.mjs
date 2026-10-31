@@ -16,12 +16,17 @@ const isTrue = (v) => /^(1|true|yes|on)$/i.test(String(v ?? "").trim());
  * @returns {{ refuse: boolean, reason: string|null }}
  */
 export function evaluatePublicBindSafety(env) {
-  const bindHost = String(env.HOSTNAME || "0.0.0.0").trim().toLowerCase();
-  const isLoopbackBind =
-    bindHost === "127.0.0.1" || bindHost === "localhost" || bindHost === "::1";
+  const bindHost = String(env.HOSTNAME || "0.0.0.0")
+    .trim()
+    .toLowerCase();
+  const isLoopbackBind = bindHost === "127.0.0.1" || bindHost === "localhost" || bindHost === "::1";
 
   // Only a PUBLIC PRODUCTION bind is gated; loopback / dev / explicit opt-in pass.
-  if (env.NODE_ENV !== "production" || isLoopbackBind || isTrue(env.OMNIROUTE_ALLOW_INSECURE_PUBLIC)) {
+  if (
+    env.NODE_ENV !== "production" ||
+    isLoopbackBind ||
+    isTrue(env.OMNIROUTE_ALLOW_INSECURE_PUBLIC)
+  ) {
     return { refuse: false, reason: null };
   }
 

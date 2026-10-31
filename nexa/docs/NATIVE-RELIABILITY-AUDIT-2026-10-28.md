@@ -19,13 +19,13 @@ artifact inspection করা হয়েছে। সংখ্যা request atte
 বা successful conversation-এর সংখ্যা নয়। Test, catalogue ও protocol requests-ও
 থাকতে পারে।
 
-| Evidence | পরিসর |
-| --- | --- |
-| Usage records | 279,382; ২০২৬-১০-০১ থেকে cutoff পর্যন্ত |
-| Request metadata | 48,689; ২০২৬-১০-২১ থেকে cutoff পর্যন্ত |
-| Retained detail artifacts | 10,000; প্রত্যেকটি parse হয়েছে; missing/invalid JSON 0 |
-| Native client logs | বর্তমান rotating log-এর bounded tails ও relevant pattern review |
-| পূর্বের কাজ | Native refusal correlation, provider/Artifact acceptance, release ও migration receipts |
+| Evidence                  | পরিসর                                                                                  |
+| ------------------------- | -------------------------------------------------------------------------------------- |
+| Usage records             | 279,382; ২০২৬-১০-০১ থেকে cutoff পর্যন্ত                                                |
+| Request metadata          | 48,689; ২০২৬-১০-২১ থেকে cutoff পর্যন্ত                                                 |
+| Retained detail artifacts | 10,000; প্রত্যেকটি parse হয়েছে; missing/invalid JSON 0                                 |
+| Native client logs        | বর্তমান rotating log-এর bounded tails ও relevant pattern review                        |
+| পূর্বের কাজ               | Native refusal correlation, provider/Artifact acceptance, release ও migration receipts |
 
 পুরোনো retained data-তে প্রতিটি user conversation-এর সম্পূর্ণ wire terminal
 নেই। তাই সব historical response বা সব native feature-এর পূর্ণ parity এই

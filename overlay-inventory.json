@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
-  "trackedNexaFiles": 429,
-  "totalNexaBytes": 1889464,
+  "trackedNexaFiles": 431,
+  "totalNexaBytes": 1894501,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -153,9 +153,9 @@
     {
       "path": "nexa/deploy/build-candidate.sh",
       "mode": "100644",
-      "gitBlobSha": "e88c51ea477564ed6590f81f95856a144b4bc01b",
-      "bytes": 2470,
-      "sha256": "a9941da57d09609fd1583c65d1b651cf44abefc0cf783e1c7fe0c5988052d940"
+      "gitBlobSha": "c225da93de5dc24828d60e9387f348e925144156",
+      "bytes": 2516,
+      "sha256": "8f112f41d2ae4ebf3d2aee74ac1e415511a828aff1b3f633622c69282b4bcc58"
     },
     {
       "path": "nexa/deploy/build-candidate.test.mjs",
@@ -240,6 +240,13 @@
       "gitBlobSha": "b710ea1f518720b2f1701af939bcb142e8e68d81",
       "bytes": 7460,
       "sha256": "df2b3480257ae607cab7d01eab5b74cc5fadd4a30413b78e806f16205f85ed04"
+    },
+    {
+      "path": "nexa/deploy/native-usage-schema.mjs",
+      "mode": "100644",
+      "gitBlobSha": "8f425612434f34e570d64dd8d65e74aa8269e574",
+      "bytes": 1074,
+      "sha256": "4352afb136c5e4bb35591e4736210b7a25796aa86b01b7d308b0f7e551ba8d29"
     },
     {
       "path": "nexa/deploy/omni-bind.pl",
@@ -333,11 +340,18 @@
       "sha256": "ae6b99a2c9b4b1b66c6857b098d6cef427323bb863232d90e305bae1cfa6f9b2"
     },
     {
+      "path": "nexa/deploy/smoke-package-migrations.test.mjs",
+      "mode": "100644",
+      "gitBlobSha": "e6127fbe0686c40aacd3fa029fc775c4750ae675",
+      "bytes": 3299,
+      "sha256": "f35be1e74edb9849503dc0daee7be28653939abaef8286dd1f82f974b4bb4fe9"
+    },
+    {
       "path": "nexa/deploy/smoke-package.mjs",
       "mode": "100644",
-      "gitBlobSha": "7df2e12caacb032615f8b7c472f8b0693c0c492e",
-      "bytes": 7628,
-      "sha256": "dddae2f5135ed21bb71fb7eb2e54b28771e2378ec0cfaaab3c7f9f6eec51cae6"
+      "gitBlobSha": "e19b57d78ff6aa71003bf76dd34197f4156a956b",
+      "bytes": 6854,
+      "sha256": "edeb07703d10fcb47f9d8f6766c8c9aafe693d4c4ea75f248f628861ee6fef24"
     },
     {
       "path": "nexa/deploy/snapshot-local.py",
@@ -510,9 +524,9 @@
     {
       "path": "nexa/docs/UPGRADE-3.8.52-2026-10-28.md",
       "mode": "100644",
-      "gitBlobSha": "06d00dbd5ef8f527b50c5098812bc13c4fd2939b",
-      "bytes": 16323,
-      "sha256": "2e7b9cbb95170b86a1beba63717a290b867b23f40dbb2ebb15790f66ad0b91a9"
+      "gitBlobSha": "651122eaecebad7ac381a96e3da7c93cf634143b",
+      "bytes": 17715,
+      "sha256": "a17242aa5db9d1b48394bc37f4e88d1900569c4ae4761f1caec81dc919c77663"
     },
     {
       "path": "nexa/docs/USAGE-AUDIT-2026-10-14.md",

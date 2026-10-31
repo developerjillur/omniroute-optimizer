@@ -5,6 +5,7 @@ import net from "node:net";
 import { spawn, execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { smokeModel } from "./smoke-model.mjs";
+import { inspectNativeUsageSchema } from "./native-usage-schema.mjs";
 
 const [archive, destination] = process.argv.slice(2);
 if (!archive || !destination) throw Error("usage: smoke-package.mjs <archive> <new destination>");
@@ -128,28 +129,7 @@ try {
         throw Error("Packaged Bridge state lost the configured port");
     }
   }
-  const nativeUsageSchema = JSON.parse(
-    execFileSync(
-      "python3",
-      [
-        "-c",
-        "import sqlite3,json,sys; c=sqlite3.connect('file:'+sys.argv[1]+'?mode=ro',uri=True); print(json.dumps({'columns':[r[1] for r in c.execute('PRAGMA table_info(call_logs)')],'migration':c.execute(\"SELECT name FROM _omniroute_migrations WHERE version='197'\").fetchone()}))",
-        path.join(data, "storage.sqlite"),
-      ],
-      { encoding: "utf8" }
-    )
-  );
-  if (
-    !nativeUsageSchema.migration ||
-    nativeUsageSchema.migration[0] !== "native_claude_cache_details" ||
-    [
-      "tokens_cache_creation_5m",
-      "tokens_cache_creation_1h",
-      "native_session_tag",
-      "native_cache_group_tag",
-    ].some((column) => !nativeUsageSchema.columns.includes(column))
-  )
-    throw Error("Isolated installed package did not apply native usage migration 197");
+  inspectNativeUsageSchema(data);
   const inference = await apiFetch("/v1/messages", {
     baseUrl: base,
     apiKey: localKey,

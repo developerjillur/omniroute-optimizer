@@ -177,3 +177,17 @@ Settings-এর omitted-field control valid partial PATCH ব্যবহার 
 result ও ব্যবহৃত `cwd/timeout` options প্রকাশ করে। Child-process control আগের মতো
 `spawnImpl`-এ থাকে। Cast ছাড়া ordinary async probe-এর নতুন case দুই Node version-এ
 চলে; required production config fields শিথিল করা হয়নি।
+
+## ২০২৬-১০-৩১: package smoke-এর migration ledger compatibility
+
+v3.8.52-এ numeric `197` upstream migration-এর জন্য সংরক্ষিত। Native cache migration
+একই SQL path রেখে `legacy-197-native_claude_cache_details` ledger identity ব্যবহার করে।
+Package smoke-এর পুরোনো numeric lookup সঠিক migrated package-কে প্রত্যাখ্যান করছিল।
+এখন smoke একই namespaced identity দেখে এবং required চারটি native usage column
+ও migration name যাচাই করে। এই gate আলাদা read-only helper থেকে সরাসরি পরীক্ষিত হয়।
+
+সাতটি regression case-এ পুরোনো lookup-এর চারটি assertion failure reproduce হয়েছে;
+সংশোধনের পরে সাতটিই পাস। Numeric-only stale ledger, upstream-only row, conflicting
+name ও প্রতিটি missing column এখনও rejected হয়; read-only inspection-এর আগে-পরে
+synthetic database-এর bytes মেলে। Local test-এ live database বা generation ব্যবহার হয়নি।
+এই focused ফল পূর্ণ build, isolated package acceptance বা live deployment-এর প্রমাণ নয়।

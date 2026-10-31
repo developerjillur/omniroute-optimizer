@@ -191,3 +191,7 @@ Package smoke-এর পুরোনো numeric lookup সঠিক migrated pac
 name ও প্রতিটি missing column এখনও rejected হয়; read-only inspection-এর আগে-পরে
 synthetic database-এর bytes মেলে। Local test-এ live database বা generation ব্যবহার হয়নি।
 এই focused ফল পূর্ণ build, isolated package acceptance বা live deployment-এর প্রমাণ নয়।
+
+## ২০২৬-১০-৩১: পূর্ণ Bridge gate-এর child-process fixture
+
+পূর্ণ candidate validation-এ `mitm-unexpected-child-exit.test.ts`-এর পুরোনো plain-object child double-তে `once()` না থাকায় intentional-stop test থেমেছিল। Double এখন spawn না করা বাস্তব `ChildProcess` ব্যবহার করে এবং signal-এর পরে asynchronous exit event দেয়। পুরোনো DNS/hosts teardown assertions অক্ষত; signal acknowledgement ও one-shot listener cleanup-ও যাচাই হয়। Focused Mac regression 11/11 PASS, skipped 0। এই patch-এর ফলে existing complete upgrade compatibility lane-ও test file-টি অন্তর্ভুক্ত করে। Runtime lifecycle module বদলানো হয়নি; এটি production crash-এর reproduction দাবি নয়।

@@ -1,0 +1,55 @@
+diff --git a/tests/unit/mitm-unexpected-child-exit.test.ts b/tests/unit/mitm-unexpected-child-exit.test.ts
+index 1a39a0a9..b857adcf 100644
+--- a/tests/unit/mitm-unexpected-child-exit.test.ts
++++ b/tests/unit/mitm-unexpected-child-exit.test.ts
+@@ -12,14 +12,14 @@
+  * no Repair.
+  *
+  * Everything privileged is injected: no test here touches the real hosts file,
+- * DNS, certificates or processes. The fake child is a plain object.
++ * DNS, certificates or processes. The child double is never spawned.
+  */
+ import test from "node:test";
+ import assert from "node:assert/strict";
+ import fs from "node:fs";
+ import os from "node:os";
+ import path from "node:path";
+-import type { ChildProcess } from "node:child_process";
++import { ChildProcess } from "node:child_process";
+ 
+ const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-mitm-child-exit-"));
+ process.env.DATA_DIR = TEST_DATA_DIR;
+@@ -61,14 +61,17 @@ function recorder(password: string | null, canRunPrivileged = Boolean(password))
+ }
+ 
+ function fakeChild(): ChildProcess {
+-  const proc = {
+-    killed: false,
+-    kill() {
+-      proc.killed = true;
+-      return true;
+-    },
++  const proc = new ChildProcess();
++  proc.kill = (signal = "SIGTERM") => {
++    assert.equal(typeof signal, "string", "this fixture expects a named signal");
++    Object.assign(proc, { killed: true });
++    queueMicrotask(() => {
++      Object.assign(proc, { signalCode: signal });
++      proc.emit("exit", null, signal);
++    });
++    return true;
+   };
+-  return proc as unknown as ChildProcess;
++  return proc;
+ }
+ 
+ test.after(() => {
+@@ -140,6 +143,8 @@ test("child exit after stopMitm() (intentional) does not run a second teardown",
+   const stopDeps = recorder("pw").deps;
+   await manager.stopMitm("pw", stopDeps);
+   assert.equal(proc.killed, true, "precondition: stopMitm() killed the child");
++  assert.equal(proc.signalCode, "SIGTERM", "stopMitm() waits for the child's exit event");
++  assert.equal(proc.listenerCount("exit"), 0, "the one-shot exit listener is released");
+ 
+   const r = recorder("pw");
+   await manager.handleMitmChildExit(proc, null, { startConfirmed: true }, r.deps);

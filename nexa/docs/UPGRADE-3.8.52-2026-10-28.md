@@ -199,3 +199,7 @@ synthetic database-এর bytes মেলে। Local test-এ live database ব
 ## ২০২৬-১০-৩১: compiled Bridge package layout
 
 v3.8.52-এর তৈরি archive-এ `dist/src/mitm/manager.js` ও `processLifecycle.js` shared ESM chunks ব্যবহার করে; পুরোনো package checker অনুপস্থিত `.ts` mirror খুঁজত। Checker এখন reachable static import graph-এ একটিমাত্র shared lifecycle registry, manager-এর ownership/readiness/termination calls এবং exit acknowledgement ও SIGTERM/SIGKILL paths যাচাই করে। Missing chunk, directory escape ও unreferenced decoy এখনও ব্যর্থ হয়; legacy TypeScript mirror-এর byte equality-ও অক্ষত। Native CJS transport mirrors, beta/header/count-token এবং request isolation-এর আগের checks বাদ যায়নি। তৈরি archive নতুন contract-এ PASS; packaged compiled lifecycle-এর আচরণ পৃথকভাবে পরীক্ষা হয়। Application runtime source বা archive-এর bytes বদলায়নি।
+
+## 2026-10-31: managed package installation policy
+
+The pinned upstream `.npmrc` deliberately uses `legacy-peer-deps=true` for deep `@lobehub/icons` imports. Global npm installation ignores that project policy and pulled unused `@lobehub/ui` peers during isolated acceptance; the first resolver attempt reached the 2048 MiB family watchdog. Managed archive installation and the local install/rollback commands now pass the existing peer policy explicitly. The isolated resolver has a 1024 MiB heap and two download sockets, with normal lifecycle scripts retained. The candidate recipe includes the policy regression tests. This changes deployment tooling only; application runtime sources and the completed archive remain unchanged.

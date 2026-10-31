@@ -175,7 +175,7 @@ cmd_install() {
   if [ "$(pkg_version)" != "$want" ]; then
     say "installing omniroute@$want into $RUNTIME"
     mkdir -p "$RUNTIME"
-    npm_run install -g --prefix "$RUNTIME" --no-fund --no-audit "omniroute@$want" || die "npm install failed"
+    npm_run install -g --prefix "$RUNTIME" --no-fund --no-audit --legacy-peer-deps "omniroute@$want" || die "npm install failed"
   else
     say "omniroute $want already installed"
   fi
@@ -350,7 +350,7 @@ cmd_update_status() {
 # Reinstalls a known version and proves it, so a failed rollback is never reported as a success.
 restore_version() {
   local ver="$1" was_loaded="$2"
-  npm_run install -g --prefix "$RUNTIME" --no-fund --no-audit "omniroute@$ver" || die "ROLLBACK FAILED: npm could not reinstall $ver (service left stopped; retry: omni-ctl.sh install $ver)"
+  npm_run install -g --prefix "$RUNTIME" --no-fund --no-audit --legacy-peer-deps "omniroute@$ver" || die "ROLLBACK FAILED: npm could not reinstall $ver (service left stopped; retry: omni-ctl.sh install $ver)"
   [ "$(pkg_version)" = "$ver" ] || die "ROLLBACK FAILED: package is $(pkg_version), expected $ver"
   if [ "$was_loaded" = 1 ]; then
     launchctl bootstrap "$DOMAIN" "$PLIST" || die "ROLLBACK FAILED: launchctl bootstrap"

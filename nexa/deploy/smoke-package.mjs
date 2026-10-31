@@ -6,6 +6,7 @@ import { spawn, execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { smokeModel } from "./smoke-model.mjs";
 import { inspectNativeUsageSchema } from "./native-usage-schema.mjs";
+import { packageInstallArgs, packageInstallEnvironment } from "./package-install.mjs";
 
 const [archive, destination] = process.argv.slice(2);
 if (!archive || !destination) throw Error("usage: smoke-package.mjs <archive> <new destination>");
@@ -30,23 +31,14 @@ if (!reuse) {
   const installLog = fs.openSync(path.join(root, "install.log"), "w", 0o600);
   execFileSync(
     "/usr/local/bin/node",
-    [
-      "/usr/local/lib/node_modules/npm/bin/npm-cli.js",
-      "install",
-      "-g",
-      "--prefix",
-      prefix,
-      "--no-fund",
-      "--no-audit",
-      path.resolve(archive),
-    ],
+    ["/usr/local/lib/node_modules/npm/bin/npm-cli.js", ...packageInstallArgs(prefix, archive)],
     {
       stdio: ["ignore", installLog, installLog],
-      env: {
+      env: packageInstallEnvironment({
         ...process.env,
         PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin",
         DATA_DIR: data,
-      },
+      }),
     }
   );
   fs.closeSync(installLog);

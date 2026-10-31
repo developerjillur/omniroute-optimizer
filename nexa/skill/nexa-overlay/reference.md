@@ -35,9 +35,19 @@ into the overlay:
 Result: `git diff upstream-main..nexalance -- . ':(exclude)nexa/'` is EMPTY — base is pristine, all
 customization is in `nexa/`.
 
-## 2b. Fork GitHub settings (cleaned up 2026-07-07 — the child-theme model needs NO CI)
+## 2b. Reference fork settings and canonical validation
 
-- **GitHub Actions is DISABLED** on `developerjillur/OmniRoute` (`gh api repos/developerjillur/OmniRoute/actions/permissions` → `{"enabled":false}`). No workflows run — neither the removed `nexa-upstream-sync.yml` nor upstream's ~24 inherited workflows (which would otherwise waste CI minutes on our fork). **Validation is 100% local** (`node nexa/build.mjs` + the gate + out-of-band smoke). Do NOT expect any CI.
+Since 2026-10-28, the canonical management repository is
+`developerjillur/omniroute-optimizer`. Its native reliability CI checks the public
+overlay against a pinned pristine application commit using synthetic fixtures.
+It does not build or deploy production and does not change Actions settings on
+the reference fork. Keep source-only CI, production build validation and live
+acceptance receipts separate. Commit with normal hooks enabled.
+
+The following settings describe the historical 2026-07-07 reference-fork cleanup;
+they are not instructions to disable the canonical repository's CI.
+
+- **GitHub Actions was disabled** on `developerjillur/OmniRoute` (`gh api repos/developerjillur/OmniRoute/actions/permissions` → `{"enabled":false}`). The old `nexa-upstream-sync.yml` and inherited workflows were not used for validation. That workflow used local `node nexa/build.mjs`, the gate and out-of-band smoke; the canonical optimizer now adds the source-only CI described above.
 - **Workflow token perms revoked** to safe defaults (`default_workflow_permissions:read`, `can_approve_pull_request_reviews:false`) — they had been elevated only for the old auto-sync PR bot.
 - **Default branch = `nexalance`** (our production overlay branch), deliberately NOT `main` (a stale v3.8.44 base with no overlay). Keep it.
 - **Upstream PRs still work** — `gh pr create --repo diegosouzapw/OmniRoute …` is unaffected by Actions being off; that is how Phase-2 shrink happens.

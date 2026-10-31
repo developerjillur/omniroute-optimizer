@@ -1,8 +1,8 @@
 diff --git a/open-sse/config/anthropicHeaders.ts b/open-sse/config/anthropicHeaders.ts
-index f26e92e32..010d83317 100644
+index 81486fe5e995de95bd6df64cecc2de345795db0c..c9dc60f071dca6477b14105243740ddd3d6eec10 100644
 --- a/open-sse/config/anthropicHeaders.ts
 +++ b/open-sse/config/anthropicHeaders.ts
-@@ -261,6 +261,10 @@ export const FORWARDABLE_CLIENT_BETAS = Object.freeze([
+@@ -298,6 +298,10 @@
    // gate (#9505), so a client that sent it must keep it through the merge —
    // otherwise its effort negotiation is silently dropped.
    "effort-2025-11-24",
@@ -13,7 +13,7 @@ index f26e92e32..010d83317 100644
    // Per-message effort (message-level output_config) — sources in doc comment above.
    "mid-conversation-output-config-2026-07-01",
    "per-turn-control-2026-07-01",
-@@ -293,13 +297,18 @@ export const FORWARDABLE_CLIENT_BETAS = Object.freeze([
+@@ -342,13 +346,18 @@
   * skills beta on tool-less requests causes upstream Anthropic to reject with
   * HTTP 400 "Skills beta requires the code_execution tool". When omitted or null,
   * backward-compatible allowlist forwarding is preserved.
@@ -33,7 +33,7 @@ index f26e92e32..010d83317 100644
  ): string {
    const baseList = base
      .split(",")
-@@ -307,7 +316,16 @@ export function mergeClientAnthropicBeta(
+@@ -356,7 +365,16 @@
      .filter(Boolean);
    if (typeof clientBeta !== "string" || !clientBeta.trim()) return baseList.join(",");
    const seen = new Set(baseList.map((s) => s.toLowerCase()));

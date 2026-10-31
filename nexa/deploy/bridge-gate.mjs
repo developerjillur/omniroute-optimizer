@@ -26,6 +26,54 @@ export function inspectCompiledCountRoute(source) {
   );
 }
 
+export function inspectCompiledBridgeLifecycle(modules) {
+  const root = "package/dist/src/mitm/";
+  const closure = (entry) => {
+    const visited = new Set();
+    const visit = (member) => {
+      if (visited.has(member)) return;
+      if (!member.startsWith(root) || typeof modules[member] !== "string")
+        throw Error(`Missing or unsafe compiled Bridge dependency: ${member}`);
+      visited.add(member);
+      for (const match of modules[member].matchAll(/\b(?:from\s+|import\s*)["'](\.[^"']+)["']/g)) {
+        visit(path.posix.normalize(path.posix.join(path.posix.dirname(member), match[1])));
+      }
+    };
+    visit(entry);
+    return visited;
+  };
+  const manager = closure(root + "manager.js");
+  const lifecycle = closure(root + "processLifecycle.js");
+  const stateModules = [...lifecycle].filter((member) =>
+    modules[member].includes('Symbol.for("omniroute.mitm.process-lifecycle.v1")')
+  );
+  if (stateModules.length !== 1 || !manager.has(stateModules[0])) return false;
+  const state = modules[stateModules[0]];
+  const managerCalls = [...manager]
+    .filter((member) => member !== stateModules[0])
+    .map((member) => modules[member])
+    .join("\n");
+  return (
+    [
+      "getBridgeProcessState",
+      "waitForBridgeReady",
+      "isOwnedBridgePid",
+      "terminateBridgeChild",
+    ].every(
+      (name) =>
+        modules[root + "processLifecycle.js"].includes(name) &&
+        new RegExp(`\\b${name}\\s*\\(`).test(managerCalls)
+    ) &&
+    [
+      'child.once("exit",',
+      "child.exitCode",
+      "child.signalCode",
+      'child.kill("SIGTERM")',
+      'child.kill("SIGKILL")',
+    ].every((value) => state.includes(value))
+  );
+}
+
 export function verifyPackage(archive, { allowPriorLifecycle = false } = {}) {
   const members = execFileSync("tar", ["-tzf", archive], {
     encoding: "utf8",
@@ -58,6 +106,7 @@ export function verifyPackage(archive, { allowPriorLifecycle = false } = {}) {
   }
   const lifecycleMember = "package/src/mitm/processLifecycle.ts";
   const lifecyclePresent = members.includes(lifecycleMember);
+  let lifecycleLayout = "prior-lifecycle";
   if (!allowPriorLifecycle) {
     if (!lifecyclePresent) throw new Error("Archive lacks shared Bridge process ownership");
     if (
@@ -122,14 +171,42 @@ raise SystemExit('Compiled token-count route drops native protocol headers or ca
       );
     }
     const processState = read(lifecycleMember).toString();
-    const runtimeManager = read("package/dist/src/mitm/manager.ts").toString();
+    let runtimeLifecycleVerified;
+    const legacyMirrorPresent = members.includes("package/dist/src/mitm/manager.ts");
+    if (
+      legacyMirrorPresent &&
+      !read("package/dist/src/mitm/processLifecycle.ts").equals(read(lifecycleMember))
+    )
+      throw new Error("Archive has an inconsistent legacy lifecycle mirror");
+    if (legacyMirrorPresent && !members.includes("package/dist/src/mitm/manager.js")) {
+      lifecycleLayout = "legacy-typescript";
+      const runtimeManager = read("package/dist/src/mitm/manager.ts").toString();
+      runtimeLifecycleVerified = [
+        "getBridgeProcessState",
+        "waitForBridgeReady",
+        "isOwnedBridgePid",
+      ].every((name) => runtimeManager.includes(name));
+    } else {
+      lifecycleLayout = "compiled-javascript";
+      const modules = JSON.parse(
+        execFileSync(
+          "python3",
+          [
+            "-c",
+            "import json,sys,tarfile; out={}\nwith tarfile.open(sys.argv[1], 'r|gz') as archive:\n for member in archive:\n  if member.name.startswith('package/dist/src/mitm/') and member.name.endswith(('.js','.mjs','.cjs')):\n   if not member.isfile() or member.size > 8*1024*1024: raise SystemExit('Unsafe compiled Bridge member')\n   out[member.name]=archive.extractfile(member).read().decode('utf-8')\nprint(json.dumps(out))",
+            archive,
+          ],
+          { maxBuffer: 64 * 1024 * 1024 }
+        )
+      );
+      runtimeLifecycleVerified = inspectCompiledBridgeLifecycle(modules);
+      if (!runtimeLifecycleVerified)
+        throw new Error("Archive compiled Bridge graph loses shared ownership or safe teardown");
+    }
     if (
       !processState.includes("omniroute.mitm.process-lifecycle.v1") ||
-      !runtimeManager.includes("getBridgeProcessState") ||
-      !runtimeManager.includes("waitForBridgeReady") ||
-      !runtimeManager.includes("isOwnedBridgePid") ||
+      !runtimeLifecycleVerified ||
       !processState.includes("terminateBridgeChild") ||
-      !read("package/dist/src/mitm/processLifecycle.ts").equals(read(lifecycleMember)) ||
       !source.toString().includes("void handleRequest(req, res).catch") ||
       !source.toString().includes("for (const socket of sockets) socket.destroy()") ||
       !source.toString().includes("upstreamResponse?.destroy()") ||
@@ -146,6 +223,7 @@ raise SystemExit('Compiled token-count route drops native protocol headers or ca
     ok: true,
     sourceAndDistMatch: true,
     sharedLifecycle: lifecyclePresent,
+    lifecycleLayout,
     serverSha256: createHash("sha256").update(source).digest("hex"),
   };
 }

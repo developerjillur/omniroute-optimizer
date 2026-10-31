@@ -1,11 +1,13 @@
 diff --git a/src/mitm/dns/dnsConfig.ts b/src/mitm/dns/dnsConfig.ts
-index 9630e5f29..d4d1d4fbd 100644
+index 9630e5f2954c4fa4a4682c1fc38a0ed46348164c..d4d1d4fbd5d94f355c962466b0ef9325702cba86 100644
 --- a/src/mitm/dns/dnsConfig.ts
 +++ b/src/mitm/dns/dnsConfig.ts
-@@ -136,6 +136,20 @@ function hasHostEntry(hostsContent: string, hostname: string): boolean {
+@@ -134,6 +134,20 @@
+       return parts.length >= 2 && parts[0] === ip && parts.includes(host);
+     });
    });
- }
- 
++}
++
 +function hasLoopbackHostEntry(hostsContent: string, hostname: string): boolean {
 +  return hostsContent.split(/\r?\n/).some((line) => {
 +    const parts = line.split("#", 1)[0].trim().split(/\s+/);
@@ -18,12 +20,10 @@ index 9630e5f29..d4d1d4fbd 100644
 +  if (hosts.length === 0) return false;
 +  const content = fs.readFileSync(hostsFilePath(), "utf8");
 +  return hosts.some((host) => hasLoopbackHostEntry(content, host));
-+}
-+
+ }
+ 
  // ---------------------------------------------------------------------------
- // Public API — parametrized (new)
- // ---------------------------------------------------------------------------
-@@ -224,8 +238,8 @@ export async function removeDNSEntries(
+@@ -224,8 +238,8 @@
  ): Promise<void> {
    if (process.env.OMNIROUTE_SKIP_DNS_WRITE === "1") return;
    const commands = resolveCommandDependencies(deps);

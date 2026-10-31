@@ -1,0 +1,11 @@
+diff --git a/src/shared/validation/schemas/settings.ts b/src/shared/validation/schemas/settings.ts
+--- a/src/shared/validation/schemas/settings.ts
++++ b/src/shared/validation/schemas/settings.ts
+@@ -91,6 +91,7 @@
+     enabled: z.boolean().optional(),
+     maxRetries: z.number().int().min(0).max(10).optional(),
+     maxRetryWaitSec: z.number().int().min(0).max(300).optional(),
++    budgetMs: z.number().int().min(0).max(300_000).optional(),
+   })
+   .strict();
+ 

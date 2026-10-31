@@ -6,17 +6,17 @@ memory settings or the user's other applications.
 
 Defaults:
 
-| Setting | Value |
-| --- | --- |
-| Node old-space heap per process | 6144 MiB |
-| Next build workers | 1 |
-| Total observed build-tree RSS budget | 8192 MiB |
-| Memory sampling interval | 1 second |
-| Scheduling priority | nice +10 |
-| Next bundler | Webpack; parallelism 8, compile cache disabled |
-| macOS build toolchain | /usr/local/bin first in PATH |
-| UV thread pool | 2 |
-| Regression execution | Serial; UI maxWorkers 1 |
+| Setting                              | Value                                          |
+| ------------------------------------ | ---------------------------------------------- |
+| Node old-space heap per process      | 6144 MiB                                       |
+| Next build workers                   | 1                                              |
+| Total observed build-tree RSS budget | 8192 MiB                                       |
+| Memory sampling interval             | 1 second                                       |
+| Scheduling priority                  | nice +10                                       |
+| Next bundler                         | Webpack; parallelism 8, compile cache disabled |
+| macOS build toolchain                | /usr/local/bin first in PATH                   |
+| UV thread pool                       | 2                                              |
+| Regression execution                 | Serial; UI maxWorkers 1                        |
 
 The wrapper replaces inherited large `--max-old-space-size` values while keeping
 other Node options. `NEXA_BUILD_HEAP_MB` accepts 1024 through 6144 and

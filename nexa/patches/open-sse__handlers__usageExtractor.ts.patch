@@ -1,38 +1,58 @@
 diff --git a/open-sse/handlers/usageExtractor.ts b/open-sse/handlers/usageExtractor.ts
-index 5c83ebcf3167bbf57701fb0f45c3fa746ad5e209..111822427635812802a7fe9970998d698b941a2d 100644
+index d9f573220e082edad2ad0317bb898ce5da9725fa..1c64864974a7b1da8b4c5e8ec86a8bc4b6ca7720 100644
 --- a/open-sse/handlers/usageExtractor.ts
 +++ b/open-sse/handlers/usageExtractor.ts
-@@ -3,6 +3,7 @@
+@@ -2,7 +2,9 @@
+  * Extract usage from non-streaming response body
   * Handles different provider response formats
   */
- import { carryEstimatedUsageMarker } from "../utils/usageTracking.ts";
+-import { carryEstimatedUsageMarker, pickReportedCostUsd } from "../utils/usageTracking.ts";
++import { carryEstimatedUsageMarker, pickReportedCostUsd, type UsageLike } from "../utils/usageTracking.ts";
 +import { getAnthropicMeteredUsage } from "../utils/anthropicUsage.ts";
++import { getCacheCreationTtlFields } from "@/lib/usage/cacheCreationTtl";
  
  /**
   * True for an Anthropic Messages response body (`type: "message"`), whatever provider
-@@ -14,7 +15,7 @@
-  */
- function isAnthropicMessageUsage(
-   responseBody: Record<string, unknown>,
--  usage: Record<string, unknown>
-+  usage: Record<string, unknown>,
- ): boolean {
-   return (
-     responseBody.type === "message" &&
-@@ -92,20 +93,24 @@
-     typeof responseBody.usage === "object" &&
-     (responseBody.usage.input_tokens !== undefined ||
+@@ -28,7 +30,22 @@
+   return typeof value === "number" && Number.isFinite(value) && value >= 0;
+ }
+ 
+-export function extractUsageFromResponse(responseBody, provider) {
++type ExtractedUsage = Pick<
++  UsageLike,
++  | "prompt_tokens"
++  | "completion_tokens"
++  | "cached_tokens"
++  | "cache_read_input_tokens"
++  | "cache_creation_input_tokens"
++  | "reasoning_tokens"
++  | "provider_credits"
++  | "cost_usd"
++  | "cost_in_usd_ticks"
++  | "cacheCreation5m"
++  | "cacheCreation1h"
++>;
++
++export function extractUsageFromResponse(responseBody, provider): ExtractedUsage | null {
+   if (!responseBody || typeof responseBody !== "object") return null;
+   const providerId = typeof provider === "string" ? provider.toLowerCase() : "";
+   const isClaudeProvider =
+@@ -53,6 +70,7 @@
+       responseBody.usage.cache_write_tokens;
+     const reportedCostUsd = pickReportedCostUsd(responseBody.usage);
+     const openAiUsage = {
++      ...getCacheCreationTtlFields(responseBody.usage),
+       prompt_tokens: responseBody.usage.prompt_tokens || 0,
+       completion_tokens: responseBody.usage.completion_tokens || 0,
+       // DeepSeek native API uses flat prompt_cache_hit_tokens (NOT
+@@ -108,18 +126,19 @@
        responseBody.usage.output_tokens !== undefined) &&
--    (isClaudeProvider || isAnthropicMessageUsage(responseBody, responseBody.usage))
-+    (isClaudeProvider ||
-+      isAnthropicMessageUsage(responseBody, responseBody.usage))
+     (isClaudeProvider || isAnthropicMessageUsage(responseBody, responseBody.usage))
    ) {
 -    const inputTokens = responseBody.usage.input_tokens || 0;
 -    const cacheRead = responseBody.usage.cache_read_input_tokens || 0;
 -    const cacheCreation = responseBody.usage.cache_creation_input_tokens || 0;
-+    const nativeUsage = getAnthropicMeteredUsage(
-+      responseBody.usage,
-+    ) as typeof responseBody.usage;
++    const nativeUsage = getAnthropicMeteredUsage(responseBody.usage) as typeof responseBody.usage;
 +    const inputTokens = nativeUsage.input_tokens || 0;
 +    const cacheRead = nativeUsage.cache_read_input_tokens || 0;
 +    const cacheCreation = nativeUsage.cache_creation_input_tokens || 0;
@@ -51,9 +71,11 @@ index 5c83ebcf3167bbf57701fb0f45c3fa746ad5e209..111822427635812802a7fe9970998d69
      // Native Claude ids always carry both cache counters. Other Claude-format
      // providers may have no prompt cache at all (devin-cli-agentic reports only
      // input/output), so emit a counter only when it was reported: the dashboard then
-@@ -115,14 +120,16 @@
+@@ -128,12 +147,13 @@
+       isClaudeProvider || (value !== undefined && value !== null);
  
      return {
++      ...getCacheCreationTtlFields(nativeUsage),
        prompt_tokens: promptTokens,
 -      completion_tokens: responseBody.usage.output_tokens || 0,
 -      ...(reportedCache(responseBody.usage.cache_read_input_tokens)
@@ -65,30 +87,12 @@ index 5c83ebcf3167bbf57701fb0f45c3fa746ad5e209..111822427635812802a7fe9970998d69
 +      ...(reportedCache(nativeUsage.cache_creation_input_tokens)
          ? { cache_creation_input_tokens: cacheCreation }
          : {}),
--      ...(typeof reasoningTokens === "number" ? { reasoning_tokens: reasoningTokens } : {}),
-+      ...(typeof reasoningTokens === "number"
-+        ? { reasoning_tokens: reasoningTokens }
-+        : {}),
-     };
-   }
- 
-@@ -131,7 +138,8 @@
-   if (
-     responsesUsage &&
-     typeof responsesUsage === "object" &&
--    (responsesUsage.input_tokens !== undefined || responsesUsage.output_tokens !== undefined)
-+    (responsesUsage.input_tokens !== undefined ||
-+      responsesUsage.output_tokens !== undefined)
-   ) {
-     return {
+       ...(typeof reasoningTokens === "number" ? { reasoning_tokens: reasoningTokens } : {}),
+@@ -154,6 +174,7 @@
+       ...(isReportedAmount(responsesUsage.cost_in_usd_ticks)
+         ? { cost_in_usd_ticks: responsesUsage.cost_in_usd_ticks }
+         : {}),
++      ...getCacheCreationTtlFields(responsesUsage),
        prompt_tokens: responsesUsage.input_tokens || 0,
-@@ -156,7 +164,8 @@
-   // Gemini format. Antigravity / gemini-cli wrap the payload in
-   // { response: { ... } } — read the envelope so non-streaming requests do
-   // not silently log zero usage (port of decolua/9router#59d858b).
--  const usageMetadata = responseBody.usageMetadata || responseBody.response?.usageMetadata;
-+  const usageMetadata =
-+    responseBody.usageMetadata || responseBody.response?.usageMetadata;
-   if (usageMetadata && typeof usageMetadata === "object") {
-     // Gemini reports thoughts outside candidates. Fold them into completion so
-     // every provider keeps reasoning as a subset of completion tokens.
+       completion_tokens: responsesUsage.output_tokens || 0,
+       cache_read_input_tokens: responsesUsage.cache_read_input_tokens,

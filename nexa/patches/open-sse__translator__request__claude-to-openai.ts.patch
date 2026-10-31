@@ -1,11 +1,13 @@
 diff --git a/open-sse/translator/request/claude-to-openai.ts b/open-sse/translator/request/claude-to-openai.ts
-index 753dead99..0c9c16607 100644
+index 0492b484d8acbc8e7ea7a7b44f835f41019f77ee..df213c11dd4f3599111c7bf6d8d598f8d68f4ee4 100644
 --- a/open-sse/translator/request/claude-to-openai.ts
 +++ b/open-sse/translator/request/claude-to-openai.ts
-@@ -49,6 +49,50 @@ function isClaudeServerWebSearchTool(tool: unknown): tool is JsonRecord {
-   );
- }
- 
+@@ -42,6 +42,50 @@
+   if (typeof effort !== "string") return undefined;
+   const normalized = effort.toLowerCase();
+   return normalized || undefined;
++}
++
 +function isClaudeServerAdvisorTool(tool: unknown): tool is JsonRecord {
 +  if (!tool || typeof tool !== "object" || Array.isArray(tool)) return false;
 +  const record = tool as JsonRecord;
@@ -48,15 +50,13 @@ index 753dead99..0c9c16607 100644
 +    ),
 +    { statusCode: 400, errorType: "unsupported_feature" }
 +  );
-+}
-+
- function toStringArray(value: unknown): string[] {
-   if (!Array.isArray(value)) return [];
-   return value
-@@ -248,11 +292,26 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown
-   }
+ }
  
-   const useNativeResponsesWebSearch = shouldUseNativeResponsesWebSearch(credentials);
+ function toStringArray(value: unknown): string[] {
+@@ -290,11 +334,26 @@
+   const geminiGroundingTarget =
+     nativeWebSearchTarget === FORMATS.GEMINI || nativeWebSearchTarget === FORMATS.ANTIGRAVITY;
+   const useGeminiGrounding = geminiGroundingTarget && isSoleClaudeServerWebSearchTool(body.tools);
 +  const omittedAdvisorNames = new Set<string>();
 +  const omittedPlaceholderNames = new Set<string>();
  
@@ -77,18 +77,22 @@ index 753dead99..0c9c16607 100644
 +          if (typeof tool.name === "string") omittedAdvisorNames.add(tool.name);
 +          return null;
 +        }
-         if (useNativeResponsesWebSearch && isClaudeServerWebSearchTool(tool)) {
-           return convertClaudeServerWebSearchTool(tool);
-         }
-@@ -280,10 +339,23 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown
+         if (isClaudeServerWebSearchTool(tool)) {
+           if (useResponsesWebSearch || useGeminiGrounding) {
+             return convertClaudeServerWebSearchTool(tool);
+@@ -331,13 +390,26 @@
  
    // Tool choice
    if (body.tool_choice) {
 -    result.tool_choice = convertToolChoice(
 +    const convertedToolChoice = convertToolChoice(
        body.tool_choice,
-       useNativeResponsesWebSearch && hasClaudeServerWebSearchTool(body.tools)
+       useResponsesWebSearch && hasClaudeServerWebSearchTool(body.tools)
      );
+     // Claude carries the single-call restriction on tool_choice (9router#4171).
+     if (body.tool_choice?.disable_parallel_tool_use === true) {
+       result.parallel_tool_calls = false;
++    }
 +    const forcedPlaceholder =
 +      body.tool_choice.type === "tool" && omittedPlaceholderNames.has(body.tool_choice.name);
 +    const onlyPlaceholderRequired =
@@ -101,14 +105,16 @@ index 753dead99..0c9c16607 100644
 +    if (forcedAdvisor || onlyAdvisorRequired) throw unsupportedAdvisorChoice();
 +    if (result.tools || (omittedAdvisorNames.size === 0 && omittedPlaceholderNames.size === 0)) {
 +      result.tool_choice = convertedToolChoice;
-+    }
+     }
    }
  
-   // Reasoning effort: map Claude-side thinking controls to OpenAI reasoning_effort.
-@@ -467,6 +539,19 @@ function convertClaudeMessage(msg, preserveCacheControl = false) {
-           }
-           break;
- 
+@@ -577,6 +649,19 @@
+         case "redacted_thinking":
+           if (reasoningContent == null) {
+             reasoningContent = "";
++          }
++          break;
++
 +        case "advisor_tool_result":
 +          // Plaintext advice is useful conversation context after a model switch.
 +          // Encrypted results can only be read by Anthropic and must not become
@@ -119,9 +125,6 @@ index 753dead99..0c9c16607 100644
 +            block.content.text
 +          ) {
 +            parts.push({ type: "text", text: block.content.text });
-+          }
-+          break;
-+
-         case "tool_use":
-           toolCalls.push({
-             id: block.id,
+           }
+           break;
+ 

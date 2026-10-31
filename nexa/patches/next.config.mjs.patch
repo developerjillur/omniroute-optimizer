@@ -1,8 +1,8 @@
 diff --git a/next.config.mjs b/next.config.mjs
-index 834c7e078..e2f754390 100644
+index 92d9a24526959ae3cfc9d5f06ec3f371019b9063..50ef1e27dc42155960a388d8c25637b9a814dc54 100644
 --- a/next.config.mjs
 +++ b/next.config.mjs
-@@ -15,10 +15,26 @@ import { shouldBuildStandalone } from "./scripts/build/backendOnlyPages.mjs";
+@@ -19,10 +19,26 @@
  const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
  const distDir = process.env.NEXT_DIST_DIR || ".build/next";
  const projectRoot = dirname(fileURLToPath(import.meta.url));
@@ -33,7 +33,7 @@ index 834c7e078..e2f754390 100644
  const contentSecurityPolicy = [
    "default-src 'self'",
    "base-uri 'self'",
-@@ -30,11 +46,7 @@ const contentSecurityPolicy = [
+@@ -34,11 +50,7 @@
    "font-src 'self' https://fonts.gstatic.com data:",
    "img-src 'self' data: blob: https:",
    "media-src 'self' data: blob:",
@@ -46,7 +46,7 @@ index 834c7e078..e2f754390 100644
    "worker-src 'self' blob:",
    "manifest-src 'self'",
  ].join("; ");
-@@ -235,6 +247,13 @@ const nextConfig = {
+@@ -200,6 +212,13 @@
    // accept for image-bearing requests; tune via env if a deployment needs
    // more.
    experimental: {
@@ -60,7 +60,7 @@ index 834c7e078..e2f754390 100644
      serverActions: {
        bodySizeLimit: process.env.OMNIROUTE_SERVER_ACTIONS_BODY_LIMIT || "50mb",
      },
-@@ -394,6 +413,11 @@ const nextConfig = {
+@@ -357,6 +376,11 @@
      ignoreBuildErrors: true,
    },
    webpack(config, { dev, webpack }) {
@@ -72,15 +72,3 @@ index 834c7e078..e2f754390 100644
      config.ignoreWarnings = [
        ...(config.ignoreWarnings || []),
        isNextIntlExtractorDynamicImportWarning,
-@@ -479,7 +503,10 @@ const nextConfig = {
-       // does the importing.
-       const replacements = [
-         [/^@\/mitm\/cert\/install$/, join(projectRoot, "src/mitm/cert/install.stub.ts")],
--        [/^@\/lib\/zed-oauth\/keychain-reader$/, join(projectRoot, "src/lib/zed-oauth/keychain-reader.stub.ts")],
-+        [
-+          /^@\/lib\/zed-oauth\/keychain-reader$/,
-+          join(projectRoot, "src/lib/zed-oauth/keychain-reader.stub.ts"),
-+        ],
-         [/^@\/lib\/cloudSync$/, join(projectRoot, "src/lib/cloudSync.stub.ts")],
-         [
-           /^@\/lib\/services\/installers\/ninerouter$/,

@@ -15,23 +15,31 @@ assertPristine();
 const before = baseVersion();
 // Default: fetch RELEASE TAGS only (fast/incremental — a full-history fetch of `main` is slow and
 // was timing out). `--main` additionally needs the branch ref.
-console.log(useMain ? "  → fetching upstream (tags + main)…" : "  → fetching upstream release tags…");
+console.log(
+  useMain ? "  → fetching upstream (tags + main)…" : "  → fetching upstream release tags…"
+);
 run(useMain ? ["fetch", "upstream", "--tags"] : ["fetch", "upstream", "refs/tags/*:refs/tags/*"]);
 
 // A production earning gateway tracks upstream RELEASE TAGS by default, never unreleased `main`.
 let target;
 if (useMain) {
-  console.log("  ⚠ --main: targeting bleeding-edge upstream/main (UNRELEASED). Prefer a release tag.");
+  console.log(
+    "  ⚠ --main: targeting bleeding-edge upstream/main (UNRELEASED). Prefer a release tag."
+  );
   target = "upstream/main";
 } else {
   const rel = releaseStatus();
   if (!rel.tag) {
-    console.error("  ✗ no upstream release tags found (fetch may have failed). Re-run, or pass --main.");
+    console.error(
+      "  ✗ no upstream release tags found (fetch may have failed). Re-run, or pass --main."
+    );
     process.exit(3);
   }
   if (rel.onLatest) {
     console.log(`  ✓ already on the latest upstream release ${rel.tag} — nothing to pull.`);
-    console.log("    (Re-run when upstream cuts the next release; merged upstream PRs arrive then.)");
+    console.log(
+      "    (Re-run when upstream cuts the next release; merged upstream PRs arrive then.)"
+    );
     process.exit(0);
   }
   console.log(`  → target: upstream release ${rel.tag} (base is behind it)`);

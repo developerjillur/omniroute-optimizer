@@ -1,8 +1,8 @@
 diff --git a/.husky/pre-commit b/.husky/pre-commit
-index ec14ffcd2..a7420c92d 100755
+index 2b9fff883e7b9fc57f4ae6a490eed8265f6cfd0a..1ad76d059d04e498b610795e3488a9b892830305 100755
 --- a/.husky/pre-commit
 +++ b/.husky/pre-commit
-@@ -11,3 +11,11 @@ npx lint-staged
+@@ -16,3 +16,11 @@
  node scripts/check/check-docs-sync.mjs
  npm run check:any-budget:t11
  node scripts/check/check-tracked-artifacts.mjs

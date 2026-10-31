@@ -1,0 +1,18 @@
+diff --git a/src/lib/usage/usageHistory/helpers.ts b/src/lib/usage/usageHistory/helpers.ts
+index 627c850c4109de4a60acbddd57cefd17aa63292f..f55507b64042be0f7aafb0b64f2e4b6bba08753c 100644
+--- a/src/lib/usage/usageHistory/helpers.ts
++++ b/src/lib/usage/usageHistory/helpers.ts
+@@ -1,3 +1,4 @@
++import { getCacheCreationTtl } from "../cacheCreationTtl";
+ /**
+  * Pure, stateless helpers extracted from usageHistory.ts.
+  * No DB access, no module-level state — safe to import anywhere.
+@@ -44,6 +45,8 @@
+       output: toNumberValue(r.tokens_output),
+       cacheRead: toNumberValue(r.tokens_cache_read),
+       cacheCreation: toNumberValue(r.tokens_cache_creation),
++      ...getCacheCreationTtl({ cacheCreation: r.tokens_cache_creation,
++        cacheCreation5m: r.tokens_cache_creation_5m, cacheCreation1h: r.tokens_cache_creation_1h }),
+       reasoning: toNumberValue(r.tokens_reasoning),
+     },
+     status: toStringOrNull(r.status),

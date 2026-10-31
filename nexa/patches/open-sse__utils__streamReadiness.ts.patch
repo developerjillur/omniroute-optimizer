@@ -1,0 +1,54 @@
+diff --git a/open-sse/utils/streamReadiness.ts b/open-sse/utils/streamReadiness.ts
+index 48e8666c46b2c332d552dad96b5890eec4a62eec..01f1d1f389542075f6c407b8d2256e03a4f64ca2 100644
+--- a/open-sse/utils/streamReadiness.ts
++++ b/open-sse/utils/streamReadiness.ts
+@@ -420,6 +420,10 @@
+    * so #8649 can stand down without treating errors as model output.
+    */
+   sawError: () => boolean;
++  /** Native terminal reason from a real message_delta, never nested metadata. */
++  getClaudeStopReason: () => string | null;
++  /** Actual top-level native message_stop, never nested metadata or an event label alone. */
++  sawClaudeMessageStop?: () => boolean;
+ };
+ 
+ /**
+@@ -451,9 +455,29 @@
+   let sse = false;
+   let error = false;
+   let progress = 0;
++  let claudeStopReason: string | null = null;
++  let claudeMessageStop = false;
+ 
+   const inspect = (frame: string): void => {
+     if (!frame) return;
++    for (const line of frame.split(/\r?\n/)) {
++      const trimmed = line.trim();
++      if (!trimmed.startsWith("data:")) continue;
++      try {
++        const event: unknown = JSON.parse(trimmed.slice(5).trim());
++        if (!isRecord(event)) continue;
++        if (event.type === "message_stop") {
++          claudeMessageStop = true;
++          continue;
++        }
++        if (event.type !== "message_delta" || !isRecord(event.delta)) continue;
++        const reason = event.delta.stop_reason;
++        if (typeof reason === "string" && reason.length > 0 && reason.length <= 64)
++          claudeStopReason = reason;
++      } catch {
++        // Only an actual native terminal event can exempt a refusal from emptiness.
++      }
++    }
+     if (!sse && SSE_FIELD_LINE.test(frame)) sse = true;
+     if (!error && frameHasStructuredStreamError(frame)) error = true;
+     if (!content && hasUsefulStreamContent(frame, { contentProbe })) content = true;
+@@ -501,6 +525,8 @@
+     sawNormalStopTerminal: () => normalStop,
+     sawSseFrame: () => sse,
+     sawError: () => error,
++    getClaudeStopReason: () => claudeStopReason,
++    sawClaudeMessageStop: () => claudeMessageStop,
+   };
+ }
+ 

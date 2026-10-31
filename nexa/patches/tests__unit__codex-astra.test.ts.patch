@@ -1,8 +1,8 @@
 diff --git a/tests/unit/codex-astra.test.ts b/tests/unit/codex-astra.test.ts
-index e57169d2a..b3aa613da 100644
+index e57169d2acf51fb743c0940e79be5396c8ec80e2..b3aa613da915ce88acc21cc2a2b314200113db59 100644
 --- a/tests/unit/codex-astra.test.ts
 +++ b/tests/unit/codex-astra.test.ts
-@@ -36,8 +36,11 @@ test("Codex exposes Astra and its effort variants with live OAuth limits", () =>
+@@ -36,8 +36,11 @@
        assert.equal(model.supportsVision, true);
        assert.equal(model.supportsXHighEffort, true);
      }

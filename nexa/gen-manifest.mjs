@@ -53,6 +53,7 @@ const push = (rel, cls) => {
   "config/compression-disabled.json",
   "deploy/disable-compression.mjs",
   "check/native-claude-regressions.mjs",
+  "retired-patches.json",
 ].forEach((f) => push(f, "nexa-specific"));
 
 const { sha, version } = baseVersion();

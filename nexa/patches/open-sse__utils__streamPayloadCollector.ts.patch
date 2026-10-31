@@ -1,0 +1,64 @@
+diff --git a/open-sse/utils/streamPayloadCollector.ts b/open-sse/utils/streamPayloadCollector.ts
+index 2df3cf49b55a3b667787f438705c030809e92302..46701fb9d2d9481f771e56a71e634addafe7ca1c 100644
+--- a/open-sse/utils/streamPayloadCollector.ts
++++ b/open-sse/utils/streamPayloadCollector.ts
+@@ -512,7 +512,8 @@
+   let messageId = "";
+   let model = fallbackModel || "claude";
+   let role = "assistant";
+-  let stopReason = "end_turn";
++  let stopReason: string | null = null;
++  let stopDetails: unknown = undefined;
+   let stopSequence: string | null = null;
+   // Context Editing (`anthropic-beta: context-management-2025-06-27`) surfaces
+   // `context_management.applied_edits[]` on the final `message_delta` snapshot. Preserve it
+@@ -539,6 +540,7 @@
+         model = toString(message.model, model);
+         role = toString(message.role, role);
+         mergeUsage(usage, message.usage);
++        if ("stop_details" in message) stopDetails = cloneLogPayload(message.stop_details);
+         return;
+       }
+ 
+@@ -580,6 +582,13 @@
+         const deltaType = toString(delta.type);
+         const existing = blocks.get(index);
+ 
++        if (deltaType === "signature_delta") {
++          if (existing?.type === "thinking" && typeof delta.signature === "string") {
++            existing.signature = (existing.signature ?? "") + delta.signature;
++          }
++          return;
++        }
++
+         if (deltaType === "input_json_delta") {
+           const toolUse =
+             existing && existing.type === "tool_use"
+@@ -622,7 +631,9 @@
+ 
+       if (eventType === "message_delta") {
+         const delta = asRecord(payload.delta);
+-        stopReason = toString(delta.stop_reason, stopReason);
++        if (typeof delta.stop_reason === "string") stopReason = delta.stop_reason;
++        if ("stop_details" in delta) stopDetails = cloneLogPayload(delta.stop_details);
++        else if ("stop_details" in payload) stopDetails = cloneLogPayload(payload.stop_details);
+         stopSequence =
+           typeof delta.stop_sequence === "string" ? String(delta.stop_sequence) : stopSequence;
+         mergeUsage(usage, payload.usage);
+@@ -649,7 +660,7 @@
+               : [];
+           }
+           if (block.type === "thinking") {
+-            return block.thinking
++            return block.thinking || block.signature
+               ? [
+                   {
+                     type: "thinking",
+@@ -681,6 +692,7 @@
+         model,
+         content,
+         stop_reason: stopReason,
++        ...(stopDetails !== undefined ? { stop_details: stopDetails } : {}),
+         ...(stopSequence ? { stop_sequence: stopSequence } : {}),
+         ...(Object.keys(usage).length > 0 ? { usage } : {}),
+         ...(contextManagement ? { context_management: contextManagement } : {}),

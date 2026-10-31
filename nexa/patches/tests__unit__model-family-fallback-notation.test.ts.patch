@@ -1,8 +1,8 @@
 diff --git a/tests/unit/model-family-fallback-notation.test.ts b/tests/unit/model-family-fallback-notation.test.ts
-index e1fdc815b..737d7cebb 100644
+index 31aa9e516e9f5891b09e637eb5bca6b2e45f204e..6c596244421b46a7a6ac273f5e81472e2b3aee79 100644
 --- a/tests/unit/model-family-fallback-notation.test.ts
 +++ b/tests/unit/model-family-fallback-notation.test.ts
-@@ -10,15 +10,15 @@ import assert from "node:assert/strict";
+@@ -10,15 +10,15 @@
  // removed the fabricated ids; `anthropic` genuinely serves them in dot notation.
  const { getNextFamilyFallback } = await import("../../open-sse/services/modelFamilyFallback.ts");
  
@@ -24,7 +24,7 @@ index e1fdc815b..737d7cebb 100644
  });
  
  test("Fable 5 fallback resolves to anthropic's dot-notation model id", () => {
-@@ -39,12 +39,12 @@ test("dot-notation current model is normalized for the family lookup", () => {
+@@ -39,12 +39,12 @@
    assert.equal(next, "anthropic/claude-opus-4.7");
  });
  

@@ -2,7 +2,39 @@
 
 Owner: Jillur Rahman / NexaLance
 
-This directory is the versioned deployment source for the local production service. The portable kit is a historical setup reference; the installed `omni-ctl` command prefers `~/Developer/OmniRoute/nexa/deploy/omni-updater.sh`.
+This directory is the versioned deployment source for the local production service.
+Since 2026-10-28, `developerjillur/omniroute-optimizer` is the canonical management
+repository for Nexa fixes and release evidence. Its overlay is validated against
+the pinned pristine application base in an isolated fixture. The complete
+`~/Developer/OmniRoute` checkout is a reference/application checkout, not a second
+place to author fixes independently.
+
+The portable kit is a historical setup reference. The currently installed
+`omni-ctl` still prefers `~/Developer/OmniRoute/nexa/deploy/omni-updater.sh`; no
+installed command or production runtime was changed by the 2026-10-28 audit.
+Before deploying a new canonical change, prepare and validate an isolated
+application checkout using the exact reviewed optimizer commit. A source push or
+passing source-only CI is not a production build, install or deployment receipt.
+
+For v3.8.52, run `python3 nexa/deploy/check-upgrade-data.py --database <existing-storage.sqlite>`
+before preparing a migration clone and again before any approved live promotion.
+The check is read-only and must exit 0. Migration 207 removes or remaps old
+`opencode` / `oc` provider configuration; if any affected record exists, hold
+promotion and preserve that configuration until an explicit migration decision.
+The pinned upstream release is `ad6f33f66bda34eba98645d3bfdabbde294bc843`;
+do not substitute the upstream default branch or a later release. Keep the two
+custom SQL paths intact: their runtime ledger identities are namespaced, and
+the old applied timestamps and native cache values must survive the cloned-data
+acceptance check. Source tests alone do not establish a safe live data migration.
+
+For a canonical release, retain both the optimizer commit and the application
+integration commit in the build receipt. In a new isolated pristine application
+checkout, copy and verify the reviewed overlay, then save that overlay with normal
+hooks before applying it. This makes the existing `build:release` Git-based
+`BUILD_SHA` identify the actual integrated source. Never commit an applied tree or
+stamp the pristine upstream SHA as though it identified new Nexa fixes. Preserve
+the installed DNS shim alongside the previous runtime for rollback; the installed
+updater's older source path must not silently replace the reviewed canonical shim.
 
 ## Runtime layout
 

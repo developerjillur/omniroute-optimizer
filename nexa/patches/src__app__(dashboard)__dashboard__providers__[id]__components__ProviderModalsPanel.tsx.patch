@@ -1,8 +1,8 @@
 diff --git a/src/app/(dashboard)/dashboard/providers/[id]/components/ProviderModalsPanel.tsx b/src/app/(dashboard)/dashboard/providers/[id]/components/ProviderModalsPanel.tsx
-index b0af90b..ea27b95 100644
+index 819482a7647f7edb0d3ec05108efaf54cc91d881..7b680c550335ad678ae4d5c98139d5ba1dd48346 100644
 --- a/src/app/(dashboard)/dashboard/providers/[id]/components/ProviderModalsPanel.tsx
 +++ b/src/app/(dashboard)/dashboard/providers/[id]/components/ProviderModalsPanel.tsx
-@@ -309,6 +309,10 @@ export default function ProviderModalsPanel({
+@@ -360,6 +360,10 @@
        )}
        {!isUpstreamProxyProvider && (
          <EditConnectionModal

@@ -1,9 +1,11 @@
 diff --git a/src/sse/services/auth.ts b/src/sse/services/auth.ts
-index d22d86d41..d53a90f11 100644
+index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..4b6c43f7e2238c3253a8d5ccf3775124510e6f80 100644
 --- a/src/sse/services/auth.ts
 +++ b/src/sse/services/auth.ts
-@@ -1,4 +1,16 @@
+@@ -3,6 +3,18 @@
+ import { qoderSupportsCallerTools } from "@omniroute/open-sse/services/qoderCapabilities";
  import { randomUUID } from "crypto";
+ import { getProviderSearchPool } from "@omniroute/open-sse/services/providerConnectionPool.ts";
 +import {
 +  getModelTestConnectionId,
 +  recordModelTestSelection,
@@ -16,10 +18,10 @@ index d22d86d41..d53a90f11 100644
 +  GOOGLE_VERIFICATION_MESSAGE,
 +} from "@/lib/providers/googleAccountHealth";
 +import { setGoogleAccountVerification } from "./googleAccountVerification.ts";
- import { nodeTypeFromId } from "@/lib/db/providerNodeSelect";
  import { hydrateConnectionProviderSpecificData } from "./compatibleNodeBaseUrl.ts"; // #13452
  import { extractGoogApiKeyHeader } from "./googApiKeyAuth.ts";
-@@ -50,12 +62,14 @@ import {
+ import { isCooldownRetrySkipRefusalsEnabled } from "./cooldownAwareRetry.ts";
+@@ -55,6 +67,7 @@
    DEFAULT_QUOTA_THRESHOLD_PERCENT,
    getCachedClaudeQuotaScopeDecision as readClaudeScope,
    getQuotaCache,
@@ -27,14 +29,15 @@ index d22d86d41..d53a90f11 100644
    getQuotaWindowStatus,
    hydrateCodexQuotaCacheForRequest,
    isQuotaExhaustedForRequest,
+@@ -62,6 +75,7 @@
    resolveClaudeQuotaCooldownMs as resolveClaudeCooldown,
  } from "@/domain/quotaCache";
- import { isClaudeExtraUsageAllowed } from "@/lib/providers/claudeExtraUsage";
+ import { defersQuotaCutoff, hasCodexCreditOptIn } from "@/lib/providers/quotaCutoffOptIns";
 +import { pickClaudeNewSession, isNativeClaudeSession } from "./claudeSessionSelection";
  import {
    getQuotaScopeLabelForProvider,
    isAntigravityQuotaProvider,
-@@ -1076,6 +1090,7 @@ async function materializeConnection(
+@@ -962,6 +976,7 @@
    } = {}
  ) {
    const providerSpecificData = await hydrateConnectionProviderSpecificData(connection);
@@ -42,7 +45,7 @@ index d22d86d41..d53a90f11 100644
    const apiKeyHealth = providerSpecificData.apiKeyHealth as Record<string, KeyHealth> | undefined;
    if (apiKeyHealth) syncHealthFromDB(connection.id, apiKeyHealth);
    const releaseOAuthSession =
-@@ -1263,6 +1278,8 @@ export async function getProviderCredentials(
+@@ -1108,6 +1123,8 @@
      // Fetched early so the session-affinity-pin override (#5903) can consult
      // the TTL before forcedConnectionId narrows the connection pool.
      const settings = await getSettings();
@@ -51,7 +54,7 @@ index d22d86d41..d53a90f11 100644
      const sessionAffinityTtlMs = resolveSessionAffinityTtlMs(provider, options, settings);
  
      // Fix #922: Check for aliases (nvidia/nvidia_nim) to ensure credentials are found
-@@ -1289,6 +1306,7 @@ export async function getProviderCredentials(
+@@ -1134,6 +1151,7 @@
      if (allowedConnections && allowedConnections.length > 0) {
        connections = connections.filter((conn) => allowedConnections.includes(conn.id));
      }
@@ -59,7 +62,7 @@ index d22d86d41..d53a90f11 100644
      let explicitProbeKind: "probe" | "suppressed" | "skip" = "skip";
      if (forcedConnectionId && !connections.some((c) => c.id === forcedConnectionId)) {
        const pinnedRaw = await getCachedProviderConnectionById(forcedConnectionId);
-@@ -1328,7 +1346,7 @@ export async function getProviderCredentials(
+@@ -1173,7 +1191,7 @@
  
      // #5903: an active session-affinity pin outranks a per-request reset-aware
      // forcedConnectionId (see sessionAffinityPin leaf for the full rationale).
@@ -68,7 +71,7 @@ index d22d86d41..d53a90f11 100644
        forcedConnectionId =
          applySessionAffinityPin({
            forcedConnectionId,
-@@ -1367,8 +1385,9 @@ export async function getProviderCredentials(
+@@ -1212,8 +1230,9 @@
          excludedConnectionIds,
          connections,
          allowRateLimitedConnections,
@@ -79,15 +82,15 @@ index d22d86d41..d53a90f11 100644
            const conn = connections.find((candidate) => candidate.id === connectionId);
            return isQuotaExhaustedForRequest(
              connectionId,
-@@ -1429,6 +1448,7 @@ export async function getProviderCredentials(
+@@ -1271,6 +1290,7 @@
          allConnections = allConnections.filter((conn) => allowedConnections.includes(conn.id));
        }
        const blockedByKeyPolicyCount = connectionsBeforeKeyPolicy - allConnections.length;
 +      allConnections = restrictModelTestConnections(allConnections);
-       if (forcedConnectionId) {
-         allConnections = allConnections.filter((conn) => conn.id === forcedConnectionId);
-       }
-@@ -1539,6 +1559,7 @@ export async function getProviderCredentials(
+       // A scoped pool may contain an allowed but inactive account. Excluding
+       // unrelated siblings does not turn that account's unavailability into a
+       // permission failure. Preserve 403 for an explicitly forbidden pin.
+@@ -1398,6 +1418,7 @@
        requestedModel
      );
      // Filter out unavailable accounts and excluded connection
@@ -95,7 +98,7 @@ index d22d86d41..d53a90f11 100644
      let availableConnections = connections.filter((c) => {
        if (excludedConnectionIds.has(c.id)) {
          connectionFilterStatus.set(c.id, "excluded");
-@@ -1556,6 +1577,13 @@ export async function getProviderCredentials(
+@@ -1420,6 +1441,13 @@
          return false;
        }
        if (!allowSuppressedConnections && explicitProbeKind !== "probe") {
@@ -109,7 +112,7 @@ index d22d86d41..d53a90f11 100644
          if (!allowRateLimitedConnections && isAccountUnavailable(c.rateLimitedUntil)) {
            connectionFilterStatus.set(c.id, "rateLimited");
            return false;
-@@ -1663,6 +1691,24 @@ export async function getProviderCredentials(
+@@ -1527,6 +1555,24 @@
      });
  
      if (availableConnections.length === 0) {
@@ -134,7 +137,7 @@ index d22d86d41..d53a90f11 100644
        const cooldownStates: CooldownInspectionState[] = connections.map((connection) => {
          const connectionCooldownMs = parseFutureDateMs(connection.rateLimitedUntil);
          const codexScopeCooldownMs =
-@@ -1798,7 +1844,7 @@ export async function getProviderCredentials(
+@@ -1666,7 +1712,7 @@
        }
      }
  
@@ -143,7 +146,7 @@ index d22d86d41..d53a90f11 100644
        policyEligibleConnections = peakHourEligibleConnections.filter((connection) => {
          const evaluation = evaluateQuotaLimitPolicy(provider, connection, requestedModel);
          quotaResults.set(connection.id, { blocked: evaluation.blocked, exhausted: false });
-@@ -1872,12 +1918,9 @@ export async function getProviderCredentials(
+@@ -1740,12 +1786,9 @@
      const withQuota: typeof policyEligibleConnections = [];
      const exhaustedQuota: typeof policyEligibleConnections = [];
      for (const c of policyEligibleConnections) {
@@ -159,7 +162,7 @@ index d22d86d41..d53a90f11 100644
        const existing = quotaResults.get(c.id);
        if (existing) existing.exhausted = exhausted;
        if (!exhausted) {
-@@ -1895,6 +1938,21 @@ export async function getProviderCredentials(
+@@ -1763,6 +1806,22 @@
      }
  
      if (withQuota.length === 0 && exhaustedQuota.length > 0) {
@@ -178,14 +181,15 @@ index d22d86d41..d53a90f11 100644
 +      );
 +      if (excludedWithQuota) return null;
 +
-       // All remaining eligible accounts are exhausted
++      // All remaining eligible accounts are exhausted
        const earliestResetAt = getEarliestFutureDate(
          exhaustedQuota.map((c) => {
-@@ -1912,7 +1970,10 @@ export async function getProviderCredentials(
+           if (resolveProviderId(provider) === "claude") {
+@@ -1785,7 +1844,10 @@
          allRateLimited: true,
          retryAfter,
          retryAfterHuman: formatRetryAfter(retryAfter),
--        lastError: `All ${provider} accounts have exhausted their quota (cached quota state, no upstream attempt; earliest reset ${formatRetryAfter(retryAfter)})`,
+-        lastError: `All ${provider} accounts have exhausted their quota (cached quota state, no upstream attempt; earliest ${formatRetryAfter(retryAfter)})`,
 +        lastError:
 +          verificationBlockedIdentities.size > 0
 +            ? `No usable ${provider} accounts: some require Google verification; the remaining eligible accounts have exhausted quota (cached state; earliest reset ${formatRetryAfter(retryAfter)})`
@@ -193,7 +197,7 @@ index d22d86d41..d53a90f11 100644
          lastErrorCode: 429,
        };
      }
-@@ -1956,6 +2017,7 @@ export async function getProviderCredentials(
+@@ -1829,6 +1891,7 @@
      >;
      const providerOverride = providerStrategyOverrides[resolvedId] || {};
      const strategy = providerOverride.fallbackStrategy || settings.fallbackStrategy || "fill-first";
@@ -201,7 +205,7 @@ index d22d86d41..d53a90f11 100644
  
      let commitSelectionSideEffects: (() => Promise<void> | void) | undefined;
      let connection = leasePolicy.activeLease
-@@ -1969,7 +2031,8 @@ export async function getProviderCredentials(
+@@ -1842,7 +1905,8 @@
              provider,
              options.sessionKey,
              orderedConnections,
@@ -211,7 +215,7 @@ index d22d86d41..d53a90f11 100644
            )
          : null;
      const affinityConnection = connection
-@@ -1980,7 +2043,8 @@ export async function getProviderCredentials(
+@@ -1853,7 +1917,8 @@
              provider,
              options.sessionKey,
              orderedConnections,
@@ -221,18 +225,20 @@ index d22d86d41..d53a90f11 100644
            );
      if (affinityConnection) {
        connection = affinityConnection;
-@@ -2154,10 +2218,17 @@ export async function getProviderCredentials(
+@@ -2027,10 +2092,17 @@
        }
      } else {
        // Default: fill-first (already sorted by priority in getProviderConnections)
 -      connection = orderedConnections[0];
+-    }
+-
+-    if (options.reserveOAuthSession === true && connection?.authType === "oauth") {
 +      connection = nativeClaudeSession
 +        ? (pickClaudeNewSession(orderedConnections, getQuotaWeightedRemainingPercent) ??
 +          orderedConnections[0])
 +        : orderedConnections[0];
-     }
- 
--    if (options.reserveOAuthSession === true && connection?.authType === "oauth") {
++    }
++
 +    if (
 +      options.reserveOAuthSession === true &&
 +      connection?.authType === "oauth" &&
@@ -241,10 +247,12 @@ index d22d86d41..d53a90f11 100644
        const selectedPriority = connection.priority || 999;
        const selectedAvailability = getOAuthSessionAvailability(connection.id, options.sessionKey);
        const moreAvailablePeer = [...orderedConnections]
-@@ -2177,6 +2248,17 @@ export async function getProviderCredentials(
+@@ -2048,6 +2120,17 @@
+             getOAuthSessionAvailability(candidate.id, options.sessionKey) > selectedAvailability
+         );
        if (moreAvailablePeer) connection = moreAvailablePeer;
-     }
- 
++    }
++
 +    if (nativeClaudeSession && !affinityConnection && connection) {
 +      const pin = planSessionAffinityConnection(
 +        provider,
@@ -254,12 +262,10 @@ index d22d86d41..d53a90f11 100644
 +      );
 +      if (options.lease) commitSelectionSideEffects = pin?.commit;
 +      else await pin?.commit();
-+    }
-+
+     }
+ 
      let exclusiveLease: ExclusiveConnectionLease | undefined;
-     if (options.lease) {
-       const candidateIds = orderedConnections.map((candidate) => candidate.id);
-@@ -2282,6 +2364,18 @@ export async function getProviderCredentialsWithQuotaPreflight(
+@@ -2155,6 +2238,18 @@
    );
  
    const resilience = resolveResilienceSettings(await getCachedSettings());
@@ -278,10 +284,11 @@ index d22d86d41..d53a90f11 100644
    const { defaultThresholdPercent, warnThresholdPercent, providerWindowDefaults } =
      resilience.quotaPreflight;
    const providerWindowMap = providerWindowDefaults[provider] || {};
-@@ -2732,6 +2826,14 @@ export async function markAccountUnavailable(
+@@ -2603,6 +2698,14 @@
+     // Request-scoped refusal: nothing about it belongs on this account or this model.
      if (isOpencodeFreeTierRefusalForProvider(provider, status, errorText))
        return { shouldFallback: true, cooldownMs: 0 };
- 
++
 +    if (
 +      isGoogleVerificationFailure(provider, status, errorText) &&
 +      !(await shouldIsolateProbeFailures())
@@ -289,7 +296,6 @@ index d22d86d41..d53a90f11 100644
 +      await setGoogleAccountVerification(connectionId, true);
 +      return { shouldFallback: true, cooldownMs: 0, reason: "project_route_error" };
 +    }
-+
-     // ─── Anti-Thundering Herd Guard ─────────────────────────────────
-     // If this connection was ALREADY marked unavailable by a prior concurrent
-     // request (within the mutex window), skip re-marking to avoid resetting
+ 
+     // A stream content stall gave up on this one request (usually a long reasoning turn
+     // with no output yet); cooling the account for it takes healthy capacity out of routing.

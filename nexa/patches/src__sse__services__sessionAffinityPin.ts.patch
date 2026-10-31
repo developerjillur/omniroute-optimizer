@@ -1,5 +1,5 @@
 diff --git a/src/sse/services/sessionAffinityPin.ts b/src/sse/services/sessionAffinityPin.ts
-index 262db8491..a0532e436 100644
+index 262db8491fcaf9538643c9432e9e229e1a1c6099..a0532e436c01c3a500639b8fdb3d47f29fc8da30 100644
 --- a/src/sse/services/sessionAffinityPin.ts
 +++ b/src/sse/services/sessionAffinityPin.ts
 @@ -27,6 +27,7 @@
@@ -10,7 +10,7 @@ index 262db8491..a0532e436 100644
  import {
    getSessionAccountAffinity,
    upsertSessionAccountAffinity,
-@@ -44,6 +45,7 @@ import {
+@@ -44,6 +45,7 @@
  import { isComboPerModelTimeoutAbort } from "@omniroute/open-sse/services/combo/comboAbortReasons.ts";
  import * as log from "../utils/logger";
  import { readHeaderValue } from "./headerReader.ts";
@@ -18,7 +18,7 @@ index 262db8491..a0532e436 100644
  
  export { readHeaderValue } from "./headerReader.ts";
  
-@@ -216,6 +218,9 @@ export function extractSessionAffinityKey(
+@@ -216,6 +218,9 @@
      normalizeSessionKey(record.prompt_cache_key, "prompt-cache");
    if (explicitKey) return explicitKey;
  
@@ -28,7 +28,7 @@ index 262db8491..a0532e436 100644
    const inputText = getFirstInputText(body);
    if (!inputText) return null;
    return `input:sha256:${createHash("sha256").update(inputText).digest("hex")}`;
-@@ -273,7 +278,8 @@ export async function selectSessionAffinityConnection<T extends SessionAffinityC
+@@ -273,7 +278,8 @@
    provider: string,
    sessionKey: string | null | undefined,
    connections: T[],
@@ -38,7 +38,7 @@ index 262db8491..a0532e436 100644
  ): Promise<T | null> {
    if (!sessionKey || connections.length === 0 || ttlMs <= 0) return null;
  
-@@ -303,6 +309,7 @@ export async function selectSessionAffinityConnection<T extends SessionAffinityC
+@@ -303,6 +309,7 @@
      );
    }
  
@@ -46,7 +46,7 @@ index 262db8491..a0532e436 100644
    const connection = [...connections].sort(compareLruConnections)[0] ?? null;
    if (!connection) return null;
  
-@@ -327,12 +334,14 @@ export function planSessionAffinityConnection<T extends SessionAffinityConnectio
+@@ -327,12 +334,14 @@
    provider: string,
    sessionKey: string | null | undefined,
    connections: T[],
@@ -62,7 +62,7 @@ index 262db8491..a0532e436 100644
    const connection = existingConnection ?? [...connections].sort(compareLruConnections)[0] ?? null;
    if (!connection) return null;
  
-@@ -441,7 +450,7 @@ export interface AffinityPinSettings {
+@@ -441,7 +450,7 @@
   * site with one call.
   */
  export function resolveSessionAffinityTtlMs(
@@ -71,7 +71,7 @@ index 262db8491..a0532e436 100644
    options: AffinityPinOptions,
    settings: AffinityPinSettings
  ): number {
-@@ -449,6 +458,7 @@ export function resolveSessionAffinityTtlMs(
+@@ -449,6 +458,7 @@
    if (Number.isFinite(override) && override > 0) return override;
    const configured = Number(settings.sessionAffinityTtlMs ?? settings.codexSessionAffinityTtlMs);
    if (Number.isFinite(configured) && configured > 0) return configured;

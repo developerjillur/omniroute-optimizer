@@ -1,20 +1,23 @@
 diff --git a/src/shared/constants/pricing/frontier-labs.ts b/src/shared/constants/pricing/frontier-labs.ts
-index 0d6e0ce88..8a10b512e 100644
+index e972fef65a41482a8adeb11cfa0a6bbba7b2e494..126507a4eda40c6f6f8f2cdf37918d86c0b869e5 100644
 --- a/src/shared/constants/pricing/frontier-labs.ts
 +++ b/src/shared/constants/pricing/frontier-labs.ts
-@@ -3,6 +3,7 @@
+@@ -3,8 +3,8 @@
   * Pure data; merged by default-pricing.ts via spread (god-file decomposition; semantic split).
   */
  import {
 +  GPT_6_1_SOL_PRICING,
    GPT_6_ASTRA_PRICING,
+-  GPT_6_SOL_PRICING,
    GEMINI_3_7_FLASH_PROMO_PRICING,
+   GEMINI_4_ARGON_PROMO_PRICING,
    GPT_5_5_PRICING,
-@@ -21,6 +22,7 @@ import {
- 
- export const DEFAULT_PRICING_FRONTIER = {
-   openai: {
-+    "gpt-6.1-sol": GPT_6_1_SOL_PRICING,
-     "gpt-6-astra": GPT_6_ASTRA_PRICING,
-     "gpt-5.6": GPT_5_6_SOL_PRICING,
-     "gpt-5.6-sol": GPT_5_6_SOL_PRICING,
+@@ -45,7 +45,7 @@
+       reasoning: 0.5,
+       cache_creation: 0.125,
+     }),
+-    "gpt-6.1-sol": withOpenAiLongContextTier(GPT_6_SOL_PRICING),
++    "gpt-6.1-sol": withOpenAiLongContextTier(GPT_6_1_SOL_PRICING),
+     "gpt-5.6": withOpenAiLongContextTier(GPT_5_6_SOL_PRICING),
+     "gpt-5.6-sol": withOpenAiLongContextTier(GPT_5_6_SOL_PRICING),
+     "gpt-5.6-terra": withOpenAiLongContextTier(GPT_5_6_TERRA_PRICING),

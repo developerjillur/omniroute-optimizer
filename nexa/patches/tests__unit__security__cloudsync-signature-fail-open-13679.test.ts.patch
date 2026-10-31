@@ -1,5 +1,5 @@
 diff --git a/tests/unit/security/cloudsync-signature-fail-open-13679.test.ts b/tests/unit/security/cloudsync-signature-fail-open-13679.test.ts
-index c8c960b35..c392fcb54 100644
+index c8c960b35c7f60153be0e86823fba0e41763a58b..c392fcb547668ae9372a82a81427b4eb7452c2fd 100644
 --- a/tests/unit/security/cloudsync-signature-fail-open-13679.test.ts
 +++ b/tests/unit/security/cloudsync-signature-fail-open-13679.test.ts
 @@ -14,20 +14,23 @@
@@ -28,7 +28,7 @@ index c8c960b35..c392fcb54 100644
  }
  
  test.after(restoreEnv);
-@@ -52,9 +55,10 @@ test("issue #13679: a present-but-unverifiable X-Cloud-Sig is rejected even with
+@@ -52,9 +55,10 @@
    }
  });
  
@@ -40,7 +40,7 @@ index c8c960b35..c392fcb54 100644
    try {
      const { verifyCloudSignature } = await import(
        `../../../src/lib/cloudSync.ts?case=13679-legacy-${Date.now()}-${Math.random()}`
-@@ -63,9 +67,24 @@ test("issue #13679: legacy peers with NO X-Cloud-Sig header still pass by defaul
+@@ -63,9 +67,24 @@
  
      assert.equal(
        verifyCloudSignature(rawBody, null),
@@ -48,7 +48,7 @@ index c8c960b35..c392fcb54 100644
 -      "an unsigned payload from a legacy peer must still pass through by default in v3.8.x"
 +      false,
 +      "unsigned responses must not pass through by default"
-+    );
+     );
 +  } finally {
 +    restoreEnv();
 +  }
@@ -61,7 +61,7 @@ index c8c960b35..c392fcb54 100644
 +  try {
 +    const { verifyCloudSignature } = await import(
 +      `../../../src/lib/cloudSync.ts?case=legacy-opt-in-${Date.now()}-${Math.random()}`
-     );
++    );
 +    assert.equal(verifyCloudSignature(JSON.stringify({ providers: [] }), null), true);
 +    assert.equal(verifyCloudSignature(JSON.stringify({ providers: [] }), "0".repeat(64)), false);
    } finally {

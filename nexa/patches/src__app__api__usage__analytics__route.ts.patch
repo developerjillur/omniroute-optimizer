@@ -1,8 +1,8 @@
 diff --git a/src/app/api/usage/analytics/route.ts b/src/app/api/usage/analytics/route.ts
-index 56a799d41..013fcc047 100644
+index 238b2571e44f3ac30f7a0919123a54d76e235528..a77e2aef13cef36aaa25e15d8b64113820423a4d 100644
 --- a/src/app/api/usage/analytics/route.ts
 +++ b/src/app/api/usage/analytics/route.ts
-@@ -248,7 +248,9 @@ function computeUsageRowCost(
+@@ -373,7 +373,9 @@
    const provider = toStringValue(row.provider);
    const model = toStringValue(row.model);
    if (!provider || !model) return 0;
@@ -13,11 +13,20 @@ index 56a799d41..013fcc047 100644
    const isAggregated = toNumber(row.isAggregated ?? row.is_aggregated) > 0;
    const storedCost = toNumber(row.storedCost ?? row.stored_cost);
  
-@@ -283,6 +285,7 @@ function computeUsageRowCost(
-       model,
-       serviceTier,
-       flatRateAsZero,
-+      longContext: toNumber(row.longContext) === 1,
-     }
+@@ -410,6 +412,8 @@
+         output: toNumber(row.costCompletionTokens ?? row.completionTokens),
+         cacheRead: toNumber(row.costCacheReadTokens ?? row.cacheReadTokens),
+         cacheCreation: toNumber(row.costCacheCreationTokens ?? row.cacheCreationTokens),
++        cacheCreation5m: toNumber(row.costCacheCreation5mTokens ?? row.cacheCreation5mTokens),
++        cacheCreation1h: toNumber(row.costCacheCreation1hTokens ?? row.cacheCreation1hTokens),
+         reasoning: toNumber(row.costReasoningTokens ?? row.reasoningTokens),
+       },
+       {
+@@ -417,6 +421,7 @@
+         model,
+         serviceTier,
+         flatRateAsZero,
++        longContext: toNumber(row.longContext) === 1,
+       }
+     )
    );
- }

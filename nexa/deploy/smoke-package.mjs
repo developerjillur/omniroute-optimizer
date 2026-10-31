@@ -5,6 +5,8 @@ import net from "node:net";
 import { spawn, execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { smokeModel } from "./smoke-model.mjs";
+import { inspectNativeUsageSchema } from "./native-usage-schema.mjs";
+import { packageInstallArgs, packageInstallEnvironment } from "./package-install.mjs";
 
 const [archive, destination] = process.argv.slice(2);
 if (!archive || !destination) throw Error("usage: smoke-package.mjs <archive> <new destination>");
@@ -29,23 +31,14 @@ if (!reuse) {
   const installLog = fs.openSync(path.join(root, "install.log"), "w", 0o600);
   execFileSync(
     "/usr/local/bin/node",
-    [
-      "/usr/local/lib/node_modules/npm/bin/npm-cli.js",
-      "install",
-      "-g",
-      "--prefix",
-      prefix,
-      "--no-fund",
-      "--no-audit",
-      path.resolve(archive),
-    ],
+    ["/usr/local/lib/node_modules/npm/bin/npm-cli.js", ...packageInstallArgs(prefix, archive)],
     {
       stdio: ["ignore", installLog, installLog],
-      env: {
+      env: packageInstallEnvironment({
         ...process.env,
         PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin",
         DATA_DIR: data,
-      },
+      }),
     }
   );
   fs.closeSync(installLog);
@@ -128,28 +121,7 @@ try {
         throw Error("Packaged Bridge state lost the configured port");
     }
   }
-  const nativeUsageSchema = JSON.parse(
-    execFileSync(
-      "python3",
-      [
-        "-c",
-        "import sqlite3,json,sys; c=sqlite3.connect('file:'+sys.argv[1]+'?mode=ro',uri=True); print(json.dumps({'columns':[r[1] for r in c.execute('PRAGMA table_info(call_logs)')],'migration':c.execute(\"SELECT name FROM _omniroute_migrations WHERE version='197'\").fetchone()}))",
-        path.join(data, "storage.sqlite"),
-      ],
-      { encoding: "utf8" }
-    )
-  );
-  if (
-    !nativeUsageSchema.migration ||
-    nativeUsageSchema.migration[0] !== "native_claude_cache_details" ||
-    [
-      "tokens_cache_creation_5m",
-      "tokens_cache_creation_1h",
-      "native_session_tag",
-      "native_cache_group_tag",
-    ].some((column) => !nativeUsageSchema.columns.includes(column))
-  )
-    throw Error("Isolated installed package did not apply native usage migration 197");
+  inspectNativeUsageSchema(data);
   const inference = await apiFetch("/v1/messages", {
     baseUrl: base,
     apiKey: localKey,

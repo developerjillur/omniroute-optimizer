@@ -72,4 +72,6 @@ for (let i = 0; i < lines.length; i++) {
 }
 
 fs.writeFileSync(OPENAPI_PATH, out.join("\n"));
-console.log(`annotated ${added} method(s) with x-loopback-only: true across ${PREFIXES.length} LOCAL_ONLY prefixes`);
+console.log(
+  `annotated ${added} method(s) with x-loopback-only: true across ${PREFIXES.length} LOCAL_ONLY prefixes`
+);

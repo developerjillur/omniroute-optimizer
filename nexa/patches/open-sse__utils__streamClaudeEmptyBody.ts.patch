@@ -1,0 +1,36 @@
+diff --git a/open-sse/utils/streamClaudeEmptyBody.ts b/open-sse/utils/streamClaudeEmptyBody.ts
+index d387972b830a10305ec8d192d2fbecbdc6a86f90..3ad05864414a300f2bee4307e8529333af18dfd7 100644
+--- a/open-sse/utils/streamClaudeEmptyBody.ts
++++ b/open-sse/utils/streamClaudeEmptyBody.ts
+@@ -16,28 +16,22 @@
+  * here already scoped to a Claude-format response).
+  */
+ type ClaudeEmptyLifecycleLike = {
++  stopReason?: string | null;
+   hasError: boolean;
+   hasContentBlock: boolean;
+   hasMessageStart: boolean;
+   hasMessageDelta: boolean;
+   hasMessageStop: boolean;
+-  stopReason?: string | null;
+ };
+-
+-const CLEAN_EMPTY_STOP_REASONS = new Set(["end_turn", "stop_sequence"]);
+ 
+ export function shouldAbortEmptyClaudeStream(
+   lifecycle: ClaudeEmptyLifecycleLike,
+   sawAnyUpstreamPayload: boolean
+ ): boolean {
+   if (lifecycle.hasError || lifecycle.hasContentBlock) return false;
+-  if (
+-    sawAnyUpstreamPayload &&
+-    lifecycle.hasMessageStop &&
+-    CLEAN_EMPTY_STOP_REASONS.has(lifecycle.stopReason || "")
+-  ) {
++  // A refusal is a completed native stop, not an empty transport failure.
++  if (lifecycle.stopReason === "refusal" && lifecycle.hasMessageDelta && lifecycle.hasMessageStop)
+     return false;
+-  }
+   const hasPartialLifecycle =
+     lifecycle.hasMessageStart || lifecycle.hasMessageDelta || lifecycle.hasMessageStop;
+   return hasPartialLifecycle || !sawAnyUpstreamPayload;

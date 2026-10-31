@@ -1,8 +1,8 @@
 diff --git a/tests/unit/guardrails-registry.test.ts b/tests/unit/guardrails-registry.test.ts
-index bb64e067e..71980608c 100644
+index bb64e067ea3cc813ddb78ac8c7984cf3eef404f7..71980608cef3e50d486b39e1b2520d16d16fee2f 100644
 --- a/tests/unit/guardrails-registry.test.ts
 +++ b/tests/unit/guardrails-registry.test.ts
-@@ -90,14 +90,21 @@ test("guardrail registry respects disabledGuardrails from context", async () =>
+@@ -90,14 +90,21 @@
    );
  });
  

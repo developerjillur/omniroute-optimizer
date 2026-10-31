@@ -1,8 +1,8 @@
 diff --git a/src/app/api/v1/messages/count_tokens/route.ts b/src/app/api/v1/messages/count_tokens/route.ts
-index be27e79a4..db0107ca5 100644
+index 4017357730b4a368d7e8d71a788ec2b4e0b44962..5716ba885e336383278dd06910fa5377dac92771 100644
 --- a/src/app/api/v1/messages/count_tokens/route.ts
 +++ b/src/app/api/v1/messages/count_tokens/route.ts
-@@ -83,6 +83,8 @@ export async function POST(request) {
+@@ -93,6 +93,8 @@
          model: modelInfo.model,
          body,
          credentials,

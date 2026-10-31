@@ -15,6 +15,7 @@ import { fileURLToPath } from "node:url";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { verifyRetiredPatches } from "./retiredPatches.mjs";
 
 export const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const BASE_REF = "upstream-main";
@@ -37,11 +38,21 @@ export function git(args, { allowFail = false } = {}) {
 
 export function listPatches() {
   if (!fs.existsSync(PATCH_DIR)) return [];
-  return fs
+  const names = fs
     .readdirSync(PATCH_DIR)
     .filter((f) => f.endsWith(".patch"))
-    .sort()
-    .map((f) => path.join(PATCH_DIR, f));
+    .sort();
+  const registryPath = path.join(NEXA, "retired-patches.json");
+  const retired = fs.existsSync(registryPath)
+    ? verifyRetiredPatches(
+        JSON.parse(fs.readFileSync(registryPath, "utf8")),
+        git(["rev-parse", BASE_REF]),
+        names,
+        (name) => fs.readFileSync(path.join(PATCH_DIR, name)),
+        (target) => git(["rev-parse", `${BASE_REF}:${target}`])
+      )
+    : new Set();
+  return names.filter((name) => !retired.has(name)).map((name) => path.join(PATCH_DIR, name));
 }
 
 // The reliable target path of a patch = its `+++ b/<path>` line (slug reversal is unsafe
@@ -147,17 +158,63 @@ export function checkPatches() {
 
 // ---- apply / restore -------------------------------------------------------
 
+function syncTranslatedMigrationRow(content, count, relative) {
+  const rows = [...content.matchAll(/<tr\b[^>]*>[\s\S]*?<\/tr>/g)].filter(([row]) =>
+    row.includes("better-sqlite3")
+  );
+  if (rows.length !== 1) throw Error(`Expected one database row: ${relative}`);
+  const [row] = rows[0];
+  const tail = row.match(/—([\s\S]*?)<\/td>/);
+  if (!tail) throw Error(`Expected database counts after em dash: ${relative}`);
+  const numbers = [...tail[1].matchAll(/<[^>]*>|[0-9٠-٩۰-۹]+/g)].filter(
+    ([token]) => !token.startsWith("<")
+  );
+  if (numbers.length !== 2) throw Error(`Expected module and migration counts: ${relative}`);
+  const number = numbers[1];
+  const first = number[0].charCodeAt(0);
+  const zero =
+    first >= 0x660 && first <= 0x669 ? 0x660 : first >= 0x6f0 && first <= 0x6f9 ? 0x6f0 : 0x30;
+  const translated = String(count).replace(/\d/g, (digit) =>
+    String.fromCharCode(zero + Number(digit))
+  );
+  const position = tail.index + 1 + number.index;
+  const updated = row.slice(0, position) + translated + row.slice(position + number[0].length);
+  return content.slice(0, rows[0].index) + updated + content.slice(rows[0].index + row.length);
+}
+
 // Derived documentation counts describe the applied package, while the saved base stays pristine.
 export function syncMigrationDocCounts() {
   const count = fs
     .readdirSync(path.join(REPO, "src/lib/db/migrations"))
     .filter((name) => name.endsWith(".sql")).length;
   const changed = [];
-  for (const rel of ["README.md", "AGENTS.md", "llm.txt"]) {
+  const documents = ["README.md", "AGENTS.md", "llm.txt"];
+  const locales = path.join(REPO, "docs/i18n");
+  if (fs.existsSync(locales)) {
+    if (fs.lstatSync(locales).isSymbolicLink()) {
+      throw Error("Unsafe documentation path: docs/i18n");
+    }
+    for (const entry of fs.readdirSync(locales, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      for (const filename of ["llm.txt", "README.md"]) {
+        const rel = `docs/i18n/${entry.name}/${filename}`;
+        try {
+          fs.lstatSync(path.join(REPO, rel));
+          documents.push(rel);
+        } catch (error) {
+          if (error.code !== "ENOENT") throw error;
+        }
+      }
+    }
+  }
+  for (const rel of documents) {
     const file = path.join(REPO, rel);
     if (fs.lstatSync(file).isSymbolicLink()) throw Error(`Unsafe documentation path: ${rel}`);
     const before = fs.readFileSync(file, "utf8");
-    const after = before.replace(/\d+\+? ((?:versioned )?(?:SQL )?migrations?\b)/gi, `${count} $1`);
+    const after =
+      rel.startsWith("docs/i18n/") && rel.endsWith("/README.md")
+        ? syncTranslatedMigrationRow(before, count, rel)
+        : before.replace(/\d+\+? ((?:versioned )?(?:SQL )?migrations?\b)/gi, `${count} $1`);
     if (before !== after) {
       fs.writeFileSync(file, after);
       changed.push(rel);
@@ -228,7 +285,9 @@ export function isApplied() {
 // ---- base version ----------------------------------------------------------
 
 export function baseVersion() {
-  const sha = git(["rev-parse", "--short", BASE_REF]);
+  // Abbreviation length depends on the checkout's object count and core.abbrev.
+  // A full object ID keeps generated manifests identical in shallow CI clones.
+  const sha = git(["rev-parse", BASE_REF]);
   let version = "?";
   try {
     version = JSON.parse(git(["show", `${BASE_REF}:package.json`])).version || "?";

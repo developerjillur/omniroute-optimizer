@@ -1,4 +1,4 @@
-import test from "node:test";
+import runTest from "node:test";
 import assert from "node:assert/strict";
 
 import { codexProvider } from "../../open-sse/config/providers/registry/codex/index.ts";
@@ -14,6 +14,15 @@ import { openaiToOpenAIResponsesRequest } from "../../open-sse/translator/reques
 import { resetDbInstance } from "../../src/lib/db/core.ts";
 
 type JsonRecord = Record<string, unknown>;
+let registeredCases = 0;
+let executedCases = 0;
+function test(name: string, run: () => unknown) {
+  registeredCases++;
+  return runTest(name, async () => {
+    executedCases++;
+    await run();
+  });
+}
 type InputFormat = "claude" | "chat" | "responses";
 
 const basicEfforts = ["low", "medium", "high", "xhigh"];
@@ -55,16 +64,24 @@ function wireBody(model: string, effort: string, format: InputFormat): JsonRecor
           )
         : { model, messages, reasoning_effort: effort };
     assert.equal(chat.reasoning_effort, effort);
-    body = openaiToOpenAIResponsesRequest(model, chat, true, null);
+    const translated = openaiToOpenAIResponsesRequest(model, chat, true, null);
+    assert.ok(translated && typeof translated === "object" && !Array.isArray(translated));
+    body = translated as JsonRecord;
   }
   const transformed = executor.transformRequest(model, body, true, {
     requestEndpointPath: "/v1/responses",
     providerSpecificData: {},
   });
-  return sanitizeReasoningEffortForProvider(transformed, "codex", model);
+  const sanitized = sanitizeReasoningEffortForProvider(transformed, "codex", model);
+  assert.ok(sanitized && typeof sanitized === "object" && !Array.isArray(sanitized));
+  return sanitized as JsonRecord;
 }
 
-test.after(() => resetDbInstance());
+runTest.after(() => {
+  resetDbInstance();
+  assert.equal(executedCases, registeredCases, "every registered native effort case must execute");
+  console.log(`NEXA_EFFORT_COVERAGE_COMPLETE cases=${registeredCases}`);
+});
 
 for (const [model, efforts] of Object.entries(supportedEfforts)) {
   for (const effort of efforts) {
@@ -116,4 +133,9 @@ test("legacy and unverified models retain their existing safety ceilings", () =>
   for (const model of ["kr/gpt-5.6-sol", "kiro/gpt-5.6-terra-max"]) {
     assert.equal(normalizeResponsesReasoningEffort("max", model), "max");
   }
+});
+
+test("other providers retain upstream literal max behavior for unknown models", () => {
+  const body = { reasoning: { effort: "max" } };
+  assert.deepEqual(sanitizeReasoningEffortForProvider(body, "openai", "gpt-unverified"), body);
 });

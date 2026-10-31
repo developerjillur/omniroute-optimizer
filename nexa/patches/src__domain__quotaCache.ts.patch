@@ -1,5 +1,5 @@
 diff --git a/src/domain/quotaCache.ts b/src/domain/quotaCache.ts
-index 4fdb474dc..ec3b55938 100644
+index 0d1e5e7530546aa9bb9e6bc25b389691abc8de7d..71273f513b2df9aab1fddbdae2fc4f4f1ede1bb0 100644
 --- a/src/domain/quotaCache.ts
 +++ b/src/domain/quotaCache.ts
 @@ -8,7 +8,8 @@
@@ -12,10 +12,10 @@ index 4fdb474dc..ec3b55938 100644
   *
   * @changes
   * - [2026-07-24] [Composer] - Scope Antigravity per-model exhaustion to exact model + family weekly windows
-@@ -16,8 +17,8 @@
-  * @module domain/quotaCache
+@@ -17,8 +18,8 @@
   */
  
+ import { hasOllamaPurchasedCredits } from "@omniroute/open-sse/services/ollamaPurchasedCredits.ts";
 -import { getUsageForProvider } from "@omniroute/open-sse/services/usage.ts";
 -import { getCachedProviderConnectionById } from "@/lib/db/readCache";
 +import { getQuotaUsageWithRefreshedToken } from "./quotaAccountRefresh";
@@ -23,27 +23,27 @@ index 4fdb474dc..ec3b55938 100644
  import { resolveProxyForConnection } from "@/lib/db/settings";
  import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
  import { safePercentage } from "@/shared/utils/formatting";
-@@ -27,6 +28,7 @@ import {
-   getLatestQuotaSnapshotsForConnection,
- } from "@/lib/db/quotaSnapshots";
+@@ -26,6 +27,7 @@
+ import { saveQuotaSnapshot, getLatestQuotaSnapshotsForConnection } from "@/lib/db/quotaSnapshots";
+ import { runQuotaSnapshotCleanup } from "./quotaSnapshotCleanup";
  import { recordProviderQuotaResetEventIfChanged } from "@/lib/db/quotaResetEvents";
 +import { getProviderLimitsCache, setProviderLimitsCache } from "@/lib/db/providerLimits";
  import {
    CODEX_SPARK_QUOTA_SESSION,
    CODEX_SPARK_QUOTA_WEEKLY,
-@@ -56,6 +58,11 @@ import {
-   unmarkQuotaHealthy,
+@@ -58,6 +60,11 @@
    isQuotaHealthy,
  } from "./quotaCacheState";
+ import { isCodexPaidCreditsEnabled } from "@/lib/providers/codexPaidCredits";
 +import {
 +  getClaudeQuotaSchedule,
 +  isBlockingClaudeQuotaWindow,
 +  shouldRefreshQuotaEntry,
 +} from "./claudeQuotaSchedule";
  
- // #14359 — re-exported so existing callers (chat.ts, tests) keep importing from here. Only
- // markQuotaHealthy has outside callers; the rest are internal and stay unexported (dead-code gate).
-@@ -82,7 +89,6 @@ export interface QuotaWindowObservation {
+ // Keep markQuotaHealthy's public import path; the remaining leaf state stays internal.
+ export { markQuotaHealthy } from "./quotaCacheState";
+@@ -83,7 +90,6 @@
  
  const ACTIVE_TTL_MS = 5 * 60 * 1000; // 5 minutes for active accounts
  const EXHAUSTED_TTL_MS = 5 * 60 * 1000; // 5 minutes for 429-sourced entries (no resetAt)
@@ -51,7 +51,7 @@ index 4fdb474dc..ec3b55938 100644
  const REFRESH_INTERVAL_MS = 60 * 1000; // Background tick every 1 minute
  export const DEFAULT_QUOTA_THRESHOLD_PERCENT = 99;
  
-@@ -286,6 +292,7 @@ function normalizeQuotas(rawQuotas: Record<string, unknown>): Record<string, Quo
+@@ -309,6 +315,7 @@
  
  export function __clearForTests() {
    getState().cache.clear();
@@ -59,18 +59,7 @@ index 4fdb474dc..ec3b55938 100644
  }
  
  function resolveAntigravityQuotaWindowsForModel(
-@@ -437,10 +444,6 @@ function activeClaudeResetMs(quota: QuotaInfo, now: number): number | null {
-   return resetMs !== null && resetMs > now ? resetMs : null;
- }
- 
--function isActiveClaudeExhaustion(quota: QuotaInfo, now: number): boolean {
--  return activeClaudeResetMs(quota, now) !== null;
--}
--
- function isClaudeQuotaExhaustedForRequest(
-   entry: QuotaCacheEntry,
-   requestedModel: string | null,
-@@ -464,7 +467,7 @@ function isClaudeQuotaExhaustedForRequest(
+@@ -514,7 +521,7 @@
    if (
      globalWindows.some(
        (quota) =>
@@ -79,7 +68,7 @@ index 4fdb474dc..ec3b55938 100644
          (quota.claudeQuota.kind !== "session" || !sessionRecoveryEnabled)
      )
    ) {
-@@ -473,7 +476,7 @@ function isClaudeQuotaExhaustedForRequest(
+@@ -523,7 +530,7 @@
    if (!requestedModel) return isStandardQuotaExhausted(entry, now);
    return scopedWindows.some(
      (quota) =>
@@ -88,14 +77,16 @@ index 4fdb474dc..ec3b55938 100644
        claudeQuotaMatchesModel(quota.claudeQuota, requestedModel)
    );
  }
-@@ -605,12 +608,18 @@ export function isQuotaExhaustedForRequest(
+@@ -683,7 +690,7 @@
+   requestedModel: string | null = null,
    providerSpecificData?: unknown
  ): boolean {
-   // #14359 — a recent successful dispatch stands the predicates down for a park window.
 -  if (isQuotaHealthy(connectionId)) return false;
 +  if (isQuotaHealthy(connectionId) && resolveProviderId(provider) !== "claude") return false;
+   if (isCodexQuotaFilteringDisabled(provider, providerSpecificData)) return false;
    if (isClaudeExtraUsageAllowed(provider, providerSpecificData)) return false;
-   const entry = getState().cache.get(connectionId) || hydrateQuotaCacheFromSnapshots(connectionId);
+   // Subscription snapshots cannot decide paid-credit eligibility. The mandatory
+@@ -693,6 +700,12 @@
    if (!entry) return false;
  
    const now = Date.now();
@@ -108,18 +99,18 @@ index 4fdb474dc..ec3b55938 100644
    const advanced = advancedWindowResetAt(entry, now);
    if (advanced) {
      entry.exhausted = false;
-@@ -628,10 +637,6 @@ export function isQuotaExhaustedForRequest(
-     return isCodexQuotaExhausted(connectionId, entry, requestedModel);
-   }
+@@ -708,10 +721,6 @@
  
--  if (resolveProviderId(provider) === "claude") {
--    return isClaudeQuotaExhaustedForRequest(entry, requestedModel, now, providerSpecificData);
+   if (provider === "codex") {
+     return isCodexQuotaExhausted(connectionId, entry, requestedModel);
 -  }
 -
+-  if (resolveProviderId(provider) === "claude") {
+-    return isClaudeQuotaExhaustedForRequest(entry, requestedModel, now, providerSpecificData);
+   }
+ 
    // Standard (non-per-model-quota) providers: check connection-wide aggregate
-   return isStandardQuotaExhausted(entry, now);
- }
-@@ -651,6 +656,16 @@ export function setQuotaCache(
+@@ -736,6 +745,16 @@
    // #4438 — capture the prior entry BEFORE overwriting the cache so we can skip
    // redundant snapshot writes for idle connections whose quota didn't change.
    const prior = getState().cache.get(connectionId);
@@ -136,7 +127,7 @@ index 4fdb474dc..ec3b55938 100644
    // A telemetry-only refresh is not evidence that a real upstream 429 has
    // recovered. Keep its original timestamp so it can still expire normally.
    if (
-@@ -672,12 +687,20 @@ export function setQuotaCache(
+@@ -757,12 +776,20 @@
      // #14359 — cap the park; keep the prior deadline while the streak continues (monitor rewrites must not extend it).
      nextResetAt: exhausted ? preserveParkDeadline(earliestResetAt(quotas), prior) : null,
    };
@@ -159,7 +150,7 @@ index 4fdb474dc..ec3b55938 100644
        if (!normalized) continue;
        const { remainingPercentage } = normalized;
        const fractionReported = normalized.fractionReported !== false;
-@@ -704,7 +727,10 @@ export function setQuotaCache(
+@@ -789,7 +816,10 @@
        // #4438 — only persist on the first observation or a real change.
        if (
          !quotaSnapshotChanged(prior, windowKey, remainingPercentage, windowExhausted) &&
@@ -171,7 +162,7 @@ index 4fdb474dc..ec3b55938 100644
        )
          continue;
        try {
-@@ -717,7 +743,14 @@ export function setQuotaCache(
+@@ -802,7 +832,14 @@
            next_reset_at: normalized.resetAt,
            window_duration_ms: entry.windowDurationMs ?? null,
            // Persist only the interpretation, never the raw provider payload.
@@ -187,7 +178,7 @@ index 4fdb474dc..ec3b55938 100644
          });
        } catch (error) {
          console.error("[quotaCache] Failed to save snapshot:", error);
-@@ -746,6 +779,7 @@ function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry |
+@@ -831,6 +868,7 @@
    if (!snapshots.length) return null;
  
    const quotas: Record<string, QuotaInfo> = {};
@@ -195,7 +186,7 @@ index 4fdb474dc..ec3b55938 100644
    let provider = "";
    let fetchedAt = 0;
    let windowDurationMs: number | null = null;
-@@ -764,10 +798,12 @@ function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry |
+@@ -849,10 +887,12 @@
      if (!windowKey) continue;
      provider = provider || snapshot.provider || "";
      let fractionReported: false | undefined;
@@ -208,7 +199,7 @@ index 4fdb474dc..ec3b55938 100644
      } catch {
        // Legacy snapshots need not contain JSON metadata.
      }
-@@ -783,7 +819,28 @@ function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry |
+@@ -868,7 +908,28 @@
        ),
        resetAt: camelSnapshot.nextResetAt ?? snapshot.next_reset_at ?? null,
        fractionReported,
@@ -237,7 +228,7 @@ index 4fdb474dc..ec3b55938 100644
      const snapshotWindowDurationMs =
        camelSnapshot.windowDurationMs ?? snapshot.window_duration_ms ?? null;
      if (snapshotWindowDurationMs && snapshotWindowDurationMs > 0) {
-@@ -794,20 +851,24 @@ function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry |
+@@ -879,20 +940,24 @@
      if (createdAtMs !== null) fetchedAt = Math.max(fetchedAt, createdAtMs);
    }
  
@@ -264,7 +255,7 @@ index 4fdb474dc..ec3b55938 100644
    cache.set(connectionId, entry);
    return entry;
  }
-@@ -958,6 +1019,11 @@ export function getQuotaSnapshotFetchedAt(connectionId: string): number | null {
+@@ -1065,6 +1130,11 @@
  export function markAccountExhaustedFrom429(connectionId: string, provider: string) {
    // #14359 — a real upstream 429 is authoritative: drop any healthy override.
    unmarkQuotaHealthy(connectionId);
@@ -276,7 +267,7 @@ index 4fdb474dc..ec3b55938 100644
    getState().cache.set(connectionId, {
      connectionId,
      provider,
-@@ -975,6 +1041,7 @@ async function refreshEntry(entry: QuotaCacheEntry) {
+@@ -1082,6 +1152,7 @@
    const { cache, refreshingSet } = getState();
    if (refreshingSet.has(entry.connectionId)) return;
    refreshingSet.add(entry.connectionId);
@@ -284,7 +275,7 @@ index 4fdb474dc..ec3b55938 100644
  
    try {
      const connection = await getCachedProviderConnectionById(entry.connectionId);
-@@ -985,7 +1052,7 @@ async function refreshEntry(entry: QuotaCacheEntry) {
+@@ -1092,7 +1163,7 @@
  
      const proxyInfo = await resolveProxyForConnection(entry.connectionId);
      const usage = await runWithProxyContext(proxyInfo?.proxy || null, () =>
@@ -293,7 +284,7 @@ index 4fdb474dc..ec3b55938 100644
      );
  
      if (usage?.quotas) {
-@@ -995,6 +1062,18 @@ async function refreshEntry(entry: QuotaCacheEntry) {
+@@ -1102,6 +1173,18 @@
          usage.quotas,
          usage.modelQuotas && typeof usage.modelQuotas === "object" ? usage.modelQuotas : {}
        );
@@ -312,7 +303,7 @@ index 4fdb474dc..ec3b55938 100644
      }
    } catch (err) {
      console.warn(
-@@ -1007,15 +1086,7 @@ async function refreshEntry(entry: QuotaCacheEntry) {
+@@ -1114,15 +1197,7 @@
  }
  
  function needsRefresh(entry: QuotaCacheEntry, now: number): boolean {
@@ -329,7 +320,7 @@ index 4fdb474dc..ec3b55938 100644
  }
  
  async function backgroundRefreshTick() {
-@@ -1046,6 +1117,27 @@ export function startBackgroundRefresh() {
+@@ -1153,6 +1228,27 @@
    if (state.refreshTimer) return;
    state.refreshTimer = setInterval(backgroundRefreshTick, REFRESH_INTERVAL_MS);
    state.refreshTimer?.unref?.();

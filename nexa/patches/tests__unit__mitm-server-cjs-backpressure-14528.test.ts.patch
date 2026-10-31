@@ -1,8 +1,8 @@
 diff --git a/tests/unit/mitm-server-cjs-backpressure-14528.test.ts b/tests/unit/mitm-server-cjs-backpressure-14528.test.ts
-index 4c324632e..5dc13bbe7 100644
+index 4c324632e70f93c912989cecc7a7f86701616f22..5dc13bbe794dc9ee4a4034cc7737c5d52a32e909 100644
 --- a/tests/unit/mitm-server-cjs-backpressure-14528.test.ts
 +++ b/tests/unit/mitm-server-cjs-backpressure-14528.test.ts
-@@ -91,6 +91,6 @@ test("a write loop against a slow client keeps the queue bounded (#14528)", asyn
+@@ -91,6 +91,6 @@
  test("server.cjs SSE loop goes through writeWithBackpressure (#14528)", () => {
    const src = fs.readFileSync(path.resolve(here, "../../src/mitm/server.cjs"), "utf8");
    assert.match(src, /require\("\.\/_internal\/writeBackpressure\.cjs"\)/);

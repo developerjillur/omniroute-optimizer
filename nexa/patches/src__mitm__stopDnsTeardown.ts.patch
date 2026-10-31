@@ -1,8 +1,8 @@
 diff --git a/src/mitm/stopDnsTeardown.ts b/src/mitm/stopDnsTeardown.ts
-index 2482b8816..ffb00236a 100644
+index 2482b8816be2bd3af7f6a89862fc760c0c1353c7..ffb00236a379b321e13222ab70ff42f18be092bc 100644
 --- a/src/mitm/stopDnsTeardown.ts
 +++ b/src/mitm/stopDnsTeardown.ts
-@@ -12,13 +12,11 @@ export type StopDnsDeps = {
+@@ -12,13 +12,11 @@
  export async function removeStopDnsEntries(deps: StopDnsDeps, sudoPassword: string): Promise<void> {
    log.info("Removing DNS entries...");
    await deps.removeDNSEntry(sudoPassword);

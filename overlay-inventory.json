@@ -7,7 +7,7 @@
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
   "trackedNexaFiles": 432,
-  "totalNexaBytes": 1900709,
+  "totalNexaBytes": 1907554,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -132,16 +132,16 @@
     {
       "path": "nexa/deploy/bridge-gate.mjs",
       "mode": "100644",
-      "gitBlobSha": "ee598a926319c8221b4bff4d1e189034f7bef9b5",
-      "bytes": 12262,
-      "sha256": "1a9c18db7c125af3f7fa71b22d45e1a192cffcd7dc92a3514075001453a02714"
+      "gitBlobSha": "b8d248e2914ceb6c192d6cd77c62ffb44b6b0f51",
+      "bytes": 15329,
+      "sha256": "0b17a416a59212f21cf2ad1b99bf53fe40f8715576859a7bbc21ab238b403dba"
     },
     {
       "path": "nexa/deploy/bridge-gate.test.mjs",
       "mode": "100644",
-      "gitBlobSha": "18d55c819466e4964a46c58db4cfb16de754c966",
-      "bytes": 847,
-      "sha256": "774e68979f80663afdb60ac2ebcaa1cd679115a165089a804a92eca7d82518e9"
+      "gitBlobSha": "15a47e7770ad7ae2d77cff8f3b5de5f82733856f",
+      "bytes": 3536,
+      "sha256": "63d73c4704b83740e348b4f052d980e37b6d690d03c01ec95da2ad756ed787f8"
     },
     {
       "path": "nexa/deploy/bridge-upstream-dns.cjs",
@@ -524,9 +524,9 @@
     {
       "path": "nexa/docs/UPGRADE-3.8.52-2026-10-28.md",
       "mode": "100644",
-      "gitBlobSha": "e14fd2e0b1ba7789ef412ef34e2e1012f6282d66",
-      "bytes": 18666,
-      "sha256": "c3cc94de127e884783eb9822cf43bc8e637cfac4513d88c3dca608eafcdb3412"
+      "gitBlobSha": "6d66be283d553af5e7c4c87b033fff19da972933",
+      "bytes": 19755,
+      "sha256": "97f6e587e8fc9ad4e2a9a70e919330c68920ae1c5697a1f975a418afa1ce2e82"
     },
     {
       "path": "nexa/docs/USAGE-AUDIT-2026-10-14.md",

@@ -195,3 +195,7 @@ synthetic database-এর bytes মেলে। Local test-এ live database ব
 ## ২০২৬-১০-৩১: পূর্ণ Bridge gate-এর child-process fixture
 
 পূর্ণ candidate validation-এ `mitm-unexpected-child-exit.test.ts`-এর পুরোনো plain-object child double-তে `once()` না থাকায় intentional-stop test থেমেছিল। Double এখন spawn না করা বাস্তব `ChildProcess` ব্যবহার করে এবং signal-এর পরে asynchronous exit event দেয়। পুরোনো DNS/hosts teardown assertions অক্ষত; signal acknowledgement ও one-shot listener cleanup-ও যাচাই হয়। Focused Mac regression 11/11 PASS, skipped 0। এই patch-এর ফলে existing complete upgrade compatibility lane-ও test file-টি অন্তর্ভুক্ত করে। Runtime lifecycle module বদলানো হয়নি; এটি production crash-এর reproduction দাবি নয়।
+
+## ২০২৬-১০-৩১: compiled Bridge package layout
+
+v3.8.52-এর তৈরি archive-এ `dist/src/mitm/manager.js` ও `processLifecycle.js` shared ESM chunks ব্যবহার করে; পুরোনো package checker অনুপস্থিত `.ts` mirror খুঁজত। Checker এখন reachable static import graph-এ একটিমাত্র shared lifecycle registry, manager-এর ownership/readiness/termination calls এবং exit acknowledgement ও SIGTERM/SIGKILL paths যাচাই করে। Missing chunk, directory escape ও unreferenced decoy এখনও ব্যর্থ হয়; legacy TypeScript mirror-এর byte equality-ও অক্ষত। Native CJS transport mirrors, beta/header/count-token এবং request isolation-এর আগের checks বাদ যায়নি। তৈরি archive নতুন contract-এ PASS; packaged compiled lifecycle-এর আচরণ পৃথকভাবে পরীক্ষা হয়। Application runtime source বা archive-এর bytes বদলায়নি।

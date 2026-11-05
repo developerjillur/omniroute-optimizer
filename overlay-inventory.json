@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
-  "trackedNexaFiles": 436,
-  "totalNexaBytes": 1920739,
+  "trackedNexaFiles": 440,
+  "totalNexaBytes": 1935363,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -494,6 +494,13 @@
       "sha256": "71e98e8c9a6275d814b35cf499a174c19dc9a08c4a20d305515ca3eb630543db"
     },
     {
+      "path": "nexa/docs/NATIVE-INCIDENT-REVIEW-2026-11-05.md",
+      "mode": "100644",
+      "gitBlobSha": "2441c9695ad775d7e4f9bb34eb54431f105ce169",
+      "bytes": 5802,
+      "sha256": "af3cd3a107ade72da9009bfa3ce8c48e512dece6808a05ddf91438437dcf4bfa"
+    },
+    {
       "path": "nexa/docs/NATIVE-PROVIDER-ACCEPTANCE-2026-10-18.md",
       "mode": "100644",
       "gitBlobSha": "106385e1a51236289e7c40e0a96617d93e01e355",
@@ -580,9 +587,9 @@
     {
       "path": "nexa/manifest.json",
       "mode": "100644",
-      "gitBlobSha": "d88e81842e9b32cdd4e0da6b2642a0da39b8ef44",
-      "bytes": 82733,
-      "sha256": "a22b005cc3ffd0d6ab4148b437fc011286546d2bf806372341bef3c6f9267411"
+      "gitBlobSha": "5e796469809cfb0e6a3ce1334d8225eed77c85bc",
+      "bytes": 82986,
+      "sha256": "37e36eecd0f516ef4a6239e0d82e1dfc5de563bac3bdb9b767274fdd4154e311"
     },
     {
       "path": "nexa/new/bin/cli/utils/packageMigrations.mjs",
@@ -919,6 +926,13 @@
       "gitBlobSha": "aa4bcb9641bb0c5aa6765115f6bfcfa49d6f461e",
       "bytes": 6201,
       "sha256": "452292b333453ecd9e4ddc394540c9233d2f1c550e7c41eec7baf4e770f785a5"
+    },
+    {
+      "path": "nexa/new/tests/unit/agent-bridge-client-socket.test.ts",
+      "mode": "100644",
+      "gitBlobSha": "ffa3b76529501347c07c398a8415cc5629bcf7c2",
+      "bytes": 3571,
+      "sha256": "18079a410f57dad9a4c76fbd522d290ac2f4abce032b2fec52e878e41ae1db0d"
     },
     {
       "path": "nexa/new/tests/unit/agent-bridge-compaction-timeout.test.ts",
@@ -2379,9 +2393,9 @@
     {
       "path": "nexa/patches/src__mitm__server.cjs.patch",
       "mode": "100644",
-      "gitBlobSha": "a885ea6abc1b8a283badd2768b9b04a03beb442e",
-      "bytes": 15448,
-      "sha256": "b0e7d5b78551e1e478186844c314994df7461fb6bdcc0c47f97db01f8651a576"
+      "gitBlobSha": "b7bdb6fc05dd100e79805fea54e3ba67ff4ae4b2",
+      "bytes": 16770,
+      "sha256": "ebb2290011edbcad3afec5555edcb5c04ad5b55bd378a1b14e382ae4bac13900"
     },
     {
       "path": "nexa/patches/src__mitm__stopDnsTeardown.ts.patch",
@@ -2902,6 +2916,13 @@
       "sha256": "8e38f57e01411c553fdd2a4d30fee7288b083ec7e3e411e3d4c188f07e2e893e"
     },
     {
+      "path": "nexa/tests/fixtures/agent-bridge-client-socket-v3.8.52.patch",
+      "mode": "100644",
+      "gitBlobSha": "7b1bfa904eb1b52d7c5b30a5bb6512ae1c359437",
+      "bytes": 1556,
+      "sha256": "bc1172f57fb055f92556d52e6734a33acaa12bd70c0513135e18ccf69d257f49"
+    },
+    {
       "path": "nexa/tests/fixtures/native-cache-cost-v3.8.52.patch",
       "mode": "100644",
       "gitBlobSha": "a728b802bfc4fceec2e5dc6323caf04c5de13a68",
@@ -3028,6 +3049,13 @@
       "sha256": "710c7b19f01f9eb88bfebbb87e87e1946c88a30097bd4970d3b386db41912197"
     },
     {
+      "path": "nexa/tests/verify-native-incident-red.mjs",
+      "mode": "100644",
+      "gitBlobSha": "cdaec806801ecde9bb815cd7865c6d96c7a54c45",
+      "bytes": 1875,
+      "sha256": "2669f16c01323659b2159bb579f275f25f05b2dcdf471a062b799819fec140f1"
+    },
+    {
       "path": "nexa/tests/verify-resilience-budget-red.mjs",
       "mode": "100644",
       "gitBlobSha": "fabf8ba63768a3aa57d15d65af2a06e144209436",
@@ -3044,9 +3072,9 @@
     {
       "path": "nexa/tests/write-native-validation.mjs",
       "mode": "100644",
-      "gitBlobSha": "323b73f0cbf34bb268dbdbf6ba406bcd09b5da32",
-      "bytes": 5828,
-      "sha256": "f6bce3e9e3bcc4282369c37e6a4d7a004a84e64fdfab317f6eb32c580b661a5f"
+      "gitBlobSha": "518330ab01b819694423f6af61d8b963ff8e5ce0",
+      "bytes": 6073,
+      "sha256": "be1197ff21fed9e76a69f1d051217dada10b329d3e93e26eb04334db6223766b"
     },
     {
       "path": "nexa/update.mjs",

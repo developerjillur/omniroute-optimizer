@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 318,
+    "total": 319,
     "patches": 190,
-    "new": 122,
+    "new": 123,
     "tooling": 6,
     "upstreamCandidates": 28,
     "nexaSpecific": 99,
-    "needsReview": 191,
+    "needsReview": 192,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
   },
@@ -1954,6 +1954,14 @@
         "pr": 15323,
         "state": "OPEN"
       }
+    },
+    {
+      "file": "new/tests/unit/agent-bridge-client-socket.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/agent-bridge-client-socket.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
     },
     {
       "file": "new/tests/unit/agent-bridge-compaction-timeout.test.ts",

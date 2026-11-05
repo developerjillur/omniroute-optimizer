@@ -1,5 +1,5 @@
 diff --git a/src/mitm/server.cjs b/src/mitm/server.cjs
-index 9eba321081ab589de44eb22fe8bb66bb0cae6b20..d2e707dd0742f402b99ffbd74d964c3ddba97319 100644
+index 9eba321081ab589de44eb22fe8bb66bb0cae6b20..680a0f86e1be775bb49eccdf0af92218e803c0a8 100644
 --- a/src/mitm/server.cjs
 +++ b/src/mitm/server.cjs
 @@ -5,6 +5,22 @@
@@ -350,7 +350,30 @@ index 9eba321081ab589de44eb22fe8bb66bb0cae6b20..d2e707dd0742f402b99ffbd74d964c3d
    });
  
    // =========================================================================
-@@ -910,25 +1073,27 @@
+@@ -899,36 +1062,50 @@
+   server.headersTimeout = MITM_IDLE_TIMEOUT_MS; // time allowed to send headers
+   server.keepAliveTimeout = MITM_IDLE_TIMEOUT_MS; // idle keep-alive window
+ 
++  // A late EPIPE/ECONNRESET belongs to one client, not the whole bridge.
++  // HTTP backpressure listeners are temporary; raw and decrypted TLS sockets
++  // need their own lifetime error handler, including CONNECT re-emission.
++  const guardedClientSockets = new WeakSet();
++  const guardClientSocket = (socket) => {
++    if (guardedClientSockets.has(socket)) return;
++    guardedClientSockets.add(socket);
++    socket.on("error", () => socket.destroy());
++  };
++  server.prependListener("secureConnection", guardClientSocket);
++
+   // GHSA-qxg2-rm3h-4cxp: the listener is dual-stack (the DNS spoof maps target
+   // hosts to both 127.0.0.1 and ::1), so refuse non-loopback peers here, before
+   // any other connection listener — otherwise a LAN peer reaches intercept()
+   // with the operator's ROUTER_API_KEY, or passthrough() as an open TLS relay.
+   // MITM_ALLOW_REMOTE_CLIENTS=1 is the explicit opt-in for a trusted LAN.
+   server.prependListener("connection", (socket) => {
++    guardClientSocket(socket);
+     if (!peerGuardShim.guardLoopbackPeer(socket)) {
+       vlog(1, `[MITM] refused non-loopback peer ${socket.remoteAddress || "unknown"}`);
      }
    });
  
@@ -382,7 +405,7 @@ index 9eba321081ab589de44eb22fe8bb66bb0cae6b20..d2e707dd0742f402b99ffbd74d964c3d
        stats.activeConnections = Math.max(0, stats.activeConnections - 1);
        writeStats();
      });
-@@ -945,12 +1110,25 @@
+@@ -945,12 +1122,25 @@
      process.exit(1);
    });
  

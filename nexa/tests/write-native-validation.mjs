@@ -104,6 +104,13 @@ const receipt = {
     baseline: tap("resilience-budget-red.tap", true),
     green: tap("resilience-budget-green.tap"),
   },
+  nativeIncidents: {
+    toolOnly: { baseline: tap("tool-only-red.tap", true), green: tap("tool-only-green.tap") },
+    clientSocket: {
+      baseline: tap("client-socket-red.tap", true),
+      green: tap("client-socket-green.tap"),
+    },
+  },
   node26: {
     tooling: tap("tooling-node26.tap"),
     native: tap("native-green.tap"),

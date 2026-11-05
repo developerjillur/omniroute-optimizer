@@ -94,7 +94,7 @@ test("inherited listener forwards actual connections after its parent closes the
   const packet = clientHello("api.anthropic.com");
   assert.deepEqual(await exchange(port, packet), packet);
 });
-test("encrypted stream is unchanged and unavailable local backend falls back to vendor route", async (t) => {
+test("encrypted stream is unchanged and vendor fallback requires an explicit choice", async (t) => {
   const echo = net.createServer((c) => c.pipe(c));
   const target = await listen(echo);
   t.after(() => close(echo));
@@ -114,6 +114,8 @@ test("encrypted stream is unchanged and unavailable local backend falls back to 
   let used = false;
   const fallback = createIngress({
     backendPort: unused,
+    backendWaitMs: 0,
+    allowVendorFallback: true,
     publicPort: target,
     fallback: async () => {
       used = true;

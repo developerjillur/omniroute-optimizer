@@ -21,6 +21,13 @@ const expected = {
       "CONNECT re-emission keeps one client error handler and one connection count",
     ],
   },
+  "ingress-availability": {
+    tests: 4,
+    failures: [
+      "an unavailable Bridge never silently sends the mapped conversation to the vendor",
+      "a restarting Bridge receives the original encrypted bytes exactly once",
+    ],
+  },
 }[family];
 assert.ok(expected, "a reviewed incident family is required");
 const output = fs.readFileSync(filename, "utf8");

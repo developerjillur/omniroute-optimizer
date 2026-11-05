@@ -37,7 +37,7 @@ jobs:
           set -euo pipefail
           node --version > "$RUNNER_TEMP/primary-node-version.txt"
           node nexa/tests/verify-source-inventory.mjs
-          node --test --test-reporter=tap --test-concurrency=1 nexa/tests/*.test.mjs nexa/deploy/tsc-ratchet.test.mjs | tee "$RUNNER_TEMP/tooling-node26.tap"
+          node --test --test-reporter=tap --test-concurrency=1 nexa/tests/*.test.mjs nexa/deploy/tsc-ratchet.test.mjs nexa/deploy/native-ingress-availability.test.mjs | tee "$RUNNER_TEMP/tooling-node26.tap"
       - name: Prepare the pinned pristine application
         shell: bash
         run: |
@@ -60,7 +60,7 @@ jobs:
           node nexa/apply.mjs --check
           npm ci --ignore-scripts --no-audit --no-fund
           npm rebuild better-sqlite3 --foreground-scripts
-          node "$fixture/node_modules/prettier/bin/prettier.cjs" --write --print-width 100 --trailing-comma es5 "$GITHUB_WORKSPACE/nexa/deploy/bridge-upstream-dns.cjs" "$GITHUB_WORKSPACE/nexa/tests/bridge-upstream-dns.test.mjs" "$GITHUB_WORKSPACE/nexa/tests/overlay-base-version.test.mjs" "$GITHUB_WORKSPACE/nexa/tests/verify-baseline-red.mjs" "$GITHUB_WORKSPACE/nexa/deploy/tsc-ratchet.test.mjs" "$GITHUB_WORKSPACE/nexa/new/scripts/check/check-tsc-ratchet.mjs" "$GITHUB_WORKSPACE/nexa/new/config/quality/tsc-error-baseline.json" "$GITHUB_WORKSPACE/nexa/lib/retiredPatches.mjs" "$GITHUB_WORKSPACE/nexa/tests/retired-patches.test.mjs" "$GITHUB_WORKSPACE/nexa/tests/run-upgrade-compatibility.mjs" "$GITHUB_WORKSPACE/nexa/tests/verify-native-incident-red.mjs" "$GITHUB_WORKSPACE/nexa/new/tests/unit/agent-bridge-client-socket.test.ts" "$GITHUB_WORKSPACE/nexa/docs/NATIVE-INCIDENT-REVIEW-2026-11-05.md" "$GITHUB_WORKSPACE/nexa/lib/overlay.mjs" "$GITHUB_WORKSPACE/nexa/lib/typeDiagnostics.mjs" "$GITHUB_WORKSPACE/nexa/tests/type-diagnostics.test.mjs" "$GITHUB_WORKSPACE/nexa/tests/overlay-doc-counts.test.mjs" "$GITHUB_WORKSPACE/nexa/tests/capture-pristine-types.mjs" "$GITHUB_WORKSPACE/nexa/tests/compare-upgrade-types.mjs" "$GITHUB_WORKSPACE/nexa/tests/write-native-validation.mjs" "$GITHUB_WORKSPACE/nexa/tests/verify-cache-cost-red.mjs" "$GITHUB_WORKSPACE/nexa/tests/verify-resilience-budget-red.mjs" "$GITHUB_WORKSPACE/nexa/tests/resilience-budget-red.test.mjs" "$GITHUB_WORKSPACE/nexa/new/tests/unit/resilience-settings-contract.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/auto-update-command-mode.test.ts" "$GITHUB_WORKSPACE/nexa/tests/verify-effort-coverage.mjs" "$GITHUB_WORKSPACE/nexa/tests/effort-coverage.test.mjs" "$GITHUB_WORKSPACE/nexa/new/src/lib/db/usageAnalytics/cacheTtl.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/db/cache-ttl-analytics-route.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/native-translated-cache-cost.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/gpt-6-1-sol-pricing.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/gpt-selected-effort-passthrough.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/agent-bridge-stop-dns-failure.test.ts" "$GITHUB_WORKSPACE/nexa/docs/UPGRADE-3.8.52-2026-10-28.md" "$GITHUB_WORKSPACE/nexa/new/src/lib/db/migrationIdentity.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/db/native-upgrade-migration-identity.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/db/native-upgrade-history-preservation.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/native-claude-refusal-terminal.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/native-thread-error-classification.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/native-stream-summary.test.ts" "$GITHUB_WORKSPACE/.github/workflows/native-reliability.yml" "$GITHUB_WORKSPACE/README.md" "$GITHUB_WORKSPACE/reports/native-reliability-2026-10-28.json"
+          node "$fixture/node_modules/prettier/bin/prettier.cjs" --write --print-width 100 --trailing-comma es5 "$GITHUB_WORKSPACE/nexa/deploy/bridge-upstream-dns.cjs" "$GITHUB_WORKSPACE/nexa/tests/bridge-upstream-dns.test.mjs" "$GITHUB_WORKSPACE/nexa/tests/overlay-base-version.test.mjs" "$GITHUB_WORKSPACE/nexa/tests/verify-baseline-red.mjs" "$GITHUB_WORKSPACE/nexa/deploy/tsc-ratchet.test.mjs" "$GITHUB_WORKSPACE/nexa/new/scripts/check/check-tsc-ratchet.mjs" "$GITHUB_WORKSPACE/nexa/new/config/quality/tsc-error-baseline.json" "$GITHUB_WORKSPACE/nexa/lib/retiredPatches.mjs" "$GITHUB_WORKSPACE/nexa/tests/retired-patches.test.mjs" "$GITHUB_WORKSPACE/nexa/tests/run-upgrade-compatibility.mjs" "$GITHUB_WORKSPACE/nexa/tests/verify-native-incident-red.mjs" "$GITHUB_WORKSPACE/nexa/deploy/native-ingress.mjs" "$GITHUB_WORKSPACE/nexa/deploy/native-ingress.test.mjs" "$GITHUB_WORKSPACE/nexa/deploy/native-ingress-availability.test.mjs" "$GITHUB_WORKSPACE/nexa/new/tests/unit/agent-bridge-client-socket.test.ts" "$GITHUB_WORKSPACE/nexa/docs/NATIVE-INCIDENT-REVIEW-2026-11-05.md" "$GITHUB_WORKSPACE/nexa/lib/overlay.mjs" "$GITHUB_WORKSPACE/nexa/lib/typeDiagnostics.mjs" "$GITHUB_WORKSPACE/nexa/tests/type-diagnostics.test.mjs" "$GITHUB_WORKSPACE/nexa/tests/overlay-doc-counts.test.mjs" "$GITHUB_WORKSPACE/nexa/tests/capture-pristine-types.mjs" "$GITHUB_WORKSPACE/nexa/tests/compare-upgrade-types.mjs" "$GITHUB_WORKSPACE/nexa/tests/write-native-validation.mjs" "$GITHUB_WORKSPACE/nexa/tests/verify-cache-cost-red.mjs" "$GITHUB_WORKSPACE/nexa/tests/verify-resilience-budget-red.mjs" "$GITHUB_WORKSPACE/nexa/tests/resilience-budget-red.test.mjs" "$GITHUB_WORKSPACE/nexa/new/tests/unit/resilience-settings-contract.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/auto-update-command-mode.test.ts" "$GITHUB_WORKSPACE/nexa/tests/verify-effort-coverage.mjs" "$GITHUB_WORKSPACE/nexa/tests/effort-coverage.test.mjs" "$GITHUB_WORKSPACE/nexa/new/src/lib/db/usageAnalytics/cacheTtl.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/db/cache-ttl-analytics-route.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/native-translated-cache-cost.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/gpt-6-1-sol-pricing.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/gpt-selected-effort-passthrough.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/agent-bridge-stop-dns-failure.test.ts" "$GITHUB_WORKSPACE/nexa/docs/UPGRADE-3.8.52-2026-10-28.md" "$GITHUB_WORKSPACE/nexa/new/src/lib/db/migrationIdentity.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/db/native-upgrade-migration-identity.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/db/native-upgrade-history-preservation.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/native-claude-refusal-terminal.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/native-thread-error-classification.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/native-stream-summary.test.ts" "$GITHUB_WORKSPACE/.github/workflows/native-reliability.yml" "$GITHUB_WORKSPACE/README.md" "$GITHUB_WORKSPACE/reports/native-reliability-2026-10-28.json"
           git -C "$GITHUB_WORKSPACE" diff --binary > "$RUNNER_TEMP/formatting.patch"
           cp -R "$GITHUB_WORKSPACE/nexa/." "$fixture/nexa/"
           node nexa/gen-manifest.mjs
@@ -148,13 +148,16 @@ jobs:
           export TMPDIR="$RUNNER_TEMP"
           restore_patch=""
           trap 'if test -n "$restore_patch"; then git apply "$restore_patch"; fi' EXIT
-          for family in tool-only client-socket; do
+          for family in tool-only client-socket ingress-availability; do
             if test "$family" = tool-only; then
               patch="nexa/patches/open-sse__handlers__responseTranslator__tool-only.ts.patch"
               test_file="tests/unit/nonstream-tool-only-claude.test.ts"
-            else
+            elif test "$family" = client-socket; then
               patch="nexa/tests/fixtures/agent-bridge-client-socket-v3.8.52.patch"
               test_file="tests/unit/agent-bridge-client-socket.test.ts"
+            else
+              patch="nexa/tests/fixtures/native-ingress-availability.patch"
+              test_file="nexa/deploy/native-ingress-availability.test.mjs"
             fi
             git apply --reverse "$patch"
             restore_patch="$patch"
@@ -288,7 +291,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          node --test --test-reporter=tap --test-concurrency=1 nexa/tests/*.test.mjs nexa/deploy/tsc-ratchet.test.mjs | tee "$RUNNER_TEMP/tooling-node24.tap"
+          node --test --test-reporter=tap --test-concurrency=1 nexa/tests/*.test.mjs nexa/deploy/tsc-ratchet.test.mjs nexa/deploy/native-ingress-availability.test.mjs | tee "$RUNNER_TEMP/tooling-node24.tap"
       - name: Production Node native, transport and upgrade regressions
         id: production
         continue-on-error: true
@@ -380,3 +383,5 @@ jobs:
             ${{ runner.temp }}/tool-only-green.tap
             ${{ runner.temp }}/client-socket-red.tap
             ${{ runner.temp }}/client-socket-green.tap
+            ${{ runner.temp }}/ingress-availability-red.tap
+            ${{ runner.temp }}/ingress-availability-green.tap

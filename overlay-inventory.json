@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
-  "trackedNexaFiles": 440,
-  "totalNexaBytes": 1935363,
+  "trackedNexaFiles": 442,
+  "totalNexaBytes": 1949300,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -228,18 +228,25 @@
       "sha256": "dd53a8c5761ea2333a079688b646fb17c89837b84fbf320588e2449ed7636206"
     },
     {
+      "path": "nexa/deploy/native-ingress-availability.test.mjs",
+      "mode": "100644",
+      "gitBlobSha": "eb9a652200869910fa8e405cce19567e19d38a54",
+      "bytes": 5331,
+      "sha256": "8763748c2fd059c7ac6a49e37f9a3b44ac87b5f82395bdad70200df4cca94eac"
+    },
+    {
       "path": "nexa/deploy/native-ingress.mjs",
       "mode": "100644",
-      "gitBlobSha": "383ee126779f345dbc918298555293b4f9cbb1c1",
-      "bytes": 6812,
-      "sha256": "216dc5db4600c3596fe14c9393dcedc03959d755ecfec5a6e6e64029b08fa891"
+      "gitBlobSha": "35715d29ab232d31b06166c15d77ef9214df427a",
+      "bytes": 8514,
+      "sha256": "608aecf425341a0e6072828221758f422d186acca92b720782918e463a64be29"
     },
     {
       "path": "nexa/deploy/native-ingress.test.mjs",
       "mode": "100644",
-      "gitBlobSha": "b710ea1f518720b2f1701af939bcb142e8e68d81",
-      "bytes": 7460,
-      "sha256": "df2b3480257ae607cab7d01eab5b74cc5fadd4a30413b78e806f16205f85ed04"
+      "gitBlobSha": "c3c0e9792a5279ca29f1817fc0263cd531370acc",
+      "bytes": 7504,
+      "sha256": "279b5df990d0d1346641b694c5a9449026f9e1d55ad7a0aa33de86b6c8d1fa30"
     },
     {
       "path": "nexa/deploy/native-usage-schema.mjs",
@@ -496,9 +503,9 @@
     {
       "path": "nexa/docs/NATIVE-INCIDENT-REVIEW-2026-11-05.md",
       "mode": "100644",
-      "gitBlobSha": "2441c9695ad775d7e4f9bb34eb54431f105ce169",
-      "bytes": 5802,
-      "sha256": "af3cd3a107ade72da9009bfa3ce8c48e512dece6808a05ddf91438437dcf4bfa"
+      "gitBlobSha": "48faf5812911551664e658c60dbdc8febd471628",
+      "bytes": 6808,
+      "sha256": "7758a0aa8443bd12d1ef53967308319c787c62ab5c8026ee07c5e6635138ed3d"
     },
     {
       "path": "nexa/docs/NATIVE-PROVIDER-ACCEPTANCE-2026-10-18.md",
@@ -930,9 +937,9 @@
     {
       "path": "nexa/new/tests/unit/agent-bridge-client-socket.test.ts",
       "mode": "100644",
-      "gitBlobSha": "ffa3b76529501347c07c398a8415cc5629bcf7c2",
-      "bytes": 3571,
-      "sha256": "18079a410f57dad9a4c76fbd522d290ac2f4abce032b2fec52e878e41ae1db0d"
+      "gitBlobSha": "44d7d496e0b9b1979d8e8aa4e64c31ea74e6ed72",
+      "bytes": 3695,
+      "sha256": "a056deee622124cf3721bd4b7eaadd180fe1a108926b7fd76c3e0c39086d2aa6"
     },
     {
       "path": "nexa/new/tests/unit/agent-bridge-compaction-timeout.test.ts",
@@ -2930,6 +2937,13 @@
       "sha256": "c25247f89274542000cb892785752db69de49c2635bcb613ec85eb460efccd90"
     },
     {
+      "path": "nexa/tests/fixtures/native-ingress-availability.patch",
+      "mode": "100644",
+      "gitBlobSha": "8c9e27d073d2a3d2f0490939d48129b21c81f440",
+      "bytes": 5345,
+      "sha256": "e7c87337f95274eb114a4377fa604ccc0cd2f4b359ab2473c872e85d54ed6149"
+    },
+    {
       "path": "nexa/tests/fixtures/native-refusal-delta-v3.8.52.patch",
       "mode": "100644",
       "gitBlobSha": "5b78a4cffef80d2b325d4fdc2dae7bac50ea51cf",
@@ -3051,9 +3065,9 @@
     {
       "path": "nexa/tests/verify-native-incident-red.mjs",
       "mode": "100644",
-      "gitBlobSha": "cdaec806801ecde9bb815cd7865c6d96c7a54c45",
-      "bytes": 1875,
-      "sha256": "2669f16c01323659b2159bb579f275f25f05b2dcdf471a062b799819fec140f1"
+      "gitBlobSha": "9d6d1d820ed9c248a54d2f41887fd8fca88aea4d",
+      "bytes": 2115,
+      "sha256": "23d6d350e31ad23290ade1fbe56523d0666e30d6ff147471b9d0357d157ff2d5"
     },
     {
       "path": "nexa/tests/verify-resilience-budget-red.mjs",
@@ -3072,9 +3086,9 @@
     {
       "path": "nexa/tests/write-native-validation.mjs",
       "mode": "100644",
-      "gitBlobSha": "518330ab01b819694423f6af61d8b963ff8e5ce0",
-      "bytes": 6073,
-      "sha256": "be1197ff21fed9e76a69f1d051217dada10b329d3e93e26eb04334db6223766b"
+      "gitBlobSha": "51f22b9baf3ae16fdadfc504a3709dcbcc64ea9b",
+      "bytes": 6218,
+      "sha256": "7dac548a78acf084bf9562beab3ee2dd17d6074997cff3fe247c00a381270c8a"
     },
     {
       "path": "nexa/update.mjs",

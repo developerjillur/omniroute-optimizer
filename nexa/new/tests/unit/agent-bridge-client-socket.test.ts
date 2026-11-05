@@ -14,9 +14,9 @@ async function bootstrap() {
   const end = source.lastIndexOf("\nstartMitmServer().catch(");
   assert.ok(start >= 0 && end > start, "production bootstrap must be available");
   const server = new EventEmitter() as EventEmitter & {
-    listen: (port: number, ready: () => void) => void;
+    listen: (port: number, host: string, ready: () => void) => void;
   };
-  server.listen = (_port, ready) => ready();
+  server.listen = (_port, _host, ready) => ready();
   const processEvents: string[] = [];
   const exits: number[] = [];
   const stats = { activeConnections: 0 };
@@ -32,7 +32,9 @@ async function bootstrap() {
     vlog: () => {},
     console: { log: () => {}, error: () => {} },
     process: {
+      env: { MITM_LOCAL_HOST: "127.0.0.1" },
       on: (event: string) => processEvents.push(event),
+      once: (event: string) => processEvents.push(event),
       exit: (code: number) => exits.push(code),
     },
     peerGuardShim: { guardLoopbackPeer: () => true },

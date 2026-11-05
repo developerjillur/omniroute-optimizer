@@ -110,6 +110,10 @@ const receipt = {
       baseline: tap("client-socket-red.tap", true),
       green: tap("client-socket-green.tap"),
     },
+    ingressAvailability: {
+      baseline: tap("ingress-availability-red.tap", true),
+      green: tap("ingress-availability-green.tap"),
+    },
   },
   node26: {
     tooling: tap("tooling-node26.tap"),

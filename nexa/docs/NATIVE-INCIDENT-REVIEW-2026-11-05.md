@@ -48,6 +48,14 @@ bootstrap-এর synthetic socket fault injection ও focused RED/green gate প
 পরবর্তী source CI ফল না পাওয়া পর্যন্ত এই পরিবর্তন validated নয়। কোনো global
 uncaught-exception suppression বা thinking signature rewrite ব্যবহার করা হয় না।
 
+দ্বিতীয় সংশোধনে ingress সর্বোচ্চ ৩০ সেকেন্ড শুধু local Bridge-এ bounded backoff-এ
+TCP connect চেষ্টা করবে। Connect হওয়ার আগে রাখা TLS bytes একবারই পাঠাবে; এরপর
+কোনো upstream retry বা provider পরিবর্তন করবে না। Default path সরাসরি vendor-এ
+যাবে না। Native mode-এ Bridge DNS বন্ধ করা আগের মতোই আলাদা action। Library caller
+স্পষ্টভাবে চাইলে পুরোনো vendor fallback বেছে নিতে পারে; managed entry point সেটি
+সক্রিয় করে না। Client reset-এ pending timer/attempt বন্ধ হবে এবং অন্য SNI-এর local
+routing অক্ষত থাকবে। নতুন loopback regression-এর source CI এখনও বাকি।
+
 ## দশ দিনের audit coverage
 
 বর্তমান call database প্রায় শেষ ১ লক্ষ request রাখে; এটি একা পুরো ১০ দিন দেখায় না।

@@ -27,6 +27,10 @@ for (const file of fs.readdirSync("nexa/patches")) {
   const target = text.match(/^\+\+\+ b\/(.+)$/m)?.[1];
   if (target?.startsWith("tests/unit/") && /\.test\.(?:ts|mjs)$/.test(target)) files.push(target);
 }
+files.push(
+  "tests/unit/translator-nonstream-reasoning-leak-502.test.ts",
+  "tests/unit/non-streaming-client-translate.test.ts"
+);
 const tests = [...new Set(files)].sort();
 console.log(`# Upgrade compatibility files: ${tests.length}`);
 const result = spawnSync(

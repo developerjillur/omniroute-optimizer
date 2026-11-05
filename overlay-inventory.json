@@ -7,7 +7,7 @@
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
   "trackedNexaFiles": 436,
-  "totalNexaBytes": 1920543,
+  "totalNexaBytes": 1920739,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -538,9 +538,9 @@
     {
       "path": "nexa/docs/UPGRADE-3.8.52-2026-10-28.md",
       "mode": "100644",
-      "gitBlobSha": "28f00a96d0ed2215dea774b5c7a5e0aff57be790",
-      "bytes": 22681,
-      "sha256": "f8690127131e5943e0f391f4ebbc7a32dd5addbb2a553b11238d2ce24f2b3151"
+      "gitBlobSha": "3034b79f5f8b3ab7d8f18dade1cb5ad7fec20d90",
+      "bytes": 22744,
+      "sha256": "6c06458e37a15d43aa041db309529bf6c19cb28f06ac9c2c8a232f809f7f878d"
     },
     {
       "path": "nexa/docs/USAGE-AUDIT-2026-10-14.md",
@@ -2981,9 +2981,9 @@
     {
       "path": "nexa/tests/run-upgrade-compatibility.mjs",
       "mode": "100644",
-      "gitBlobSha": "7b90e97ab22b924715f0952405ab5da3cc89a8bf",
-      "bytes": 1592,
-      "sha256": "d9afb77424f1985a1c930b0893091989f8f3028906675cae8ac2cec76293621a"
+      "gitBlobSha": "aef106ca2a0de28209b28e7cf8d534931d97571f",
+      "bytes": 1725,
+      "sha256": "aa797270a32066ca0523814801980fd54135e61990c38f5f3efcbfd25953faf9"
     },
     {
       "path": "nexa/tests/test_database_rollback.py",

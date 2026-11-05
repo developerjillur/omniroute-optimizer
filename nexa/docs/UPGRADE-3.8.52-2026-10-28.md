@@ -217,8 +217,9 @@ names, JSON arguments, usage ও `tool_use` terminal সংরক্ষিত �
 Synthetic regression-এ Chat Completions ও Responses API tool-only replies,
 parallel calls, reasoning blocks, token/cache accounting, visible narration এবং
 empty-response controls রাখা হয়েছে। Network বা generation call দিয়ে এই regression
-চালাতে হয় না। Screenshot-এর সঙ্গে মেলা session-এ tool calls ও শেষের text answer
-পাওয়া গেছে; narration ছাড়া tool-only turn-এর client-side presentation পৃথক বিষয়।
+চালাতে হয় না। পরীক্ষিত একটি transcript-এ tool calls ও nonempty final answer পাওয়া গেছে; ছবির
+সঠিক session correlation এখনও বাকি। Narration ছাড়া tool-only turn-এর client-side
+presentation পৃথক বিষয়।
 এই source correction প্রত্যেকটি UI placeholder বা Thread-resume error সমাধানের
 দাবি করে না। Historical session বা transcript বদলানো হয়নি।
 

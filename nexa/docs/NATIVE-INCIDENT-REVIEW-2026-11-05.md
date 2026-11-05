@@ -56,6 +56,22 @@ TCP connect চেষ্টা করবে। Connect হওয়ার আগে
 সক্রিয় করে না। Client reset-এ pending timer/attempt বন্ধ হবে এবং অন্য SNI-এর local
 routing অক্ষত থাকবে। নতুন loopback regression-এর source CI এখনও বাকি।
 
+## Focused baseline verifier-এর প্রথম rejected attempt
+
+Source `8bf36503f51dc47943cf35782986cd3dcd7e8d29`-এর run
+`41963911972` গ্রহণ করা হয়নি। Tool-only baseline-এ ১৬টির মধ্যে ১২টি pass ও
+৪টি নির্দিষ্ট assertion failure পাওয়া গেছে; verifier ভুল করে পাঁচটি failure
+চেয়েছিল। Responses API function-call-only control upstream-এ আগেই সঠিক ছিল।
+সেই functional test ও বাকি সব assertion অক্ষত রেখে baseline-এর expected failure
+তালিকা actual evidence-এর সঙ্গে মিলানো হচ্ছে। Socket ও ingress-এর focused RED
+সেই run-এ আর পৌঁছায়নি; তিন পরিবার সম্পূর্ণ reproduced বলা সঠিক নয়।
+
+ওই rejected run-এ Node 26 compatibility ১২৪৬/১২৪৬, production Node 24 native
+১৯৮/১৯৮ এবং দুই runtime-এর tooling ৫২/৫২ পাস করেছে। Deployment helper ৮১ pass,
+একটি আগের macOS-only limitation skip। এগুলো একটি ব্যর্থ mandatory baseline gate
+ঢেকে দেয় না। পরবর্তী run সব focused পরিবারের ফল সংরক্ষণ করবে এবং কোনোটি
+ব্যর্থ হলে বিস্তৃত validation শুরু করবে না।
+
 ## দশ দিনের audit coverage
 
 বর্তমান call database প্রায় শেষ ১ লক্ষ request রাখে; এটি একা পুরো ১০ দিন দেখায় না।

@@ -138,7 +138,6 @@ jobs:
           node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/resilience-settings-contract.test.ts | tee "$RUNNER_TEMP/resilience-budget-green.tap"
       - name: Reproduce and fix tool-only replies and client socket crashes
         id: native_incidents
-        continue-on-error: true
         timeout-minutes: 3
         shell: bash
         run: |
@@ -147,6 +146,7 @@ jobs:
           export DATA_DIR="$RUNNER_TEMP/native-incident-data"
           export TMPDIR="$RUNNER_TEMP"
           restore_patch=""
+          family_failures=0
           trap 'if test -n "$restore_patch"; then git apply "$restore_patch"; fi' EXIT
           for family in tool-only client-socket ingress-availability; do
             if test "$family" = tool-only; then
@@ -168,10 +168,15 @@ jobs:
             git apply "$patch"
             restore_patch=""
             tail -n 40 "$RUNNER_TEMP/$family-red.tap"
-            test "$result" -ne 0
-            node "$GITHUB_WORKSPACE/nexa/tests/verify-native-incident-red.mjs" "$family" "$RUNNER_TEMP/$family-red.tap"
-            node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 "$test_file" | tee "$RUNNER_TEMP/$family-green.tap"
+            if test "$result" -eq 0; then family_failures=1; fi
+            if ! node "$GITHUB_WORKSPACE/nexa/tests/verify-native-incident-red.mjs" "$family" "$RUNNER_TEMP/$family-red.tap"; then
+              family_failures=1
+            fi
+            if ! node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 "$test_file" | tee "$RUNNER_TEMP/$family-green.tap"; then
+              family_failures=1
+            fi
           done
+          test "$family_failures" -eq 0
       - name: Native, protocol, transport, cache and translator regressions
         id: native_tests
         continue-on-error: true

@@ -9,7 +9,6 @@ const expected = {
       "tool-only Claude reply omits synthetic text for null content",
       "tool-only Claude reply omits synthetic text for omitted content",
       "tool-only Claude reply omits synthetic text for whitespace content",
-      "Responses API function-call-only output remains a tool-only Claude reply",
       "parallel tool-only calls preserve every id, name and argument",
     ],
   },

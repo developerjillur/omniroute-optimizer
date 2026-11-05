@@ -203,3 +203,26 @@ v3.8.52-এর তৈরি archive-এ `dist/src/mitm/manager.js` ও `processL
 ## 2026-10-31: managed package installation policy
 
 The pinned upstream `.npmrc` deliberately uses `legacy-peer-deps=true` for deep `@lobehub/icons` imports. Global npm installation ignores that project policy and pulled unused `@lobehub/ui` peers during isolated acceptance; the first resolver attempt reached the 2048 MiB family watchdog. Managed archive installation and the local install/rollback commands now pass the existing peer policy explicitly. The isolated resolver has a 1024 MiB heap and two download sockets, with normal lifecycle scripts retained. The candidate recipe includes the policy regression tests. This changes deployment tooling only; application runtime sources and the completed archive remain unchanged.
+
+## ২০২৬-১১-০৫: tool-only Claude reply-এর অতিরিক্ত placeholder
+
+OpenAI/Codex-এর buffered tool-call reply-তে `content: null` বা অনুপস্থিত content
+থাকলে translator নিজে `(empty response)` text যোগ করত। খালি string-এর পুরোনো
+upstream correction এই দুই branch ও whitespace-only narration ধরত না। নতুন
+active patch valid tool call-এর পাশে এই অতিরিক্ত text তৈরি বন্ধ করে। Tool IDs,
+names, JSON arguments, usage ও `tool_use` terminal সংরক্ষিত থাকে; সাধারণ answer
+এবং provider নিজে দেওয়া literal text অক্ষত থাকে। আসল empty output-এ tool call না
+থাকলে আগের malformed-response check এখনও প্রযোজ্য।
+
+Synthetic regression-এ Chat Completions ও Responses API tool-only replies,
+parallel calls, reasoning blocks, token/cache accounting, visible narration এবং
+empty-response controls রাখা হয়েছে। Network বা generation call দিয়ে এই regression
+চালাতে হয় না। Screenshot-এর সঙ্গে মেলা session-এ tool calls ও শেষের text answer
+পাওয়া গেছে; narration ছাড়া tool-only turn-এর client-side presentation পৃথক বিষয়।
+এই source correction প্রত্যেকটি UI placeholder বা Thread-resume error সমাধানের
+দাবি করে না। Historical session বা transcript বদলানো হয়নি।
+
+বর্তমান source validation চলবে existing CI-তে। Live runtime এখনও
+`3.8.51 / 15533a05c`; আগের `7776efc1` package-এ এই নতুন patch নেই। Source tests,
+প্রয়োজনীয় build/package acceptance ও অনুমোদিত live installation সম্পন্ন না হওয়া
+পর্যন্ত live fix বা সব native client-এর parity দাবি করা হচ্ছে না।

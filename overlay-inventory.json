@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
-  "trackedNexaFiles": 434,
-  "totalNexaBytes": 1910749,
+  "trackedNexaFiles": 436,
+  "totalNexaBytes": 1920543,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -538,9 +538,9 @@
     {
       "path": "nexa/docs/UPGRADE-3.8.52-2026-10-28.md",
       "mode": "100644",
-      "gitBlobSha": "219e1d38f1baf3b92164bee02ffb57b4ae6e4040",
-      "bytes": 20489,
-      "sha256": "dae05207019c06decdb22e28f0c30d016daabfbc7cf39dda986bfd85cd3c3b82"
+      "gitBlobSha": "28f00a96d0ed2215dea774b5c7a5e0aff57be790",
+      "bytes": 22681,
+      "sha256": "f8690127131e5943e0f391f4ebbc7a32dd5addbb2a553b11238d2ce24f2b3151"
     },
     {
       "path": "nexa/docs/USAGE-AUDIT-2026-10-14.md",
@@ -580,9 +580,9 @@
     {
       "path": "nexa/manifest.json",
       "mode": "100644",
-      "gitBlobSha": "4a90c4ca1569376a06c6f663d532bd1848c4b0d5",
-      "bytes": 82208,
-      "sha256": "553d8b1c65790b57b2be961b1a35018d652c9ee420ca63c79a34bc6fd194ad27"
+      "gitBlobSha": "d88e81842e9b32cdd4e0da6b2642a0da39b8ef44",
+      "bytes": 82733,
+      "sha256": "a22b005cc3ffd0d6ab4148b437fc011286546d2bf806372341bef3c6f9267411"
     },
     {
       "path": "nexa/new/bin/cli/utils/packageMigrations.mjs",
@@ -1369,6 +1369,13 @@
       "sha256": "14e98ac1113a17aeba9c20b705cc49477b556e1292f231e856989b7d3a4d189a"
     },
     {
+      "path": "nexa/new/tests/unit/nonstream-tool-only-claude.test.ts",
+      "mode": "100644",
+      "gitBlobSha": "94de579be6b1664ce9f9ddb091bde7ab30f5115e",
+      "bytes": 5690,
+      "sha256": "45f54962922f7fd7927c116f31c5e6fb951e2206b03ed031c731b299101985c7"
+    },
+    {
       "path": "nexa/new/tests/unit/prompt-cache-ttl-cost.test.ts",
       "mode": "100644",
       "gitBlobSha": "5f7d41afacc3ccacc6d4976bc37658cdf8835e87",
@@ -1682,6 +1689,13 @@
       "gitBlobSha": "cdb205f3acb9ff53190fc01489d9302c9f182c4f",
       "bytes": 581,
       "sha256": "da08bb879b2f2e27493e0e4ce800818707d6fa710d52da3d7616db99d49a8f50"
+    },
+    {
+      "path": "nexa/patches/open-sse__handlers__responseTranslator__tool-only.ts.patch",
+      "mode": "100644",
+      "gitBlobSha": "0d50ed6d951c86db9d75a9af63f61cf6241ddcc5",
+      "bytes": 1387,
+      "sha256": "2e6233de254c7c626784decac4b697e0b664134637faabb96ae058f5e5e936c7"
     },
     {
       "path": "nexa/patches/open-sse__handlers__sseParser.ts.patch",

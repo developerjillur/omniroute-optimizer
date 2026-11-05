@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 316,
-    "patches": 189,
-    "new": 121,
+    "total": 318,
+    "patches": 190,
+    "new": 122,
     "tooling": 6,
     "upstreamCandidates": 28,
     "nexaSpecific": 99,
-    "needsReview": 189,
+    "needsReview": 191,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
   },
@@ -299,6 +299,14 @@
       "layer": "patch",
       "class": "nexa-specific",
       "target": "open-sse/handlers/chatCore/upstreamBody.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__handlers__responseTranslator__tool-only.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/handlers/responseTranslator.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -2465,6 +2473,14 @@
       "layer": "new",
       "class": "needs-review",
       "target": "tests/unit/nexa-model-test-connection.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/nonstream-tool-only-claude.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/nonstream-tool-only-claude.test.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },

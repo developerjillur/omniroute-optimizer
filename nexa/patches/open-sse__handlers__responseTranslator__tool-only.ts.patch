@@ -1,0 +1,32 @@
+diff --git a/open-sse/handlers/responseTranslator.ts b/open-sse/handlers/responseTranslator.ts
+--- a/open-sse/handlers/responseTranslator.ts
++++ b/open-sse/handlers/responseTranslator.ts
+@@ -804,7 +804,7 @@
+     });
+   }
+ 
+-  // Always include text if it exists (even empty string), or if there are no tool calls and no reasoning
++  // Tool calls are complete output without an accompanying text block.
+   const hasToolCalls = Array.isArray(messageObj.tool_calls) && messageObj.tool_calls.length > 0;
+ 
+   if (typeof messageObj.refusal === "string" && messageObj.refusal) {
+@@ -816,8 +816,8 @@
+   } else if (messageObj.content !== undefined && messageObj.content !== null) {
+     hasTextOrReasoning = true;
+     const resolvedText = toString(messageObj.content);
+-    // #15764: no placeholder text block next to tool_use when the text is empty.
+-    if (resolvedText !== "" || !hasToolCalls) {
++    // Omit blank text beside tool_use, including whitespace-only content.
++    if (resolvedText.trim() !== "" || !hasToolCalls) {
+       content.push({
+         type: "text",
+         text: resolvedText === "" ? "(empty response)" : resolvedText,
+@@ -833,7 +833,7 @@
+       type: "text",
+       text: reasoningText,
+     });
+-  } else if (!hasTextOrReasoning) {
++  } else if (!hasTextOrReasoning && !hasToolCalls) {
+     content.push({
+       type: "text",
+       text: "(empty response)",

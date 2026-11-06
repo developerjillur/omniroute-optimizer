@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
+  "applicationVersion": "3.8.52",
+  "targets": [
+    { "section": "dependencies", "name": "next", "before": "16.3.8", "after": "16.4.5" },
+    {
+      "section": "devDependencies",
+      "name": "eslint-config-next",
+      "before": "16.3.8",
+      "after": "16.4.5"
+    }
+  ],
+  "references": [
+    "https://github.com/vercel/next.js/security/advisories/GHSA-p3m5-59mp-jv5r",
+    "https://github.com/vercel/next.js/releases/tag/v16.4.5"
+  ]
+}

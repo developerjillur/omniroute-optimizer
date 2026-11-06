@@ -90,10 +90,17 @@ candidate-এর rejection; live-এ ওই candidate বসানো হয়ন�
 
 Source-root override published dependency হিসেবে কার্যকর থাকে না। শুধু lock
 যোগ করার প্রথম প্রচেষ্টাতেও পুরোনো nested versions ফিরে এসেছে; সেই failed
-archive/install receipt সংরক্ষিত। পরের publication tooling-এ npm-এর effective
-source edges, publishable shrinkwrap discovery এবং actual installed graph
-comparison যোগ করা হচ্ছে। Source ও compiled bundle অক্ষত রেখে কেবল packaging
-metadata বদলাবে। এই প্রস্তুতিকে installed security PASS বলা হচ্ছে না; নতুন
+archive/install receipt সংরক্ষিত। ছোট বাস্তব npm fixture-এর
+[global installation regression](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42249487310)
+দেখিয়েছে, local tarball-এর lock ও private discovery flag দিয়েও পুরোনো nested
+version ফিরে আসে। এটি mechanism-এর assertion failure; environment failure নয়।
+
+পরের installer একই runtime layout-এর নতুন directory-তে package root হিসেবে
+normal `npm ci` চালাবে, যাতে source override ও shipped lock কার্যকর থাকে।
+Development dependency ও workspace linking বাদ যাবে, required lifecycle scripts
+চলবে। Source, package metadata ও compiled bundle অক্ষত থাকবে; archive-এ শুধু
+publication lock যোগ হবে। Actual installed graph comparison-ও বাধ্যতামূলক।
+এই প্রস্তুতিকে installed security PASS বলা হচ্ছে না; নতুন
 actual installation ও advisory audit সম্পূর্ণ না হওয়া পর্যন্ত candidate rejected।
 
 Existing development graph-এর 57টি finding এই packaging কাজ দিয়ে cleared হয় না।

@@ -44,7 +44,7 @@ test("an overridden exact dependency publishes the validated safe target instead
   assert.equal(changes.length, 1);
   assert.deepEqual(source, before);
   assert.deepEqual(lock.packages[""].dependencies, source.packages[""].dependencies);
-  assert.equal(lock.packages[""].devDependencies, undefined);
+  assert.deepEqual(lock.packages[""].devDependencies, source.packages[""].devDependencies);
   assert.equal(lock.packages[""].workspaces, undefined);
   assert.equal(lock.packages["node_modules/workspace"], undefined);
   assert.equal(lock.packages["packages/workspace"], undefined);

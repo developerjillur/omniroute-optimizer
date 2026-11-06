@@ -29,17 +29,12 @@ export async function inspectInstalledPublication(
   packageRoot,
   npmPackageJson = "/usr/local/lib/node_modules/npm/package.json"
 ) {
-  const metadata = JSON.parse(fs.readFileSync(path.join(packageRoot, "package.json")));
-  assert.equal(
-    metadata._hasShrinkwrap,
-    true,
-    "Local archive shrinkwrap discovery metadata is missing"
-  );
   const lock = JSON.parse(fs.readFileSync(path.join(packageRoot, "npm-shrinkwrap.json")));
   const require = createRequire(path.resolve(npmPackageJson));
   const tree = await new (require("@npmcli/arborist"))({
     path: packageRoot,
     legacyPeerDeps: true,
+    workspacesEnabled: false,
     audit: false,
   }).loadActual();
   return verifyInstalledPublication(tree, lock);

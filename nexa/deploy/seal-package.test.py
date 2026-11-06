@@ -49,7 +49,6 @@ class PublicationLockTest(unittest.TestCase):
         self.assertTrue(result["actualGlobalInstallAuditRequired"])
         with tarfile.open(self.output, "r:gz") as stream:
             metadata = json.load(stream.extractfile("package/package.json"))
-            self.assertTrue(metadata.pop("_hasShrinkwrap"))
             self.assertEqual(metadata, self.metadata)
             self.assertEqual(stream.extractfile("package/dist/server.js").read(),
                              b"preserved compiled application")

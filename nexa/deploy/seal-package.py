@@ -70,7 +70,6 @@ def seal(archive, source_lock, publication_lock, output, effective_edges=None):
         if not location or (location.startswith("node_modules/") and not entry.get("link"))
     }
     expected_lock["packages"][""].pop("workspaces", None)
-    expected_lock["packages"][""].pop("devDependencies", None)
     changes = []
     if effective_edges is not None:
         recipe = json.loads(Path(effective_edges).read_text())
@@ -115,39 +114,31 @@ def seal(archive, source_lock, publication_lock, output, effective_edges=None):
     require(lock == expected_lock, "Publication metadata differs from source and reviewed effective edges")
     before = inventory(archive)
     require("package/npm-shrinkwrap.json" not in before, "Archive already has a publication lock")
-    # Local tarball manifests do not get the registry's shrinkwrap discovery flag.
-    # npm Arborist uses this metadata to load the nested published lock.
-    sealed_metadata = dict(metadata, _hasShrinkwrap=True)
-    metadata_bytes = (json.dumps(sealed_metadata, indent=2, ensure_ascii=False) + "\n").encode()
     with output.open("xb") as destination:
         with gzip.GzipFile(fileobj=destination, mode="wb", mtime=0) as compressed:
             with tarfile.open(fileobj=compressed, mode="w|", format=tarfile.PAX_FORMAT) as target:
                 with tarfile.open(archive, "r|gz") as original:
                     stamp = 0
                     for member in original:
-                        content = original.extractfile(member) if member.isfile() else None
-                        member = copy.copy(member)
                         if member.name == "package/package.json":
                             stamp = member.mtime
-                            member.size = len(metadata_bytes)
-                            content = io.BytesIO(metadata_bytes)
-                        target.addfile(member, content)
+                        target.addfile(copy.copy(member), original.extractfile(member)
+                                       if member.isfile() else None)
                     member = tarfile.TarInfo("package/npm-shrinkwrap.json")
                     member.mode, member.mtime, member.size = 0o644, stamp, len(lock_bytes)
                     target.addfile(member, io.BytesIO(lock_bytes))
     after = inventory(output)
     require(set(after) == set(before) | {"package/npm-shrinkwrap.json"}, "Unexpected archive change")
-    require(all(after[name] == entry for name, entry in before.items()
-                if name != "package/package.json"),
+    require(all(after[name] == entry for name, entry in before.items()),
             "A compiled or original package member changed")
     return {
         "status": "SEALED_PACKAGE_CREATED_NOT_ACCEPTED",
         "originalArchive": str(archive), "originalSHA256": sha(archive),
         "archive": str(output), "sha256": sha(output), "bytes": output.stat().st_size,
         "sourceLockSHA256": sha(source_lock), "publicationLockSHA256": sha(publication_lock),
-        "originalMembersPreserved": len(before) - 1, "compiledAssetsUnchanged": True,
+        "originalMembersPreserved": len(before), "compiledAssetsUnchanged": True,
         "addedMembers": ["package/npm-shrinkwrap.json"],
-        "metadataChanges": ["package/package.json:_hasShrinkwrap=true"],
+        "metadataChanges": [],
         "effectiveSourceOverrideEdges": len(changes),
         "effectiveEdgesSHA256": sha(effective_edges) if effective_edges else None,
         "actualGlobalInstallAuditRequired": True, "livePromotionPerformed": False,

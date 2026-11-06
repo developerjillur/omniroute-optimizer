@@ -6,9 +6,10 @@ import { spawn, execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { smokeModel } from "./smoke-model.mjs";
 import { inspectNativeUsageSchema } from "./native-usage-schema.mjs";
-import { packageInstallArgs, packageInstallEnvironment } from "./package-install.mjs";
+import { packageInstallEnvironment } from "./package-install.mjs";
 import { readSmokeApiKey } from "./smoke-api-key.mjs";
 import { inspectInstalledPublication } from "./installed-publication.mjs";
+import { installPublication } from "./install-publication.mjs";
 
 const [archive, destination] = process.argv.slice(2);
 if (!archive || !destination) throw Error("usage: smoke-package.mjs <archive> <new destination>");
@@ -31,18 +32,14 @@ if (!reuse) {
   ]);
   fs.chmodSync(path.join(data, "storage.sqlite"), 0o600);
   const installLog = fs.openSync(path.join(root, "install.log"), "w", 0o600);
-  execFileSync(
-    "/usr/local/bin/node",
-    ["/usr/local/lib/node_modules/npm/bin/npm-cli.js", ...packageInstallArgs(prefix, archive)],
-    {
-      stdio: ["ignore", installLog, installLog],
-      env: packageInstallEnvironment({
-        ...process.env,
-        PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin",
-        DATA_DIR: data,
-      }),
-    }
-  );
+  await installPublication(prefix, archive, {
+    log: ["ignore", installLog, installLog],
+    env: packageInstallEnvironment({
+      ...process.env,
+      PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin",
+      DATA_DIR: data,
+    }),
+  });
   fs.closeSync(installLog);
 }
 const installedPublication = await inspectInstalledPublication(

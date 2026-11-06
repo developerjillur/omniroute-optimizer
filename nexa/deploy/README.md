@@ -88,11 +88,17 @@ and excludes development workspace links from a publishable `npm-shrinkwrap.json
 The original source lock and source manifest remain unchanged.
 
 `seal-package.py` retains the unsealed archive and adds the publication lock to a
-new archive. Its only package metadata change is `_hasShrinkwrap=true`, which lets
-npm discover a nested lock when installing a local tarball. Every other original
-member, including compiled assets, must retain its bytes and mode. The effective
-edge recipe, source lock, archive hashes and changed metadata are recorded. Creating
-this archive is preparation, not package acceptance.
+new archive. Every original member, including package metadata and compiled assets,
+must retain its bytes and mode. The effective edge recipe, source lock and archive
+hashes are recorded. Creating this archive is preparation, not package acceptance.
+
+`install-publication.mjs` extracts the reviewed archive into a new prefix at the
+existing `lib/node_modules/omniroute` layout, then runs normal `npm ci` at that
+package root with the shipped lock. Workspace linking is disabled; production and
+optional dependencies retain their required lifecycle scripts. The prefix's normal
+executable links are recreated from the unchanged package metadata. No existing
+runtime is overwritten by preparation. Global installation of a nested tarball
+is not used for the candidate because it ignores the package-root override policy.
 
 The normal installer omits development tools while retaining required lifecycle
 scripts. After installation, `installed-publication.mjs` checks the actual tree
@@ -102,8 +108,9 @@ including the separately shipped `dist` dependencies. Keep failed attempts and d
 not replace an installed audit with a source-only audit.
 
 The separate `Publication dependency regression` CI workflow exercises actual
-global installs with a small public dependency fixture. Its baseline must lose
-the override, and its sealed candidate must retain the validated version and
+installs with a small public dependency fixture. Its global baseline must lose
+the override; the candidate must retain the validated version, omit development
+and workspace packages, run its required lifecycle script and executable, and
 execute the dependency correctly. This proves the publication mechanism; it does
 not stand in for installing and auditing the complete OmniRoute artifact.
 

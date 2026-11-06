@@ -25,10 +25,14 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "24.15.0"
-      - name: Reproduce dependency drift and verify the sealed global installation
+      - name: Reproduce dependency drift and verify the sealed runtime installation
         env:
           PUBLICATION_TEST_ROOT: ${{ runner.temp }}/publication-regression
-        run: node nexa/tests/publication-install-integration.mjs
+        run: |
+          python3 nexa/deploy/seal-package.test.py
+          python3 nexa/deploy/extract-publication.test.py
+          node --test nexa/deploy/publication-lock.test.mjs nexa/deploy/installed-publication.test.mjs nexa/deploy/install-publication.test.mjs
+          node nexa/tests/publication-install-integration.mjs
       - name: Preserve the isolated publication evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

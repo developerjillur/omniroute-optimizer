@@ -7,6 +7,7 @@ import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { createPublicationLock } from "../deploy/publication-lock.mjs";
 import { inspectInstalledPublication } from "../deploy/installed-publication.mjs";
+import { installPublication } from "../deploy/install-publication.mjs";
 import { packageInstallArgs, packageInstallEnvironment } from "../deploy/package-install.mjs";
 
 const root = process.env.PUBLICATION_TEST_ROOT
@@ -49,12 +50,25 @@ const metadata = {
   name: "publication-regression-fixture",
   version: "1.0.0",
   main: "index.cjs",
-  files: ["index.cjs"],
+  files: ["index.cjs", "cli.cjs"],
+  bin: { "publication-fixture": "cli.cjs" },
+  scripts: { postinstall: "node -e \"require('fs').writeFileSync('lifecycle-ran.txt','ran')\"" },
   dependencies: { "is-odd": "3.0.1", "is-number": "7.0.0" },
+  devDependencies: { "is-plain-object": "5.0.0" },
+  workspaces: ["packages/local-workspace"],
   overrides: { "is-odd": { "is-number": "7.0.0" } },
 };
 fs.writeFileSync(path.join(source, "package.json"), JSON.stringify(metadata, null, 2) + "\n");
 fs.writeFileSync(path.join(source, "index.cjs"), 'module.exports = require("is-odd");\n');
+fs.writeFileSync(
+  path.join(source, "cli.cjs"),
+  '#!/usr/bin/env node\nprocess.stdout.write("fixture ready\\n");\n'
+);
+fs.mkdirSync(path.join(source, "packages/local-workspace"), { recursive: true });
+fs.writeFileSync(
+  path.join(source, "packages/local-workspace/package.json"),
+  JSON.stringify({ name: "publication-fixture-workspace", version: "1.0.0" })
+);
 runNpm(
   [
     "install",
@@ -103,8 +117,24 @@ execFileSync(
   { env: environment, stdio: "inherit", timeout: 30000 }
 );
 const candidatePrefix = path.join(root, "candidate-runtime");
-runNpm(packageInstallArgs(candidatePrefix, archive), root, "candidate-install");
-const pkg = installedRoot(candidatePrefix);
+const installLog = fs.openSync(path.join(root, "candidate-install.log"), "wx", 0o600);
+let installed;
+try {
+  installed = await installPublication(candidatePrefix, archive, {
+    npmPackageJson,
+    env: {
+      ...environment,
+      npm_config_ignore_scripts: "true",
+      npm_config_include: "dev",
+      npm_config_global: "true",
+    },
+    log: ["ignore", installLog, installLog],
+    timeout: 120000,
+  });
+} finally {
+  fs.closeSync(installLog);
+}
+const pkg = installed.packageRoot;
 const after = nestedVersion(pkg);
 assert.equal(after, "7.0.0");
 const graph = await inspectInstalledPublication(pkg, npmPackageJson);
@@ -112,12 +142,25 @@ const req = createRequire(path.join(pkg, "index.cjs"));
 const isOdd = req(path.join(pkg, "index.cjs"));
 assert.equal(isOdd(3), true);
 assert.equal(isOdd(4), false);
+assert.equal(fs.readFileSync(path.join(pkg, "lifecycle-ran.txt"), "utf8"), "ran");
+assert.equal(fs.existsSync(path.join(pkg, "node_modules/is-plain-object")), false);
+assert.equal(fs.existsSync(path.join(pkg, "node_modules/publication-fixture-workspace")), false);
+assert.equal(
+  execFileSync(process.execPath, [path.join(candidatePrefix, "bin/publication-fixture")], {
+    encoding: "utf8",
+  }).trim(),
+  "fixture ready"
+);
 const result = {
   status: "PUBLICATION_INSTALL_REGRESSION_PASS",
   baselineNestedVersion: before,
   candidateNestedVersion: after,
   ...graph,
   functionalDependencyCallsPassed: true,
+  requiredLifecycleScriptsEnabled: true,
+  developmentDependenciesOmitted: true,
+  sourceWorkspaceLinksDisabled: true,
+  executableLayoutVerified: true,
   applicationArtifactAcceptance: false,
   providerGenerationCalls: 0,
   sourcePackage: "is-odd@3.0.1 with is-number@7.0.0 override",

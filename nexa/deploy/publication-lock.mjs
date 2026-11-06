@@ -24,7 +24,6 @@ export function compilePublicationLock(source, tree) {
     }
   }
   delete lock.packages[""].workspaces;
-  delete lock.packages[""].devDependencies;
   for (const node of tree.inventory.values()) {
     if (node.isRoot || node.isLink || !lock.packages[node.location]) continue;
     for (const edge of node.edgesOut.values()) {

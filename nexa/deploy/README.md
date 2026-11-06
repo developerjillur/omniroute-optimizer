@@ -101,6 +101,12 @@ The release must also retain an audit of the actual installed production graph,
 including the separately shipped `dist` dependencies. Keep failed attempts and do
 not replace an installed audit with a source-only audit.
 
+The separate `Publication dependency regression` CI workflow exercises actual
+global installs with a small public dependency fixture. Its baseline must lose
+the override, and its sealed candidate must retain the validated version and
+execute the dependency correctly. This proves the publication mechanism; it does
+not stand in for installing and auditing the complete OmniRoute artifact.
+
 Isolated smoke decrypts an existing ordinary client key with the package's own
 storage implementation, verifies its authentication fingerprint, and excludes
 revoked, expired, restricted or quota-bypass credentials. It creates no keys and

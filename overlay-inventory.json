@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
-  "trackedNexaFiles": 472,
-  "totalNexaBytes": 2133401,
+  "trackedNexaFiles": 473,
+  "totalNexaBytes": 2138637,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -104,9 +104,9 @@
     {
       "path": "nexa/deploy/README.md",
       "mode": "100644",
-      "gitBlobSha": "287ef18bbca3381fda9405cbe9fafa49391083ab",
-      "bytes": 14771,
-      "sha256": "9b124b50a9fcdc5aaaed8a88dfaad3ce82d49bb34fef5321d092bf6b87c2935b"
+      "gitBlobSha": "f601dd9d79212624914a32eb786a79db920d40f4",
+      "bytes": 15161,
+      "sha256": "41a0511bc80cdc7b32d09b49affea43bf8ac6ae3af1057117ca3239a5220b9b8"
     },
     {
       "path": "nexa/deploy/bootstrap-launchdaemon.sh",
@@ -3201,6 +3201,13 @@
       "gitBlobSha": "c8a62fae9b8d1216a276f2808e2d288786d598de",
       "bytes": 7662,
       "sha256": "ca9750a151c00e2e6edf99de602104c0bd9dc6328894278f2231f94244498fd9"
+    },
+    {
+      "path": "nexa/tests/publication-install-integration.mjs",
+      "mode": "100644",
+      "gitBlobSha": "29ead8e0ade14af8e42f4f50889a036427893cb1",
+      "bytes": 4846,
+      "sha256": "ae0bfae0ef7d5ecab745f967e69453be105f4bf7920eefa5f7e3810344d1c8e0"
     },
     {
       "path": "nexa/tests/resilience-budget-red.test.mjs",

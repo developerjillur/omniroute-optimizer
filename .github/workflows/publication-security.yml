@@ -1,0 +1,41 @@
+name: Publication dependency regression
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - "nexa/deploy/**"
+      - "nexa/tests/publication-install-integration.mjs"
+      - ".github/workflows/publication-security.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  publication:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    env:
+      NODE_OPTIONS: --max-old-space-size=256
+      PUBLICATION_TEST_ROOT: ${{ runner.temp }}/publication-regression
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24.15.0"
+      - name: Reproduce dependency drift and verify the sealed global installation
+        run: node nexa/tests/publication-install-integration.mjs
+      - name: Preserve the isolated publication evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: publication-install-evidence
+          path: |
+            ${{ runner.temp }}/publication-regression/*.log
+            ${{ runner.temp }}/publication-regression/verification.json
+            ${{ runner.temp }}/publication-regression/publication-lock/*.json
+            ${{ runner.temp }}/publication-regression/sealed/*.receipt.json
+          retention-days: 14

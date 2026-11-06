@@ -114,6 +114,26 @@
       "path": ["undici@7"],
       "before": null,
       "after": "7.30.1"
+    },
+    {
+      "path": ["joi"],
+      "before": "^18.2.9",
+      "after": "18.3.1"
+    },
+    {
+      "path": ["node-forge"],
+      "before": null,
+      "after": "1.4.3"
+    },
+    {
+      "path": ["engine.io"],
+      "before": null,
+      "after": "6.6.10"
+    },
+    {
+      "path": ["@modelcontextprotocol/server"],
+      "before": null,
+      "after": "2.3.0"
     }
   ],
   "allowedGraphVersions": {
@@ -127,6 +147,10 @@
     "qs": ["6.16.1"],
     "zod": ["4.6.6"],
     "vite": ["8.3.6"],
-    "undici": ["8.12.4", "7.30.1", "6.29.1"]
+    "undici": ["8.12.4", "7.30.1", "6.29.1"],
+    "joi": ["18.3.1"],
+    "node-forge": ["1.4.3"],
+    "engine.io": ["6.6.10"],
+    "@modelcontextprotocol/server": ["2.3.0"]
   }
 }

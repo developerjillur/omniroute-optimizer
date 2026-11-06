@@ -7,7 +7,7 @@
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
   "trackedNexaFiles": 459,
-  "totalNexaBytes": 2062423,
+  "totalNexaBytes": 2062920,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -2960,9 +2960,9 @@
     {
       "path": "nexa/security/dependency-targets-2026-11-06.json",
       "mode": "100644",
-      "gitBlobSha": "0dd6ee31d0519f3e380c9d44b358cd49ac0e4252",
-      "bytes": 2742,
-      "sha256": "609e2684b33051ccbd8e5f1c4a4f38e2cbdb60995aa269eb00678dbd379c0761"
+      "gitBlobSha": "4bae450af353cc8bbe0c20914c087f4d09a2c3b2",
+      "bytes": 3239,
+      "sha256": "d5770c3590dcb9136ce67bb92030486cac2b1e4e6a7bd376179f7174c40b531b"
     },
     {
       "path": "nexa/setup.mjs",

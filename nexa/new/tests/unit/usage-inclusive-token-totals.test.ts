@@ -5,6 +5,8 @@ import { buildApiKeySelfServiceStatus } from "../../src/lib/usage/apiKeySelfServ
 import { getDbInstance } from "../../src/lib/db/core.ts";
 import { getMonthlyProviderTokensForConnection } from "../../src/lib/usage/usageStats.ts";
 import { extractUsage } from "../../open-sse/utils/usageTracking.ts";
+import { getAntigravityCacheIdentity } from "../../open-sse/services/usage/antigravityCacheIdentity.ts";
+import { fetchAntigravityUserQuotaSummaryCached } from "../../open-sse/services/usage/antigravityWeeklyQuota.ts";
 
 const { getUsageForProvider } = await import("../../open-sse/services/usage.ts");
 
@@ -222,4 +224,76 @@ test("Antigravity local quota fallback counts normalized reasoning once within i
   assert.ok(saved);
   assert.equal(saved.tokens_output, 1000);
   assert.equal(saved.tokens_reasoning, 900);
+});
+
+test("Antigravity quota caches isolate credentials sharing a prefix and preserve same-account reuse", async (t) => {
+  const model = "gemini-3.8-flash-high";
+  const prefix = "shared-prefix-1234567890";
+  const firstToken = `${prefix}-first`;
+  const secondToken = `${prefix}-second`;
+  const identity = getAntigravityCacheIdentity(firstToken, null, "ide");
+  assert.match(identity, /^[a-f0-9]{64}$/);
+  assert.equal(identity.includes(prefix), false);
+  assert.notEqual(identity, getAntigravityCacheIdentity(secondToken, null, "ide"));
+  assert.notEqual(identity, getAntigravityCacheIdentity(firstToken, "default", "ide"));
+  assert.notEqual(identity, getAntigravityCacheIdentity(firstToken, null, "cli"));
+  assert.equal(identity, getAntigravityCacheIdentity(firstToken, undefined, "ide"));
+  const resetAt = new Date(Date.now() + 60 * 60000).toISOString();
+  let modelRequests = 0;
+  let summaryRequests = 0;
+  t.mock.method(globalThis, "fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+    const headers = new Headers(init?.headers);
+    const accountMarker = headers.get("authorization")?.endsWith("-second") ? "second" : "first";
+    if (url.includes("retrieveUserQuotaSummary")) {
+      summaryRequests += 1;
+      return new Response(JSON.stringify({ accountMarker }), { status: 200 });
+    }
+    if (url.includes("retrieveUserQuota")) return new Response("{}", { status: 404 });
+    if (url.includes("loadCodeAssist")) {
+      return new Response(JSON.stringify({ accountMarker }), { status: 200 });
+    }
+    if (url.includes("fetchAvailableModels")) modelRequests += 1;
+    const remainingFraction = accountMarker === "second" ? 0.8 : 0.2;
+    return new Response(
+      JSON.stringify({
+        models: { [model]: { quotaInfo: { remainingFraction, resetTime: resetAt } } },
+      }),
+      { status: 200, headers: { "content-type": "application/json" } }
+    );
+  });
+  const connection = (id: string, accessToken: string) => ({
+    id,
+    provider: "antigravity",
+    accessToken,
+    providerSpecificData: {},
+    projectId: undefined,
+  });
+  const first = await getUsageForProvider(connection("cache-first", firstToken));
+  const second = await getUsageForProvider(connection("cache-second", secondToken));
+  const again = await getUsageForProvider(connection("cache-first", firstToken));
+  const remaining = (result: unknown) =>
+    (result as { quotas?: Record<string, { remainingPercentage?: number }> }).quotas?.[model]
+      ?.remainingPercentage;
+  assert.equal(remaining(first), 20);
+  assert.equal(
+    remaining(second),
+    80,
+    "another credential must not inherit the first account's quota"
+  );
+  assert.equal(remaining(again), 20);
+  assert.equal(modelRequests, 2, "same-account reads retain the existing cache benefit");
+  const subscription = (result: unknown) =>
+    (result as { subscriptionInfo?: { accountMarker?: string } }).subscriptionInfo?.accountMarker;
+  assert.equal(subscription(first), "first");
+  assert.equal(subscription(second), "second");
+  const readSummary = async (token: string) =>
+    (await fetchAntigravityUserQuotaSummaryCached(token, "identity-check", "ide")) as {
+      accountMarker?: string;
+    };
+  const summaryCallsBefore = summaryRequests;
+  assert.equal((await readSummary(firstToken)).accountMarker, "first");
+  assert.equal((await readSummary(secondToken)).accountMarker, "second");
+  assert.equal((await readSummary(firstToken)).accountMarker, "first");
+  assert.equal(summaryRequests - summaryCallsBefore, 2);
 });

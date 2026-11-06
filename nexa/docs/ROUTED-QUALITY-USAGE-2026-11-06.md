@@ -23,6 +23,14 @@ reasoning আবার যোগ করছিল। Gemini extractor candidates 
 local estimate 2 units, 3 নয়। একই account/model-এর সফল পাঁচ ঘণ্টার window-ই
 গণনা হয়। Provider-এর authoritative quota, token breakdown ও billed usage বদলায় না।
 
+Antigravity quota/subscription cache এবং weekly-summary cache আগে credential-এর
+শুধু প্রথম 16 character দিয়ে identity বানাত। একই prefix-এর দুই credential,
+একই project ও profile থাকলে একটির cached quota অন্যটিতে যেতে পারত। এখন সম্পূর্ণ
+credential, project ও client profile-এর SHA-256 identity ব্যবহৃত হয়। কোনো raw
+credential cache key বা report-এ যোগ হয় না; TTL ও same-account reuse বজায় থাকে।
+এটি synthetic collision দিয়ে পরীক্ষা করা source defect; বাস্তব account data
+মিশেছিল বা token চুরি হয়েছিল, এমন দাবি করা হচ্ছে না।
+
 Chat-shaped assistant history থেকে Responses input তৈরির সময় explicit
 `phase` হারিয়ে যাচ্ছিল। এখন `commentary`, `final_answer` ও explicit `null`
 assistant item-এ থাকে। User item-এ phase যোগ হয় না; অনুপস্থিত phase অনুমান
@@ -48,7 +56,7 @@ system ও transcript, tool schema, tool call/result, selected effort এবং 
 Responses opaque reasoning সংরক্ষণ পরীক্ষা করে। সব input synthetic।
 
 `quality-usage-delta-v3.8.52.patch` শুধু এই সংশোধনগুলো সরিয়ে আগের behavior
-ফেরায়। Mandatory CI-তে আগের behavior-এর 11টি case-এর মধ্যে নির্দিষ্ট 7টি
+ফেরায়। Mandatory CI-তে আগের behavior-এর 12টি case-এর মধ্যে নির্দিষ্ট 8টি
 assertion failure চাই; environment error, skipped test বা cancelled run
 reproduction নয়। তারপর সংশোধন পুনরায় apply করে নতুন tests ও বিদ্যমান
 self-service suite পাস করতে হবে। Production Node-এও suite চলে। Exact ফল

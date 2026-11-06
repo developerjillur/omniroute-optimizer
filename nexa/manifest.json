@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 331,
-    "patches": 196,
-    "new": 129,
+    "total": 333,
+    "patches": 197,
+    "new": 130,
     "tooling": 6,
     "upstreamCandidates": 28,
     "nexaSpecific": 99,
-    "needsReview": 204,
+    "needsReview": 206,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
   },
@@ -422,6 +422,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "open-sse/services/usage/antigravity.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__services__usage__antigravityWeeklyQuota.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/services/usage/antigravityWeeklyQuota.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -1663,6 +1671,14 @@
       "layer": "new",
       "class": "nexa-specific",
       "target": "open-sse/services/nativeClaudeThread.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/open-sse/services/usage/antigravityCacheIdentity.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "open-sse/services/usage/antigravityCacheIdentity.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },

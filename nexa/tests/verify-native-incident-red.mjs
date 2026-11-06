@@ -15,12 +15,13 @@ const expected = {
     ],
   },
   "quality-usage": {
-    tests: 11,
+    tests: 12,
     failures: [
       "self-service counts Responses cached input and reasoning once and keeps the breakdown",
       "self-service counts native Claude cache reads and writes once and keeps the breakdown",
       "monthly self-tracked provider quotas count inclusive tokens once within their connection and month",
       "Antigravity local quota fallback counts normalized reasoning once within its account model and window",
+      "Antigravity quota caches isolate credentials sharing a prefix and preserve same-account reuse",
       "Responses translation retains an explicit assistant phase commentary",
       "Responses translation retains an explicit assistant phase final_answer",
       "Responses translation retains an explicit assistant phase null",

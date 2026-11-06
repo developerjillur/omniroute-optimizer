@@ -58,7 +58,15 @@ diff --git a/open-sse/translator/request/openai-responses/toResponses.ts b/open-
 diff --git a/open-sse/services/usage/antigravity.ts b/open-sse/services/usage/antigravity.ts
 --- a/open-sse/services/usage/antigravity.ts
 +++ b/open-sse/services/usage/antigravity.ts
-@@ -138,7 +138,7 @@
+@@ -49,6 +49,7 @@
+   type AntigravityQuotaGroup,
+ } from "./antigravityWeeklyQuota.ts";
+ import { getAntigravityQuotaFamily } from "../antigravityQuotaFamily.ts";
++import { getAntigravityCacheIdentity } from "./antigravityCacheIdentity.ts";
+ 
+ type JsonRecord = Record<string, unknown>;
+ type SubscriptionCacheEntry = {
+@@ -138,7 +139,7 @@
      const row = db
        .prepare(
          `SELECT COALESCE(SUM(
@@ -67,3 +75,42 @@ diff --git a/open-sse/services/usage/antigravity.ts b/open-sse/services/usage/an
           ), 0) AS tokens
           FROM usage_history
           WHERE provider = ?
+@@ -186,7 +187,7 @@
+   projectId: string | null | undefined,
+   clientProfile: AntigravityClientProfile
+ ): string {
+-  return `${accessToken.substring(0, 16)}:${projectId || "default"}:${clientProfile}`;
++  return getAntigravityCacheIdentity(accessToken, projectId, clientProfile);
+ }
+ 
+ async function fetchAntigravityAvailableModelsCached(
+@@ -793,7 +794,7 @@
+   options: AntigravityUsageOptions = {}
+ ): Promise<unknown> {
+   const profile = getAntigravityClientProfile({ providerSpecificData });
+-  const cacheKey = `${accessToken.substring(0, 16)}:${profile}`;
++  const cacheKey = getAntigravityCacheIdentity(accessToken, null, profile);
+ 
+   if (options.forceRefresh) {
+     _antigravitySubCache.delete(cacheKey);
+
+diff --git a/open-sse/services/usage/antigravityWeeklyQuota.ts b/open-sse/services/usage/antigravityWeeklyQuota.ts
+--- a/open-sse/services/usage/antigravityWeeklyQuota.ts
++++ b/open-sse/services/usage/antigravityWeeklyQuota.ts
+@@ -10,6 +10,7 @@
+ import { toRecord, toNumber } from "./scalars.ts";
+ import { type UsageQuota, parseResetTime } from "./quota.ts";
+ import { getAntigravityContentHeaders } from "../antigravityHeaders.ts";
++import { getAntigravityCacheIdentity } from "./antigravityCacheIdentity.ts";
+ import type { AntigravityClientProfile } from "../antigravityClientProfile.ts";
+ 
+ type JsonRecord = Record<string, unknown>;
+@@ -57,7 +58,7 @@
+   projectId: string | null | undefined,
+   clientProfile: AntigravityClientProfile
+ ): string {
+-  return `${accessToken.substring(0, 16)}:${projectId || "default"}:${clientProfile}`;
++  return getAntigravityCacheIdentity(accessToken, projectId, clientProfile);
+ }
+ 
+ export async function fetchAntigravityUserQuotaSummaryCached(

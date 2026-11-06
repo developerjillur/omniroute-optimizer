@@ -8,11 +8,12 @@
     "Use inclusive input plus output in API-key self-service totals",
     "Use inclusive input plus output in self-tracked monthly provider quotas",
     "Retain explicit valid assistant phase through Responses request translation",
-    "Count normalized Antigravity reasoning once in local quota fallback"
+    "Count normalized Antigravity reasoning once in local quota fallback",
+    "Scope Antigravity quota, summary and subscription caches to full credential project and profile identity"
   ],
   "requiredSyntheticValidation": {
-    "baselineTests": 11,
-    "baselineExpectedAssertionFailures": 7,
+    "baselineTests": 12,
+    "baselineExpectedAssertionFailures": 8,
     "baselineUnexpectedErrorsAllowed": false,
     "baselineSkippedOrCancelledAllowed": false,
     "greenSuites": [
@@ -150,6 +151,15 @@
     "authoritativeProviderQuotaChanged": false,
     "historicalRowsRewritten": false,
     "newGenerationCalls": 0,
+    "validation": "PENDING_EXACT_SOURCE_CI"
+  },
+  "updatedAtUtc": "2026-11-06T12:04:58.905807+00:00",
+  "antigravityCacheIsolation": {
+    "before": "First 16 credential characters could collide across accounts",
+    "after": "SHA256 of the complete credential project and client-profile tuple",
+    "sameAccountCacheReusePreserved": true,
+    "rawCredentialStoredInKey": false,
+    "historicalCrossAccountExposureProved": false,
     "validation": "PENDING_EXACT_SOURCE_CI"
   }
 }

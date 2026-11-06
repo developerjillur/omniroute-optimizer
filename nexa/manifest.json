@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 322,
-    "patches": 190,
-    "new": 126,
+    "total": 327,
+    "patches": 193,
+    "new": 128,
     "tooling": 6,
     "upstreamCandidates": 28,
     "nexaSpecific": 99,
-    "needsReview": 195,
+    "needsReview": 200,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
   },
@@ -438,6 +438,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "open-sse/translator/request/openai-responses/helpers.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__translator__request__openai-responses__toResponses.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/translator/request/openai-responses/toResponses.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -957,6 +965,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/src__lib__usage__apiKeySelfService.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/lib/usage/apiKeySelfService.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/src__lib__usage__cacheHealth.ts.patch",
       "layer": "patch",
       "class": "nexa-specific",
@@ -1239,6 +1255,14 @@
       "layer": "patch",
       "class": "nexa-specific",
       "target": "tests/unit/agy-family-not-connection-cooldown.test.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/tests__unit__api-key-self-service.test.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "tests/unit/api-key-self-service.test.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -2533,6 +2557,14 @@
       "upstreamPR": null
     },
     {
+      "file": "new/tests/unit/routed-gpt-quality-contract.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/routed-gpt-quality-contract.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
       "file": "new/tests/unit/security/audit-remediation-guards.test.ts",
       "layer": "new",
       "class": "needs-review",
@@ -2585,6 +2617,14 @@
       "layer": "new",
       "class": "nexa-specific",
       "target": "tests/unit/ui/native-cache-panel.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/usage-inclusive-token-totals.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/usage-inclusive-token-totals.test.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },

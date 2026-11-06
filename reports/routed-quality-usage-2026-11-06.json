@@ -1,0 +1,31 @@
+{
+  "recordedAtUtc": "2026-11-06T03:08:08.764258+00:00",
+  "repository": "developerjillur/omniroute-optimizer",
+  "upstreamVersion": "3.8.52",
+  "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
+  "previousValidatedSource": "68dba2d734d169b57631464aa360a99c78a8cddb",
+  "sourceChanges": [
+    "Use inclusive input plus output in API-key self-service totals",
+    "Use inclusive input plus output in self-tracked monthly provider quotas",
+    "Retain explicit valid assistant phase through Responses request translation"
+  ],
+  "requiredSyntheticValidation": {
+    "baselineTests": 10,
+    "baselineExpectedAssertionFailures": 6,
+    "baselineUnexpectedErrorsAllowed": false,
+    "baselineSkippedOrCancelledAllowed": false,
+    "greenSuites": [
+      "usage-inclusive-token-totals.test.ts",
+      "routed-gpt-quality-contract.test.ts",
+      "api-key-self-service.test.ts"
+    ],
+    "productionNodeValidationRequired": true,
+    "exactResult": "Commit-specific native-validation.json and TAP artifacts"
+  },
+  "privateRuntimeDataPublished": false,
+  "providerGenerationCalls": 0,
+  "modelOutputQualityBenchmark": false,
+  "fullMalwareClearance": false,
+  "fullBuildInThisChange": false,
+  "liveDeploymentInThisChange": false
+}

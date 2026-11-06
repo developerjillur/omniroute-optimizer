@@ -1,5 +1,4 @@
 diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
-index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..d0196bcb31aacb80f5ae3e8d309ba51d683876dc 100644
 --- a/src/lib/usage/usageStats.ts
 +++ b/src/lib/usage/usageStats.ts
 @@ -8,6 +8,7 @@
@@ -81,7 +80,32 @@ index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..d0196bcb31aacb80f5ae3e8d309ba51d
    );
    // daily_usage_summary stores API-equivalent value so the dedicated costs
    // view can preserve history. This legacy stats surface keeps billed-cost
-@@ -280,25 +296,30 @@
+@@ -230,10 +246,11 @@
+ }
+ 
+ /**
+- * Sum of all token columns recorded for one provider connection in the current
++ * Inclusive input plus output recorded for one provider connection in the current
+  * UTC calendar month. Powers SELF-TRACKED provider quotas (e.g. Xiaomi MiMo
+  * Token Plan), where the upstream exposes no API-key usage endpoint — OmniRoute
+  * counts the tokens it routed and compares against the known monthly limit.
++ * Cache and reasoning columns are breakdowns, already included in input/output.
+  * Only reflects traffic that went THROUGH OmniRoute (not the provider's panel).
+  */
+ export function getMonthlyProviderTokensForConnection(
+@@ -249,10 +266,7 @@
+   const row = db
+     .prepare(
+       `SELECT COALESCE(SUM(tokens_input), 0)
+-            + COALESCE(SUM(tokens_output), 0)
+-            + COALESCE(SUM(tokens_cache_read), 0)
+-            + COALESCE(SUM(tokens_cache_creation), 0)
+-            + COALESCE(SUM(tokens_reasoning), 0) AS total
++            + COALESCE(SUM(tokens_output), 0) AS total
+        FROM usage_history
+        WHERE provider = ? AND connection_id = ? AND timestamp >= ?`
+     )
+@@ -280,25 +294,30 @@
    const db = getDbInstance();
    const rows = db
      .prepare(
@@ -114,7 +138,7 @@ index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..d0196bcb31aacb80f5ae3e8d309ba51d
      reasoning?: number;
      requests?: number;
    }>;
-@@ -313,6 +334,8 @@
+@@ -313,6 +332,8 @@
        output: Number(row.output ?? 0),
        cacheRead: Number(row.cacheRead ?? 0),
        cacheCreation: Number(row.cacheCreation ?? 0),
@@ -123,7 +147,7 @@ index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..d0196bcb31aacb80f5ae3e8d309ba51d
        reasoning: Number(row.reasoning ?? 0),
      };
      costUsd += Number(row.storedCost ?? 0);
-@@ -320,6 +343,7 @@
+@@ -320,6 +341,7 @@
        provider,
        model,
        flatRateAsZero: true,
@@ -131,7 +155,7 @@ index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..d0196bcb31aacb80f5ae3e8d309ba51d
      });
    }
  
-@@ -413,9 +437,9 @@
+@@ -413,9 +435,9 @@
      .prepare(
        `
          WITH usage_source AS (${sourceSql})
@@ -143,7 +167,7 @@ index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..d0196bcb31aacb80f5ae3e8d309ba51d
        `
      )
      .all(...sourceParams) as unknown[];
-@@ -469,10 +493,10 @@
+@@ -469,10 +491,10 @@
      .prepare(
        `
          WITH usage_source AS (${sourceSql})
@@ -156,7 +180,7 @@ index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..d0196bcb31aacb80f5ae3e8d309ba51d
        `
      )
      .all(...sourceParams) as unknown[];
-@@ -522,11 +546,11 @@
+@@ -522,11 +544,11 @@
      .prepare(
        `
          WITH usage_source AS (${sourceSql})
@@ -170,7 +194,7 @@ index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..d0196bcb31aacb80f5ae3e8d309ba51d
        `
      )
      .all(...sourceParams) as unknown[];
-@@ -580,11 +604,14 @@
+@@ -580,11 +602,14 @@
            provider,
            model,
            COALESCE(service_tier, 'standard') as service_tier,
@@ -185,7 +209,7 @@ index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..d0196bcb31aacb80f5ae3e8d309ba51d
            COALESCE(SUM(tokens_reasoning), 0) as tokens_reasoning,
            COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_input ELSE 0 END), 0) as cost_tokens_input,
            COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_output ELSE 0 END), 0) as cost_tokens_output,
-@@ -594,7 +621,7 @@
+@@ -594,7 +619,7 @@
            COALESCE(SUM(provider_cost_usd), 0.0) as stored_cost
          FROM usage_history
          WHERE timestamp >= ? AND timestamp <= ?

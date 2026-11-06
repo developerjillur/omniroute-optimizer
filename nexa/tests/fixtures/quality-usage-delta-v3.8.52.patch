@@ -1,0 +1,56 @@
+diff --git a/src/lib/usage/apiKeySelfService.ts b/src/lib/usage/apiKeySelfService.ts
+--- a/src/lib/usage/apiKeySelfService.ts
++++ b/src/lib/usage/apiKeySelfService.ts
+@@ -172,8 +172,8 @@
+     cacheReadTokens,
+     cacheCreationTokens,
+     reasoningTokens,
+-    totalTokens:
+-      inputTokens + outputTokens + cacheReadTokens + cacheCreationTokens + reasoningTokens,
++    // Stored input/output already include cache and reasoning subcategories.
++    totalTokens: inputTokens + outputTokens,
+   };
+ }
+ 
+diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
+--- a/src/lib/usage/usageStats.ts
++++ b/src/lib/usage/usageStats.ts
+@@ -246,10 +246,11 @@
+ }
+ 
+ /**
+- * Sum of all token columns recorded for one provider connection in the current
++ * Inclusive input plus output recorded for one provider connection in the current
+  * UTC calendar month. Powers SELF-TRACKED provider quotas (e.g. Xiaomi MiMo
+  * Token Plan), where the upstream exposes no API-key usage endpoint — OmniRoute
+  * counts the tokens it routed and compares against the known monthly limit.
++ * Cache and reasoning columns are breakdowns, already included in input/output.
+  * Only reflects traffic that went THROUGH OmniRoute (not the provider's panel).
+  */
+ export function getMonthlyProviderTokensForConnection(
+@@ -265,10 +266,7 @@
+   const row = db
+     .prepare(
+       `SELECT COALESCE(SUM(tokens_input), 0)
+-            + COALESCE(SUM(tokens_output), 0)
+-            + COALESCE(SUM(tokens_cache_read), 0)
+-            + COALESCE(SUM(tokens_cache_creation), 0)
+-            + COALESCE(SUM(tokens_reasoning), 0) AS total
++            + COALESCE(SUM(tokens_output), 0) AS total
+        FROM usage_history
+        WHERE provider = ? AND connection_id = ? AND timestamp >= ?`
+     )
+diff --git a/open-sse/translator/request/openai-responses/toResponses.ts b/open-sse/translator/request/openai-responses/toResponses.ts
+--- a/open-sse/translator/request/openai-responses/toResponses.ts
++++ b/open-sse/translator/request/openai-responses/toResponses.ts
+@@ -313,6 +313,10 @@
+         input.push({
+           type: "message",
+           role: "assistant",
++          // A replayed progress update must not become a completed final answer.
++          ...(msg.phase === "commentary" || msg.phase === "final_answer" || msg.phase === null
++            ? { phase: msg.phase }
++            : {}),
+           content: outputContent,
+           status: "completed",
+         });

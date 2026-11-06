@@ -172,6 +172,10 @@ frontend rebuild বা isolated install পুনরাবৃত্তি হ�
 
 এই correction প্রাথমিক full-build source CI-এর পরে হয়েছে। তার local RED/green
 এবং live acceptance পৃথক evidence; নতুন repository CI-তে test দুটিও অন্তর্ভুক্ত।
+পরবর্তী `68dba2d734d169b57631464aa360a99c78a8cddb`-এর
+[পূর্ণ source CI](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42149613611)
+পাস করেছে: full ratchet `6510 ≤ 6529`, lint, docs ও production Node gates-সহ।
+এর পরে যোগ করা quality/usage source-এর ফল পৃথক commit-এর checks-এ দেখতে হবে।
 
 ### বাকি সীমা
 

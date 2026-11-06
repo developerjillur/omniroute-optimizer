@@ -100,6 +100,11 @@ const receipt = {
   productionRuntime: process.version,
   baseline: tap("native-red.tap", true),
   translatedCacheCostBaseline: tap("cache-cost-red.tap", true),
+  routedQualityAndUsage: {
+    baseline: tap("quality-usage-red.tap", true),
+    green: tap("quality-usage-green.tap"),
+    modelQualityBenchmark: false,
+  },
   resilienceSettings: {
     baseline: tap("resilience-budget-red.tap", true),
     green: tap("resilience-budget-green.tap"),

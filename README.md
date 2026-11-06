@@ -8,6 +8,12 @@ Local gateway এখন **v3.8.52 / `d6d071ef0`**। Full production build, isol
 
 Runtime source `9f3317269994273d95cab3efea4bda5bac6a86e3`; application integration `d6d071ef0b79ff00fba6c0ca7f7a54ce948bf0bc`। পরের documentation commit packaged runtime identity বদলায় না। [Release note](nexa/docs/RELEASE-3.8.52-2026-11-06.md) ও [public release receipt](reports/native-release-2026-11-06.json)-এ exact artifact, validation, preservation ও limits আছে। নতুন package দিয়ে macOS reboot এবং পূর্ণ দশ দিনের audit এখনও অসম্পূর্ণ; native hosted-feature parity দাবি করা হচ্ছে না।
 
+## Routed quality ও usage — ২০২৬-১১-০৬
+
+Self-service ও self-tracked provider total-এ inclusive cache/reasoning দ্বিতীয়বার যোগ হওয়ার সংশোধন এবং Responses request-এ সরবরাহ করা assistant phase সংরক্ষণের পরিবর্তন Nexa overlay-এ আছে। [Source note](nexa/docs/ROUTED-QUALITY-USAGE-2026-11-06.md) ও [validation contract](reports/routed-quality-usage-2026-11-06.json)-এ synthetic RED/green, transcript/tool fidelity এবং সীমা দেওয়া আছে। Model output quality, subscription allowance এবং gateway token display পৃথকভাবে যাচাই করতে হবে; এই source change নতুন live deployment বা Claude–GPT parity-এর দাবি নয়। ব্যক্তিগত session/log data এখানে প্রকাশিত হয় না।
+
+Bridge recovery source `68dba2d734d169b57631464aa360a99c78a8cddb`-এর [পূর্ণ source CI](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42149613611) পাস করেছে; full TypeScript ratchet `6510 ≤ 6529`, lint, docs ও দুই Node runtime-এর gate-সহ। পরবর্তী quality/usage source-এর জন্য তার নিজস্ব commit-specific checks প্রয়োজন।
+
 ## Canonical management — ২০২৬-১০-২৮
 
 OmniRoute-এর Nexa fixes, regression tests, validation ও release evidence এখন এই repository থেকে পরিচালিত হবে। `nexa/`-ই custom source; pristine application base আলাদা isolated fixture-এ apply করে পরীক্ষা করা হয়। Live database, credentials, request bodies ও ব্যক্তিগত কথোপকথন এই repository-তে রাখা হয় না।
@@ -42,9 +48,9 @@ Historical documents-এর পুরোনো status-এর পরে পাও
 | Reference overlay commit         | `72230a52a548b9fdc8dda0495c893f5193e5d64d` |
 | Pristine upstream base           | `ad6f33f66bda34eba98645d3bfdabbde294bc843` |
 | Upstream version                 | `3.8.52`                                   |
-| Managed overlay files            | 446                                        |
+| Managed overlay files            | 453                                        |
 
-বর্তমান `nexa/`-তে reference overlay-এর সঙ্গে নতুন reliability fixes আছে; তাই সব file reference commit-এর হুবহু copy—এমন দাবি করা হচ্ছে না। প্রতিটি managed file-এর byte count, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এ 322টি entry: 190টি active patch, 126টি নতুন application/test file ও 6টি tooling entry। ৬টি retired patch মূল path-এ সংরক্ষিত। অতিরিক্ত deployment, overlay tests ও documentation-ও inventory-তে রয়েছে।
+বর্তমান `nexa/`-তে reference overlay-এর সঙ্গে নতুন reliability fixes আছে; তাই সব file reference commit-এর হুবহু copy—এমন দাবি করা হচ্ছে না। প্রতিটি managed file-এর byte count, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এ 327টি entry: 193টি active patch, 128টি নতুন application/test file ও 6টি tooling entry। ৬টি retired patch মূল path-এ সংরক্ষিত। অতিরিক্ত deployment, overlay tests ও documentation-ও inventory-তে রয়েছে।
 
 ## কী রয়েছে
 

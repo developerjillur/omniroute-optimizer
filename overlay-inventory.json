@@ -7,7 +7,7 @@
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
   "trackedNexaFiles": 461,
-  "totalNexaBytes": 2076601,
+  "totalNexaBytes": 2078073,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -468,9 +468,9 @@
     {
       "path": "nexa/docs/DEPENDENCY-SECURITY-2026-11-06.md",
       "mode": "100644",
-      "gitBlobSha": "6fc786a2c8bfe3a380b166360be66e3a3fb76ddb",
-      "bytes": 6336,
-      "sha256": "3de11c2bf1f87256d3fe6ccbe0cb2eeb391768ddb09facf4c7158ad8f909d1cc"
+      "gitBlobSha": "c07e2d7414e75762f806750f134195180ce6d302",
+      "bytes": 6940,
+      "sha256": "919fda13c2bb1c3285678d1983cc4f50bb8697ad093f6bfea36d98b71a14cea7"
     },
     {
       "path": "nexa/docs/GOOGLE-VERIFICATION-ROUTING-2026-10-06.md",
@@ -559,9 +559,9 @@
     {
       "path": "nexa/docs/ROUTED-QUALITY-USAGE-2026-11-06.md",
       "mode": "100644",
-      "gitBlobSha": "8f4d0a34f413c4ef85170a3079ee7968560c6b8c",
-      "bytes": 8140,
-      "sha256": "d6ced7523f7dac714e78639c661025e8c5bcb17940f912f6bddc0a639c23cfd7"
+      "gitBlobSha": "1a30599c114aad19d9d337ec4f480373b91a12c3",
+      "bytes": 9008,
+      "sha256": "efa05103dccae5541f4bf6fa2ff0e9bd1073beae54a33e57a73ae4e6f0b7fe30"
     },
     {
       "path": "nexa/docs/TYPECHECK-BASELINE-2026-10-02.md",

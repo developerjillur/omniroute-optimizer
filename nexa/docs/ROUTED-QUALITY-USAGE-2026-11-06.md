@@ -58,6 +58,16 @@ attribution-এর সংশোধন; model output quality benchmark নয়।
 Source validation, package validation এবং live acceptance পৃথক gate। এই
 পরিবর্তনের সঙ্গে model output benchmark বা provider generation চালানো হয় না।
 
+`a40c4b083d664444199cfea52068af8c501e4517`-এর
+[পূর্ণ source CI](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42163225907)
+পাস করেছে। Attribution baseline 8টির মধ্যে নির্দিষ্ট 6টি assertion failure
+ও 2টি pass; corrected logging family 26/26, quality/usage family 21/21,
+production Node native family 245/245 এবং upgrade compatibility 1293/1293।
+Full TypeScript 6510 ≤ 6529; core types, lint, docs ও installed production
+dependency audit পাস। এটি recorded source commit-এর ফল; পরের documentation
+commit বা live runtime-কে ওই source commit বলা হচ্ছে না। পূর্ণ private log
+audit এবং model-output comparison অসম্পূর্ণ; application build বন্ধ আছে।
+
 ## মান ও quota বিশ্লেষণের সীমা
 
 একই native client-এর system, tool history ও effort সংরক্ষিত থাকলেও target

@@ -67,6 +67,14 @@ pristine dependency দিয়ে upstream TypeScript record নেয়, তার
 production audit-এ zero finding বাধ্যতামূলক। ফলে আগের installed dependency
 থেকে পাওয়া PASS নতুন version-এর validation হিসেবে ব্যবহৃত হবে না।
 
+এই সংশোধনসহ `a40c4b083d664444199cfea52068af8c501e4517`-এর
+[পূর্ণ source CI](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42163225907)
+পাস করেছে। Installed source dependency checks ও production audit পাস;
+production Node native family 245/245, compatibility 1293/1293, lint/docs ও
+core types পাস, full TypeScript 6510 ≤ 6529। Package build, installed live
+dependency validation ও development graph-এর অবশিষ্ট findings এই ফল দিয়ে
+cleared বলা হচ্ছে না।
+
 - [DOMPurify advisory](https://github.com/cure53/DOMPurify/security/advisories/GHSA-cg2g-xh64-v4q7)
 - [Body-parser advisory](https://github.com/expressjs/body-parser/security/advisories/GHSA-27r3-jxmh-p828)
 - [Undici TLS advisory](https://github.com/nodejs/undici/security/advisories/GHSA-2m5v-pch6-74hx)

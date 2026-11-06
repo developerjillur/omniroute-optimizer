@@ -1,5 +1,5 @@
 {
-  "status": "SOURCE_CANDIDATE_REQUIRES_FULL_VALIDATION",
+  "status": "SOURCE_FIXES_VALIDATED_PACKAGE_BUILD_HELD",
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
   "preparationSourceCommit": "f07e1c28dad67d26324f73403f10da455e6b6ee6",
@@ -175,13 +175,96 @@
       "after": "2.3.0"
     }
   ],
-  "sourceValidation": "PENDING_FOR_PACKAGE_PATCH_COMMIT",
+  "sourceValidation": {
+    "status": "PASS",
+    "validatedSourceCommit": "a40c4b083d664444199cfea52068af8c501e4517",
+    "runUrl": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/42163225907",
+    "nativeAttribution": {
+      "baseline": {
+        "file": "native-attribution-red.tap",
+        "sha256": "6a51022ce9a44540fc6037657db2f12b98fab7bacea204561fd452b26488522b",
+        "counts": {
+          "tests": 8,
+          "pass": 2,
+          "fail": 6,
+          "skipped": 0,
+          "cancelled": 0
+        }
+      },
+      "green": {
+        "file": "native-attribution-green.tap",
+        "sha256": "0d35ec42a1fbec6b9874e65dd7d358ae560b83d128d22eaa998cab8649c5faed",
+        "counts": {
+          "tests": 26,
+          "pass": 26,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        }
+      },
+      "historicalNullTagsBackfilled": false
+    },
+    "routedQualityAndUsage": {
+      "baseline": {
+        "file": "quality-usage-red.tap",
+        "sha256": "95ba24f5875ff9b70948e1ffccc95fb7b792e64b22ef043969b28ad428aac6e7",
+        "counts": {
+          "tests": 10,
+          "pass": 4,
+          "fail": 6,
+          "skipped": 0,
+          "cancelled": 0
+        }
+      },
+      "green": {
+        "file": "quality-usage-green.tap",
+        "sha256": "a284a4065bc100983121ee57a479d685f37a198d368ecc05b3f1c46ee70365b4",
+        "counts": {
+          "tests": 21,
+          "pass": 21,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        }
+      },
+      "modelQualityBenchmark": false
+    },
+    "productionNative": {
+      "tests": 245,
+      "pass": 245,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "upgradeCompatibility": {
+      "tests": 1293,
+      "pass": 1293,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "fullTypecheck": {
+      "completed": true,
+      "diagnostics": 6510,
+      "baseline": 6529
+    },
+    "productionDependencyAudit": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "applicationBuildExecuted": false,
+    "liveDeploymentExecuted": false
+  },
   "fullBuildExecuted": false,
   "liveDeploymentExecuted": false,
   "providerGenerationCalls": 0,
   "privateRuntimeDataUsed": false,
   "limits": [
-    "Lock preparation is not installed dependency compatibility validation",
+    "Source CI verified installed source dependencies; later package and live dependency validation remain required",
     "Development graph findings remain open and are not suppressed",
     "Published vulnerabilities do not establish exploitation or subscription token theft",
     "Owner has held builds until ongoing work finishes"
@@ -213,5 +296,6 @@
       "before": "1.4.0",
       "after": "1.4.3"
     }
-  ]
+  ],
+  "developmentFindingsRemainOpen": true
 }

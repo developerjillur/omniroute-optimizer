@@ -134,6 +134,8 @@ save("lock-preparation.stderr.txt", install.stderr);
 assert.equal(install.status, 0, "Lock preparation failed");
 const finalPackage = fs.readFileSync(path.join(application, "package.json"));
 const finalLock = fs.readFileSync(path.join(application, "package-lock.json"));
+save("candidate-package.json", finalPackage);
+save("candidate-package-lock.json", finalLock);
 assert.deepEqual(JSON.parse(finalPackage), candidate);
 const lock = JSON.parse(finalLock);
 assert.equal(lock.lockfileVersion, 3);
@@ -150,8 +152,6 @@ for (const [name, allowed] of Object.entries(config.allowedGraphVersions || {}))
     assert.ok(allowed.includes(entry.version), `Unexpected ${location}@${entry.version}`);
   }
 }
-save("candidate-package.json", finalPackage);
-save("candidate-package-lock.json", finalLock);
 const candidateAudit = audit(application, "candidate-production-audit", true);
 const developmentAudit = audit(application, "candidate-all-audit", false);
 const receipt = {

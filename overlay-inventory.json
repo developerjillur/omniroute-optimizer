@@ -7,7 +7,7 @@
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
   "trackedNexaFiles": 456,
-  "totalNexaBytes": 2019047,
+  "totalNexaBytes": 2019221,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -2946,9 +2946,9 @@
     {
       "path": "nexa/security/dependency-targets-2026-11-06.json",
       "mode": "100644",
-      "gitBlobSha": "ac80fdc10ab6a5d4999f78177ad73408aa6e0d1f",
-      "bytes": 2568,
-      "sha256": "6be2d3430703db446503434be705b25e4bcfbc5a13e3f36fd1372ace770c78a6"
+      "gitBlobSha": "0dd6ee31d0519f3e380c9d44b358cd49ac0e4252",
+      "bytes": 2742,
+      "sha256": "609e2684b33051ccbd8e5f1c4a4f38e2cbdb60995aa269eb00678dbd379c0761"
     },
     {
       "path": "nexa/setup.mjs",
@@ -3093,9 +3093,9 @@
     {
       "path": "nexa/tests/prepare-dependency-security.mjs",
       "mode": "100644",
-      "gitBlobSha": "dc584d106c6bbe7cd2900b6233f8ae91cdb2e529",
+      "gitBlobSha": "c8a62fae9b8d1216a276f2808e2d288786d598de",
       "bytes": 7662,
-      "sha256": "fcf7d52faed0e8c736a70f28157cca6e7a88804ede463ab518e6dab1f8d315fb"
+      "sha256": "ca9750a151c00e2e6edf99de602104c0bd9dc6328894278f2231f94244498fd9"
     },
     {
       "path": "nexa/tests/resilience-budget-red.test.mjs",

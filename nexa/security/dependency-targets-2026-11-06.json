@@ -104,6 +104,16 @@
       "path": ["vite"],
       "before": "^8.0.16",
       "after": "8.3.6"
+    },
+    {
+      "path": ["undici@6"],
+      "before": null,
+      "after": "6.29.1"
+    },
+    {
+      "path": ["undici@7"],
+      "before": null,
+      "after": "7.30.1"
     }
   ],
   "allowedGraphVersions": {

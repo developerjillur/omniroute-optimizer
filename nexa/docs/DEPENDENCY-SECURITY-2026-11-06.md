@@ -16,8 +16,8 @@ Maintainer-এর [advisory](https://github.com/vercel/next.js/security/advisori
 `dependency-security.yml` pinned pristine application ও Nexa overlay-এর পৃথক
 temporary copy-তে baseline এবং candidate dependency graph যাচাই করে। এটি
 শুধু `package-lock-only` চালায়; lifecycle scripts, package build, provider
-generation ও deployment চালায় না। Direct declarations-এর নির্দিষ্ট দুটো
-version ছাড়া helper অন্য field বদলাতে পারবে না। Baseline ও candidate package,
+generation ও deployment চালায় না। ঘোষিত direct versions ও নির্দিষ্ট scoped
+overrides ছাড়া helper অন্য field বদলাতে পারবে না। Baseline ও candidate package,
 lock, audit JSON এবং exact hashes artifact-এ সংরক্ষিত থাকে।
 
 Candidate lock পাওয়া source validation পাসের সমান নয়। Audit-এর অন্য
@@ -29,3 +29,24 @@ selected effort, tools বা model quality কমানো হবে না।
 Local installed package ও core configuration/data এই source preparation-এ
 বদলায় না। সংশোধিত source build এবং live promotion-এর অনুমোদন পৃথক; চলমান
 কাজ শেষ না হওয়া পর্যন্ত build বন্ধ থাকবে।
+
+## Framework-এর বাইরের dependency graph
+
+প্রথম baseline production audit-এ 13টি dependency entry flagged হয়; শুধু
+Next.js সংশোধনের candidate-এ 12টি থাকে। এগুলো আলাদা exploit বা compromise-এর
+গণনা নয়; যেমন DOMPurify-এর finding-এর কারণে parent Monaco entry-ও flagged হয়।
+
+পরের candidate-এ DOMPurify 3.4.17, Undici 8.12.4 ও Zod 4.6.6 pin করা হচ্ছে।
+বিদ্যমান Monaco version বজায় রেখে তার sanitizer-এর override সংশোধন হবে।
+Body parser, URI parser, redirects, Hono adapter, IP parser ও query parser-এর
+patched versions নির্দিষ্ট করা আছে। Scoped Undici 6/7 dependency তাদের নিজস্ব
+major version-এ থাকবে। Development Vite-ও 8.3.6-এ pin হবে।
+
+Helper প্রত্যেক সংশোধিত dependency-এর সম্পূর্ণ lock graph version পরীক্ষা
+করে। অন্য advisory থাকলে তা report-এ থাকবে; audit warning সরিয়ে বা package
+downgrade করে zero দেখানো হবে না। Dependency সংস্করণ বদলের পরে পূর্ণ source
+validation এবং পরবর্তী অনুমোদিত build/package validation প্রয়োজন।
+
+- [DOMPurify advisory](https://github.com/cure53/DOMPurify/security/advisories/GHSA-cg2g-xh64-v4q7)
+- [Body-parser advisory](https://github.com/expressjs/body-parser/security/advisories/GHSA-27r3-jxmh-p828)
+- [Undici TLS advisory](https://github.com/nodejs/undici/security/advisories/GHSA-2m5v-pch6-74hx)

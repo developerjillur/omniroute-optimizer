@@ -32,6 +32,22 @@ const npmEnvironment = {
   npm_config_fund: "false",
 };
 
+function overrideValue(object, keys) {
+  assert.ok(keys.length > 0 && keys.every((key) => typeof key === "string"));
+  assert.ok(keys.every((key) => !["__proto__", "constructor", "prototype"].includes(key)));
+  return keys.reduce((value, key) => value?.[key], object);
+}
+
+function setOverride(object, keys, value) {
+  let parent = object;
+  for (const key of keys.slice(0, -1)) {
+    assert.ok(parent[key] && typeof parent[key] === "object");
+    parent = parent[key];
+  }
+  if (value === undefined) delete parent[keys.at(-1)];
+  else parent[keys.at(-1)] = value;
+}
+
 function command(program, args, cwd) {
   const result = spawnSync(program, args, {
     cwd,
@@ -73,6 +89,7 @@ assert.equal(candidate.version, config.applicationVersion);
 assert.equal(baselineJson.version, config.applicationVersion);
 const original = structuredClone(candidate);
 for (const target of config.targets) {
+  assert.ok(["dependencies", "devDependencies"].includes(target.section));
   assert.equal(baselineJson[target.section]?.[target.name], target.before);
   assert.ok(
     [target.before, target.after].includes(candidate[target.section]?.[target.name]),
@@ -80,9 +97,24 @@ for (const target of config.targets) {
   );
   candidate[target.section][target.name] = target.after;
 }
+for (const change of config.overrides || []) {
+  const before = overrideValue(candidate.overrides, change.path);
+  assert.ok(
+    before === (change.before ?? undefined) || before === change.after,
+    `Unexpected override declaration: ${change.path.join("/")}`
+  );
+  setOverride(candidate.overrides, change.path, change.after);
+}
 const candidateWithoutTargets = structuredClone(candidate);
 for (const target of config.targets) {
   candidateWithoutTargets[target.section][target.name] = original[target.section][target.name];
+}
+for (const change of config.overrides || []) {
+  setOverride(
+    candidateWithoutTargets.overrides,
+    change.path,
+    overrideValue(original.overrides, change.path)
+  );
 }
 assert.deepEqual(candidateWithoutTargets, original, "Unrelated package declarations changed");
 save("baseline-package.json", baselinePackage);
@@ -109,6 +141,15 @@ for (const target of config.targets) {
   assert.equal(lock.packages[""][target.section]?.[target.name], target.after);
   assert.equal(lock.packages[`node_modules/${target.name}`]?.version, target.after);
 }
+for (const [name, allowed] of Object.entries(config.allowedGraphVersions || {})) {
+  const entries = Object.entries(lock.packages).filter(
+    ([location]) => location.split("node_modules/").at(-1) === name
+  );
+  assert.ok(entries.length > 0, `Missing dependency graph entry: ${name}`);
+  for (const [location, entry] of entries) {
+    assert.ok(allowed.includes(entry.version), `Unexpected ${location}@${entry.version}`);
+  }
+}
 save("candidate-package.json", finalPackage);
 save("candidate-package-lock.json", finalLock);
 const candidateAudit = audit(application, "candidate-production-audit", true);
@@ -120,6 +161,7 @@ const receipt = {
   upstreamBase: config.upstreamBase,
   runtime: process.version,
   targets: config.targets,
+  overrides: config.overrides || [],
   hashes: {
     baselinePackage: hash(baselinePackage),
     baselineLock: hash(baselineLock),
@@ -131,7 +173,8 @@ const receipt = {
   baselineAudit,
   candidateAudit,
   developmentAudit,
-  remainingAdvisoriesRequireReview: candidateAudit.vulnerabilities.total > 0,
+  remainingAdvisoriesRequireReview:
+    candidateAudit.vulnerabilities.total > 0 || developmentAudit.vulnerabilities.total > 0,
   lifecycleScriptsExecuted: false,
   packageBuildExecuted: false,
   deploymentExecuted: false,

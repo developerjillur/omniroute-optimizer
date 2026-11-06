@@ -54,6 +54,13 @@ development graph-এ এখনও 61টি flagged entry আছে: 13 high, 45
 critical 0। এগুলো cleared বলা হচ্ছে না এবং runtime intrusion-এর প্রমাণও নয়।
 Major dependency changes প্রয়োজন এমন development findings পর্যালোচনাধীন।
 
+পরবর্তী [preparation run](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42161444797)
+`f07e1c28dad67d26324f73403f10da455e6b6ee6`-এ Joi, Node-forge, Engine.IO এবং
+MCP server/core-এর সংশোধিত minor/patch versions যাচাই করেছে। পাঁচটি existing
+dependency node বদলেছে; production finding 0-ই আছে। বর্তমান candidate-এর
+development graph-এ 57টি entry অবশিষ্ট: 9 high, 45 moderate ও 3 low। এই নতুন
+lock-এর compatibility-ও পৃথক source CI-তে পাস করতে হবে।
+
 এই candidate-এর দুই package patch overlay-তে সংরক্ষিত। Mandatory CI প্রথমে
 pristine dependency দিয়ে upstream TypeScript record নেয়, তারপর applied lock
 দিয়ে আবার install করে। Installed package ও lock version মেলানো এবং নতুন

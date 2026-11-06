@@ -7,7 +7,7 @@
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
   "trackedNexaFiles": 459,
-  "totalNexaBytes": 2062920,
+  "totalNexaBytes": 2067593,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -468,9 +468,9 @@
     {
       "path": "nexa/docs/DEPENDENCY-SECURITY-2026-11-06.md",
       "mode": "100644",
-      "gitBlobSha": "ceb50e7d036fe1f4cd62be95edc8aeaeaf846bff",
-      "bytes": 5679,
-      "sha256": "fb190050a0bc5b6477adfda00a9e452a2a025487ee0c12a4ac8c5704cb8e4263"
+      "gitBlobSha": "6fc786a2c8bfe3a380b166360be66e3a3fb76ddb",
+      "bytes": 6336,
+      "sha256": "3de11c2bf1f87256d3fe6ccbe0cb2eeb391768ddb09facf4c7158ad8f909d1cc"
     },
     {
       "path": "nexa/docs/GOOGLE-VERIFICATION-ROUTING-2026-10-06.md",
@@ -1959,16 +1959,16 @@
     {
       "path": "nexa/patches/package-lock.json.patch",
       "mode": "100644",
-      "gitBlobSha": "325a009f8118cad2855b0f4acd90b255ca72b55b",
-      "bytes": 35510,
-      "sha256": "aba274bc69cb6926cf92ab91e13b0b103b6c8d9f81bfa97e7793d62293398dcc"
+      "gitBlobSha": "f6f63f4a6bb9596ae2dec3b42ac1cd96c6b97a65",
+      "bytes": 39245,
+      "sha256": "b7a7d1b362a8928e3ae2732c62af4970e0da1135b28889ee4b80b4771a7b83aa"
     },
     {
       "path": "nexa/patches/package.json.patch",
       "mode": "100644",
-      "gitBlobSha": "08dfffdaba441fe92f66df08067d18f9df3488c4",
-      "bytes": 3001,
-      "sha256": "82f26fc4a23c75e71319b0657c5b56f4f82bc4b376b51e8343c0c6fa0084ee75"
+      "gitBlobSha": "4686127156dbc1f2d142b3ce4d2a37342e61fedb",
+      "bytes": 3282,
+      "sha256": "c583337d58e3dc30d8ff2ae2a17d1d7c33629e458c3c1f8ee76a45fd8e603ba7"
     },
     {
       "path": "nexa/patches/public__openapi.yaml.patch",

@@ -2,15 +2,15 @@
   "status": "SOURCE_CANDIDATE_REQUIRES_FULL_VALIDATION",
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
-  "preparationSourceCommit": "4d4f8d87d3407ce8c700ed5f4c153f927242bfe8",
-  "preparationRun": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/42160082877",
+  "preparationSourceCommit": "f07e1c28dad67d26324f73403f10da455e6b6ee6",
+  "preparationRun": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/42161444797",
   "hashes": {
     "baselinePackage": "07dace2cacb424e10c025286bf17f8033c4a5bc677cbe70e91f856873b878dee",
     "baselineLock": "31f0fad9e440e4e8f7318db4f482dd7e617cce77ec0deefa03cbd0ff5bba6bdc",
-    "appliedBeforePackage": "07dace2cacb424e10c025286bf17f8033c4a5bc677cbe70e91f856873b878dee",
-    "appliedBeforeLock": "31f0fad9e440e4e8f7318db4f482dd7e617cce77ec0deefa03cbd0ff5bba6bdc",
-    "candidatePackage": "165d4e25812ab102b49c90c6e1b477ea1c9819d030917fc9968c400fd1a33882",
-    "candidateLock": "5b796a6391d011ea45a25f20fa7cb2328ae4a75cd2dde980cfd1ad22e8e2ab09"
+    "appliedBeforePackage": "165d4e25812ab102b49c90c6e1b477ea1c9819d030917fc9968c400fd1a33882",
+    "appliedBeforeLock": "5b796a6391d011ea45a25f20fa7cb2328ae4a75cd2dde980cfd1ad22e8e2ab09",
+    "candidatePackage": "b26b9bcd37625b17b26cd514fbd0fe06cc2ccde881e41487b50e949022a3c314",
+    "candidateLock": "9d2b2eacf62706c15194304cc0d8de37058c12537cb745a94626527ac99b3bcc"
   },
   "baselineProductionAudit": {
     "exitCode": 1,
@@ -40,9 +40,9 @@
       "info": 0,
       "low": 3,
       "moderate": 45,
-      "high": 13,
+      "high": 9,
       "critical": 0,
-      "total": 61
+      "total": 57
     }
   },
   "targets": [
@@ -153,6 +153,26 @@
       "path": ["undici@7"],
       "before": null,
       "after": "7.30.1"
+    },
+    {
+      "path": ["joi"],
+      "before": "^18.2.9",
+      "after": "18.3.1"
+    },
+    {
+      "path": ["node-forge"],
+      "before": null,
+      "after": "1.4.3"
+    },
+    {
+      "path": ["engine.io"],
+      "before": null,
+      "after": "6.6.10"
+    },
+    {
+      "path": ["@modelcontextprotocol/server"],
+      "before": null,
+      "after": "2.3.0"
     }
   ],
   "sourceValidation": "PENDING_FOR_PACKAGE_PATCH_COMMIT",
@@ -165,5 +185,33 @@
     "Development graph findings remain open and are not suppressed",
     "Published vulnerabilities do not establish exploitation or subscription token theft",
     "Owner has held builds until ongoing work finishes"
+  ],
+  "previousPreparationSourceCommit": "4d4f8d87d3407ce8c700ed5f4c153f927242bfe8",
+  "additionalDevelopmentNodeChanges": [
+    {
+      "package": "@modelcontextprotocol/server",
+      "before": "2.0.0",
+      "after": "2.3.0"
+    },
+    {
+      "package": "@modelcontextprotocol/core",
+      "before": "2.0.0",
+      "after": "2.3.0"
+    },
+    {
+      "package": "engine.io",
+      "before": "6.6.9",
+      "after": "6.6.10"
+    },
+    {
+      "package": "joi",
+      "before": "18.2.9",
+      "after": "18.3.1"
+    },
+    {
+      "package": "node-forge",
+      "before": "1.4.0",
+      "after": "1.4.3"
+    }
   ]
 }

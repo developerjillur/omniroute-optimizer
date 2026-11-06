@@ -78,3 +78,25 @@ cleared বলা হচ্ছে না।
 - [DOMPurify advisory](https://github.com/cure53/DOMPurify/security/advisories/GHSA-cg2g-xh64-v4q7)
 - [Body-parser advisory](https://github.com/expressjs/body-parser/security/advisories/GHSA-27r3-jxmh-p828)
 - [Undici TLS advisory](https://github.com/nodejs/undici/security/advisories/GHSA-2m5v-pch6-74hx)
+
+## Full build-এর পরে actual installation
+
+পরের `4fd86ab7f2d25649107c9180a283a96a1e39ecab` source-এর পূর্ণ production
+build সম্পন্ন হয়েছে; integration `e43e5f9e4`। Source audit-এ production finding
+০ থাকলেও পৃথক global installation-এর actual graph-এ ৪টি flagged entry পাওয়া
+গেছে: ১ critical, ১ moderate ও ২ low। Monaco-এর nested DOMPurify 3.4.8 এবং
+Mermaid-এর KaTeX 0.16.47 source-এর সংশোধিত graph-এর সঙ্গে মেলেনি। এটি নতুন
+candidate-এর rejection; live-এ ওই candidate বসানো হয়নি।
+
+Source-root override published dependency হিসেবে কার্যকর থাকে না। শুধু lock
+যোগ করার প্রথম প্রচেষ্টাতেও পুরোনো nested versions ফিরে এসেছে; সেই failed
+archive/install receipt সংরক্ষিত। পরের publication tooling-এ npm-এর effective
+source edges, publishable shrinkwrap discovery এবং actual installed graph
+comparison যোগ করা হচ্ছে। Source ও compiled bundle অক্ষত রেখে কেবল packaging
+metadata বদলাবে। এই প্রস্তুতিকে installed security PASS বলা হচ্ছে না; নতুন
+actual installation ও advisory audit সম্পূর্ণ না হওয়া পর্যন্ত candidate rejected।
+
+Existing development graph-এর 57টি finding এই packaging কাজ দিয়ে cleared হয় না।
+Provider-এর weekly quota exhaustion-ও dependency finding থেকে পৃথক। কোনো quota
+threshold, native mapping, context, selected effort বা compression policy বদলানো
+হয়নি।

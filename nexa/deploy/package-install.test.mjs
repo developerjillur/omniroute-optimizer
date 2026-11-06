@@ -12,6 +12,7 @@ test("managed archive install retains the pinned project's peer policy", () => {
     "/private prefix",
     "--no-fund",
     "--no-audit",
+    "--omit=dev",
     "--legacy-peer-deps",
     path.resolve("candidate.tgz"),
   ]);

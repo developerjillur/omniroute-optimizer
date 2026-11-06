@@ -7,6 +7,8 @@ import { pathToFileURL } from "node:url";
 import { smokeModel } from "./smoke-model.mjs";
 import { inspectNativeUsageSchema } from "./native-usage-schema.mjs";
 import { packageInstallArgs, packageInstallEnvironment } from "./package-install.mjs";
+import { readSmokeApiKey } from "./smoke-api-key.mjs";
+import { inspectInstalledPublication } from "./installed-publication.mjs";
 
 const [archive, destination] = process.argv.slice(2);
 if (!archive || !destination) throw Error("usage: smoke-package.mjs <archive> <new destination>");
@@ -43,6 +45,9 @@ if (!reuse) {
   );
   fs.closeSync(installLog);
 }
+const installedPublication = await inspectInstalledPublication(
+  path.join(prefix, "lib/node_modules/omniroute")
+);
 const installedServer = fs.readFileSync(
   path.join(prefix, "lib/node_modules/omniroute/src/mitm/server.cjs")
 );
@@ -102,15 +107,7 @@ try {
   if (!ready) throw Error("Isolated package did not become healthy");
   process.env.DATA_DIR = data;
   const { apiFetch } = await import(pathToFileURL(path.join(pkg, "bin/cli/api.mjs")).href);
-  const localKey = execFileSync(
-    "python3",
-    [
-      "-c",
-      "import sqlite3,sys; c=sqlite3.connect('file:'+sys.argv[1]+'?mode=ro',uri=True); row=c.execute(\"SELECT key FROM api_keys WHERE is_active=1 AND revoked_at IS NULL AND is_banned=0 ORDER BY CASE WHEN scopes LIKE '%manage%' THEN 0 ELSE 1 END LIMIT 1\").fetchone(); print(row[0] if row else '',end='')",
-      path.join(data, "storage.sqlite"),
-    ],
-    { encoding: "utf8" }
-  );
+  const localKey = await readSmokeApiKey(data, pkg);
   if (!localKey) throw Error("An existing local inference key is required for package smoke");
   for (const route of ["/api/settings", "/api/tools/agent-bridge/state", "/api/v1/models"]) {
     const response = await apiFetch(route, { baseUrl: base, apiKey: localKey, retry: false });
@@ -159,6 +156,7 @@ try {
     managementAuth: true,
     bridgeState: true,
     modelCatalog: true,
+    installedPublication,
     nativeUsageSchema: true,
     anthropicInference: true,
     inferenceModel,

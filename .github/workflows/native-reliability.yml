@@ -38,6 +38,7 @@ jobs:
           node --version > "$RUNNER_TEMP/primary-node-version.txt"
           node nexa/tests/verify-source-inventory.mjs
           node --test --test-reporter=tap --test-concurrency=1 nexa/tests/*.test.mjs nexa/deploy/tsc-ratchet.test.mjs nexa/deploy/native-ingress-availability.test.mjs | tee "$RUNNER_TEMP/tooling-node26.tap"
+          python3 nexa/deploy/seal-package.test.py 2>&1 | tee "$RUNNER_TEMP/publication-seal-tests.txt"
       - name: Prepare the pinned pristine application
         shell: bash
         run: |

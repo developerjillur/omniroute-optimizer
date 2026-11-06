@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
-  "trackedNexaFiles": 464,
-  "totalNexaBytes": 2095638,
+  "trackedNexaFiles": 472,
+  "totalNexaBytes": 2133401,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -104,9 +104,9 @@
     {
       "path": "nexa/deploy/README.md",
       "mode": "100644",
-      "gitBlobSha": "94e65c2bf3050acf6adc96f65e9b2bd78e6569a2",
-      "bytes": 12952,
-      "sha256": "2377f947826969815176bf7e704b14fad433c2a3861530f0f8a4538084c6ce9a"
+      "gitBlobSha": "287ef18bbca3381fda9405cbe9fafa49391083ab",
+      "bytes": 14771,
+      "sha256": "9b124b50a9fcdc5aaaed8a88dfaad3ce82d49bb34fef5321d092bf6b87c2935b"
     },
     {
       "path": "nexa/deploy/bootstrap-launchdaemon.sh",
@@ -153,9 +153,9 @@
     {
       "path": "nexa/deploy/build-candidate.sh",
       "mode": "100644",
-      "gitBlobSha": "addaa8f7091dfd23aa792ab85b6f4166b0d0bdcb",
-      "bytes": 2553,
-      "sha256": "f551b4f964ca11d52bd837f235962b94dda15ba6053bd03e06653c9d436fae2b"
+      "gitBlobSha": "e56285b33955d952107030063301caedda92e627",
+      "bytes": 3039,
+      "sha256": "7878c92db14e03efd5ad44d20a82e9eb21801b2cdc503c72f12091a01a33c582"
     },
     {
       "path": "nexa/deploy/build-candidate.test.mjs",
@@ -228,6 +228,20 @@
       "sha256": "dd53a8c5761ea2333a079688b646fb17c89837b84fbf320588e2449ed7636206"
     },
     {
+      "path": "nexa/deploy/installed-publication.mjs",
+      "mode": "100644",
+      "gitBlobSha": "88c47d10b1b19dbdd9b1cdc9f6de43f33238d0e9",
+      "bytes": 1689,
+      "sha256": "ba8f5ba3a8118a87352a8286e241409be7a88457c1605adb6fcc08629210681f"
+    },
+    {
+      "path": "nexa/deploy/installed-publication.test.mjs",
+      "mode": "100644",
+      "gitBlobSha": "298057f88492d4dd9e66084e78b0bdf8843ece33",
+      "bytes": 1698,
+      "sha256": "1d6d3580fcd532491f3b580c843030041f4b04ccaa0e19328c863023be4f0d15"
+    },
+    {
       "path": "nexa/deploy/native-ingress-availability.test.mjs",
       "mode": "100644",
       "gitBlobSha": "eb9a652200869910fa8e405cce19567e19d38a54",
@@ -279,16 +293,16 @@
     {
       "path": "nexa/deploy/package-install.mjs",
       "mode": "100644",
-      "gitBlobSha": "8f01ab60aa8e6c44bf76001ed4cde9df966ba689",
-      "bytes": 672,
-      "sha256": "7b926def59fde993106f3ff828157a66b72492d1cd9fe5fe774eaa274504febf"
+      "gitBlobSha": "08f2b51fede27d47f59b084f8f2440d786f65ca4",
+      "bytes": 690,
+      "sha256": "15cca9377dc30ae098eb10c1c8aa9cfda77e9defc981aa7f614d15462fdac72e"
     },
     {
       "path": "nexa/deploy/package-install.test.mjs",
       "mode": "100644",
-      "gitBlobSha": "8272b4bfa277c5f8e2825d146878ba915dd23a9b",
-      "bytes": 1702,
-      "sha256": "9c243118c8cd273d78343bea7af32e3ddf1ff15ba16b935506d54573169c00ab"
+      "gitBlobSha": "9fb27a1efc82f590dd8281162b739004249453e0",
+      "bytes": 1720,
+      "sha256": "67167c61f46163705bf83e8a8e135d5e3aba23d82d148e21761470629ee187b8"
     },
     {
       "path": "nexa/deploy/preserve-runtime-extras.py",
@@ -296,6 +310,20 @@
       "gitBlobSha": "c83bbf07115bc60820373377548d05c2984bc57a",
       "bytes": 477,
       "sha256": "7c0e0b9bc4488773acd942d213b61e956a1bb81f86080b1d1488fa725dc5793e"
+    },
+    {
+      "path": "nexa/deploy/publication-lock.mjs",
+      "mode": "100644",
+      "gitBlobSha": "475674ca46cfdae09486498abe3f2be387d173f5",
+      "bytes": 4843,
+      "sha256": "b45e5b26eab1cf918a0aa1cbab342e753e0442322fad5c1e0a5cd0f77bb980e8"
+    },
+    {
+      "path": "nexa/deploy/publication-lock.test.mjs",
+      "mode": "100644",
+      "gitBlobSha": "36a86f41f1f77f7413130bcb9f31c58bd4747156",
+      "bytes": 3305,
+      "sha256": "376bc876e12686964994a14860e41a8b8daec670d12c1c5165256b588b80f9fc"
     },
     {
       "path": "nexa/deploy/refresh-native-dns.mjs",
@@ -347,6 +375,34 @@
       "sha256": "cc272ef850b3aab1386e1a2334b31f91eb30c86e4557696de1c8a4b66bcf1a10"
     },
     {
+      "path": "nexa/deploy/seal-package.py",
+      "mode": "100644",
+      "gitBlobSha": "ac0f3f0587d7da72511d69e48dcc03d9e8a9cee4",
+      "bytes": 9184,
+      "sha256": "e41e979bee25f8a41818ab12e647cbd6822cc63fc6f22426c136cba3485bba68"
+    },
+    {
+      "path": "nexa/deploy/seal-package.test.py",
+      "mode": "100644",
+      "gitBlobSha": "5944b59f1d6d51c81243bd0628a8c1318101b2ce",
+      "bytes": 6058,
+      "sha256": "9cdd9a79ff8424d93d4a1cd507abaa442f0d80424c1485f6d77a3632857cee63"
+    },
+    {
+      "path": "nexa/deploy/smoke-api-key.mjs",
+      "mode": "100644",
+      "gitBlobSha": "3908c69c9e41147b8ef8357e3b74eb41553036e0",
+      "bytes": 3624,
+      "sha256": "472c95502002e6026adfef92e47fda98dc630fb7fa95e0dedc5233e253c3bf77"
+    },
+    {
+      "path": "nexa/deploy/smoke-api-key.test.mjs",
+      "mode": "100644",
+      "gitBlobSha": "979ac362bdf4c33f07503a84087a2bf07b8daadb",
+      "bytes": 3225,
+      "sha256": "8dda7f8697876d485476422cf7cc58616f064627c215bc3c0301e0137bdd902f"
+    },
+    {
       "path": "nexa/deploy/smoke-model.mjs",
       "mode": "100644",
       "gitBlobSha": "519bcb26f78519f3ada3f310e7fbf9b7659a86eb",
@@ -370,9 +426,9 @@
     {
       "path": "nexa/deploy/smoke-package.mjs",
       "mode": "100644",
-      "gitBlobSha": "4cd0f190117a0e8782dd4b505bd2edbd35963eb1",
-      "bytes": 6866,
-      "sha256": "5f3092657db0357fa207ad3f55bfddfda2464ab05ec9be6f773e62dd0e54feb4"
+      "gitBlobSha": "a3064435bdaa5515bcdf54fcd422e6abce5d362b",
+      "bytes": 6742,
+      "sha256": "19be69f0a7ee0864e4d19ee9f2544aa2f4b7d22846f803561ab581dda527142a"
     },
     {
       "path": "nexa/deploy/snapshot-local.py",
@@ -468,9 +524,9 @@
     {
       "path": "nexa/docs/DEPENDENCY-SECURITY-2026-11-06.md",
       "mode": "100644",
-      "gitBlobSha": "c07e2d7414e75762f806750f134195180ce6d302",
-      "bytes": 6940,
-      "sha256": "919fda13c2bb1c3285678d1983cc4f50bb8697ad093f6bfea36d98b71a14cea7"
+      "gitBlobSha": "e598291041d9eb0af386c1f4fbd45ee2c2a0eb68",
+      "bytes": 8860,
+      "sha256": "00010d64e041dc1325bf4101720cd3fa2e0834576a09ea48e2365ce1bb808ab5"
     },
     {
       "path": "nexa/docs/GOOGLE-VERIFICATION-ROUTING-2026-10-06.md",

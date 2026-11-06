@@ -23,4 +23,11 @@ node nexa/deploy/dashboard-gate.mjs dist/.build/next
 npm run build:cli-api
 npm run build:cli
 OMNIROUTE_ALLOW_CANARY_BUILD=1 npm run check:pack-artifact
-/usr/local/bin/node /usr/local/lib/node_modules/npm/bin/npm-cli.js pack --pack-destination "$OUTDIR"
+mkdir "$OUTDIR/unsealed"
+/usr/local/bin/node /usr/local/lib/node_modules/npm/bin/npm-cli.js pack --pack-destination "$OUTDIR/unsealed"
+node nexa/deploy/publication-lock.mjs "$PWD" /usr/local/lib/node_modules/npm/package.json "$OUTDIR/publication-lock"
+PACKAGE_VERSION="$(node -p 'require("./package.json").version')"
+python3 nexa/deploy/seal-package.py "$OUTDIR/unsealed/omniroute-$PACKAGE_VERSION.tgz" \
+  package-lock.json "$OUTDIR/publication-lock/npm-shrinkwrap.json" \
+  "$OUTDIR/omniroute-$PACKAGE_VERSION.tgz" \
+  --effective-edges "$OUTDIR/publication-lock/effective-edges.json"

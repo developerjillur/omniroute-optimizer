@@ -78,6 +78,35 @@ The archive gate rejects missing native transport/recovery/event-stream files an
 
 When `NEXA_DEPLOY_ARTIFACT` supplies an existing verified archive, release identity comes from its `dist/BUILD_SHA`; the updater logs its own source identity separately. Deployment receipts include the attempt timestamp so retrying the same application artifact preserves earlier evidence.
 
+### Published dependency graph
+
+A clean source dependency audit does not establish the graph installed by
+`npm install -g`. Root `overrides` do not apply when OmniRoute is itself a dependency.
+`publication-lock.mjs` reads npm's existing virtual source tree without network
+resolution, pins its effective overridden edges to their validated target versions,
+and excludes development workspace links from a publishable `npm-shrinkwrap.json`.
+The original source lock and source manifest remain unchanged.
+
+`seal-package.py` retains the unsealed archive and adds the publication lock to a
+new archive. Its only package metadata change is `_hasShrinkwrap=true`, which lets
+npm discover a nested lock when installing a local tarball. Every other original
+member, including compiled assets, must retain its bytes and mode. The effective
+edge recipe, source lock, archive hashes and changed metadata are recorded. Creating
+this archive is preparation, not package acceptance.
+
+The normal installer omits development tools while retaining required lifecycle
+scripts. After installation, `installed-publication.mjs` checks the actual tree
+against the shipped lock; a nested dependency absent from that lock blocks smoke.
+The release must also retain an audit of the actual installed production graph,
+including the separately shipped `dist` dependencies. Keep failed attempts and do
+not replace an installed audit with a source-only audit.
+
+Isolated smoke decrypts an existing ordinary client key with the package's own
+storage implementation, verifies its authentication fingerprint, and excludes
+revoked, expired, restricted or quota-bypass credentials. It creates no keys and
+does not change permissions. Provider quota failure remains a failed inference
+gate; offline health, schema or CORS success is reported separately.
+
 Promotion retains the entire previous runtime prefix. Failure stops the candidate, preserves it, restores the old prefix and restores the pre-deployment SQLite snapshot. The candidate's database/WAL files are kept privately for recovery. A snapshot cannot preserve writes made after it was taken; the retained failed database is the source for recovering those writes. Open database handles block restoration rather than replacing an active database.
 
 No updater path deletes old archives, snapshots, rejected runtimes or build evidence. Cleanup is a separate owner operation. Gateway updates retain the installed desktop shell by default, without building it, closing it or replacing it. `NEXA_BUILD_DESKTOP=1` explicitly requests a desktop artifact; `NEXA_DEPLOY_DESKTOP=1` separately authorizes closing and replacing the OmniRoute desktop shell during promotion. Building an artifact alone does not authorize app interruption. The local updater never pushes repository state; remote publication is a separate owner action. This workflow does not alter the native Claude Desktop bundle or native Claude account/history.

@@ -8,6 +8,7 @@ export function packageInstallArgs(prefix, archive) {
     prefix,
     "--no-fund",
     "--no-audit",
+    "--omit=dev",
     // Global installs ignore the project .npmrc used by the pinned build.
     "--legacy-peer-deps",
     path.resolve(archive),

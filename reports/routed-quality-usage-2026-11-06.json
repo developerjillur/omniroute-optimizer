@@ -128,5 +128,19 @@
     "applicationBuildExecuted": false,
     "liveDeploymentExecuted": false
   },
-  "extendedPrivateLogAudit": "INCOMPLETE_RESOURCE_ADMISSION_PENDING"
+  "extendedPrivateLogAudit": "INCOMPLETE_RESOURCE_ADMISSION_PENDING",
+  "subsequentCiRegression": {
+    "sourceCommit": "e5338c8dd119fb1c6a6e00dbd978676c3256e8f6",
+    "runUrl": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/42166307812",
+    "failedGate": "extended_tests",
+    "tests": 171,
+    "pass": 170,
+    "fail": 1,
+    "case": "known global walls retain the latest reset with bounded slow polling",
+    "cause": "Fixture captured request-start time before the actual quota observation time",
+    "correction": "Freeze the original fixture clock and add a delayed-observation boundary case",
+    "runtimePolicyChanged": false,
+    "existingAssertionsChanged": false,
+    "correctionValidation": "PENDING_SOURCE_CI"
+  }
 }

@@ -7,7 +7,7 @@
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
   "trackedNexaFiles": 461,
-  "totalNexaBytes": 2078073,
+  "totalNexaBytes": 2079791,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -559,9 +559,9 @@
     {
       "path": "nexa/docs/ROUTED-QUALITY-USAGE-2026-11-06.md",
       "mode": "100644",
-      "gitBlobSha": "1a30599c114aad19d9d337ec4f480373b91a12c3",
-      "bytes": 9008,
-      "sha256": "efa05103dccae5541f4bf6fa2ff0e9bd1073beae54a33e57a73ae4e6f0b7fe30"
+      "gitBlobSha": "3993d8269a29b0e924a349248195ad1206af939b",
+      "bytes": 9916,
+      "sha256": "a7cde17ba8e46b2b90ad4550344b9cc386ea152edb217688144c6178aafca226"
     },
     {
       "path": "nexa/docs/TYPECHECK-BASELINE-2026-10-02.md",
@@ -1035,9 +1035,9 @@
     {
       "path": "nexa/new/tests/unit/agent-bridge-quota-recovery.test.ts",
       "mode": "100644",
-      "gitBlobSha": "127aa4a58d7a7e22387b7f65a20481b89420ba8a",
-      "bytes": 18088,
-      "sha256": "ed4f81b0a96ec9de4f41e88da6e24794d837f58ab9e0df78eb980124d4bb6ee1"
+      "gitBlobSha": "978cf2920d68df6cc3947c4602a1fc8ae7bbfab7",
+      "bytes": 18898,
+      "sha256": "372014760e3b5afc47fb37a2819000912e1093d4f3360dc8c611cef2c51e66b1"
     },
     {
       "path": "nexa/new/tests/unit/agent-bridge-resilience.test.ts",

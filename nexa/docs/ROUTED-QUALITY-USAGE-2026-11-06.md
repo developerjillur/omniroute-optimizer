@@ -68,6 +68,14 @@ dependency audit পাস। এটি recorded source commit-এর ফল; �
 commit বা live runtime-কে ওই source commit বলা হচ্ছে না। পূর্ণ private log
 audit এবং model-output comparison অসম্পূর্ণ; application build বন্ধ আছে।
 
+পরের documentation commit `e5338c8`-এর [CI run](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42166307812)
+extended family-তে 171টির মধ্যে 170টি pass ও একটি quota polling boundary failure
+সংরক্ষণ করেছে। Test-এর প্রথম `Date.now()` ও quota observation-এর `fetchedAt`
+একই clock instant ধরে নেওয়ায় কয়েক millisecond পার্থক্যেও failure হতো। Fixture-এর
+clock এখন স্থির; পৃথক delayed-observation case একই 30-minute boundary পরীক্ষা করে।
+Runtime polling interval, quota policy ও পুরোনো assertions অপরিবর্তিত। Failed
+run-কে pass বলা হচ্ছে না; এই test correction-এর নিজস্ব source CI প্রয়োজন।
+
 ## মান ও quota বিশ্লেষণের সীমা
 
 একই native client-এর system, tool history ও effort সংরক্ষিত থাকলেও target

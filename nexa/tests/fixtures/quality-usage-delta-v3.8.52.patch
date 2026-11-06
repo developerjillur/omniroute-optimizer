@@ -54,3 +54,16 @@ diff --git a/open-sse/translator/request/openai-responses/toResponses.ts b/open-
            content: outputContent,
            status: "completed",
          });
+
+diff --git a/open-sse/services/usage/antigravity.ts b/open-sse/services/usage/antigravity.ts
+--- a/open-sse/services/usage/antigravity.ts
++++ b/open-sse/services/usage/antigravity.ts
+@@ -138,7 +138,7 @@
+     const row = db
+       .prepare(
+         `SELECT COALESCE(SUM(
+-           COALESCE(tokens_input, 0) + COALESCE(tokens_output, 0) + COALESCE(tokens_reasoning, 0)
++           COALESCE(tokens_input, 0) + COALESCE(tokens_output, 0)
+          ), 0) AS tokens
+          FROM usage_history
+          WHERE provider = ?

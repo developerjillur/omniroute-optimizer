@@ -7,11 +7,12 @@
   "sourceChanges": [
     "Use inclusive input plus output in API-key self-service totals",
     "Use inclusive input plus output in self-tracked monthly provider quotas",
-    "Retain explicit valid assistant phase through Responses request translation"
+    "Retain explicit valid assistant phase through Responses request translation",
+    "Count normalized Antigravity reasoning once in local quota fallback"
   ],
   "requiredSyntheticValidation": {
-    "baselineTests": 10,
-    "baselineExpectedAssertionFailures": 6,
+    "baselineTests": 11,
+    "baselineExpectedAssertionFailures": 7,
     "baselineUnexpectedErrorsAllowed": false,
     "baselineSkippedOrCancelledAllowed": false,
     "greenSuites": [
@@ -142,5 +143,13 @@
     "runtimePolicyChanged": false,
     "existingAssertionsChanged": false,
     "correctionValidation": "PENDING_SOURCE_CI"
+  },
+  "antigravityLocalFallback": {
+    "before": "Inclusive output plus reasoning counted reasoning twice",
+    "after": "Inclusive input plus output",
+    "authoritativeProviderQuotaChanged": false,
+    "historicalRowsRewritten": false,
+    "newGenerationCalls": 0,
+    "validation": "PENDING_EXACT_SOURCE_CI"
   }
 }

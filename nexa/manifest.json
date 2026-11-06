@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 330,
-    "patches": 195,
+    "total": 331,
+    "patches": 196,
     "new": 129,
     "tooling": 6,
     "upstreamCandidates": 28,
     "nexaSpecific": 99,
-    "needsReview": 203,
+    "needsReview": 204,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
   },
@@ -414,6 +414,14 @@
       "layer": "patch",
       "class": "upstream-candidate",
       "target": "open-sse/services/sessionManager.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__services__usage__antigravity.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/services/usage/antigravity.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },

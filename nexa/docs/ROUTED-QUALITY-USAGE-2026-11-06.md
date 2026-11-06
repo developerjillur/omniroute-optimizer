@@ -16,6 +16,13 @@ self-tracked monthly provider total আবার ওই breakdown যোগ ক�
 201,000; 391,700 নয়। এটি reporting ও local self-tracked quota arithmetic-এর
 সংশোধন; provider-এর subscription allowance সরাসরি বদলায় না।
 
+Antigravity/Gemini-এর `localUsageHistory` fallback-ও normalized output-এর সঙ্গে
+reasoning আবার যোগ করছিল। Gemini extractor candidates ও thoughts মিলে output
+সংরক্ষণ করে; তাই fallback এখন শুধু inclusive input + output যোগ করে। যেমন,
+1000 input, 100 visible output ও 900 thoughts হলে normalized output 1000;
+local estimate 2 units, 3 নয়। একই account/model-এর সফল পাঁচ ঘণ্টার window-ই
+গণনা হয়। Provider-এর authoritative quota, token breakdown ও billed usage বদলায় না।
+
 Chat-shaped assistant history থেকে Responses input তৈরির সময় explicit
 `phase` হারিয়ে যাচ্ছিল। এখন `commentary`, `final_answer` ও explicit `null`
 assistant item-এ থাকে। User item-এ phase যোগ হয় না; অনুপস্থিত phase অনুমান
@@ -41,11 +48,15 @@ system ও transcript, tool schema, tool call/result, selected effort এবং 
 Responses opaque reasoning সংরক্ষণ পরীক্ষা করে। সব input synthetic।
 
 `quality-usage-delta-v3.8.52.patch` শুধু এই সংশোধনগুলো সরিয়ে আগের behavior
-ফেরায়। Mandatory CI-তে আগের behavior-এর 10টি case-এর মধ্যে নির্দিষ্ট 6টি
+ফেরায়। Mandatory CI-তে আগের behavior-এর 11টি case-এর মধ্যে নির্দিষ্ট 7টি
 assertion failure চাই; environment error, skipped test বা cancelled run
 reproduction নয়। তারপর সংশোধন পুনরায় apply করে নতুন tests ও বিদ্যমান
 self-service suite পাস করতে হবে। Production Node-এও suite চলে। Exact ফল
 commit-specific CI-এর `native-validation.json` ও TAP artifacts-এ থাকবে।
+
+Antigravity case-এ real Gemini normalization ও isolated SQLite rows দিয়ে
+provider, account, model, success ও `[windowStart, resetAt)` boundaries পরীক্ষা
+হয়। HTTP responses সম্পূর্ণ synthetic; quota বা generation network call হয় না।
 
 `native-source-attribution.test.ts` real SQLite-তে পুরো `persistAttemptLogs`
 path চালায়। Native Claude, routed GPT/Gemini, header precedence, malformed

@@ -4,6 +4,9 @@ import { DatabaseSync } from "node:sqlite";
 import { buildApiKeySelfServiceStatus } from "../../src/lib/usage/apiKeySelfService.ts";
 import { getDbInstance } from "../../src/lib/db/core.ts";
 import { getMonthlyProviderTokensForConnection } from "../../src/lib/usage/usageStats.ts";
+import { extractUsage } from "../../open-sse/utils/usageTracking.ts";
+
+const { getUsageForProvider } = await import("../../open-sse/services/usage.ts");
 
 const metadata = {
   id: "inclusive-token-owner",
@@ -122,4 +125,101 @@ test("monthly self-tracked provider quotas count inclusive tokens once within th
   assert.equal(getMonthlyProviderTokensForConnection("mimo", connection), 402_000);
   assert.equal(getMonthlyProviderTokensForConnection("", connection), 0);
   assert.equal(getMonthlyProviderTokensForConnection("mimo", ""), 0);
+});
+
+test("Antigravity local quota fallback counts normalized reasoning once within its account model and window", async (t) => {
+  const db = getDbInstance();
+  const key = "inclusive-antigravity-fixture";
+  const connection = "inclusive-antigravity-connection";
+  const model = "gemini-3.8-flash-high";
+  const now = Date.now();
+  const resetAt = new Date(now + 60 * 60000).toISOString();
+  const usage = extractUsage({
+    response: {
+      usageMetadata: {
+        promptTokenCount: 1000,
+        candidatesTokenCount: 100,
+        thoughtsTokenCount: 900,
+        totalTokenCount: 2000,
+      },
+    },
+  });
+  assert.equal(usage?.prompt_tokens, 1000);
+  assert.equal(usage?.completion_tokens, 1000, "normalized output already includes thoughts");
+  assert.equal(usage?.reasoning_tokens, 900, "reasoning remains a separate breakdown");
+  const insert = db.prepare(`INSERT INTO usage_history
+    (provider, model, connection_id, api_key_id, timestamp, tokens_input, tokens_output,
+     tokens_cache_read, tokens_reasoning, status, success)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+  t.after(() => db.prepare("DELETE FROM usage_history WHERE api_key_id = ?").run(key));
+  insert.run(
+    "antigravity",
+    model,
+    connection,
+    key,
+    new Date(now - 60000).toISOString(),
+    usage!.prompt_tokens,
+    usage!.completion_tokens,
+    800,
+    usage!.reasoning_tokens,
+    "success",
+    1
+  );
+  for (const [provider, rowModel, owner, stamp, success] of [
+    ["antigravity", model, "another-connection", now - 60000, 1],
+    ["antigravity", "another-model", connection, now - 60000, 1],
+    ["agy", model, connection, now - 60000, 1],
+    ["antigravity", model, connection, now - 6 * 60 * 60000, 1],
+    ["antigravity", model, connection, Date.parse(resetAt), 1],
+    ["antigravity", model, connection, now - 60000, 0],
+  ] as const) {
+    insert.run(
+      provider,
+      rowModel,
+      owner,
+      key,
+      new Date(stamp).toISOString(),
+      900000,
+      100000,
+      800000,
+      90000,
+      success ? "success" : "error",
+      success
+    );
+  }
+  t.mock.method(globalThis, "fetch", async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+    if (url.includes("retrieveUserQuota")) {
+      return new Response("{}", { status: 404 });
+    }
+    return new Response(
+      JSON.stringify({
+        models: { [model]: { quotaInfo: { remainingFraction: 1.0, resetTime: resetAt } } },
+      }),
+      { status: 200, headers: { "content-type": "application/json" } }
+    );
+  });
+  const result = await getUsageForProvider(
+    {
+      id: connection,
+      provider: "antigravity",
+      accessToken: "inclusive-fake-token",
+      providerSpecificData: {},
+      projectId: undefined,
+    },
+    { forceRefresh: true }
+  );
+  const quota = (result as { quotas?: Record<string, { quotaSource?: string; used?: number }> })
+    .quotas?.[model];
+  assert.ok(quota, "the requested model must retain its quota entry");
+  assert.equal(quota.quotaSource, "localUsageHistory");
+  assert.equal(quota.used, 2, "1000 input plus 1000 inclusive output is two units, not three");
+  const saved = db
+    .prepare(
+      "SELECT tokens_output, tokens_reasoning FROM usage_history WHERE api_key_id = ? AND tokens_input = 1000"
+    )
+    .get(key) as { tokens_output: number; tokens_reasoning: number };
+  assert.ok(saved);
+  assert.equal(saved.tokens_output, 1000);
+  assert.equal(saved.tokens_reasoning, 900);
 });

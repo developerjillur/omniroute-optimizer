@@ -73,7 +73,7 @@ test("the shipped TypeScript crypto module loads from an installed dependency pa
       "export function decrypt(value: string): string { return unseal(value); }\n" +
       'export function looksEncrypted(value: string): boolean { return value.startsWith("enc:v1:"); }\n'
   );
-  const module = await loadPackagedEncryption(packageRoot);
-  assert.equal(module.looksEncrypted("enc:v1:fixture"), true);
-  assert.equal(module.decrypt("enc:v1:fixture"), "fixture");
+  const cryptoModule = await loadPackagedEncryption(packageRoot);
+  assert.equal(cryptoModule.looksEncrypted("enc:v1:fixture"), true);
+  assert.equal(cryptoModule.decrypt("enc:v1:fixture"), "fixture");
 });

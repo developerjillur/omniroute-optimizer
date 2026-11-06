@@ -7,7 +7,7 @@
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
   "trackedNexaFiles": 477,
-  "totalNexaBytes": 2150362,
+  "totalNexaBytes": 2150380,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -426,9 +426,9 @@
     {
       "path": "nexa/deploy/smoke-api-key.test.mjs",
       "mode": "100644",
-      "gitBlobSha": "979ac362bdf4c33f07503a84087a2bf07b8daadb",
-      "bytes": 3225,
-      "sha256": "8dda7f8697876d485476422cf7cc58616f064627c215bc3c0301e0137bdd902f"
+      "gitBlobSha": "138cf929c8b38f1f9e14fe07abb29bdfc69f34bc",
+      "bytes": 3243,
+      "sha256": "d735b1025a433726ef3d16ab8350f89b21cf67a85551e510b9d9871590243ebc"
     },
     {
       "path": "nexa/deploy/smoke-model.mjs",

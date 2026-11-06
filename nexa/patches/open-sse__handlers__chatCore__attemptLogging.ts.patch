@@ -1,5 +1,4 @@
 diff --git a/open-sse/handlers/chatCore/attemptLogging.ts b/open-sse/handlers/chatCore/attemptLogging.ts
-index 454de9fe3386f817c904571416f927eda036eaf1..7288c8ad5b480cfbd6353681d5ea6145d98897b0 100644
 --- a/open-sse/handlers/chatCore/attemptLogging.ts
 +++ b/open-sse/handlers/chatCore/attemptLogging.ts
 @@ -1,3 +1,9 @@
@@ -346,12 +345,12 @@ index 454de9fe3386f817c904571416f927eda036eaf1..7288c8ad5b480cfbd6353681d5ea6145
          pipelinePayloads.streamChunks = {
            ...existingStreamChunks,
            client: [...earlyClientBytes, ...(existingStreamChunks.client ?? [])],
-@@ -566,7 +657,38 @@
+@@ -566,7 +657,37 @@
    // capture sink by the executor. Fail-soft: null outside a capture or when
    // nothing was published — the row stores NULL (no wait), never throws.
    const addedWait = readAddedWait();
 +  const nativeSessionId =
-+    provider === "claude"
++    sourceFormat === FORMATS.CLAUDE
 +      ? getNativeClaudeSessionId(body, ctx.clientRawRequest?.headers)
 +      : null;
 +  const nativeSessionTag = nativeSessionId
@@ -361,12 +360,11 @@ index 454de9fe3386f817c904571416f927eda036eaf1..7288c8ad5b480cfbd6353681d5ea6145
 +    body && typeof body === "object" ? (body as Record<string, unknown>) : {};
 +  const nativeThread = nativeBody.thread as Record<string, unknown> | undefined;
 +  const nativeCacheGroupTag =
-+    nativeThread?.type === "continue"
-+      ? getNativeClaudeThreadCacheGroup(
-+          nativeSessionId,
-+          nativeThread.previous_message_id,
-+        )
-+      : nativeClaudeCacheGroup(body, nativeSessionId);
++    provider !== "claude"
++      ? null
++      : nativeThread?.type === "continue"
++        ? getNativeClaudeThreadCacheGroup(nativeSessionId, nativeThread.previous_message_id)
++        : nativeClaudeCacheGroup(body, nativeSessionId);
 +  const providerEnvelope =
 +    providerResponse && typeof providerResponse === "object"
 +      ? (providerResponse as Record<string, unknown>)
@@ -385,7 +383,7 @@ index 454de9fe3386f817c904571416f927eda036eaf1..7288c8ad5b480cfbd6353681d5ea6145
      pendingRequestId: ctx.pendingRequestId,
      method: "POST",
      path: clientRawRequest?.endpoint || "/v1/chat/completions",
-@@ -576,11 +698,15 @@
+@@ -576,11 +697,15 @@
      provider,
      connectionId: finalConnectionId || undefined,
      duration: Date.now() - startTime,
@@ -403,7 +401,7 @@ index 454de9fe3386f817c904571416f927eda036eaf1..7288c8ad5b480cfbd6353681d5ea6145
      // Encrypted-reasoning observation: stream-side flag plus duration, and
      // the two request bodies so the sink can read effort values
      // (requested from the client body, upstream from the post-strip body).
-@@ -588,26 +714,32 @@
+@@ -588,26 +713,32 @@
      clientRequestBody: body ?? null,
      upstreamRequestBody: providerRequest ?? null,
      requestBody: cloneBoundedChatLogPayload(
@@ -454,7 +452,7 @@ index 454de9fe3386f817c904571416f927eda036eaf1..7288c8ad5b480cfbd6353681d5ea6145
      ),
      error: retainedError || null,
      sourceFormat,
-@@ -624,7 +756,11 @@
+@@ -624,7 +755,11 @@
      correlationId: correlationId || traceId,
      modelPinned: modelPinned || false,
      sessionTag: sessionTag || null,

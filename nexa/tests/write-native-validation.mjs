@@ -103,6 +103,11 @@ const receipt = {
   productionRuntime: process.version,
   baseline: tap("native-red.tap", true),
   translatedCacheCostBaseline: tap("cache-cost-red.tap", true),
+  nativeClientAttribution: {
+    baseline: tap("native-attribution-red.tap", true),
+    green: tap("native-attribution-green.tap"),
+    historicalNullTagsBackfilled: false,
+  },
   routedQualityAndUsage: {
     baseline: tap("quality-usage-red.tap", true),
     green: tap("quality-usage-green.tap"),

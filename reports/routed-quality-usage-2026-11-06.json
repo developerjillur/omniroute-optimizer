@@ -27,5 +27,21 @@
   "modelOutputQualityBenchmark": false,
   "fullMalwareClearance": false,
   "fullBuildInThisChange": false,
-  "liveDeploymentInThisChange": false
+  "liveDeploymentInThisChange": false,
+  "nativeClientAttribution": {
+    "scope": "Client Claude source, independent of routed provider",
+    "storedIdentifier": "SHA256 of validated native session UUID",
+    "claudeCacheGroup": "Claude provider only",
+    "rawSessionIdentifierStored": false,
+    "wireOrRoutingChanged": false,
+    "historicalNullTagsBackfilled": false,
+    "baselineExpected": {
+      "tests": 8,
+      "pass": 2,
+      "assertionFailures": 6,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "validation": "PENDING_EXACT_COMMIT_CI"
+  }
 }

@@ -16,6 +16,7 @@ const tests = [
   "native-usage-fidelity.test.ts",
   "usage-inclusive-token-totals.test.ts",
   "routed-gpt-quality-contract.test.ts",
+  "native-source-attribution.test.ts",
   "api-key-self-service.test.ts",
   "inference-transport-no-replay.test.ts",
   "native-artifact-recovery.test.ts",

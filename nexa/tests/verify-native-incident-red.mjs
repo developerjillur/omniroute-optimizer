@@ -3,6 +3,17 @@ import fs from "node:fs";
 
 const [family, filename] = process.argv.slice(2);
 const expected = {
+  "native-attribution": {
+    tests: 8,
+    failures: [
+      "native client attribution follows a routed Codex request",
+      "native client attribution follows a routed Gemini request",
+      "non-native Chat metadata cannot manufacture native attribution",
+      "non-native Responses headers cannot manufacture native attribution",
+      "routed native attribution preserves header identity precedence",
+      "failed routed native attempts retain identity and the real error",
+    ],
+  },
   "quality-usage": {
     tests: 10,
     failures: [
@@ -53,7 +64,7 @@ assert.deepEqual(failures.sort(), [...expected.failures].sort());
 assert.match(output, /ERR_ASSERTION/);
 assert.doesNotMatch(
   output,
-  /ERR_MODULE_NOT_FOUND|ERR_DLOPEN_FAILED|ERR_UNSUPPORTED|SyntaxError:|ReferenceError:|hookFailed|heap out of memory|RESOURCE_STOP/
+  /ERR_MODULE_NOT_FOUND|ERR_DLOPEN_FAILED|ERR_UNSUPPORTED|SyntaxError:|ReferenceError:|hookFailed|Environment:|heap out of memory|RESOURCE_STOP/
 );
 console.log(
   JSON.stringify({

@@ -1,0 +1,30 @@
+diff --git a/open-sse/handlers/chatCore/attemptLogging.ts b/open-sse/handlers/chatCore/attemptLogging.ts
+--- a/open-sse/handlers/chatCore/attemptLogging.ts
++++ b/open-sse/handlers/chatCore/attemptLogging.ts
+@@ -658,7 +658,7 @@
+   // nothing was published — the row stores NULL (no wait), never throws.
+   const addedWait = readAddedWait();
+   const nativeSessionId =
+-    provider === "claude"
++    sourceFormat === FORMATS.CLAUDE
+       ? getNativeClaudeSessionId(body, ctx.clientRawRequest?.headers)
+       : null;
+   const nativeSessionTag = nativeSessionId
+@@ -668,12 +668,11 @@
+     body && typeof body === "object" ? (body as Record<string, unknown>) : {};
+   const nativeThread = nativeBody.thread as Record<string, unknown> | undefined;
+   const nativeCacheGroupTag =
+-    nativeThread?.type === "continue"
+-      ? getNativeClaudeThreadCacheGroup(
+-          nativeSessionId,
+-          nativeThread.previous_message_id,
+-        )
+-      : nativeClaudeCacheGroup(body, nativeSessionId);
++    provider !== "claude"
++      ? null
++      : nativeThread?.type === "continue"
++        ? getNativeClaudeThreadCacheGroup(nativeSessionId, nativeThread.previous_message_id)
++        : nativeClaudeCacheGroup(body, nativeSessionId);
+   const providerEnvelope =
+     providerResponse && typeof providerResponse === "object"
+       ? (providerResponse as Record<string, unknown>)

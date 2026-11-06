@@ -23,6 +23,15 @@ assistant item-এ থাকে। User item-এ phase যোগ হয় না; 
 জন্য সংশোধনটি প্রযোজ্য। Claude protocol-এ অনুপস্থিত GPT metadata এটি তৈরি
 করে দেয় না।
 
+Native client-এর usage attribution শুধু target provider `claude` হলে session
+tag লিখছিল। ফলে একই Claude client থেকে GPT বা Gemini-তে route করা request
+নিজের native session-এর সঙ্গে সরাসরি মেলানো যাচ্ছিল না। এখন source format
+`claude` হলে validated client session identifier-এর SHA-256 সংরক্ষিত হয়।
+Native Claude cache-group attribution তার নিজস্ব provider-এই সীমিত থাকে।
+অন্য protocol-এর একই metadata/header native attribution তৈরি করে না। Wire
+payload, chosen model, effort, token counters ও real errors অপরিবর্তিত থাকে।
+পুরোনো NULL tags backfill করা হয় না এবং raw session identifier যোগ হয় না।
+
 ## পরীক্ষার চুক্তি
 
 `usage-inclusive-token-totals.test.ts` real SQLite queries দিয়ে cache/read/write
@@ -37,6 +46,14 @@ assertion failure চাই; environment error, skipped test বা cancelled ru
 reproduction নয়। তারপর সংশোধন পুনরায় apply করে নতুন tests ও বিদ্যমান
 self-service suite পাস করতে হবে। Production Node-এও suite চলে। Exact ফল
 commit-specific CI-এর `native-validation.json` ও TAP artifacts-এ থাকবে।
+
+`native-source-attribution.test.ts` real SQLite-তে পুরো `persistAttemptLogs`
+path চালায়। Native Claude, routed GPT/Gemini, header precedence, malformed
+identifier, non-native spoof metadata/header ও failed upstream attempt—8টি
+case আছে। Provider-only baseline-এ নির্দিষ্ট 6টি assertion failure ও 2টি pass
+চাই; environment error reproduction নয়। সংশোধিত focused suite, বিদ্যমান
+logging regressions এবং production Node gate বাধ্যতামূলক। এটি future log
+attribution-এর সংশোধন; model output quality benchmark নয়।
 
 Source validation, package validation এবং live acceptance পৃথক gate। এই
 পরিবর্তনের সঙ্গে model output benchmark বা provider generation চালানো হয় না।

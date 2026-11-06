@@ -18,7 +18,6 @@ jobs:
     timeout-minutes: 6
     env:
       NODE_OPTIONS: --max-old-space-size=256
-      PUBLICATION_TEST_ROOT: ${{ runner.temp }}/publication-regression
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -27,6 +26,8 @@ jobs:
         with:
           node-version: "24.15.0"
       - name: Reproduce dependency drift and verify the sealed global installation
+        env:
+          PUBLICATION_TEST_ROOT: ${{ runner.temp }}/publication-regression
         run: node nexa/tests/publication-install-integration.mjs
       - name: Preserve the isolated publication evidence
         if: always()

@@ -1,5 +1,10 @@
 # Native / Agent Bridge reliability audit — ২০২৬-১০-২৮
 
+এটি ২০২৬-১০-২৮-এর audit snapshot। পরের v3.8.52 build, নতুন runtime corrections
+ও ২০২৬-১১-০৬-এর অনুমোদিত live promotion-এর বর্তমান ফল
+[release note](RELEASE-3.8.52-2026-11-06.md)-এ আছে। নিচের historical validation
+ও তখনকার deployment সীমা সেই তারিখের evidence হিসেবেই রাখা হয়েছে।
+
 ## Source ও দায়িত্ব
 
 Nexa fixes, regression coverage, validation ও release evidence-এর canonical

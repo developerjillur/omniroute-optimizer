@@ -17,6 +17,8 @@ const tests = [
   "inference-transport-no-replay.test.ts",
   "native-artifact-recovery.test.ts",
   "agent-bridge-native-buffered.test.ts",
+  "agent-bridge-production-ready.test.ts",
+  "agent-bridge-tool-model-routing.test.mjs",
   "gpt-6-1-sol-pricing.test.ts",
   "prompt-cache-ttl-cost.test.ts",
   "cache-ttl-pricing-api.test.ts",

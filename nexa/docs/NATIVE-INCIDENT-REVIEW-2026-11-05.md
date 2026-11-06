@@ -1,8 +1,10 @@
 # Native routing incident review — ২০২৬-১১-০৫
 
-এই review-এ চলমান native session বন্ধ, transcript পরিবর্তন, model/account rotation,
-core configuration পরিবর্তন বা live install করা হয়নি। Application changes কেবল Nexa
-overlay-তে থাকে। Source validation, package build ও live acceptance পৃথক ফল।
+প্রাথমিক review-এ চলমান native session বন্ধ, transcript পরিবর্তন, model/account
+rotation বা core configuration পরিবর্তন করা হয়নি। Application changes কেবল Nexa
+overlay-তে থাকে। পরের অনুমোদিত build ও live promotion-এর ফল
+[২০২৬-১১-০৬ release note](RELEASE-3.8.52-2026-11-06.md)-এ আছে। Source validation,
+package build ও live acceptance পৃথক ফল।
 
 ## Tool-only reply
 
@@ -85,8 +87,31 @@ Thread replay-এর 404, client cancellation, quota/credit limit, transport fai
 replay-কে model unavailable বা provider refusal-কে retryযোগ্য defect ধরা যাবে না।
 Root ingress log এই unprivileged session-এ পড়া যায়নি; সেই সীমা সংরক্ষিত আছে।
 
-## Deployment status
+## শেষ source validation ও deployment — ২০২৬-১১-০৬
 
-চলমান gateway এখনও `3.8.51 / 15533a05c`। এই review-এর runtime fixes live-এ বসেনি।
-সেগুলোর পূর্ণ source gates, নতুন package build, isolated smoke ও অনুমোদিত promotion
-শেষ না হওয়া পর্যন্ত live issue fixed, native parity বা সব সমস্যা সমাধানের দাবি নেই।
+Canonical source `9f3317269994273d95cab3efea4bda5bac6a86e3`-এর
+[CI](https://github.com/developerjillur/omniroute-optimizer/actions/runs/41966643610)
+সব mandatory gate পাস। Focused baseline-এ tool-only ৪টি, socket ৩টি ও ingress
+২টি assertion failure reproduced; candidate-এর ১৬/১৬, ৪/৪ ও ৪/৪ পাস। Production
+Node 24 native ১৯৮/১৯৮, Node 26 compatibility ১২৪৬/১২৪৬; full compiler ৬৫১০ ≤
+৬৫২৯ এবং নতুন diagnostic identity ০। Mac-এর focused/socket/ingress ৩১/৩১ পাস,
+wildcard listener-সহ skip ০।
+
+নতুন full package ও isolated installed-package acceptance-এর পরে ব্যবহারকারীর
+অনুমোদনে live gateway `3.8.52 / d6d071ef0` হয়েছে। Root ingress-এও reviewed
+no-vendor-fallback source বসেছে। Certificate-verified IPv4/IPv6 HTTPS, Bridge TLS,
+dashboard assets, native SSE এবং GPT buffered tool-only Messages response পাস।
+পুরোনো runtime ও final stopped database snapshot সংরক্ষিত। বর্তমান mappings
+অপরিবর্তিত; পরীক্ষিত native stream ও GPT API response পৃথক route। বিস্তারিত,
+artifact/source identities ও বাকি সীমা linked release note-এ আছে। পূর্ণ historical
+audit, নতুন macOS reboot বা সব native feature-এর parity এখনও দাবি করা হচ্ছে না।
+
+## Native retry follow-up — ২০২৬-১১-০৬
+
+প্রাথমিক package smoke-এর পরে real user request-এ healthy worker-এর readiness log
+ও parent parser mismatch ধরা পড়ে। Parent প্রতিবার ১০ সেকেন্ড পর worker বন্ধ করে
+recovery চালাত। Log-এর parenthetical অংশ সরিয়ে parser-এর production contract
+ফিরেছে। পৃথক advisor `tools.0.model` prefix leak-ও mapped Claude forward boundary-তে
+সংশোধিত। Local native/socket/beta/thread regression ৪৬/৪৬; একই worker ৬০.৯৭ সেকেন্ড
+পর্যবেক্ষণে healthy। Prefixed advisor field-সহ native request ২০০ এবং পরে user-এর
+দীর্ঘ requests-ও ২০০। বিস্তারিত ও exact CJS hash current release note-এ আছে।

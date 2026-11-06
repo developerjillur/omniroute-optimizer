@@ -223,7 +223,10 @@ presentation পৃথক বিষয়।
 এই source correction প্রত্যেকটি UI placeholder বা Thread-resume error সমাধানের
 দাবি করে না। Historical session বা transcript বদলানো হয়নি।
 
-বর্তমান source validation চলবে existing CI-তে। Live runtime এখনও
-`3.8.51 / 15533a05c`; আগের `7776efc1` package-এ এই নতুন patch নেই। Source tests,
-প্রয়োজনীয় build/package acceptance ও অনুমোদিত live installation সম্পন্ন না হওয়া
-পর্যন্ত live fix বা সব native client-এর parity দাবি করা হচ্ছে না।
+প্রথম `7776efc1` package-এ এই নতুন patch ছিল না। পরের accepted source
+`9f3317269994273d95cab3efea4bda5bac6a86e3`-এর CI, নতুন full build এবং isolated
+package acceptance পাস হয়েছে। ২০২৬-১১-০৬-এর অনুমোদিত promotion-এর পরে live runtime
+এখন `3.8.52 / d6d071ef0`। Native SSE ও GPT buffered tool-only response পাস;
+existing mappings সংরক্ষিত। Exact artifact, ingress, resource evidence ও সীমা
+[বর্তমান release note](RELEASE-3.8.52-2026-11-06.md)-এ আছে। সব native client-এর
+parity বা পুরো historical audit সম্পূর্ণ বলা হচ্ছে না।

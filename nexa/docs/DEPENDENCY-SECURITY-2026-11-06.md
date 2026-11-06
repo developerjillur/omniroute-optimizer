@@ -103,6 +103,17 @@ publication lock যোগ হবে। Actual installed graph comparison-ও �
 এই প্রস্তুতিকে installed security PASS বলা হচ্ছে না; নতুন
 actual installation ও advisory audit সম্পূর্ণ না হওয়া পর্যন্ত candidate rejected।
 
+Package-root installation-এর
+[পরবর্তী বাস্তব regression](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42251778067)
+পাস করেছে। একই dependency assertion-এ global baseline nested version 6.0.0,
+নতুন root installation-এ validated 7.0.0 পাওয়া গেছে। Required lifecycle script,
+executable এবং dev/workspace exclusion-ও পরীক্ষা হয়েছে। পূর্ণ source validation
+`05966fd450116e6c9d09108a3c96853f28407e68`-এর
+[CI-তে পাস](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42251778132)।
+ছোট fixture-এর এই ফল সম্পূর্ণ OmniRoute artifact-এর acceptance নয়। চলমান
+Mac resource admission পাস করে নতুন artifact installation ও actual root/dist
+audit এখনও প্রয়োজন; পুরোনো rejected archive বা installed tree live-এ দেওয়া হয়নি।
+
 Existing development graph-এর 57টি finding এই packaging কাজ দিয়ে cleared হয় না।
 Provider-এর weekly quota exhaustion-ও dependency finding থেকে পৃথক। কোনো quota
 threshold, native mapping, context, selected effort বা compression policy বদলানো

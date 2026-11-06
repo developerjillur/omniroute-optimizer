@@ -6,6 +6,52 @@ inclusive token accounting ও সরবরাহ করা assistant phase স�
 Claude ও GPT-এর সমান মান, পূর্ণ native hosted-feature parity বা একটি নতুন
 live deployment-এর ঘোষণা নয়।
 
+## বর্তমান যাচাইকৃত checkpoint
+
+Implementation source `05966fd450116e6c9d09108a3c96853f28407e68`-এর
+[পূর্ণ source CI](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42251778132)
+পাস। Quality/usage family 23/23, native attribution/logging 26/26,
+production Node native family 247/247 ও upgrade compatibility 1296/1296।
+Core types, full lint, docs-all, pristine/patch, inventory ও formatting gates পাস।
+Full compiler completed 6510 diagnostics, অনুমোদিত ceiling 6529; এটি zero-error
+full typecheck নয়। পরিবারগুলোর overlap আছে; counts যোগ করে unique total নয়।
+
+একই application patch/new-file inputs দিয়ে integration `e43e5f9e4`-এর পূর্ণ
+Mac production build সম্পন্ন ও সংরক্ষিত। পরের publication tooling application
+inputs বদলায়নি। তবে source audit পরিষ্কার হলেও global installed dependency
+graph-এ পুরোনো nested versions ফিরে এসেছিল; ওই candidate গ্রহণ করা হয়নি।
+নতুন package-root installer-এর
+[বাস্তব publication regression](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42251778067)
+পাস। এটি ছোট dependency fixture-এর lifecycle, lock, executable এবং dev/workspace
+exclusion-এর প্রমাণ; সম্পূর্ণ Mac artifact-এর installed acceptance নয়।
+
+সম্পূর্ণ artifact install, actual root/dist dependency audit, cloned-data
+preservation ও live acceptance এখনও বাকি। চলমান live build `d6d071ef0`;
+নতুন source fixes-কে live-এ কার্যকর বলা হচ্ছে না। Detailed release ও security
+scope [dependency report](DEPENDENCY-SECURITY-2026-11-06.md)-এ আছে। পরের নথি
+commit আগের executable বা validated implementation-এর পরিচয় বদলায় না।
+
+## স্থানীয় usage ও quality review-এর ফলের সীমা
+
+7/15-day usage aggregation এবং নির্বাচিত native session-এর review স্থানীয়
+private evidence-এ সম্পন্ন হয়েছে। Retained detailed archive পুরো window ঢাকে না;
+shared history ancestry-ও exact session billing attribution নয়। ফলে aggregate
+counter দিয়ে সব historical retry-এর charge বা subscription allowance debit
+ঘোষণা করা যাবে না। Missing usage measured zero নয়।
+
+নির্বাচিত routed request-এ actual upstream context-window rejection পাওয়া গেছে।
+Native client-এর বড় context/compaction budget target backend-এর কার্যকর budget-এর
+সমান—এমন ধরে নেওয়া নিরাপদ নয়। এটি নির্দিষ্ট request failure-এর প্রমাণ; সব
+মানগত পার্থক্যের একমাত্র কারণ নয়। নির্বাচিত effort review-এ blanket effort
+downgrade প্রমাণিত হয়নি। Context কেটে, effort কমিয়ে বা lossy compression চালু
+করে এই review-কে সফল দেখানো হয়নি।
+
+Visible output review transport acceptance থেকে পৃথক। Reference inspection,
+complete artifact review, independent reviewers এবং model-switch checkpoint-এর
+workflow gaps আলাদা family-layer handoff-এ আছে। সেই স্তর সংশোধিত বা GPT/native
+output quality সমান হয়েছে—এই overlay তা প্রমাণ করে না। Controlled comparison
+ও model-switch continuation acceptance এখনও অসম্পূর্ণ।
+
 ## সংশোধন
 
 `usage_history.tokens_input`-এ cache read ও cache creation অন্তর্ভুক্ত থাকে।
@@ -84,8 +130,9 @@ Source validation, package validation এবং live acceptance পৃথক gat
 production Node native family 245/245 এবং upgrade compatibility 1293/1293।
 Full TypeScript 6510 ≤ 6529; core types, lint, docs ও installed production
 dependency audit পাস। এটি recorded source commit-এর ফল; পরের documentation
-commit বা live runtime-কে ওই source commit বলা হচ্ছে না। পূর্ণ private log
-audit এবং model-output comparison অসম্পূর্ণ; application build বন্ধ আছে।
+commit বা live runtime-কে ওই source commit বলা হচ্ছে না। সেই checkpoint-এ
+private log audit ও model-output comparison অসম্পূর্ণ ছিল এবং application
+build স্থগিত ছিল। পরের checkpoint-এর বর্তমান অবস্থা উপরে নথিভুক্ত।
 
 পরের documentation commit `e5338c8`-এর [CI run](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42166307812)
 extended family-তে 171টির মধ্যে 170টি pass ও একটি quota polling boundary failure
@@ -119,7 +166,7 @@ native বা external traffic-ও থাকতে পারে।
 
 ব্যক্তিগত usage, session, account ও security metadata এই repository-তে
 প্রকাশিত হয় না। স্থানীয় read-only audit-এর coverage ও সীমা পৃথক private
-receipt-এ সংরক্ষিত থাকবে। সীমিত exposure/persistence checks একটি পূর্ণ
+receipt-এ সংরক্ষিত আছে। সীমিত exposure/persistence checks একটি পূর্ণ
 malware clearance নয়।
 
 ## প্রাথমিক নথি

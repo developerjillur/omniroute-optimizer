@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 327,
-    "patches": 193,
+    "total": 329,
+    "patches": 195,
     "new": 128,
     "tooling": 6,
     "upstreamCandidates": 28,
     "nexaSpecific": 99,
-    "needsReview": 200,
+    "needsReview": 202,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
   },
@@ -518,6 +518,22 @@
       "layer": "patch",
       "class": "nexa-specific",
       "target": "open-sse/utils/usageTracking.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/package-lock.json.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "package-lock.json",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/package.json.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "package.json",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },

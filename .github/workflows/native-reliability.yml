@@ -69,6 +69,15 @@ jobs:
           npx --no-install fumadocs-mdx
           NODE_OPTIONS=--max-old-space-size=6144 node nexa/tests/capture-pristine-types.mjs
           node nexa/apply.mjs
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm rebuild better-sqlite3 --foreground-scripts
+          npx --no-install fumadocs-mdx
+      - name: Verify the installed security dependency graph
+        id: dependency_security
+        continue-on-error: true
+        timeout-minutes: 3
+        working-directory: ${{ runner.temp }}/omniroute-fixture
+        run: node nexa/tests/verify-installed-dependency-security.mjs
       - name: Reproduce and correct inclusive usage totals and assistant phase loss
         id: quality_usage
         continue-on-error: true
@@ -364,7 +373,7 @@ jobs:
           python3 - <<'PYCODE'
           import json, os
           steps = json.loads(os.environ["UPGRADE_GATE_OUTCOMES"])
-          expected = ['quality_usage', 'native_incidents', 'resilience_budget', 'effort_tests', 'production_efforts', 'cache_cost_baseline', 'production_migrations', 'deployment_helpers', 'migrations', 'baseline', 'native_tests', 'extended_tests', 'stream_tests', 'compatibility', 'interface_tests', 'core_types', 'docs_types', 'full_types', 'compare_types', 'lint', 'docs', 'production_tooling', 'production', 'formatting']
+          expected = ['dependency_security', 'quality_usage', 'native_incidents', 'resilience_budget', 'effort_tests', 'production_efforts', 'cache_cost_baseline', 'production_migrations', 'deployment_helpers', 'migrations', 'baseline', 'native_tests', 'extended_tests', 'stream_tests', 'compatibility', 'interface_tests', 'core_types', 'docs_types', 'full_types', 'compare_types', 'lint', 'docs', 'production_tooling', 'production', 'formatting']
           failed = {name: steps.get(name, {}).get("outcome", "missing") for name in expected if steps.get(name, {}).get("outcome") != "success"}
           print(json.dumps({"failedGates": failed}, indent=2))
           if failed: raise SystemExit(1)
@@ -394,6 +403,8 @@ jobs:
             ${{ runner.temp }}/tooling-node26.tap
             ${{ runner.temp }}/tooling-node24.tap
             ${{ runner.temp }}/native-validation.json
+            ${{ runner.temp }}/dependency-installed-security.json
+            ${{ runner.temp }}/dependency-production-audit.json
             ${{ runner.temp }}/upgrade-migrations.tap
             ${{ runner.temp }}/upgrade-compatibility.tap
             ${{ runner.temp }}/pristine-tsc-diagnostics.log

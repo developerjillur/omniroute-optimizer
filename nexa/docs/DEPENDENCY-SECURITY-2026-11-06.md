@@ -47,6 +47,19 @@ Helper প্রত্যেক সংশোধিত dependency-এর সম�
 downgrade করে zero দেখানো হবে না। Dependency সংস্করণ বদলের পরে পূর্ণ source
 validation এবং পরবর্তী অনুমোদিত build/package validation প্রয়োজন।
 
+`4d4f8d87d3407ce8c700ed5f4c153f927242bfe8`-এর
+[lock preparation](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42160082877)
+সম্পূর্ণ হয়েছে। Production audit-এর 13টি flagged entry থেকে 0 হয়েছে। আলাদা
+development graph-এ এখনও 61টি flagged entry আছে: 13 high, 45 moderate ও 3 low;
+critical 0। এগুলো cleared বলা হচ্ছে না এবং runtime intrusion-এর প্রমাণও নয়।
+Major dependency changes প্রয়োজন এমন development findings পর্যালোচনাধীন।
+
+এই candidate-এর দুই package patch overlay-তে সংরক্ষিত। Mandatory CI প্রথমে
+pristine dependency দিয়ে upstream TypeScript record নেয়, তারপর applied lock
+দিয়ে আবার install করে। Installed package ও lock version মেলানো এবং নতুন
+production audit-এ zero finding বাধ্যতামূলক। ফলে আগের installed dependency
+থেকে পাওয়া PASS নতুন version-এর validation হিসেবে ব্যবহৃত হবে না।
+
 - [DOMPurify advisory](https://github.com/cure53/DOMPurify/security/advisories/GHSA-cg2g-xh64-v4q7)
 - [Body-parser advisory](https://github.com/expressjs/body-parser/security/advisories/GHSA-27r3-jxmh-p828)
 - [Undici TLS advisory](https://github.com/nodejs/undici/security/advisories/GHSA-2m5v-pch6-74hx)

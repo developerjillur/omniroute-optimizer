@@ -96,6 +96,9 @@ const receipt = {
   runUrl: `https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`,
   upstreamBase: manifest.upstreamBase,
   inventorySha256: hash(fs.readFileSync("overlay-inventory.json")),
+  dependencySecurity: JSON.parse(
+    fs.readFileSync(path.join(directory, "dependency-installed-security.json"), "utf8")
+  ),
   primaryRuntime,
   productionRuntime: process.version,
   baseline: tap("native-red.tap", true),

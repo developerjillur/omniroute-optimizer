@@ -38,12 +38,22 @@ Other Opus capability, pricing, thinking and protocol assertions remain.
 
 ## Validation and release status
 
-Status: **new focused regressions passed in the first CI run; corrected related
-suite, full CI and local acceptance pending**. The first run reproduced 10
-assertion failures in 12 baseline tests, then passed all 15 new regressions. Its
-related suite passed 44 of 45 tests; the existing implicit-downgrade expectation
-above caused the failure and is now explicitly aligned with Nexa's existing
-native-model policy. This is not a full-source CI or live acceptance PASS.
+Status: **functional suites passed; final source CI and local acceptance
+pending**. The first run reproduced 10 assertion failures in 12 baseline tests
+and passed all 15 new regressions. Its related suite passed 44 of 45 tests; the
+existing implicit-downgrade expectation above caused the failure and was aligned
+with Nexa's existing native-model policy.
+
+The next run passed the focused 45/45, complete compatibility 1320/1320 and
+production Node native 262/262 suites. These counts overlap and must not be
+added. Release still stopped: the settings-plan return type lost the known
+owner fields in three test diagnostics, and the route fixture had two lint
+errors. The correction preserves the generic settings type, uses a typed-safe
+global fixture assignment and renames an unused callback argument. Assertions,
+the 6529 compiler ceiling and the zero-new-diagnostics gate remain unchanged.
+The full compiler completed with 6513 diagnostics before this correction; that
+run is retained as a failure, not accepted merely because it was under the
+ceiling. This is not a full-source CI or live acceptance PASS.
 
 The focused regression lane executes the prior source first and
 requires assertion failures, then the fixed source. Environment/import errors,

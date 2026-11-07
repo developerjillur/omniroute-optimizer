@@ -14,7 +14,7 @@ async function fixture(initial?: Record<string, unknown>) {
   if (initial) await fs.writeFile(filename, JSON.stringify(initial));
   const state = { filename, backups: 0, saved: 0 };
   const key = `fixture${Date.now()}${Math.random().toString(36).slice(2)}`;
-  (globalThis as any)[key] = state;
+  Reflect.set(globalThis, key, state);
   const helper = pathToFileURL(path.resolve("src/shared/services/claudeCliConfig.ts")).href;
   const replacements: Record<string, string> = {
     "next/server": "export const NextResponse={json:(...args)=>Response.json(...args)};",
@@ -36,7 +36,7 @@ async function fixture(initial?: Record<string, unknown>) {
   );
   source = stripTypeScriptTypes(source, { mode: "strip" }).replace(
     /from\s+(["'])([^"']+)\1/g,
-    (match, quote, specifier) => {
+    (match, _quote, specifier) => {
       const code = replacements[specifier];
       return code
         ? `from ${JSON.stringify("data:text/javascript," + encodeURIComponent(code))}`

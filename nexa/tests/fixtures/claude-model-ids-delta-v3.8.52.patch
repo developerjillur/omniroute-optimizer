@@ -758,8 +758,8 @@ diff --git a/src/shared/services/claudeCliConfig.ts b/src/shared/services/claude
 +export { normalizeClaudeModelId };
 +
 +/** Merge only requested fields; Fable remains an independently managed owner choice. */
-+export function planClaudeSettings(
-+  currentSettings: Record<string, any>,
++export function planClaudeSettings<Settings extends Record<string, any>>(
++  currentSettings: Settings,
 +  requestedEnv: Record<string, string>
 +) {
 +  const env = { ...(currentSettings.env || {}) };

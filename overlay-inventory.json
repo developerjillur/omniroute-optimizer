@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
-  "trackedNexaFiles": 493,
-  "totalNexaBytes": 2238446,
+  "trackedNexaFiles": 494,
+  "totalNexaBytes": 2239851,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -517,9 +517,9 @@
     {
       "path": "nexa/docs/CLAUDE-CODE-MODEL-IDS-2026-11-08.md",
       "mode": "100644",
-      "gitBlobSha": "a8a47fd17f6084fba0ec1692b7ac53186d74be6a",
-      "bytes": 5453,
-      "sha256": "9aed7634658321e2aff017ce3ada137770873add9676af7e94ccf2302ec97d46"
+      "gitBlobSha": "aeeda9f349dc6be8efbe7f5d6a8623c119bc94c1",
+      "bytes": 6095,
+      "sha256": "a70d3f30920b394ef1ce1c4d620e3763b662fc82fdf0a7fff644efcbd8008ce0"
     },
     {
       "path": "nexa/docs/CLAUDE-FALLBACK-QUOTA-2026-10-06.md",
@@ -1273,9 +1273,9 @@
     {
       "path": "nexa/new/tests/unit/claude-model-settings-route.test.ts",
       "mode": "100644",
-      "gitBlobSha": "3615422489c7a75be3ae9f019add981bf45a1a70",
-      "bytes": 6105,
-      "sha256": "acc511381151c8d5882e7c82cfab9d25523a6795cc249e1bcdc9cae7f7593ea9"
+      "gitBlobSha": "cf3d4a044f23f7ec86b3f3788a6c48962f860e27",
+      "bytes": 6109,
+      "sha256": "a4a9f4b464fbead49304a20bed7387623d0b97066ad8a799d02511709274cfe7"
     },
     {
       "path": "nexa/new/tests/unit/claude-quota-alert-vs-exhaustion.test.ts",
@@ -2736,9 +2736,9 @@
     {
       "path": "nexa/patches/src__shared__services__claudeCliConfig.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "492dbbd318e481196c083a3ef34a28230403c55e",
-      "bytes": 1664,
-      "sha256": "3b183f6f8f8c17f4ae52bd5a0171c2bf541ffa6909ec9c647b0b65fee369c485"
+      "gitBlobSha": "b1f8293f30923dc19f726417d0507cd0dba3c12b",
+      "bytes": 1691,
+      "sha256": "32f05cb649776bf76856e9cdf3122cd9646d57bfe07ba0fb3cf7088af7d84a37"
     },
     {
       "path": "nexa/patches/src__shared__utils__classify429.ts.patch",
@@ -3247,9 +3247,16 @@
     {
       "path": "nexa/tests/fixtures/claude-model-ids-delta-v3.8.52.patch",
       "mode": "100644",
-      "gitBlobSha": "dea0141977ab35b5a0f90533b8e62147ac17e72c",
-      "bytes": 29017,
-      "sha256": "12c8b29654c2d98d029ccfca1afee4697f5645fe6d08cf9ee5025055f1e92cff"
+      "gitBlobSha": "28fca332d36a4b9fd28f565170b0e07b0809f197",
+      "bytes": 29044,
+      "sha256": "2ba1c40b4a2937dc218be714ddd21f6322bde0e845affb8f6b52d649b5e8e36a"
+    },
+    {
+      "path": "nexa/tests/fixtures/claude-settings-type-contract.ts",
+      "mode": "100644",
+      "gitBlobSha": "7fc84afee41bcd1d6d720ccbeef20fdb2106ae43",
+      "bytes": 705,
+      "sha256": "88e5c946ba9cab0108524c8a896c7c874348535456a2b715efa6616a86118819"
     },
     {
       "path": "nexa/tests/fixtures/native-attribution-delta-v3.8.52.patch",

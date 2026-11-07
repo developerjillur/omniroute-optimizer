@@ -30,14 +30,22 @@ failure. Registry insertion order also selected older family defaults.
 
 The pre-existing native model metadata was preserved while extracting the shared
 catalog. `claude-haiku-5-5` is added with an ID and name; no unverified capability
-or context-window values are invented. The previous upstream test intentionally
-selected Opus 5 over 5.5 for stale catalogs. That single expectation now follows
-the requested newest-version policy; other Opus and protocol assertions remain.
+or context-window values are invented. Two scoped upstream expectations are
+ported: the CLI default follows the requested newest-version policy, and an
+explicit native Opus request cannot silently downgrade. The latter policy was
+already implemented before this change; its runtime implementation is unchanged.
+Other Opus capability, pricing, thinking and protocol assertions remain.
 
 ## Validation and release status
 
-Status at preparation: **source prepared; current-change CI and local acceptance
-pending**. The focused regression lane executes the prior source first and
+Status: **new focused regressions passed in the first CI run; corrected related
+suite, full CI and local acceptance pending**. The first run reproduced 10
+assertion failures in 12 baseline tests, then passed all 15 new regressions. Its
+related suite passed 44 of 45 tests; the existing implicit-downgrade expectation
+above caused the failure and is now explicitly aligned with Nexa's existing
+native-model policy. This is not a full-source CI or live acceptance PASS.
+
+The focused regression lane executes the prior source first and
 requires assertion failures, then the fixed source. Environment/import errors,
 skips and resource stops do not count as a reproduced regression.
 

@@ -7,7 +7,7 @@
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
   "trackedNexaFiles": 493,
-  "totalNexaBytes": 2237673,
+  "totalNexaBytes": 2238446,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -517,9 +517,9 @@
     {
       "path": "nexa/docs/CLAUDE-CODE-MODEL-IDS-2026-11-08.md",
       "mode": "100644",
-      "gitBlobSha": "eee438d38f7a4adcfce7cc20a5d7822c28bd0394",
-      "bytes": 4933,
-      "sha256": "d5fcd67c63872cfb82087492880d3b9889f1239d44217ef2769022394c176883"
+      "gitBlobSha": "a8a47fd17f6084fba0ec1692b7ac53186d74be6a",
+      "bytes": 5453,
+      "sha256": "9aed7634658321e2aff017ce3ada137770873add9676af7e94ccf2302ec97d46"
     },
     {
       "path": "nexa/docs/CLAUDE-FALLBACK-QUOTA-2026-10-06.md",
@@ -2904,9 +2904,9 @@
     {
       "path": "nexa/patches/tests__unit__claude-opus-5-5.test.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "1f5898cfc17582c6a80d07292b74c85e8b7bea21",
-      "bytes": 894,
-      "sha256": "42aa5fdbcdfcd42e139b02942d2d215c1c6b70373fe5215362d6a30d27535469"
+      "gitBlobSha": "51aa2e58a357a2b5338f7f15042247e887cdcfcd",
+      "bytes": 1147,
+      "sha256": "f97f29553c915c0f9c334203b5960eccaa499079930a050fc2c4628bd225a220"
     },
     {
       "path": "nexa/patches/tests__unit__cli-helper__config-generator.test.ts.patch",

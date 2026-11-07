@@ -133,9 +133,10 @@ function cloneChunk(base: Record<string, unknown>, delta: Record<string, unknown
 
 /** Split one OpenAI chunk's `content` into content / reasoning_content sub-chunks. */
 function rewriteChunk(json: Record<string, unknown>, splitter: TagSplitter): string[] {
-  const choice = (Array.isArray(json.choices) ? json.choices[0] : null) as
-    | Record<string, unknown>
-    | null;
+  const choice = (Array.isArray(json.choices) ? json.choices[0] : null) as Record<
+    string,
+    unknown
+  > | null;
   const delta = (choice?.delta ?? null) as Record<string, unknown> | null;
   const content = delta?.content;
   if (typeof content !== "string" || content.length === 0) {
@@ -235,7 +236,7 @@ function tagSplit(content: string): { content: string; reasoning: string } {
   const segs = [...splitter.push(content), ...splitter.flush()];
   let reasoning = "";
   let body = "";
-  for (const s of segs) (s.kind === "reasoning" ? (reasoning += s.text) : (body += s.text));
+  for (const s of segs) s.kind === "reasoning" ? (reasoning += s.text) : (body += s.text);
   return { content: body, reasoning };
 }
 
@@ -289,9 +290,7 @@ export function reassembleAndSplit(text: string): unknown {
     }
     if (typeof j.id === "string") id = j.id;
     if (typeof j.model === "string") model = j.model;
-    const ch = (Array.isArray(j.choices) ? j.choices[0] : null) as
-      | Record<string, unknown>
-      | null;
+    const ch = (Array.isArray(j.choices) ? j.choices[0] : null) as Record<string, unknown> | null;
     const d = (ch?.delta ?? null) as Record<string, unknown> | null;
     const m = (ch?.message ?? null) as Record<string, unknown> | null;
     if (typeof d?.content === "string") content += d.content;

@@ -1,0 +1,48 @@
+{
+  "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
+  "version": "3.8.52",
+  "patches": [
+    {
+      "patch": "bin__cli__utils__pid.mjs.patch",
+      "target": "bin/cli/utils/pid.mjs",
+      "patchSha256": "b52cfb2a35454e25817744450f1ac5d87779df524476d1fb89623bdc0e762472",
+      "upstreamBlob": "919f79df19c546f4d3593ec9985ad6061a0acd3b",
+      "reason": "Behavior incorporated upstream or relocated to the new owning helper; covered by retained regressions."
+    },
+    {
+      "patch": "open-sse__handlers__responseTranslator.ts.patch",
+      "target": "open-sse/handlers/responseTranslator.ts",
+      "patchSha256": "da08bb879b2f2e27493e0e4ce800818707d6fa710d52da3d7616db99d49a8f50",
+      "upstreamBlob": "dd61cd2bdeee0d7e6d6909fde64bef9a12c47ef8",
+      "reason": "Behavior incorporated upstream or relocated to the new owning helper; covered by retained regressions."
+    },
+    {
+      "patch": "src__lib__usage__usageHistory.ts.patch",
+      "target": "src/lib/usage/usageHistory.ts",
+      "patchSha256": "5f0f174ead14b2810435b1486bbc42a4522645fad85dfa8638dba9c71eb44dbd",
+      "upstreamBlob": "314671a4ca00b659561b5161475ee78cbe5b4b4a",
+      "reason": "Behavior incorporated upstream or relocated to the new owning helper; covered by retained regressions."
+    },
+    {
+      "patch": "tests__unit__cli-serve-port-in-use-preflight.test.mjs.patch",
+      "target": "tests/unit/cli-serve-port-in-use-preflight.test.mjs",
+      "patchSha256": "a1427e692a5dac8ac34a7d175a64c7383a2b9ca3b08815ef91781e9da29149a5",
+      "upstreamBlob": "72d4db2238ffb0a0e559a3b584f6cd447b05dcb1",
+      "reason": "Behavior incorporated upstream or relocated to the new owning helper; covered by retained regressions."
+    },
+    {
+      "patch": "tests__unit__proxyfetch-direct-response-start-timeout-10214.test.ts.patch",
+      "target": "tests/unit/proxyfetch-direct-response-start-timeout-10214.test.ts",
+      "patchSha256": "71de0edf4cc3a2317585d1fc7e9a809c7a8d26deb15fd77a02dc49f6fa1c367d",
+      "upstreamBlob": "977fa08f2c85ad1721f6425caa3a77aae428fac4",
+      "reason": "Behavior incorporated upstream or relocated to the new owning helper; covered by retained regressions."
+    },
+    {
+      "patch": "tests__unit__usage-history-provider-alias-13459.test.ts.patch",
+      "target": "tests/unit/usage-history-provider-alias-13459.test.ts",
+      "patchSha256": "ec1f934bd6c7f19c7a7d121d170aed37c7b01439dafd45e22738ec8d5e7fbb13",
+      "upstreamBlob": "e3e3e2a726fba680a5b0129275d4e7650fa3cdcb",
+      "reason": "Behavior incorporated upstream or relocated to the new owning helper; covered by retained regressions."
+    }
+  ]
+}

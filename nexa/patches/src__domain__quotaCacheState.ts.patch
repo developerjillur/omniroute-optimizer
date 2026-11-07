@@ -1,8 +1,8 @@
 diff --git a/src/domain/quotaCacheState.ts b/src/domain/quotaCacheState.ts
-index 2dc86449f..e5d1ed830 100644
+index 2dc86449f04d0c74564137fc66dd0a154be48d89..e5d1ed8305c47484fd5821af110d045ff7f39dd1 100644
 --- a/src/domain/quotaCacheState.ts
 +++ b/src/domain/quotaCacheState.ts
-@@ -60,6 +60,7 @@ export const EXHAUSTED_MAX_PARK_MS = 30 * 60 * 1000;
+@@ -60,6 +60,7 @@
  interface QuotaCacheState {
    cache: Map<string, QuotaCacheEntry>;
    refreshingSet: Set<string>;
@@ -10,7 +10,7 @@ index 2dc86449f..e5d1ed830 100644
    // #14359 — connectionId → epoch ms the healthy override stands the predicates down; shared state per #8065.
    healthyUntil: Map<string, number>;
    refreshTimer: ReturnType<typeof setInterval> | null;
-@@ -75,6 +76,7 @@ export function getQuotaCacheState(): QuotaCacheState {
+@@ -75,6 +76,7 @@
      globalThis.__omnirouteQuotaCacheState = {
        cache: new Map(),
        refreshingSet: new Set(),

@@ -1,0 +1,126 @@
+diff --git a/nexa/deploy/native-ingress.mjs b/nexa/deploy/native-ingress.mjs
+index 383ee126779f345dbc918298555293b4f9cbb1c1..35715d29ab232d31b06166c15d77ef9214df427a 100644
+--- a/nexa/deploy/native-ingress.mjs
++++ b/nexa/deploy/native-ingress.mjs
+@@ -78,49 +78,82 @@
+ export function createIngress({
+   backendPort = 8443,
+   fallback = publicAnthropicAddress,
++  allowVendorFallback = false,
+   publicPort = 443,
+   localRouterHost = "127.0.0.2",
+   localRouterPort = 443,
+   nativeIdleTimeoutMs = 1_320_000,
++  backendWaitMs = 30_000,
++  backendRetryMs = 100,
+ } = {}) {
++  if (!Number.isInteger(backendWaitMs) || backendWaitMs < 0 || backendWaitMs > 60_000)
++    throw new RangeError("Native Bridge connection budget must be between 0 and 60000 ms");
++  if (!Number.isInteger(backendRetryMs) || backendRetryMs < 1 || backendRetryMs > 1000)
++    throw new RangeError("Native Bridge retry delay must be between 1 and 1000 ms");
++  if (typeof allowVendorFallback !== "boolean")
++    throw new TypeError("Vendor fallback requires an explicit boolean choice");
+   return net.createServer({ allowHalfOpen: true }, (client) => {
+     let upstream;
+     let closed = false;
+     let pending = Buffer.alloc(0);
+     let decided = false;
+     let sniffTimer;
++    let connectTimer;
++    let retryTimer;
++    let backendDeadline = 0;
++    let retryDelay = backendRetryMs;
+     const drop = () => {
++      if (closed) return;
+       closed = true;
+       clearTimeout(sniffTimer);
++      clearTimeout(connectTimer);
++      clearTimeout(retryTimer);
++      pending = Buffer.alloc(0);
+       client.destroy();
+       upstream?.destroy();
+     };
+     client.on("error", drop);
+     client.on("close", drop);
+-    const connect = (host, port, mayFallback) => {
++    const connect = (host, port, bridge) => {
+       if (closed) return;
+       upstream = net.connect({ host, port, allowHalfOpen: true });
+-      upstream.setTimeout(mayFallback ? nativeIdleTimeoutMs : 600_000, drop);
+-      const timer = setTimeout(() => upstream.destroy(new Error("Connect timeout")), 5_000);
+-      upstream.once("connect", () => {
+-        clearTimeout(timer);
+-        upstream.removeAllListeners("error");
+-        upstream.on("error", drop);
+-        upstream.on("close", () => client.end());
+-        upstream.write(pending);
+-        pending = Buffer.alloc(0);
+-        client.pipe(upstream).pipe(client);
+-        if (client.readableEnded) upstream.end();
+-        client.resume();
+-      });
+-      upstream.once("error", async () => {
+-        clearTimeout(timer);
+-        if (!mayFallback) return drop();
++      const attempt = upstream;
++      attempt.setTimeout(bridge ? nativeIdleTimeoutMs : 600_000, drop);
++      const connectBudget = bridge
++        ? Math.min(5000, Math.max(1, backendDeadline - Date.now()))
++        : 5000;
++      connectTimer = setTimeout(() => attempt.destroy(new Error("Connect timeout")), connectBudget);
++      const onConnectError = async () => {
++        clearTimeout(connectTimer);
++        if (closed || !bridge) return drop();
++        const remaining = backendDeadline - Date.now();
++        if (remaining > 0) {
++          retryTimer = setTimeout(() => connect(host, port, true), Math.min(retryDelay, remaining));
++          retryDelay = Math.min(1000, retryDelay * 2);
++          return;
++        }
++        // A mapped GPT conversation must not silently become an Anthropic
++        // request during a local Bridge restart. No TLS bytes have been sent.
++        if (!allowVendorFallback) return drop();
+         try {
+           connect(await fallback(), publicPort, false);
+         } catch {
+           drop();
+         }
++      };
++      attempt.once("error", onConnectError);
++      attempt.once("connect", () => {
++        clearTimeout(connectTimer);
++        if (closed) return attempt.destroy();
++        attempt.removeListener("error", onConnectError);
++        // After the first write, never retry or choose another upstream.
++        attempt.on("error", drop);
++        attempt.on("close", () => client.end());
++        attempt.write(pending);
++        pending = Buffer.alloc(0);
++        client.pipe(attempt).pipe(client);
++        if (client.readableEnded) attempt.end();
++        client.resume();
+       });
+     };
+     const choose = (host) => {
+@@ -129,8 +162,10 @@
+       clearTimeout(sniffTimer);
+       client.pause();
+       client.removeListener("data", sniff);
+-      if (host === "api.anthropic.com") connect("127.0.0.1", backendPort, true);
+-      else connect(localRouterHost, localRouterPort, false);
++      if (host === "api.anthropic.com") {
++        backendDeadline = Date.now() + backendWaitMs;
++        connect("127.0.0.1", backendPort, true);
++      } else connect(localRouterHost, localRouterPort, false);
+     };
+     const sniff = (chunk) => {
+       pending = Buffer.concat([pending, chunk]);
+@@ -191,7 +226,7 @@
+     process.setuid("nobody");
+   }
+   console.log(
+-    "Native ingress: loopback :443; api.anthropic.com -> :8443 with direct vendor fallback; other SNI -> Local router 127.0.0.2:443; untouched TLS."
++    "Native ingress: loopback :443; api.anthropic.com -> :8443 with bounded local Bridge retry and no direct vendor fallback; other SNI -> Local router 127.0.0.2:443; untouched TLS."
+   );
+   for (const signal of ["SIGTERM", "SIGINT"])
+     process.on(signal, () => {

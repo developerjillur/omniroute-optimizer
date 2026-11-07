@@ -1,31 +1,33 @@
 diff --git a/tests/unit/executor-claude-identity.test.ts b/tests/unit/executor-claude-identity.test.ts
-index 76e58545a..ddfac927c 100644
+index 76e58545a9e12bd7c0082ec3432185673d4ac4c9..ddfac927cf1657dc2fb607f2e6dcaa57f6d596a4 100644
 --- a/tests/unit/executor-claude-identity.test.ts
 +++ b/tests/unit/executor-claude-identity.test.ts
-@@ -169,16 +169,24 @@ describe("claudeIdentity — selectBetaFlags", () => {
+@@ -169,14 +169,22 @@
      assert.ok(flags.includes("claude-code-20250219"));
    });
  
 -  it("includes context-1m for opus full agent", () => {
-+  it("includes context-1m for eligible Opus 4.6 full agent", () => {
-     const body = {
-       system: "test",
-       tools: [{ name: "test_tool" }],
-     };
+-    const body = {
+-      system: "test",
+-      tools: [{ name: "test_tool" }],
+-    };
 -    const flags = mod.selectBetaFlags(body, "claude-opus-4");
++  it("includes context-1m for eligible Opus 4.6 full agent", () => {
++    const body = {
++      system: "test",
++      tools: [{ name: "test_tool" }],
++    };
 +    const flags = mod.selectBetaFlags(body, "claude-opus-4-6");
      assert.ok(flags.includes("context-1m-2025-08-07"));
      assert.ok(flags.includes("mid-conversation-system-2026-04-07"));
-   });
- 
++  });
++
 +  it("does not inject context-1m for unsupported Opus 4", () => {
 +    const flags = mod.selectBetaFlags(
 +      { system: "test", tools: [{ name: "test_tool" }] },
 +      "claude-opus-4"
 +    );
 +    assert.ok(!flags.includes("context-1m-2025-08-07"));
-+  });
-+
+   });
+ 
    it("omits the legacy context-1m beta for Opus 5", () => {
-     const body = {
-       system: "test",

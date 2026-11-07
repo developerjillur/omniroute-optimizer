@@ -1,11 +1,11 @@
 diff --git a/open-sse/utils/earlyStreamKeepalive.ts b/open-sse/utils/earlyStreamKeepalive.ts
-index c70180f..16b5783 100644
+index 893b752cf336258afaa3fe891af09b1364009e6b..df201e2798f4636a4d3c401544c43f5dafec2daa 100644
 --- a/open-sse/utils/earlyStreamKeepalive.ts
 +++ b/open-sse/utils/earlyStreamKeepalive.ts
-@@ -216,13 +216,25 @@ export async function withEarlyStreamKeepalive(
+@@ -759,13 +759,25 @@
      },
    });
-
+ 
 +  // Slow-path SSE head is committed HERE, before the upstream handler resolves, so the
 +  // source `response` is NOT in scope yet — reading response.headers threw ReferenceError
 +  // (→ 500 on every slow streaming request, e.g. tool-call turns). Build fresh transport

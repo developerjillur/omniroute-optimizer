@@ -1,8 +1,8 @@
 diff --git a/src/app/(dashboard)/dashboard/tools/agent-bridge/AgentBridgePageClient.tsx b/src/app/(dashboard)/dashboard/tools/agent-bridge/AgentBridgePageClient.tsx
-index 7f7294c98..2b44845c2 100644
+index 7f7294c982b2023eb9ab673cb502de5360de9509..2b44845c2a8ef1b3afed4ab1244478a415b8e8b2 100644
 --- a/src/app/(dashboard)/dashboard/tools/agent-bridge/AgentBridgePageClient.tsx
 +++ b/src/app/(dashboard)/dashboard/tools/agent-bridge/AgentBridgePageClient.tsx
-@@ -119,9 +119,9 @@ export default function AgentBridgePageClient({
+@@ -119,9 +119,9 @@
    const handleServerAction = useCallback(
      async (action: "start" | "stop" | "restart" | "trust-cert" | "regenerate-cert") => {
        setActionError(null);

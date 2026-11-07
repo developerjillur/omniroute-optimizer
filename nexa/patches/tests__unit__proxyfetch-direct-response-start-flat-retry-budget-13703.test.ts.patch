@@ -1,8 +1,8 @@
 diff --git a/tests/unit/proxyfetch-direct-response-start-flat-retry-budget-13703.test.ts b/tests/unit/proxyfetch-direct-response-start-flat-retry-budget-13703.test.ts
-index 12a40c801b163278fc7fc6a909c49b189ac92545..36ccea5b3a8a3798310c4c83aecb58375d619d04 100644
+index a761e26da6b2ef867bafd199b0cd0ae655d115d7..02af4eab240365f59c29cb229a001b028410adf4 100644
 --- a/tests/unit/proxyfetch-direct-response-start-flat-retry-budget-13703.test.ts
 +++ b/tests/unit/proxyfetch-direct-response-start-flat-retry-budget-13703.test.ts
-@@ -29,7 +29,10 @@
+@@ -33,7 +33,10 @@
    const attemptStarts: number[] = [];
    const attemptAbortedAfter: number[] = [];
  
@@ -14,7 +14,7 @@ index 12a40c801b163278fc7fc6a909c49b189ac92545..36ccea5b3a8a3798310c4c83aecb5837
      const start = Date.now();
      attemptStarts.push(start);
      return new Promise<Response>((_, reject) => {
-@@ -40,10 +43,10 @@
+@@ -44,10 +47,10 @@
            reject(
              init.signal!.reason instanceof Error
                ? init.signal!.reason
@@ -27,19 +27,9 @@ index 12a40c801b163278fc7fc6a909c49b189ac92545..36ccea5b3a8a3798310c4c83aecb5837
        );
      });
    };
-@@ -54,20 +57,24 @@
-     withFastTimeout(FLAT_TIMEOUT_MS, () =>
-       proxyFetch(
-         "https://slow-ttfb.example/v1/chat/completions",
--        { method: "POST", signal: callerDeadlineSignal },
--        { undiciFetch: mockUndici, nativeFetch: mockNative }
--      )
--    )
-+        { method: "GET", signal: callerDeadlineSignal },
-+        { undiciFetch: mockUndici, nativeFetch: mockNative },
-+      ),
-+    ),
-   );
+@@ -68,14 +71,18 @@
+     clearTimeout(callerDeadlineTimer);
+   }
  
 -  assert.equal(attemptStarts.length, 2, "pooled attempt + fresh-socket retry must both fire");
 +  assert.equal(
@@ -58,7 +48,7 @@ index 12a40c801b163278fc7fc6a909c49b189ac92545..36ccea5b3a8a3798310c4c83aecb5837
    );
  
    assert.ok(
-@@ -76,6 +83,6 @@
+@@ -84,6 +91,6 @@
        `budget (~${LARGER_CALLER_DEADLINE_MS - FLAT_TIMEOUT_MS}ms available), not the ` +
        `identical flat ${FLAT_TIMEOUT_MS}ms window. Got ${secondAttemptDuration}ms — ` +
        `proves the retry reuses the same flat budget as the pooled attempt instead of ` +

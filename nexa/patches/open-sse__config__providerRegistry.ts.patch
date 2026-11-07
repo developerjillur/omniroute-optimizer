@@ -1,0 +1,38 @@
+diff --git a/open-sse/config/providerRegistry.ts b/open-sse/config/providerRegistry.ts
+--- a/open-sse/config/providerRegistry.ts
++++ b/open-sse/config/providerRegistry.ts
+@@ -10,6 +10,7 @@
+ } from "./providers/registry/alibaba/index.ts";
+ export { REGISTRY } from "./providers/index.ts";
+ import { REGISTRY } from "./providers/index.ts";
++import { selectClaudeFamilyModels } from "../../src/mitm/_internal/claudeModels.cjs";
+ // Imported from `privateHost` rather than `outboundUrlGuard`: this module is reachable from
+ // `ProviderDetailPageClient.tsx`, so anything it pulls in has to survive a browser bundle
+ // (#11122). `privateHost` is platform-free by contract; the guard module is not.
+@@ -309,8 +310,8 @@
+
+ /**
+  * Derive the latest fable/opus/sonnet/haiku model IDs from the `claude` registry entry.
+- * Picks the first model whose ID matches each family pattern — registry order
+- * determines precedence, so newer models should be listed first.
++ * Compare numeric versions and optional release dates independently of registry order.
++ * Fable is exposed for explicit selection only; CLI defaults do not select it.
+  */
+ export function getClaudeCodeDefaultModels(): {
+   fable: string;
+@@ -318,14 +319,7 @@
+   sonnet: string;
+   haiku: string;
+ } {
+-  const models = REGISTRY.claude?.models ?? [];
+-  const find = (pattern: RegExp) => models.find((m) => pattern.test(m.id))?.id ?? "";
+-  return {
+-    fable: find(/fable/i),
+-    opus: find(/opus/i),
+-    sonnet: find(/sonnet/i),
+-    haiku: find(/haiku/i),
+-  };
++  return selectClaudeFamilyModels(REGISTRY.claude?.models ?? []);
+ }
+
+ /**

@@ -1,8 +1,8 @@
 diff --git a/open-sse/handlers/chatCore/streamingPipeline.ts b/open-sse/handlers/chatCore/streamingPipeline.ts
-index b75c96e11..60a65dc34 100644
+index 65e95960f152738464fd9161fb6cd4c68bb761dd..5d7af44a0a60892d279474e885ecdebfb60588d1 100644
 --- a/open-sse/handlers/chatCore/streamingPipeline.ts
 +++ b/open-sse/handlers/chatCore/streamingPipeline.ts
-@@ -75,6 +75,8 @@ export function assembleStreamingPipeline(
+@@ -83,6 +83,8 @@
       * request's pre-handoff readiness gate, so slow-first-content reasoning
       * models keep the same generous budget in both phases. */
      contentStallTimeoutMs?: number;
@@ -11,7 +11,7 @@ index b75c96e11..60a65dc34 100644
    },
    deps: StreamingPipelineDeps = DEFAULT_DEPS
  ) {
-@@ -90,7 +92,11 @@ export function assembleStreamingPipeline(
+@@ -98,7 +100,11 @@
      args.providerResponse,
      args.transformStream,
      args.streamController,

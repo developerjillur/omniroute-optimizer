@@ -58,17 +58,17 @@ HTTP 200 + a multi-hundred-KB PNG = healthy.
 
 ## 3. Model matrix — what works and what does NOT (and why)
 
-| Model id | Works? | Auth | Notes |
-| --- | --- | --- | --- |
-| **`codex/gpt-5.5`** (alias `cx/gpt-5.5`) | ✅ **YES** | OmniRoute Codex **OAuth** (subscription) | The one subscription image model. `$0` per image. **Use this.** |
-| `antigravity/gemini-3.1-flash-image` | ✅ yes | Antigravity OAuth (subscription) | Fallback. Quality lower; hits `429 RESOURCE_EXHAUSTED` when quota drained. |
-| `openai/gpt-image-2` | ❌ no | — | `"No credentials for image provider: openai"` — the OpenAI provider was removed from OmniRoute for embeddings-isolation. |
-| `cx/gpt-image-2` | ❌ no | — | `"gpt-image-2 is not supported when using Codex with a ChatGPT account."` |
-| `codex/gpt-5.6`, `cx/gpt-5.6` | ❌ no | — | `"The 'gpt-5.6' model is not supported when using Codex with a ChatGPT account."` gpt-5.6 works for **coding/chat** via the Codex CLI, but the ChatGPT-account codex **image** endpoint only allows an upstream allowlist (today: `gpt-5.5`). Re-test when OpenAI widens it. |
+| Model id                                 | Works?     | Auth                                     | Notes                                                                                                                                                                                                                                                                        |
+| ---------------------------------------- | ---------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`codex/gpt-5.5`** (alias `cx/gpt-5.5`) | ✅ **YES** | OmniRoute Codex **OAuth** (subscription) | The one subscription image model. `$0` per image. **Use this.**                                                                                                                                                                                                              |
+| `antigravity/gemini-3.1-flash-image`     | ✅ yes     | Antigravity OAuth (subscription)         | Fallback. Quality lower; hits `429 RESOURCE_EXHAUSTED` when quota drained.                                                                                                                                                                                                   |
+| `openai/gpt-image-2`                     | ❌ no      | —                                        | `"No credentials for image provider: openai"` — the OpenAI provider was removed from OmniRoute for embeddings-isolation.                                                                                                                                                     |
+| `cx/gpt-image-2`                         | ❌ no      | —                                        | `"gpt-image-2 is not supported when using Codex with a ChatGPT account."`                                                                                                                                                                                                    |
+| `codex/gpt-5.6`, `cx/gpt-5.6`            | ❌ no      | —                                        | `"The 'gpt-5.6' model is not supported when using Codex with a ChatGPT account."` gpt-5.6 works for **coding/chat** via the Codex CLI, but the ChatGPT-account codex **image** endpoint only allows an upstream allowlist (today: `gpt-5.5`). Re-test when OpenAI widens it. |
 
 **Key lesson:** the codex **image** model is **`gpt-5.5`**, NOT `gpt-image-2`. An earlier
-belief that "OmniRoute can't do gpt-image-2 server-side" was true only for that *wrong model
-id* — `codex/gpt-5.5` works and always did.
+belief that "OmniRoute can't do gpt-image-2 server-side" was true only for that _wrong model
+id_ — `codex/gpt-5.5` works and always did.
 
 ## 4. How it works under the hood (OmniRoute internals)
 
@@ -122,7 +122,7 @@ autonomous brain's images through **this** endpoint:
 
 ## 7. Surviving OmniRoute updates — the checklist
 
-The codex image provider is **upstream's** code, so a future upstream change *could* move or
+The codex image provider is **upstream's** code, so a future upstream change _could_ move or
 rename it. After **every** `node nexa/update.mjs`:
 
 1. **Run the verify curl** in §2. HTTP 200 + a PNG → nothing to do.
@@ -146,7 +146,7 @@ env line, no redeploy.
 
 For completeness — the Codex **CLI** (`codex exec` → built-in `image_gen`) also renders
 images headless on Linux using a copied `~/.codex/auth.json` (proven 2026-07-21 on the VPS).
-It is the *full agentic loop* (can iterate/use skills) but costs ~18–20 K tokens/image and
+It is the _full agentic loop_ (can iterate/use skills) but costs ~18–20 K tokens/image and
 needs the binary + credential on the box. The Responses-API path above was chosen instead
 (faster, no subprocess, OmniRoute-managed OAuth). If a complex multi-image/iterative agentic
 workflow is ever needed, that path can be added as a separate provider — but it is **not**

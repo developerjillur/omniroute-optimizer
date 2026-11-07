@@ -1,0 +1,41 @@
+diff --git a/src/lib/usage/usageHistory/duplicateEntry.ts b/src/lib/usage/usageHistory/duplicateEntry.ts
+index 62106f6c444137b695241e382976464845231afb..25755fa18b5f73c56febbbe000bbf0805c4408ff 100644
+--- a/src/lib/usage/usageHistory/duplicateEntry.ts
++++ b/src/lib/usage/usageHistory/duplicateEntry.ts
+@@ -1,3 +1,5 @@
++import { getCacheCreationTtl } from "../cacheCreationTtl";
++import { getPromptCacheCreationTokens } from "../tokenAccounting";
+ import type { getDbInstance } from "../../db/core";
+ import { resolveProviderId } from "@/shared/constants/providers";
+ import type { UsageEntry } from "../usageHistory";
+@@ -12,7 +14,7 @@
+ ): boolean {
+   const existing = db
+     .prepare(
+-      `SELECT id, endpoint, cpa_auth_index FROM usage_history
++      `SELECT id, endpoint, cpa_auth_index, tokens_cache_creation, tokens_cache_creation_5m, tokens_cache_creation_1h FROM usage_history
+        WHERE timestamp = ?
+          AND COALESCE(provider, '')     = COALESCE(?, '')
+          AND COALESCE(model, '')        = COALESCE(?, '')
+@@ -30,7 +32,7 @@
+       entry.apiKeyId || null,
+       tokensInput,
+       tokensOutput
+-    ) as { id: number; endpoint: string | null; cpa_auth_index: string | null } | undefined;
++    ) as { id: number; endpoint: string | null; cpa_auth_index: string | null; tokens_cache_creation: number; tokens_cache_creation_5m: number | null; tokens_cache_creation_1h: number | null } | undefined;
+ 
+   if (!existing) return false;
+   // Back-fill endpoint if the original row missed it.
+@@ -47,5 +49,12 @@
+       existing.id
+     );
+   }
++  const ttl = getCacheCreationTtl(entry.tokens);
++  if (existing.tokens_cache_creation_5m === null && existing.tokens_cache_creation_1h === null &&
++      existing.tokens_cache_creation === getPromptCacheCreationTokens(entry.tokens) &&
++      (ttl.cacheCreation5m !== null || ttl.cacheCreation1h !== null)) {
++    db.prepare(`UPDATE usage_history SET tokens_cache_creation_5m = ?, tokens_cache_creation_1h = ? WHERE id = ?`)
++      .run(ttl.cacheCreation5m, ttl.cacheCreation1h, existing.id);
++  }
+   return true;
+ }

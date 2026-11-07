@@ -1,23 +1,24 @@
 diff --git a/src/lib/usage/providerWindowCosts.ts b/src/lib/usage/providerWindowCosts.ts
-index bc62c65080329ef5843eed9033ae74cf1f7f7229..ef518e6fa7614238c8a8305c2e4b8b94b214f2cb 100644
+index ac2addc706c0deb665766535265e90ac8d90e7a4..71049f25f778cdd9fae07d890062dd55e18175b3 100644
 --- a/src/lib/usage/providerWindowCosts.ts
 +++ b/src/lib/usage/providerWindowCosts.ts
-@@ -9,9 +9,13 @@
+@@ -10,6 +10,7 @@
  import { getCostSummary } from "@/domain/costRules";
  import { getApiKeys } from "@/lib/db/apiKeys";
  import { getDbInstance } from "@/lib/db/core";
--import { getAllProviderLimitsCache, getProviderLimitsCache } from "@/lib/db/providerLimits";
-+import {
-+  getAllProviderLimitsCache,
-+  getProviderLimitsCache,
-+} from "@/lib/db/providerLimits";
++import { cacheTtlTokenSql } from "@/lib/db/usageAnalytics/cacheTtl";
+ import { getAllProviderLimitsCache, getProviderLimitsCache } from "@/lib/db/providerLimits";
  import { getProviderQuotaWindowStart } from "@/lib/db/quotaResetEvents";
  import { calculateCost } from "@/lib/usage/costCalculator";
+@@ -18,6 +19,7 @@
+   RecordedCostMatcher,
+   type RecordedCostRow,
+ } from "./recordedCostMatcher";
 +import { GPT_6_1_SOL_LONG_CONTEXT_THRESHOLD } from "@/shared/constants/pricing/shared-tiers";
  
  const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
  const RECORDED_COST_MATCH_TOLERANCE_MS = 30_000;
-@@ -24,6 +28,7 @@
+@@ -30,6 +32,7 @@
  }
  
  interface AggregatedUsageCostRow {
@@ -25,24 +26,33 @@ index bc62c65080329ef5843eed9033ae74cf1f7f7229..ef518e6fa7614238c8a8305c2e4b8b94
    apiKeyId: string | null;
    apiKeyName: string | null;
    provider: string;
-@@ -117,7 +122,9 @@
- }
- 
- function toRecord(value: unknown): JsonRecord {
--  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-+  return value && typeof value === "object" && !Array.isArray(value)
-+    ? (value as JsonRecord)
-+    : {};
- }
- 
- function toNumber(value: unknown, fallback = 0): number {
-@@ -152,8 +159,11 @@
- function getProviderWindowStart(
+@@ -40,6 +43,10 @@
+   completionTokens: number;
+   cacheReadTokens: number;
+   cacheCreationTokens: number;
++  cacheCreation5mTokens?: number;
++  cacheCreation1hTokens?: number;
++  costCacheCreation5mTokens?: number;
++  costCacheCreation1hTokens?: number;
+   reasoningTokens: number;
+   totalTokens: number;
+   lastUsed: string | null;
+@@ -64,6 +71,10 @@
+   completionTokens: number;
+   cacheReadTokens: number;
+   cacheCreationTokens: number;
++  cacheCreation5mTokens?: number;
++  cacheCreation1hTokens?: number;
++  costCacheCreation5mTokens?: number;
++  costCacheCreation1hTokens?: number;
+   reasoningTokens: number;
+   totalTokens: number;
+   timestamp: string | null;
+@@ -162,7 +173,10 @@
    connectionId: string | null,
    resetMs: number,
--  nowMs: number
+   nowMs: number
 -): { startMs: number; source: ProviderWindowCostBreakdown["windowStartSource"] } | null {
-+  nowMs: number,
 +): {
 +  startMs: number;
 +  source: ProviderWindowCostBreakdown["windowStartSource"];
@@ -50,100 +60,16 @@ index bc62c65080329ef5843eed9033ae74cf1f7f7229..ef518e6fa7614238c8a8305c2e4b8b94
    if (!connectionId) return null;
    const resetIso = new Date(resetMs).toISOString();
    const start = getProviderQuotaWindowStart(connectionId, resetIso, nowMs);
-@@ -185,7 +195,8 @@
+@@ -348,7 +362,7 @@
  
- function scoreWeeklyQuota(name: string): number {
-   const normalized = name.trim().toLowerCase();
--  if (!normalized.includes("weekly") && !normalized.includes("7d")) return Number.NEGATIVE_INFINITY;
-+  if (!normalized.includes("weekly") && !normalized.includes("7d"))
-+    return Number.NEGATIVE_INFINITY;
- 
-   let score = 10;
-   if (normalized === "weekly" || /^weekly\s*\(/.test(normalized)) score += 100;
-@@ -198,7 +209,7 @@
- function selectWeeklyWindow(
-   provider: string,
-   connectionId: string | null,
--  nowMs: number
-+  nowMs: number,
- ): {
-   startMs: number;
-   resetMs: number | null;
-@@ -231,7 +242,9 @@
-       if (resetMs === null) continue;
-       const remainingPercent = getRemainingPercent(quota);
-       const usedPercent =
--        remainingPercent === null ? null : Math.max(0, Math.min(100, 100 - remainingPercent));
-+        remainingPercent === null
-+          ? null
-+          : Math.max(0, Math.min(100, 100 - remainingPercent));
-       if (
-         !selected ||
-         score > selected.score ||
-@@ -253,13 +266,14 @@
-     const providerWindowStart = getProviderWindowStart(
-       selected.connectionId,
-       selected.resetMs,
--      nowMs
-+      nowMs,
-     );
-     return {
-       startMs: providerWindowStart?.startMs ?? selected.resetMs - WEEK_MS,
-       resetMs: selected.resetMs,
-       source: "provider_weekly_reset",
--      windowStartSource: providerWindowStart?.source ?? "inferred_from_reset_at",
-+      windowStartSource:
-+        providerWindowStart?.source ?? "inferred_from_reset_at",
-       quotaName: selected.quotaName,
-       quotaUsedPercent: selected.quotaUsedPercent,
-       quotaRemainingPercent: selected.quotaRemainingPercent,
-@@ -277,7 +291,10 @@
-   };
- }
- 
--function makeApiKeyKey(apiKeyId: string | null, apiKeyName: string | null): string {
-+function makeApiKeyKey(
-+  apiKeyId: string | null,
-+  apiKeyName: string | null,
-+): string {
-   if (apiKeyId) return `id:${apiKeyId}`;
-   if (apiKeyName) return `name:${apiKeyName}`;
-   return "unattributed";
-@@ -303,8 +320,8 @@
-     new Set(
-       rows
-         .map((row) => (typeof row.apiKeyId === "string" ? row.apiKeyId : ""))
--        .filter((value) => value.length > 0)
--    )
-+        .filter((value) => value.length > 0),
-+    ),
-   );
- }
- 
-@@ -313,7 +330,7 @@
-   windowStartAt: string,
-   nowIso: string,
-   windowResetAt: string | null,
--  connectionId: string | null
-+  connectionId: string | null,
- ): UsageHistoryFilter {
-   const where = [
-     "LOWER(provider) = @provider",
-@@ -337,9 +354,11 @@
-   return { whereSql: where.join(" AND "), params };
- }
- 
--function fetchAggregatedUsageRows(filter: UsageHistoryFilter): AggregatedUsageCostRow[] {
-+function fetchAggregatedUsageRows(
-+  filter: UsageHistoryFilter,
-+): AggregatedUsageCostRow[] {
+ function fetchAggregatedUsageRows(filter: UsageHistoryFilter): AggregatedUsageCostRow[] {
    return getDbInstance()
 -    .prepare<AggregatedUsageCostRow>(
 +    .prepare(
        `
        SELECT
          NULLIF(api_key_id, '') as apiKeyId,
-@@ -347,6 +366,8 @@
+@@ -356,11 +370,15 @@
          LOWER(provider) as provider,
          LOWER(model) as model,
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
@@ -152,7 +78,23 @@ index bc62c65080329ef5843eed9033ae74cf1f7f7229..ef518e6fa7614238c8a8305c2e4b8b94
          COUNT(*) as requests,
          COALESCE(SUM(tokens_input), 0) as promptTokens,
          COALESCE(SUM(tokens_output), 0) as completionTokens,
-@@ -362,16 +383,19 @@
+         COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
+         COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
++        COALESCE(SUM(${cacheTtlTokenSql().five}), 0) as cacheCreation5mTokens,
++        COALESCE(SUM(${cacheTtlTokenSql().hour}), 0) as cacheCreation1hTokens,
+         COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
+         COALESCE(SUM(tokens_input + tokens_output), 0) as totalTokens,
+         MAX(timestamp) as lastUsed,
+@@ -369,6 +387,8 @@
+         COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_output ELSE 0 END), 0) as costCompletionTokens,
+         COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_read ELSE 0 END), 0) as costCacheReadTokens,
+         COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_creation ELSE 0 END), 0) as costCacheCreationTokens,
++        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN ${cacheTtlTokenSql().five} ELSE 0 END), 0) as costCacheCreation5mTokens,
++        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN ${cacheTtlTokenSql().hour} ELSE 0 END), 0) as costCacheCreation1hTokens,
+         COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_reasoning ELSE 0 END), 0) as costReasoningTokens
+       FROM usage_history
+       WHERE ${filter.whereSql}
+@@ -377,16 +397,17 @@
          COALESCE(NULLIF(api_key_name, ''), ''),
          LOWER(provider),
          LOWER(model),
@@ -160,43 +102,30 @@ index bc62c65080329ef5843eed9033ae74cf1f7f7229..ef518e6fa7614238c8a8305c2e4b8b94
 +        COALESCE(NULLIF(service_tier, ''), 'standard'),
 +        longContext
        ORDER BY totalTokens DESC
--      `
-+      `,
+       `
      )
 -    .all(filter.params);
--}
--
--function fetchUsageRequestCountByApiKey(filter: UsageHistoryFilter): Map<string, number> {
 +    .all(filter.params) as AggregatedUsageCostRow[];
-+}
-+
-+function fetchUsageRequestCountByApiKey(
-+  filter: UsageHistoryFilter,
-+): Map<string, number> {
+ }
+ 
+ function fetchUsageRequestCountByApiKey(filter: UsageHistoryFilter): Map<string, number> {
    const rows = getDbInstance()
 -    .prepare<{ apiKeyId: string; requestCount: number }>(
 +    .prepare(
        `
        SELECT
          COALESCE(NULLIF(api_key_id, ''), '') as apiKeyId,
-@@ -379,9 +403,9 @@
-       FROM usage_history
-       WHERE ${filter.whereSql}
+@@ -396,7 +417,7 @@
        GROUP BY COALESCE(NULLIF(api_key_id, ''), '')
--      `
-+      `,
+       `
      )
 -    .all(filter.params);
 +    .all(filter.params) as { apiKeyId: string; requestCount: number }[];
  
    const counts = new Map<string, number>();
    for (const row of rows) {
-@@ -393,10 +417,10 @@
- 
- function fetchDetailedUsageRowsForApiKey(
-   filter: UsageHistoryFilter,
--  apiKeyId: string
-+  apiKeyId: string,
+@@ -411,7 +432,7 @@
+   apiKeyId: string
  ): UsageCostRow[] {
    return getDbInstance()
 -    .prepare<UsageCostRow>(
@@ -204,26 +133,25 @@ index bc62c65080329ef5843eed9033ae74cf1f7f7229..ef518e6fa7614238c8a8305c2e4b8b94
        `
        SELECT
          id,
-@@ -416,15 +440,15 @@
-       WHERE ${filter.whereSql}
-         AND api_key_id = @apiKeyId
+@@ -424,6 +445,8 @@
+         COALESCE(tokens_output, 0) as completionTokens,
+         COALESCE(tokens_cache_read, 0) as cacheReadTokens,
+         COALESCE(tokens_cache_creation, 0) as cacheCreationTokens,
++        ${cacheTtlTokenSql().five} as cacheCreation5mTokens,
++        ${cacheTtlTokenSql().hour} as cacheCreation1hTokens,
+         COALESCE(tokens_reasoning, 0) as reasoningTokens,
+         COALESCE(tokens_input + tokens_output, 0) as totalTokens,
+         timestamp,
+@@ -434,7 +457,7 @@
        ORDER BY timestamp ASC, id ASC
--      `
-+      `,
+       `
      )
 -    .all({ ...filter.params, apiKeyId });
 +    .all({ ...filter.params, apiKeyId }) as UsageCostRow[];
  }
  
  function getRecordedCostSummariesByApiKey(
-   apiKeyIds: string[],
-   sinceMs: number,
--  untilMs: number
-+  untilMs: number,
- ): Map<string, RecordedCostSummary> {
-   if (apiKeyIds.length === 0) return new Map();
- 
-@@ -435,7 +459,7 @@
+@@ -451,7 +474,7 @@
      };
      const placeholders = appendNamedPlaceholders(params, "apiKey", apiKeyIds);
      const rows = getDbInstance()
@@ -232,12 +160,9 @@ index bc62c65080329ef5843eed9033ae74cf1f7f7229..ef518e6fa7614238c8a8305c2e4b8b94
          `
          SELECT
            api_key_id as apiKeyId,
-@@ -446,9 +470,13 @@
-           AND timestamp >= @sinceMs
-           AND timestamp <= @untilMs
+@@ -464,7 +487,11 @@
          GROUP BY api_key_id
--      `
-+      `,
+       `
        )
 -      .all(params);
 +      .all(params) as {
@@ -248,25 +173,7 @@ index bc62c65080329ef5843eed9033ae74cf1f7f7229..ef518e6fa7614238c8a8305c2e4b8b94
  
      const summaries = new Map<string, RecordedCostSummary>();
      for (const row of rows) {
-@@ -467,7 +495,7 @@
- function appendNamedPlaceholders(
-   params: Record<string, unknown>,
-   prefix: string,
--  values: string[]
-+  values: string[],
- ): string {
-   return values
-     .map((value, index) => {
-@@ -481,7 +509,7 @@
- function getRecordedCostsByApiKey(
-   apiKeyIds: string[],
-   sinceMs: number,
--  untilMs: number
-+  untilMs: number,
- ): Map<string, RecordedCostRow[]> {
-   if (apiKeyIds.length === 0) return new Map();
- 
-@@ -492,7 +520,7 @@
+@@ -508,7 +535,7 @@
      };
      const placeholders = appendNamedPlaceholders(params, "apiKey", apiKeyIds);
      const rows = getDbInstance()
@@ -275,252 +182,34 @@ index bc62c65080329ef5843eed9033ae74cf1f7f7229..ef518e6fa7614238c8a8305c2e4b8b94
          `
          SELECT
            id as rowId,
-@@ -504,13 +532,17 @@
-           AND timestamp >= @sinceMs
-           AND timestamp <= @untilMs
+@@ -522,7 +549,7 @@
          ORDER BY api_key_id ASC, timestamp ASC, rowid ASC
--      `
-+      `,
+       `
        )
 -      .all(params);
 +      .all(params) as RecordedCostRow[];
  
      const byApiKey = new Map<string, RecordedCostRow[]>();
-     for (const row of rows) {
--      if (!row.apiKeyId || !Number.isFinite(row.timestamp) || !Number.isFinite(row.cost)) {
-+      if (
-+        !row.apiKeyId ||
-+        !Number.isFinite(row.timestamp) ||
-+        !Number.isFinite(row.cost)
-+      ) {
-         continue;
-       }
-       const list = byApiKey.get(row.apiKeyId) ?? [];
-@@ -526,7 +558,7 @@
- function findClosestRecordedCost(
-   candidates: RecordedCostRow[] | undefined,
-   timestampMs: number,
--  usedRecordedRows: Set<number>
-+  usedRecordedRows: Set<number>,
- ): RecordedCostRow | null {
-   if (!candidates?.length || !Number.isFinite(timestampMs)) return null;
- 
-@@ -537,7 +569,8 @@
-     if (usedRecordedRows.has(candidate.rowId)) continue;
-     const delta = Math.abs(candidate.timestamp - timestampMs);
-     if (delta > RECORDED_COST_MATCH_TOLERANCE_MS) {
--      if (candidate.timestamp > timestampMs + RECORDED_COST_MATCH_TOLERANCE_MS) break;
-+      if (candidate.timestamp > timestampMs + RECORDED_COST_MATCH_TOLERANCE_MS)
-+        break;
-       continue;
-     }
-     if (delta < bestDelta) {
-@@ -553,13 +586,13 @@
- async function getUsageRowCostUsd(
-   row: UsageCostRow,
-   recordedCostsByApiKey: Map<string, RecordedCostRow[]>,
--  usedRecordedRows: Set<number>
-+  usedRecordedRows: Set<number>,
- ): Promise<number> {
-   const usageTimestampMs = Date.parse(row.timestamp ?? "");
-   const recordedCost = findClosestRecordedCost(
-     row.apiKeyId ? recordedCostsByApiKey.get(row.apiKeyId) : undefined,
-     usageTimestampMs,
--    usedRecordedRows
-+    usedRecordedRows,
-   );
-   if (recordedCost) return Math.max(0, toNumber(recordedCost.cost));
- 
-@@ -573,11 +606,13 @@
+     let processed = 0;
+@@ -561,6 +588,8 @@
+       output: toNumber(row.completionTokens),
+       cacheRead: toNumber(row.cacheReadTokens),
        cacheCreation: toNumber(row.cacheCreationTokens),
++      cacheCreation5m: toNumber(row.costCacheCreation5mTokens ?? row.cacheCreation5mTokens),
++      cacheCreation1h: toNumber(row.costCacheCreation1hTokens ?? row.cacheCreation1hTokens),
        reasoning: toNumber(row.reasoningTokens),
      },
--    { serviceTier: row.serviceTier }
--  );
--}
--
--async function getAggregatedGroupCostUsd(row: AggregatedUsageCostRow): Promise<number> {
-+    { serviceTier: row.serviceTier },
-+  );
-+}
-+
-+async function getAggregatedGroupCostUsd(
-+  row: AggregatedUsageCostRow,
-+): Promise<number> {
-   return roundUsd(
-     await calculateCost(
-       row.provider,
-@@ -589,23 +624,26 @@
-         cacheCreation: toNumber(row.cacheCreationTokens),
-         reasoning: toNumber(row.reasoningTokens),
-       },
--      { serviceTier: row.serviceTier }
--    )
-+      { serviceTier: row.serviceTier, longContext: row.longContext === 1 },
-+    ),
+     { serviceTier: row.serviceTier }
+@@ -579,9 +608,11 @@
+           output: toNumber(row.costCompletionTokens),
+           cacheRead: toNumber(row.costCacheReadTokens),
+           cacheCreation: toNumber(row.costCacheCreationTokens),
++          cacheCreation5m: toNumber(row.costCacheCreation5mTokens ?? row.cacheCreation5mTokens),
++          cacheCreation1h: toNumber(row.costCacheCreation1hTokens ?? row.cacheCreation1hTokens),
+           reasoning: toNumber(row.costReasoningTokens),
+         },
+-        { serviceTier: row.serviceTier }
++        { serviceTier: row.serviceTier, longContext: row.longContext === 1 }
+       ))
    );
  }
- 
- function distributeRecordedCostAcrossGroups(
-   groups: AggregatedUsageCostRow[],
-   recordedTotalUsd: number,
--  groupCalculatedCosts: number[]
-+  groupCalculatedCosts: number[],
- ): number[] {
--  const calculatedTotal = groupCalculatedCosts.reduce((sum, value) => sum + value, 0);
-+  const calculatedTotal = groupCalculatedCosts.reduce(
-+    (sum, value) => sum + value,
-+    0,
-+  );
-   if (calculatedTotal <= 0) {
-     const evenShare = recordedTotalUsd / Math.max(groups.length, 1);
-     return groups.map(() => roundUsd(evenShare));
-   }
-   return groupCalculatedCosts.map((value) =>
--    roundUsd((recordedTotalUsd * value) / calculatedTotal)
-+    roundUsd((recordedTotalUsd * value) / calculatedTotal),
-   );
- }
- 
-@@ -618,7 +656,7 @@
-   usedRecordedRows: Set<number>;
- }): Promise<number[]> {
-   const calculatedCosts = await Promise.all(
--    args.groups.map((group) => getAggregatedGroupCostUsd(group))
-+    args.groups.map((group) => getAggregatedGroupCostUsd(group)),
-   );
- 
-   if (!args.recordedSummary || args.recordedSummary.entryCount <= 0) {
-@@ -629,7 +667,7 @@
-     return distributeRecordedCostAcrossGroups(
-       args.groups,
-       args.recordedSummary.totalCost,
--      calculatedCosts
-+      calculatedCosts,
-     );
-   }
- 
-@@ -639,11 +677,21 @@
-   const detailedRows = fetchDetailedUsageRowsForApiKey(args.filter, apiKeyId);
-   const rowCosts = await Promise.all(
-     detailedRows.map((row) =>
--      getUsageRowCostUsd(row, args.recordedCostsByApiKey, args.usedRecordedRows)
--    )
--  );
--  const detailedTotal = roundUsd(rowCosts.reduce((sum, value) => sum + value, 0));
--  return distributeRecordedCostAcrossGroups(args.groups, detailedTotal, calculatedCosts);
-+      getUsageRowCostUsd(
-+        row,
-+        args.recordedCostsByApiKey,
-+        args.usedRecordedRows,
-+      ),
-+    ),
-+  );
-+  const detailedTotal = roundUsd(
-+    rowCosts.reduce((sum, value) => sum + value, 0),
-+  );
-+  return distributeRecordedCostAcrossGroups(
-+    args.groups,
-+    detailedTotal,
-+    calculatedCosts,
-+  );
- }
- 
- export async function getProviderWindowCostBreakdown({
-@@ -659,22 +707,32 @@
-   const nowMs = Number.isFinite(now) ? now : Date.now();
-   const window = selectWeeklyWindow(providerKey, connectionId, nowMs);
-   const windowStartAt = new Date(window.startMs).toISOString();
--  const windowResetAt = window.resetMs ? new Date(window.resetMs).toISOString() : null;
-+  const windowResetAt = window.resetMs
-+    ? new Date(window.resetMs).toISOString()
-+    : null;
-   const nowIso = new Date(nowMs).toISOString();
-   const filter = buildUsageHistoryFilter(
-     providerKey,
-     windowStartAt,
-     nowIso,
-     windowResetAt,
--    connectionId
-+    connectionId,
-   );
- 
-   const aggregatedRows = fetchAggregatedUsageRows(filter);
-   const usageRequestCounts = fetchUsageRequestCountByApiKey(filter);
-   const currentApiKeyNames = await getCurrentApiKeyNames();
-   const apiKeyIds = uniqueApiKeyIds(aggregatedRows);
--  const recordedSummaries = getRecordedCostSummariesByApiKey(apiKeyIds, window.startMs, nowMs);
--  const recordedCostsByApiKey = getRecordedCostsByApiKey(apiKeyIds, window.startMs, nowMs);
-+  const recordedSummaries = getRecordedCostSummariesByApiKey(
-+    apiKeyIds,
-+    window.startMs,
-+    nowMs,
-+  );
-+  const recordedCostsByApiKey = getRecordedCostsByApiKey(
-+    apiKeyIds,
-+    window.startMs,
-+    nowMs,
-+  );
-   const usedRecordedRows = new Set<number>();
-   const byApiKey = new Map<string, ProviderWindowCostAggregateRow>();
- 
-@@ -716,7 +774,8 @@
-         limitUsd = summary.activeLimitUsd;
-         limitPeriod = summary.resetInterval;
-         budgetResetAt =
--          typeof summary.nextResetAt === "number" && Number.isFinite(summary.nextResetAt)
-+          typeof summary.nextResetAt === "number" &&
-+          Number.isFinite(summary.nextResetAt)
-             ? new Date(summary.nextResetAt).toISOString()
-             : null;
-       }
-@@ -747,7 +806,10 @@
-       aggregate.completionTokens += toNumber(row.completionTokens);
-       aggregate.totalTokens += toNumber(row.totalTokens);
-       aggregate.costUsd = roundUsd(aggregate.costUsd + costUsd);
--      if (!aggregate.lastUsed || (row.lastUsed && row.lastUsed > aggregate.lastUsed)) {
-+      if (
-+        !aggregate.lastUsed ||
-+        (row.lastUsed && row.lastUsed > aggregate.lastUsed)
-+      ) {
-         aggregate.lastUsed = row.lastUsed || aggregate.lastUsed;
-       }
- 
-@@ -772,7 +834,9 @@
-   const breakdownRows = Array.from(byApiKey.values())
-     .map((row) => {
-       const limitUsedPercent =
--        row.limitUsd && row.limitUsd > 0 ? roundPercent((row.costUsd / row.limitUsd) * 100) : null;
-+        row.limitUsd && row.limitUsd > 0
-+          ? roundPercent((row.costUsd / row.limitUsd) * 100)
-+          : null;
-       const models = Array.from(row.modelMap.values())
-         .map((model) => ({ ...model, costUsd: roundUsd(model.costUsd) }))
-         .sort((left, right) => right.costUsd - left.costUsd);
-@@ -787,7 +851,9 @@
-     })
-     .sort((left, right) => right.costUsd - left.costUsd);
- 
--  const totalCostUsd = roundUsd(breakdownRows.reduce((sum, row) => sum + row.costUsd, 0));
-+  const totalCostUsd = roundUsd(
-+    breakdownRows.reduce((sum, row) => sum + row.costUsd, 0),
-+  );
-   const estimatedFullQuotaUsd =
-     totalCostUsd > 0 && window.quotaUsedPercent && window.quotaUsedPercent > 0
-       ? roundUsd(totalCostUsd / (window.quotaUsedPercent / 100))
-@@ -802,9 +868,13 @@
-     windowStartSource: window.windowStartSource,
-     quotaName: window.quotaName,
-     quotaUsedPercent:
--      window.quotaUsedPercent === null ? null : roundPercent(window.quotaUsedPercent),
-+      window.quotaUsedPercent === null
-+        ? null
-+        : roundPercent(window.quotaUsedPercent),
-     quotaRemainingPercent:
--      window.quotaRemainingPercent === null ? null : roundPercent(window.quotaRemainingPercent),
-+      window.quotaRemainingPercent === null
-+        ? null
-+        : roundPercent(window.quotaRemainingPercent),
-     totalCostUsd,
-     estimatedFullQuotaUsd,
-     rows: breakdownRows,

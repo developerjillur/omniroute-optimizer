@@ -1,8 +1,8 @@
 diff --git a/tests/e2e/providers-management.spec.ts b/tests/e2e/providers-management.spec.ts
-index 3f43e0f..7adb45c 100644
+index af41abcfbb9b7b241d7b6ee0b699c3542e8f6bf0..957d924ffbd07cf7bff5ee3b910fec330f3b8e6a 100644
 --- a/tests/e2e/providers-management.spec.ts
 +++ b/tests/e2e/providers-management.spec.ts
-@@ -278,7 +278,14 @@ test.describe("Providers management", () => {
+@@ -278,7 +278,14 @@
  
      await page.getByTitle(/^edit$/i).click();
      const editDialog = page.getByRole("dialog");

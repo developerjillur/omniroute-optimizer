@@ -1,32 +1,8 @@
 diff --git a/open-sse/utils/proxyFetch.ts b/open-sse/utils/proxyFetch.ts
-index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163c444aa12 100644
+index 07d4b37662818d78838d5cf3ddbc619100eb77b8..05476a8155f6527e7ccbd23fa545cb9281cfb991 100644
 --- a/open-sse/utils/proxyFetch.ts
 +++ b/open-sse/utils/proxyFetch.ts
-@@ -15,11 +15,20 @@
-   proxyConfigToUrl,
-   proxyUrlForLogs,
- } from "./proxyDispatcher.ts";
--import tlsClient, { type TlsFetchOptions, guardTlsFirstByte } from "./tlsClient.ts";
-+import tlsClient, {
-+  type TlsFetchOptions,
-+  guardTlsFirstByte,
-+} from "./tlsClient.ts";
- import { withUpstreamStatusCapture } from "./upstreamStatusCapture.ts";
- import { stampOwnListenerSelfHop } from "./selfHop.ts";
--import { describeFallbackFailure, redactProxyDetailsInMessage } from "./proxyFetchRedaction.ts";
--import { recordFinalTransportOutcome, recordProxiedSuccess } from "./proxyTransportOutcome.ts";
-+import {
-+  describeFallbackFailure,
-+  redactProxyDetailsInMessage,
-+} from "./proxyFetchRedaction.ts";
-+import {
-+  recordFinalTransportOutcome,
-+  recordProxiedSuccess,
-+} from "./proxyTransportOutcome.ts";
- import { sanitizeTransportError } from "./proxyTransportError.ts";
- import { isProxyReachable } from "@/lib/proxyHealth";
- import {
-@@ -75,7 +84,7 @@
+@@ -78,7 +78,7 @@
    const parsed = Number(raw);
    if (!Number.isFinite(parsed) || parsed < 1) {
      console.warn(
@@ -35,7 +11,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
      );
      return 25_000;
    }
-@@ -85,7 +94,10 @@
+@@ -88,7 +88,10 @@
  
  // Shared retry backoff for the direct / relay / proxy retry-once paths.
  // Overridable via OMNIROUTE_RETRY_BACKOFF_MS (0 = retry immediately).
@@ -47,28 +23,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
  
  function isTlsFingerprintEnabled() {
    return process.env.ENABLE_TLS_FINGERPRINT === "true";
-@@ -93,7 +105,7 @@
- 
- function tlsFingerprintProviderAllowed(
-   provider: string | null | undefined,
--  proxied: boolean
-+  proxied: boolean,
- ): boolean {
-   const configured = process.env.TLS_FINGERPRINT_PROVIDERS?.trim();
-   // Preserve the legacy direct-only opt-in. The new proxied transport requires
-@@ -117,8 +129,9 @@
- };
- 
- type TlsProfileResult = { browserProfile?: string; os?: string };
--function tlsProfileForProvider(provider: string | null | undefined): TlsProfileResult {
--
-+function tlsProfileForProvider(
-+  provider: string | null | undefined,
-+): TlsProfileResult {
-   if (!provider) return {};
-   const p = TLS_PROVIDER_PROFILE[provider.trim().toLowerCase()];
-   return p ? { browserProfile: p.browser, os: p.os } : {};
-@@ -154,11 +167,18 @@
+@@ -141,11 +144,18 @@
  function isProxyUnreachableError(err: unknown): boolean {
    if (!err || typeof err !== "object") return false;
    const code = (err as { code?: unknown }).code;
@@ -90,7 +45,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
    const msg = (err as Error).message;
    return typeof msg === "string" && PROXY_UNREACHABLE_ERROR_CODES.has(msg);
  }
-@@ -212,7 +232,9 @@
+@@ -199,7 +209,9 @@
     */
    reselectPoolMember?: () => Promise<unknown>;
  };
@@ -101,7 +56,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
  type AppliedProxyStore = typeof globalThis & {
    [APPLIED_PROXY_CONTEXT_KEY]?: AsyncLocalStorage<AppliedProxySink>;
  };
-@@ -228,7 +250,10 @@
+@@ -215,7 +227,10 @@
   * mutable object the caller retains, so it can read `sink.proxy` after `fn`
   * resolves. Pure plumbing — no behavioral change to the request itself.
   */
@@ -113,7 +68,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
    return getAppliedProxyContext().run(sink, fn);
  }
  
-@@ -264,7 +289,10 @@
+@@ -251,7 +266,10 @@
   * Snapshot: callers publish cumulative totals, so last-write-wins loses
   * nothing. Best-effort like noteRotationAccount: no-op outside a capture.
   */
@@ -125,7 +80,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
    try {
      const sink = getAppliedProxyContext().getStore();
      if (!sink) return;
-@@ -274,7 +302,8 @@
+@@ -261,7 +279,8 @@
        return;
      }
      sink.addedWaitMs = Math.round(totalMs);
@@ -135,7 +90,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
    } catch {
      /* added-wait is best-effort; never break the request path */
    }
-@@ -284,13 +313,17 @@
+@@ -271,13 +290,17 @@
   * Late read of the added wait on the capture sink. Fail-soft: null
   * outside a capture or when nothing was published — callers persist NULL.
   */
@@ -155,7 +110,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
      return { ms, cause };
    } catch {
      return null;
-@@ -300,7 +333,7 @@
+@@ -287,7 +310,7 @@
  type FetchWithDispatcherOptions = RequestInit & { dispatcher?: unknown };
  type FetchWithDispatcher = (
    input: RequestInfo | URL,
@@ -164,7 +119,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
  ) => Promise<Response>;
  
  /**
-@@ -343,7 +376,8 @@
+@@ -330,7 +353,8 @@
            .filter(Boolean)
            .join(" ");
          if (subSeg) parts.push(`↳ ${subSeg}`);
@@ -174,7 +129,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
        }
      }
      cur = e.cause;
-@@ -363,12 +397,32 @@
+@@ -350,12 +374,32 @@
  
  function requestHasNonReplayableBody(
    input: RequestInfo | URL,
@@ -208,7 +163,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
    }
    return false;
  }
-@@ -392,20 +446,24 @@
+@@ -381,20 +425,24 @@
  
  function isTlsRequestEligible(
    input: RequestInfo | URL,
@@ -223,7 +178,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
 +  );
  }
  
- function isTlsFallbackReplaySafe(
+ function isAmbiguousFailureReplaySafe(
    input: RequestInfo | URL,
 -  options: FetchWithDispatcherOptions
 +  options: FetchWithDispatcherOptions,
@@ -237,7 +192,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
    ).toUpperCase();
    return (
      (method === "GET" || method === "HEAD" || method === "OPTIONS") &&
-@@ -415,11 +473,13 @@
+@@ -404,11 +452,13 @@
  
  function getEffectiveSignal(
    input: RequestInfo | URL,
@@ -253,7 +208,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
    );
  }
  
-@@ -438,8 +498,14 @@
+@@ -427,8 +477,14 @@
  /** Injectable dependencies for testability (Approach B DI). */
  export type ProxyFetchDeps = {
    undiciFetch?: FetchWithDispatcher;
@@ -270,7 +225,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
  };
  
  type PatchState = {
-@@ -470,7 +536,8 @@
+@@ -459,7 +515,8 @@
  }
  
  const patchState = getPatchState();
@@ -280,29 +235,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
  const originalFetch = patchState.originalFetch;
  const originalFetchWithDispatcher = originalFetch as FetchWithDispatcher;
  const proxyContext = patchState.proxyContext;
-@@ -513,7 +580,9 @@
-         for (let i = 1; i < parts.length && ok; i++) {
-           const seg = parts[i];
-           if (i === parts.length - 1) {
--            ok = seg === "" || (hostname.endsWith(seg) && hostname.length - seg.length >= pos);
-+            ok =
-+              seg === "" ||
-+              (hostname.endsWith(seg) && hostname.length - seg.length >= pos);
-           } else {
-             const idx = seg ? hostname.indexOf(seg, pos) : pos;
-             if (idx === -1) {
-@@ -528,7 +597,9 @@
-     }
- 
-     if (patternHost.startsWith(".")) {
--      return hostname.endsWith(patternHost) || hostname === patternHost.slice(1);
-+      return (
-+        hostname.endsWith(patternHost) || hostname === patternHost.slice(1)
-+      );
-     }
-     return hostname === patternHost || hostname.endsWith(`.${patternHost}`);
-   });
-@@ -546,7 +617,12 @@
+@@ -475,7 +532,12 @@
      .replace(/\]$/, "")
      .replace(/^::ffff:/i, "")
      .toLowerCase();
@@ -315,31 +248,8 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
 +  );
  }
  
- function isLocalAddress(hostname: string): boolean {
-@@ -554,10 +630,20 @@
-     .replace(/^\[/, "")
-     .replace(/\]$/, "")
-     .replace(/^::ffff:/i, "");
--  if (host === "localhost" || host === "0.0.0.0" || host === "127.0.0.1" || host === "::1") {
-+  if (
-+    host === "localhost" ||
-+    host === "0.0.0.0" ||
-+    host === "127.0.0.1" ||
-+    host === "::1"
-+  ) {
-     return true;
-   }
--  if (host.endsWith(".local") || host.endsWith(".lan") || host.endsWith(".internal")) return true;
-+  if (
-+    host.endsWith(".local") ||
-+    host.endsWith(".lan") ||
-+    host.endsWith(".internal")
-+  )
-+    return true;
-   // RFC1918 + loopback + link-local (169.254, incl. cloud metadata 169.254.169.254)
-   // + CGNAT (100.64/10). 127/8 covers all loopback, not just 127.0.0.1.
-   if (host.startsWith("192.168.")) return true;
-@@ -634,7 +720,10 @@
+ export function resolveProxyForRequest(targetUrl) {
+@@ -516,7 +578,10 @@
   * Dependency-internal TimeoutError/AbortError values are transport failures and
   * retain the normal safe-method fallback behavior.
   */
@@ -351,7 +261,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
    return signal?.aborted === true;
  }
  
-@@ -647,7 +736,7 @@
+@@ -529,7 +594,7 @@
  export async function runWithProxyContext(
    proxyConfig,
    fn,
@@ -360,7 +270,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
  ) {
    if (typeof fn !== "function") {
      throw new TypeError("runWithProxyContext requires a callback function");
-@@ -656,16 +745,23 @@
+@@ -538,16 +603,23 @@
    // Inherit existing context if no specific proxyConfig is provided. A direct
    // sentinel must remain direct without being mistaken for a proxy config.
    const currentContext = proxyContext.getStore();
@@ -390,7 +300,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
    // Keep an explicit direct sentinel so resolveProxyForRequest cannot re-read
    // HTTPS_PROXY/HTTP_PROXY after the control-plane route decision.
    const runDirect = () => proxyContext.run(DIRECT_PROXY_CONTEXT, fn);
-@@ -682,12 +778,18 @@
+@@ -564,12 +636,18 @@
    // probe fires WITHOUT awaiting and the request dispatches optimistically;
    // only if the probe resolves UNREACHABLE while the request is still in flight
    // do we fail fast with PROXY_UNREACHABLE (503).
@@ -411,7 +321,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
      if (directFallbackOnUnreachable) {
        // Opt-in control-plane direct-fallback path: keep the BLOCKING probe —
        // this path must decide direct-vs-proxy BEFORE dispatch, so the probe
-@@ -696,7 +798,7 @@
+@@ -578,7 +656,7 @@
        if (!reachable) {
          const proxyLabel = proxyUrlForLogs(resolvedProxyUrl);
          console.warn(
@@ -420,7 +330,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
          );
          return runDirect();
        }
-@@ -712,18 +814,23 @@
+@@ -594,18 +672,23 @@
    // to the other family. No-op for IP literals (their family is intrinsic).
    // Nested same-context call: skip the family pre-check too — the outer scope
    // already verified this exact proxy (mirrors the probe gate above).
@@ -447,7 +357,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
          );
          return runDirect();
        }
-@@ -741,7 +848,7 @@
+@@ -623,7 +706,7 @@
        // traffic doesn't spam stdout at production log levels.
        if (process.env.OMNIROUTE_PROXY_FETCH_DEBUG === "true") {
          console.log(
@@ -456,7 +366,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
          );
        }
      }
-@@ -764,7 +871,10 @@
+@@ -646,7 +729,10 @@
      // request wins and the stale probe result is ignored — the first dispatch
      // is NEVER gated on the probe.
      const winner = await Promise.race([
@@ -468,7 +378,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
        requestPromise.then((value) => ({ kind: "request" as const, value })),
      ]);
  
-@@ -775,7 +885,9 @@
+@@ -657,7 +743,9 @@
        // caller observes this fast failure instead of the ~30s timeout stall.
        requestPromise.catch(() => {});
        const proxyLabel = proxyUrlForLogs(resolvedProxyUrl);
@@ -479,7 +389,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
          code?: string;
          errorCode?: string;
          statusCode?: number;
-@@ -822,13 +934,15 @@
+@@ -705,13 +793,15 @@
   * from Feature Flags or the environment.
   */
  export async function runWithProxyContextOrDirect(proxyConfig, fn) {
@@ -497,7 +407,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
  ) {
    // #13593: a hop back to this listener carries the process self-hop token
    // so admission does not shed it with public traffic.
-@@ -844,7 +958,8 @@
+@@ -727,7 +817,8 @@
      // to ensure version compatibility. Node 22 built-in fetch (undici v6)
      // is incompatible with undici v8 dispatchers (missing onRequestStart, etc.)
      const _undiciDispatcher =
@@ -507,7 +417,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
      return _undiciDispatcher(input, options);
    }
  
-@@ -884,7 +999,8 @@
+@@ -767,7 +858,8 @@
          if (tlsStore) tlsStore.used = true;
          return await guardTlsFirstByte(response);
        } catch (error) {
@@ -517,7 +427,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
          const sessionHadCookies =
            !!error &&
            typeof error === "object" &&
-@@ -896,10 +1012,12 @@
+@@ -779,10 +871,12 @@
              sessionHadCookies
                ? "TLS fingerprint request failed; stateful session cannot be replayed"
                : "TLS fingerprint request failed; request is not safe to replay",
@@ -532,7 +442,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
          if (tlsStore) tlsStore.used = false;
          tlsDirectFallback = true;
        }
-@@ -911,16 +1029,20 @@
+@@ -794,7 +888,8 @@
      // requests, but use Bun's native fetch for ordinary direct egress.
      if (process.versions.bun) {
        const _nativeFetch =
@@ -542,9 +452,11 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
        return _nativeFetch(input, options);
      }
      // Direct undici path: bound response-start, fresh-socket retry, and body guard.
-     const hasNonReplayableBody = requestHasNonReplayableBody(input, options);
+@@ -803,10 +898,13 @@
+     // Method gating covers response-start ambiguity; connection-error retries remain below.
+     const canReplayResponseStartTimeout = isAmbiguousFailureReplaySafe(input, options);
      const maxAttempts = hasNonReplayableBody ? 1 : 2;
-+    const canReplayDirect = isTlsFallbackReplaySafe(input, options);
++    const canReplayDirect = isAmbiguousFailureReplaySafe(input, options);
      const _undiciDirect =
 -      deps.undiciFetch ?? (undiciFetch as unknown as (...args: unknown[]) => Promise<Response>);
 +      deps.undiciFetch ??
@@ -554,28 +466,18 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
 +      (deps.nativeFetch as FetchWithDispatcher | undefined) ??
 +      originalFetchWithDispatcher;
  
-     // A loopback self-request (model sync, auto-discovery, internal routes) must
-     // NOT inherit the outbound-egress policy below. That policy bounds
-@@ -966,13 +1088,15 @@
-                 : getRetryDispatcher(hostnameForDispatcher),
-           },
-           _undiciDirect,
--          timeoutFor(attempt)
-+          timeoutFor(canReplayDirect ? attempt : 1),
-         );
-       } catch (dispatcherError) {
-+        if (isCallerAbort(dispatcherError, getEffectiveSignal(input, options)))
-+          throw dispatcherError;
+     // Loopback self-requests must not inherit remote-egress response-start replay:
+     // replaying against our own listener only doubles inbound-slot occupancy and
+@@ -852,7 +950,7 @@
          if (isDirectResponseStartTimeout(dispatcherError)) {
--          if (attempt === 0 && maxAttempts > 1) {
-+          if (attempt === 0 && maxAttempts > 1 && canReplayDirect) {
+           if (attempt === 0 && maxAttempts > 1 && canReplayResponseStartTimeout) {
              console.warn(
 -              `[ProxyFetch] Direct response-start timeout (${timeoutFor(0)}ms) on pooled dispatcher — retrying on fresh no-keep-alive dispatcher: ${targetHostForLogs}`
 +              `[ProxyFetch] Direct response-start timeout (${timeoutFor(0)}ms) on pooled dispatcher — retrying on fresh no-keep-alive dispatcher: ${targetHostForLogs}`,
              );
              lastDispatcherError = dispatcherError;
              continue;
-@@ -980,10 +1104,12 @@
+@@ -860,10 +958,12 @@
            throw dispatcherError;
          }
          const msg =
@@ -590,7 +492,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
            );
            throw dispatcherError;
          }
-@@ -1003,8 +1129,11 @@
+@@ -883,8 +983,11 @@
            (typeof errCode === "string" && errCode.startsWith("UND_ERR")) ||
            msg.includes("UND_ERR")
          ) {
@@ -604,7 +506,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
              lastDispatcherError = dispatcherError;
              await new Promise((r) => setTimeout(r, RETRY_BACKOFF_MS));
              continue;
-@@ -1012,13 +1141,15 @@
+@@ -892,13 +995,15 @@
            if (hasNonReplayableBody) {
              const detail = describeFallbackFailure(
                describeFetchCause(dispatcherError),
@@ -623,7 +525,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
              }
              throw tagProxyUnreachable(dispatcherError);
            }
-@@ -1037,8 +1168,12 @@
+@@ -917,8 +1022,12 @@
              }
              if (targetHostname) {
                const findWorkingProxy =
@@ -638,16 +540,16 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
                if (fallbackProxyUrl) {
                  try {
                    const dispatcher = createProxyDispatcher(fallbackProxyUrl);
-@@ -1051,7 +1186,7 @@
+@@ -931,7 +1040,7 @@
            }
            // Preserve the original monitoring phrase and append the transport cause.
            console.warn(
 -            `[ProxyFetch] Undici dispatcher failed, falling back to native fetch (after retry): ${describeFetchCause(dispatcherError)}`
 +            `[ProxyFetch] Undici dispatcher failed, falling back to native fetch (after retry): ${describeFetchCause(dispatcherError)}`,
            );
-           // On PROXY_UNREACHABLE for local-egress hostnames (host.docker.internal,
-           // *.internal, *.local), drop the cached dispatcher pool: Docker
-@@ -1071,11 +1206,15 @@
+           // Reap the failed pool on PROXY_UNREACHABLE so the next request
+           // rebuilds it with fresh sockets.
+@@ -944,11 +1053,15 @@
              // Surface both dispatcher and native causes immediately.
              const detail = describeFallbackFailure(
                describeFetchCause(dispatcherError),
@@ -666,7 +568,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
              }
              tagProxyUnreachable(nativeError);
              throw nativeError;
-@@ -1098,12 +1237,17 @@
+@@ -971,12 +1084,17 @@
      typeof contextProxy === "object" &&
      isRelayType((contextProxy as { type?: string }).type)
    ) {
@@ -686,7 +588,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
        throw new Error(`${label} configuration error: missing relayAuth`);
      }
      const targetUrl = getTargetUrl(input);
-@@ -1114,7 +1258,9 @@
+@@ -987,7 +1105,9 @@
      // to relay routing logs (the rest of this module already follows that rule).
      const hostForLogs = proxyUrlForLogs(vc.host ? `https://${vc.host}` : "");
      if (process.env.OMNIROUTE_PROXY_FETCH_DEBUG === "true") {
@@ -697,7 +599,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
      }
  
      // #9100/#9158: pooled, timed, retried relay egress. Bare `originalFetch` had
-@@ -1129,8 +1275,12 @@
+@@ -1002,8 +1122,12 @@
      // native fetch for the relay path: it has no pooling and would churn
      // connections again.
      const _undiciRelay =
@@ -712,7 +614,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
      const maxRelayAttempts = hasNonReplayableRelayBody ? 1 : 2;
      const relayUrl = `https://${vc.host}`;
      let lastRelayError: unknown = null;
-@@ -1141,7 +1291,10 @@
+@@ -1014,7 +1138,10 @@
        // AbortSignal.any([...]) so the relay branch stays free of the literal
        // word `any` (T11 any-budget checker).
        const relayController = new AbortController();
@@ -724,7 +626,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
        const onCallerAbort = () => relayController.abort();
        options.signal?.addEventListener("abort", onCallerAbort, { once: true });
        try {
-@@ -1159,18 +1312,24 @@
+@@ -1032,18 +1159,24 @@
          // The manual relayController fires only on this branch's own timer, so
          // `relayController.signal.aborted` alone cannot be a caller abort; when
          // BOTH fire, the caller abort wins (guarded by the check below).
@@ -753,7 +655,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
          const errCode = (relayError as { code?: unknown })?.code;
          const isTransportFailure =
            msg.includes("fetch failed") ||
-@@ -1178,7 +1337,13 @@
+@@ -1051,7 +1184,13 @@
            msg.includes("ECONNREFUSED") ||
            (typeof errCode === "string" && errCode.startsWith("UND_ERR")) ||
            msg.includes("UND_ERR");
@@ -762,13 +664,13 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
 +          attempt === 0 &&
 +          maxRelayAttempts > 1 &&
 +          isTransportFailure &&
-+          (isTlsFallbackReplaySafe(input, options) ||
++          (isAmbiguousFailureReplaySafe(input, options) ||
 +            isKnownPreconnectFailure(relayError))
 +        ) {
            lastRelayError = relayError;
            // #9158: fixed OMNIROUTE_RETRY_BACKOFF_MS backoff — the retry uses a
            // FRESH no-keep-alive RELAY_RETRY_AGENT (connections: 1, keepAliveTimeout:
-@@ -1235,10 +1400,12 @@
+@@ -1108,10 +1247,12 @@
            sessionHadCookies
              ? "TLS fingerprint request failed; stateful session cannot be replayed"
              : "TLS fingerprint request failed; request is not safe to replay",
@@ -783,7 +685,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
        if (tlsStore) tlsStore.used = false;
      }
    }
-@@ -1249,7 +1416,8 @@
+@@ -1122,7 +1263,8 @@
    // no-keep-alive dispatcher (mirrors the direct-path #4252 pattern) instead
    // of killing all idle sockets after 1ms or surfacing a bare 502.
    const _undiciProxy =
@@ -793,7 +695,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
    const hasNonReplayableProxyBody = requestHasNonReplayableBody(input, options);
    const maxProxyAttempts = hasNonReplayableProxyBody ? 1 : 2;
    let lastProxyError: unknown = null;
-@@ -1258,7 +1426,9 @@
+@@ -1131,7 +1273,9 @@
        const response = await _undiciProxy(input, {
          ...options,
          dispatcher:
@@ -804,7 +706,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
        });
        recordProxiedSuccess(proxyUrl, targetUrl); // completed response, any status
        return response;
-@@ -1272,7 +1442,13 @@
+@@ -1145,7 +1289,13 @@
          msg.includes("ECONNREFUSED") ||
          (typeof errCode === "string" && errCode.startsWith("UND_ERR")) ||
          msg.includes("UND_ERR");
@@ -813,13 +715,13 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
 +        attempt === 0 &&
 +        maxProxyAttempts > 1 &&
 +        isTransportFailure &&
-+        (isTlsFallbackReplaySafe(input, options) ||
++        (isAmbiguousFailureReplaySafe(input, options) ||
 +          isKnownPreconnectFailure(error))
 +      ) {
          lastProxyError = error;
          // #9158: fixed OMNIROUTE_RETRY_BACKOFF_MS backoff — the retry uses a
          // fresh no-keep-alive dispatcher (getProxyRetryDispatcher), so the old
-@@ -1286,12 +1462,14 @@
+@@ -1159,12 +1309,14 @@
        // proxy URL / credential tokens first — this error can bubble into
        // response bodies (#9837, Hard Rule #12).
        const originalMsg = redactProxyDetailsInMessage(
@@ -837,7 +739,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
        );
        // Read the code off the thrown sanitized error (tag survives the
        // sanitize as errorCode passthrough; untagged reads undefined).
-@@ -1301,7 +1479,7 @@
+@@ -1174,7 +1326,7 @@
          sanitized.message += ` (cause ${sanitized.causeCode})`;
        }
        console.error(
@@ -846,7 +748,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
        );
        throw sanitized;
      }
-@@ -1310,7 +1488,10 @@
+@@ -1183,7 +1335,10 @@
  }
  
  const getAppliedProxySink = () => getAppliedProxyContext().getStore();
@@ -858,7 +760,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
  
  /**
   * Named export for proxyFetch — identical to the patched globalThis.fetch but
-@@ -1320,7 +1501,7 @@
+@@ -1193,7 +1348,7 @@
  export async function proxyFetch(
    input: RequestInfo | URL,
    options: RequestInit = {},
@@ -867,7 +769,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
  ): Promise<Response> {
    return patchedFetch(input, options as FetchWithDispatcherOptions, deps);
  }
-@@ -1341,21 +1522,25 @@
+@@ -1214,21 +1369,25 @@
   * runWithTlsTracking(provider, fn).
   */
  export async function runWithTlsTracking<T>(
@@ -899,7 +801,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
    if (typeof legacyFn !== "function") {
      throw new TypeError("runWithTlsTracking requires a callback function");
    }
-@@ -1365,7 +1550,10 @@
+@@ -1238,7 +1397,10 @@
      typeof providerOrIdentityOrFn !== "function"
        ? providerOrIdentityOrFn
        : {
@@ -911,7 +813,7 @@ index 35a950818e6a4affdd63615ddd3d456e70347168..0bca252e98c488212b18ee143fde2163
          };
    const store: TlsFingerprintStore = {
      used: false,
-@@ -1377,7 +1565,10 @@
+@@ -1250,7 +1412,10 @@
  }
  
  /** Check whether TLS fingerprint transport is enabled for this route identity. */

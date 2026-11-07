@@ -1,8 +1,10 @@
 diff --git a/open-sse/services/model.ts b/open-sse/services/model.ts
-index 3584b842ecb3324a1b3ef03dbff717fe0bc2a8b3..79a3d8d960db86ca007626c3674b70f24a351c9c 100644
+index d4b3bb038f9a5754cd6801aa98ee87b4a8c623e2..b2ce6ad98affbc80ebf5c0bf8960ed79f7208fcf 100644
 --- a/open-sse/services/model.ts
 +++ b/open-sse/services/model.ts
-@@ -127,2 +127,9 @@
+@@ -95,6 +95,13 @@
+ // prefixing the model id (e.g. `agentrouter/gpt-5.6-sol`,
+ // `openai/gpt-5.6-sol`) — the prefix path always wins.
  export const CODEX_NATIVE_UNPREFIXED_MODELS = new Set([
 +  "gpt-6.1-sol",
 +  "gpt-6.1-sol-ultra",
@@ -12,3 +14,5 @@ index 3584b842ecb3324a1b3ef03dbff717fe0bc2a8b3..79a3d8d960db86ca007626c3674b70f2
 +  "gpt-6.1-sol-medium",
 +  "gpt-6.1-sol-low",
    "codex-auto-review",
+   "gpt-6-astra",
+   "gpt-6-astra-ultra",

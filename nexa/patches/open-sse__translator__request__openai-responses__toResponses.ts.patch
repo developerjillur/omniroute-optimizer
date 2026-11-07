@@ -1,0 +1,14 @@
+diff --git a/open-sse/translator/request/openai-responses/toResponses.ts b/open-sse/translator/request/openai-responses/toResponses.ts
+--- a/open-sse/translator/request/openai-responses/toResponses.ts
++++ b/open-sse/translator/request/openai-responses/toResponses.ts
+@@ -313,6 +313,10 @@
+         input.push({
+           type: "message",
+           role: "assistant",
++          // A replayed progress update must not become a completed final answer.
++          ...(msg.phase === "commentary" || msg.phase === "final_answer" || msg.phase === null
++            ? { phase: msg.phase }
++            : {}),
+           content: outputContent,
+           status: "completed",
+         });

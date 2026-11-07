@@ -1,0 +1,46 @@
+diff --git a/src/mitm/_internal/standaloneRouting.cjs b/src/mitm/_internal/standaloneRouting.cjs
+--- a/src/mitm/_internal/standaloneRouting.cjs
++++ b/src/mitm/_internal/standaloneRouting.cjs
+@@ -1,4 +1,6 @@
+ "use strict";
++
++const { resolveClaudeMapping } = require("./claudeModels.cjs");
+
+ const AGENT_ROUTE_CONFIG = {
+   antigravity: {
+@@ -41,6 +43,10 @@
+
+   const config = getAgentRouteConfig(agentId);
+   const { fs, dbFile, getSqliteDb, aliasConfigShim } = deps;
++  const resolve = (mappings) =>
++    agentId === "claude-code"
++      ? resolveClaudeMapping(model, mappings)
++      : mappings[model] || mappings["*"] || null;
+
+   try {
+     const db = getSqliteDb();
+@@ -50,7 +56,7 @@
+         .get(config.aliasKey);
+       if (row) {
+         const mappings = aliasConfigShim.normalizeAliasMappings(JSON.parse(row.value));
+-        return mappings[model] || mappings["*"] || null;
++        return resolve(mappings);
+       }
+     }
+   } catch {
+@@ -61,13 +67,13 @@
+     if (fs.existsSync(dbFile)) {
+       const db = JSON.parse(fs.readFileSync(dbFile, "utf-8"));
+       const mappings = aliasConfigShim.normalizeAliasMappings(db.mitmAlias?.[config.aliasKey]);
+-      return mappings[model] || mappings["*"] || null;
++      return resolve(mappings);
+     }
+   } catch {
+     // Ignore malformed legacy state.
+   }
+
+-  return null;
++  return agentId === "claude-code" ? resolveClaudeMapping(model, {}) : null;
+ }
+
+ module.exports = {

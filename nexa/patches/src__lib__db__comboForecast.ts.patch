@@ -1,0 +1,46 @@
+diff --git a/src/lib/db/comboForecast.ts b/src/lib/db/comboForecast.ts
+index 342e3e6e6889bc5e1246296d263abb4c5656e8f3..8866e0e65120c910fed8cb13a81f5ca2902057b6 100644
+--- a/src/lib/db/comboForecast.ts
++++ b/src/lib/db/comboForecast.ts
+@@ -1,4 +1,5 @@
+ import { getDbInstance } from "./core";
++import { cacheTtlTokenSql } from "./usageAnalytics/cacheTtl";
+ 
+ export type ComboForecastUsageRow = {
+   comboName: string;
+@@ -14,6 +15,8 @@
+   outputTokens: number;
+   cacheReadTokens: number;
+   cacheCreationTokens: number;
++  cacheCreation5mTokens?: number;
++  cacheCreation1hTokens?: number;
+   reasoningTokens: number;
+   totalTokens: number;
+   avgLatencyMs: number;
+@@ -34,6 +37,8 @@
+   outputTokens: number | null;
+   cacheReadTokens: number | null;
+   cacheCreationTokens: number | null;
++  cacheCreation5mTokens: number | null;
++  cacheCreation1hTokens: number | null;
+   reasoningTokens: number | null;
+   totalTokens: number | null;
+   avgLatencyMs: number | null;
+@@ -83,6 +88,8 @@
+          COALESCE(SUM(tokens_out), 0) as outputTokens,
+          COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
+          COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
++         COALESCE(SUM(${cacheTtlTokenSql().five}), 0) as cacheCreation5mTokens,
++         COALESCE(SUM(${cacheTtlTokenSql().hour}), 0) as cacheCreation1hTokens,
+          COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
+          COALESCE(SUM(tokens_in), 0) + COALESCE(SUM(tokens_out), 0) as totalTokens,
+          COALESCE(AVG(duration), 0) as avgLatencyMs,
+@@ -111,6 +118,8 @@
+     outputTokens: toNumber(row.outputTokens),
+     cacheReadTokens: toNumber(row.cacheReadTokens),
+     cacheCreationTokens: toNumber(row.cacheCreationTokens),
++    cacheCreation5mTokens: toNumber(row.cacheCreation5mTokens),
++    cacheCreation1hTokens: toNumber(row.cacheCreation1hTokens),
+     reasoningTokens: toNumber(row.reasoningTokens),
+     totalTokens: toNumber(row.totalTokens),
+     avgLatencyMs: toNumber(row.avgLatencyMs),

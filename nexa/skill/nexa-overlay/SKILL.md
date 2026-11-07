@@ -7,6 +7,11 @@ description: Use when working in the NexaLance OmniRoute fork (developerjillur/O
 
 ## Overview
 
+Since 2026-10-28, Nexa fixes and release evidence are managed in
+`developerjillur/omniroute-optimizer`. Author overlay changes there and validate
+them in an isolated application checkout at the recorded pristine base. Do not
+create a competing set of fixes in the reference application checkout.
+
 This repo is a fork of `diegosouzapw/OmniRoute` run as a **child-theme overlay**. The branch
 `nexalance` = the **pristine upstream tree, byte-for-byte** (identical to `upstream-main`) **plus one
 top-level `nexa/` folder** holding every customization. Our source edits live as surgical patches
@@ -32,22 +37,26 @@ promotion, post-mortems): `reference.md` in this skill dir.
   smoked **out-of-band first**.
 - **`npm run dev` is BANNED** (15–25 s route compiles, ~1 GB OOM). Deploy = the production standalone
   via `nexa/build.mjs` + launchd.
-- **Commit overlay changes with `git commit --no-verify`.** The husky pre-commit hook (lint-staged)
-  runs prettier/eslint on staged files — including the pristine upstream files — and reformats them,
-  silently breaking the byte-pristine base. `--no-verify` skips it. The guard catches it if you forget.
+- **Commit overlay changes with normal hooks enabled.** Stage only reviewed
+  overlay/documentation files, keep the application base pristine and inspect
+  hook changes before committing. Do not skip hooks. Operator instructions take
+  precedence over the historical hook-bypass advice.
 
-## Git structure
+## Git structure of the reference application repository
 
 - Remotes: `origin` → `git@github.com:developerjillur/OmniRoute.git` (SSH, push here) · `upstream` →
   `https://github.com/diegosouzapw/OmniRoute.git` (never push).
 - Branches: `nexalance` = production (pristine base + `nexa/`) · `upstream-main` = pristine mirror
   (only ff'd from a release tag / `upstream/main`, never hand-edited) · `pre-child-theme-migration` =
   pre-overlay rollback anchor.
-- **No CI:** GitHub Actions is **DISABLED** on the fork (default branch `nexalance`). The child-theme
-  model needs no workflows — validation is 100% local (`nexa/build.mjs` + gate + smoke). Upstream PRs
-  via `gh` still work. Details + re-enable command: `reference.md` §2b.
+- GitHub Actions on the reference fork (default branch `nexalance`) remains
+  separate from the canonical optimizer repository. The optimizer's native
+  reliability workflow validates public source and synthetic fixtures against a
+  pinned application commit; it does not deploy or change the reference fork's
+  Actions settings. Production build, full ratchet and deployment smoke gates
+  remain required before a live release.
 
-## Workflow (run from repo root)
+## Workflow (run from the isolated application root)
 
 ```bash
 node nexa/status.mjs           # base version, pristine/applied state, patch health, drift
@@ -71,7 +80,10 @@ node nexa/gen-manifest.mjs     # regenerate nexa/manifest.json from live content
    until clean.
 3. **Validate + deploy**: `node nexa/build.mjs` → run the gate → smoke out-of-band → flip launchd
    (see Deploy).
-4. `node nexa/gen-manifest.mjs`, commit, `git push origin nexalance`.
+4. Regenerate the manifest, retain the validated overlay changes in the canonical
+   optimizer repository and commit with normal hooks. Push only the reviewed
+   descriptive branch to the owner's canonical repository; do not automatically
+   publish a reference-fork branch or any upstream contribution.
 
 ## Re-cut a patch (the only reconciliation this model has)
 

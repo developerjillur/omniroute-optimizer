@@ -1,0 +1,52 @@
+--- a/open-sse/translator/response/claude-to-openai.ts
++++ b/open-sse/translator/response/claude-to-openai.ts
+@@ -16,10 +16,12 @@
+   completion_tokens: number;
+   total_tokens: number;
+   reasoning_tokens?: number;
++  cacheCreation5m?: number;
++  cacheCreation1h?: number;
+   prompt_tokens_details?: {
+     cached_tokens?: number;
+     cache_creation_tokens?: number;
+-    // false: cache_creation_tokens is not included in prompt_tokens (#2215).
++    // Native metering uses an inclusive prompt count; retain its cache inclusion flag.
+     cache_creation_in_prompt?: boolean;
+   };
+   completion_tokens_details?: {
+@@ -297,6 +299,8 @@
+           const totalTokens = promptTokens + completionTokens;
+ 
+           finalChunk.usage = {
++            ...(state.usage.cacheCreation5m !== undefined ? {cacheCreation5m:state.usage.cacheCreation5m} : {}),
++            ...(state.usage.cacheCreation1h !== undefined ? {cacheCreation1h:state.usage.cacheCreation1h} : {}),
+             prompt_tokens: promptTokens,
+             completion_tokens: completionTokens,
+             total_tokens: totalTokens,
+@@ -319,7 +323,7 @@
+             }
+             if (cacheCreationTokens > 0) {
+               finalChunk.usage.prompt_tokens_details.cache_creation_tokens = cacheCreationTokens;
+-              finalChunk.usage.prompt_tokens_details.cache_creation_in_prompt = false;
++              finalChunk.usage.prompt_tokens_details.cache_creation_in_prompt = true;
+             }
+           }
+         }
+@@ -343,6 +347,8 @@
+           state.usage && typeof state.usage === "object"
+             ? {
+                 usage: {
++                  ...(state.usage.cacheCreation5m !== undefined ? {cacheCreation5m:state.usage.cacheCreation5m} : {}),
++                  ...(state.usage.cacheCreation1h !== undefined ? {cacheCreation1h:state.usage.cacheCreation1h} : {}),
+                   prompt_tokens: state.usage.input_tokens || 0,
+                   completion_tokens: state.usage.output_tokens || 0,
+                   total_tokens:
+@@ -365,7 +371,7 @@
+                           ...(cacheCreationTokens > 0
+                             ? {
+                                 cache_creation_tokens: cacheCreationTokens,
+-                                cache_creation_in_prompt: false,
++                                cache_creation_in_prompt: true,
+                               }
+                             : {}),
+                         },

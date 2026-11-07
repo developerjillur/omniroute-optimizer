@@ -2,7 +2,7 @@
 // scripts/check/check-tsc-ratchet.mjs
 // TypeScript-error ratchet — the report-accepted "tracked exception" for
 // `next.config.mjs typescript.ignoreBuildErrors: true`. The production build
-// still ignores TS errors (a full flip is a 2966-error / 620-file backlog), but
+// still ignores the inherited backlog recorded in the versioned baseline, but
 // this gate makes the backlog MONOTONICALLY BURN DOWN: new code may not add TS
 // errors, and the count can only ratchet down.
 //
@@ -24,6 +24,12 @@ const QUIET = process.argv.includes("--quiet");
 const RATCHET = process.argv.includes("--ratchet");
 const UPDATE = process.argv.includes("--update");
 const BASELINE_PATH = path.join(ROOT, "config/quality/tsc-error-baseline.json");
+const diagnosticsIndex = process.argv.indexOf("--diagnostics-out");
+const diagnosticsPath = diagnosticsIndex < 0 ? null : process.argv[diagnosticsIndex + 1];
+if (diagnosticsIndex >= 0 && (!diagnosticsPath || diagnosticsPath.startsWith("--"))) {
+  console.error("--diagnostics-out requires an output file");
+  process.exit(2);
+}
 
 function log(msg) {
   if (!QUIET) process.stderr.write(`${msg}\n`);
@@ -50,24 +56,46 @@ function measure() {
       "--noEmit",
       "--incremental",
       "false",
+      "--pretty",
+      "false",
       "-p",
       "tsconfig.json",
     ],
-    { cwd: ROOT, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 }
+    { cwd: ROOT, encoding: "utf8", maxBuffer: 64 * 1024 * 1024, timeout: 8 * 60_000 }
   );
+  // Preserve one measurement's diagnostics without replacing an earlier receipt.
+  if (diagnosticsPath) {
+    fs.writeFileSync(
+      diagnosticsPath,
+      JSON.stringify({ status: res.status, signal: res.signal, error: res.error?.code }) +
+        "\n" +
+        (res.stdout || "") +
+        (res.stderr || ""),
+      { flag: "wx" }
+    );
+  }
   if (res.error || res.status === null) {
     return { skip: true, reason: res.error ? `tsc-${res.error.code}` : `tsc-signal-${res.signal}` };
   }
-  // tsc exits non-zero when there are errors; that is expected — we parse stdout.
-  const count = countTscErrors(`${res.stdout || ""}${res.stderr || ""}`);
-  if (res.status !== 0 && count === 0) return { skip: true, reason: `tsc-exit-${res.status}` };
+  // The pinned compiler completes this noEmit measurement with status 0 or 2.
+  // Partial diagnostics from an abnormal exit cannot authorize a release budget.
+  if (res.status !== 0 && res.status !== 2) {
+    return { skip: true, reason: `tsc-exit-${res.status}` };
+  }
+  const output = `${res.stdout || ""}${res.stderr || ""}`;
+  const count = countTscErrors(output);
+  const located = (output.match(/^.+\(\d+,\d+\): error TS\d+:/gm) || []).length;
+  if (located !== count) return { skip: true, reason: "tsc-global-diagnostics" };
+  if ((res.status === 0 && count !== 0) || (res.status === 2 && count === 0)) {
+    return { skip: true, reason: `tsc-exit-${res.status}` };
+  }
   return { skip: false, count };
 }
 
-function readBaseline() {
+function readBaselineRecord() {
   try {
     const raw = JSON.parse(fs.readFileSync(BASELINE_PATH, "utf8"));
-    return typeof raw.value === "number" ? raw.value : null;
+    return raw && Number.isSafeInteger(raw.value) && raw.value >= 0 ? raw : null;
   } catch {
     return null;
   }
@@ -76,13 +104,19 @@ function readBaseline() {
 const result = measure();
 if (result.skip) {
   process.stdout.write(`tscErrors=SKIP reason=${result.reason}\n`);
-  process.exit(RATCHET ? 75 : 0); // production must reject an unmeasured gate
+  process.exit(RATCHET || UPDATE ? 75 : 0); // production must reject an unmeasured gate
 }
 
 const measured = result.count;
-const baseline = readBaseline();
+const baselineRecord = readBaselineRecord();
+const baseline = baselineRecord?.value ?? null;
 process.stdout.write(`tscErrors=${measured}\n`);
 log(`[tsc-ratchet] measured=${measured} baseline=${baseline ?? "none"}`);
+
+if ((RATCHET || UPDATE) && baselineRecord === null) {
+  log("[tsc-ratchet] baseline missing or invalid; a measurement cannot authorize a new budget.");
+  process.exit(75);
+}
 
 if (UPDATE) {
   if (baseline !== null && measured > baseline) {
@@ -95,6 +129,7 @@ if (UPDATE) {
     BASELINE_PATH,
     JSON.stringify(
       {
+        ...baselineRecord,
         _comment:
           "TypeScript-error ratchet baseline. direction: down (can only shrink). Update via `npm run check:tsc-ratchet -- --update` ONLY when the measured count drops. Owner: OmniRoute maintainers. Removal target: reach 0, then re-enable next.config typescript.ignoreBuildErrors:false.",
         value: measured,

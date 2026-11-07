@@ -1,0 +1,794 @@
+diff --git a/open-sse/config/providerRegistry.ts b/open-sse/config/providerRegistry.ts
+--- a/open-sse/config/providerRegistry.ts
++++ b/open-sse/config/providerRegistry.ts
+@@ -10,6 +10,7 @@
+ } from "./providers/registry/alibaba/index.ts";
+ export { REGISTRY } from "./providers/index.ts";
+ import { REGISTRY } from "./providers/index.ts";
++import { selectClaudeFamilyModels } from "../../src/mitm/_internal/claudeModels.cjs";
+ // Imported from `privateHost` rather than `outboundUrlGuard`: this module is reachable from
+ // `ProviderDetailPageClient.tsx`, so anything it pulls in has to survive a browser bundle
+ // (#11122). `privateHost` is platform-free by contract; the guard module is not.
+@@ -309,8 +310,8 @@
+
+ /**
+  * Derive the latest fable/opus/sonnet/haiku model IDs from the `claude` registry entry.
+- * Picks the first model whose ID matches each family pattern — registry order
+- * determines precedence, so newer models should be listed first.
++ * Compare numeric versions and optional release dates independently of registry order.
++ * Fable is exposed for explicit selection only; CLI defaults do not select it.
+  */
+ export function getClaudeCodeDefaultModels(): {
+   fable: string;
+@@ -318,14 +319,7 @@
+   sonnet: string;
+   haiku: string;
+ } {
+-  const models = REGISTRY.claude?.models ?? [];
+-  const find = (pattern: RegExp) => models.find((m) => pattern.test(m.id))?.id ?? "";
+-  return {
+-    fable: find(/fable/i),
+-    opus: find(/opus/i),
+-    sonnet: find(/sonnet/i),
+-    haiku: find(/haiku/i),
+-  };
++  return selectClaudeFamilyModels(REGISTRY.claude?.models ?? []);
+ }
+
+ /**
+diff --git a/open-sse/config/providers/registry/claude/index.ts b/open-sse/config/providers/registry/claude/index.ts
+--- a/open-sse/config/providers/registry/claude/index.ts
++++ b/open-sse/config/providers/registry/claude/index.ts
+@@ -1,3 +1,4 @@
++import { catalog as claudeModels } from "../../../../../src/mitm/_internal/claudeModels.cjs";
+ import type { RegistryEntry } from "../../shared.ts";
+ import {
+   getClaudeCliHeaders,
+@@ -26,133 +27,5 @@
+     clientIdDefault: resolvePublicCred("claude_id"),
+     tokenUrl: "https://api.anthropic.com/v1/oauth/token",
+   },
+-  models: [
+-    {
+-      id: "claude-fable-5-1",
+-      name: "Claude Fable 5.1",
+-      contextLength: 1000000,
+-      maxOutputTokens: 128000,
+-      supportsReasoning: true,
+-      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
+-      supportsXHighEffort: true,
+-      supportsVision: true,
+-      unsupportedParams: ["temperature", "top_p", "top_k"],
+-    },
+-    {
+-      id: "claude-fable-5",
+-      name: "Claude Fable 5",
+-      contextLength: 1000000,
+-      maxOutputTokens: 128000,
+-      // Opus 4.7+/Fable 5 reject non-default temperature/top_p/top_k with a 400 (sampling
+-      // is fixed; reasoning is steered by output_config.effort). Strip them before dispatch.
+-      supportsReasoning: true,
+-      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
+-      supportsXHighEffort: true,
+-      unsupportedParams: ["temperature", "top_p", "top_k"],
+-    },
+-    {
+-      id: "claude-opus-5",
+-      name: "Claude Opus 5",
+-      contextLength: 1000000,
+-      maxOutputTokens: 128000,
+-      supportsReasoning: true,
+-      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
+-      supportsXHighEffort: true,
+-      unsupportedParams: ["temperature", "top_p", "top_k"],
+-    },
+-    // Listed after Opus 5 so the cc/ Opus default stays on a model stale live catalogs still accept (#14612).
+-    {
+-      id: "claude-opus-5-5",
+-      name: "Claude Opus 5.5",
+-      contextLength: 1000000,
+-      maxOutputTokens: 128000,
+-      supportsReasoning: true,
+-      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
+-      supportsXHighEffort: true,
+-      supportsVision: true,
+-      unsupportedParams: ["temperature", "top_p", "top_k"],
+-    },
+-    {
+-      id: "claude-opus-4-8",
+-      name: "Claude Opus 4.8",
+-      contextLength: 1000000,
+-      maxOutputTokens: 128000,
+-      supportsReasoning: true,
+-      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
+-      supportsXHighEffort: true,
+-      unsupportedParams: ["temperature", "top_p", "top_k"],
+-    },
+-    {
+-      id: "claude-opus-4-7",
+-      name: "Claude Opus 4.7",
+-      contextLength: 1000000,
+-      maxOutputTokens: 128000,
+-      supportsReasoning: true,
+-      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
+-      supportsXHighEffort: true,
+-      unsupportedParams: ["temperature", "top_p", "top_k"],
+-    },
+-    {
+-      id: "claude-opus-4-6",
+-      name: "Claude Opus 4.6",
+-      supportsXHighEffort: false,
+-      contextLength: 1000000,
+-      maxOutputTokens: 128000,
+-      supportsReasoning: true,
+-      supportedThinkingEfforts: ["low", "medium", "high", "max"],
+-    },
+-    {
+-      id: "claude-opus-4-5-20251101",
+-      name: "Claude Opus 4.5",
+-      supportsXHighEffort: false,
+-      contextLength: 200000,
+-      maxOutputTokens: 64000,
+-      supportsReasoning: true,
+-      supportedThinkingEfforts: ["low", "medium", "high"],
+-    },
+-    {
+-      id: "claude-sonnet-5",
+-      name: "Claude Sonnet 5",
+-      contextLength: 1000000,
+-      maxOutputTokens: 128000,
+-      // Sonnet 5 is the first Sonnet-tier model to support xhigh effort — do NOT copy
+-      // the `supportsXHighEffort: false` from the older claude-sonnet-4-6/4-5 entries.
+-      supportsXHighEffort: true,
+-      // Sonnet 5 rejects non-default temperature/top_p/top_k with a 400 (adaptive-only;
+-      // reasoning steered by output_config.effort). Mirrors the Opus/Fable entries.
+-      unsupportedParams: ["temperature", "top_p", "top_k"],
+-    },
+-    {
+-      id: "claude-sonnet-5-5",
+-      name: "Claude Sonnet 5.5",
+-      contextLength: 1000000,
+-      maxOutputTokens: 128000,
+-      supportsXHighEffort: true,
+-      // Sonnet 5.5 caps effort at xhigh. Listing the tiers here makes the
+-      // executor lower a requested "max" to "xhigh" instead of forwarding it.
+-      supportedThinkingEfforts: ["low", "medium", "high", "xhigh"],
+-      unsupportedParams: ["temperature", "top_p", "top_k"],
+-    },
+-    {
+-      id: "claude-sonnet-4-6",
+-      name: "Claude Sonnet 4.6",
+-      supportsXHighEffort: false,
+-      contextLength: 1000000,
+-      maxOutputTokens: 64000,
+-    },
+-    {
+-      id: "claude-sonnet-4-5-20250929",
+-      name: "Claude Sonnet 4.5",
+-      supportsXHighEffort: false,
+-      contextLength: 200000,
+-      maxOutputTokens: 64000,
+-    },
+-    {
+-      id: "claude-haiku-4-5-20251001",
+-      name: "Claude Haiku 4.5",
+-      supportsXHighEffort: false,
+-      contextLength: 200000,
+-      maxOutputTokens: 64000,
+-    },
+-  ],
++  models: claudeModels as RegistryEntry["models"],
+ };
+diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.tsx b/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.tsx
+--- a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.tsx
++++ b/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.tsx
+@@ -11,6 +11,7 @@
+ import {
+   getStoredClaudeAuthValue,
+   normalizeClaudeBaseUrl,
++  normalizeClaudeModelId,
+ } from "@/shared/services/claudeCliConfig";
+
+ const CLOUD_URL = process.env.NEXT_PUBLIC_CLOUD_URL;
+@@ -68,6 +69,7 @@
+   const [claudeStatus, setClaudeStatus] = useState(null);
+   const [checkingClaude, setCheckingClaude] = useState(false);
+   const [applying, setApplying] = useState(false);
++  const [settingsPreview, setSettingsPreview] = useState(null);
+   const [restoring, setRestoring] = useState(false);
+   const [message, setMessage] = useState(null);
+   const [showInstallGuide, setShowInstallGuide] = useState(false);
+@@ -171,7 +173,7 @@
+     return normalizeClaudeBaseUrl(url);
+   };
+
+-  const handleApplySettings = async () => {
++  const handleApplySettings = async (reviewed = false) => {
+     setApplying(true);
+     setMessage(null);
+     try {
+@@ -184,11 +186,19 @@
+
+       tool.defaultModels.forEach((model) => {
+         const targetModel = modelMappings[model.alias] || model.defaultValue || "";
+-        if (targetModel && model.envKey) env[model.envKey] = targetModel;
++        if (targetModel && model.envKey) env[model.envKey] = normalizeClaudeModelId(targetModel);
+       });
+
+-      const postBody: Record<string, unknown> = { env };
++      let postBody: Record<string, unknown> = { env, preview: true };
+       if (selectedKeyId) postBody.keyId = selectedKeyId;
++      if (reviewed) {
++        if (!settingsPreview) return;
++        postBody = {
++          ...settingsPreview.postBody,
++          preview: false,
++          expectedRevision: settingsPreview.revision,
++        };
++      }
+
+       const res = await fetch("/api/cli-tools/claude-settings", {
+         method: "POST",
+@@ -196,14 +206,16 @@
+         body: JSON.stringify(postBody),
+       });
+       const data = await res.json();
++      if (res.ok && data.preview) {
++        setSettingsPreview({ ...data, postBody });
++        return;
++      }
+       if (res.ok) {
++        setSettingsPreview(null);
+         setMessage({ type: "success", text: t("settingsApplied") });
+-        setClaudeStatus((prev) => ({
+-          ...prev,
+-          hasBackup: true,
+-          settings: { ...prev?.settings, env },
+-        }));
++        await checkClaudeStatus();
+       } else {
++        setSettingsPreview(null);
+         setMessage({
+           type: "error",
+           text:
+@@ -265,7 +277,7 @@
+
+     tool.defaultModels.forEach((model) => {
+       const targetModel = modelMappings[model.alias];
+-      if (targetModel && model.envKey) env[model.envKey] = targetModel;
++      if (targetModel && model.envKey) env[model.envKey] = normalizeClaudeModelId(targetModel);
+     });
+
+     return [
+@@ -511,6 +523,32 @@
+               </div>
+
+               {/* Opt-in (default off): Claude Code auto-permission classifier compat mode. */}
++              {settingsPreview && (
++                <div
++                  className="rounded border border-border p-3 space-y-2"
++                  role="region"
++                  aria-label="settings.json"
++                >
++                  <p className="text-sm font-semibold">{t("preview")} — settings.json</p>
++                  <ul className="text-xs space-y-2 break-all">
++                    {settingsPreview.changes.map((change) => (
++                      <li key={change.key}>
++                        <code>{change.key}</code>: <code>{change.before ?? "∅"}</code>
++                        {" → "}
++                        <code>{change.after}</code>
++                      </li>
++                    ))}
++                  </ul>
++                  <div className="flex gap-2">
++                    <Button size="sm" onClick={() => handleApplySettings(true)} loading={applying}>
++                      {t("apply")}
++                    </Button>
++                    <Button size="sm" variant="outline" onClick={() => setSettingsPreview(null)}>
++                      {t("clear")}
++                    </Button>
++                  </div>
++                </div>
++              )}
+               <ClaudeClassifierCompatToggle />
+
+               {/* Info link to the discovery-alias gate (claude/<provider>/<model> mirror ids) */}
+@@ -534,12 +572,12 @@
+                 <Button
+                   variant="primary"
+                   size="sm"
+-                  onClick={handleApplySettings}
++                  onClick={() => handleApplySettings()}
+                   disabled={!hasActiveProviders}
+                   loading={applying}
+                 >
+                   <span className="material-symbols-outlined text-[14px] mr-1">save</span>
+-                  {t("apply")}
++                  {t("preview")}
+                 </Button>
+                 <Button
+                   variant="outline"
+diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-tools/claude-settings/route.ts
+--- a/src/app/api/cli-tools/claude-settings/route.ts
++++ b/src/app/api/cli-tools/claude-settings/route.ts
+@@ -3,6 +3,7 @@
+ import { NextResponse } from "next/server";
+ import fs from "fs/promises";
+ import path from "path";
++import { createHash } from "node:crypto";
+ import { requireCliToolsAuth } from "@/lib/api/requireCliToolsAuth";
+ import {
+   ensureCliConfigWriteAllowed,
+@@ -10,7 +11,7 @@
+   getCliRuntimeStatus,
+ } from "@/shared/services/cliRuntime";
+ import { createBackup } from "@/shared/services/backupService";
+-import { normalizeClaudeBaseUrl } from "@/shared/services/claudeCliConfig";
++import { planClaudeSettings } from "@/shared/services/claudeCliConfig";
+ import { saveCliToolLastConfigured, deleteCliToolLastConfigured } from "@/lib/db/cliToolState";
+ import { cliSettingsEnvSchema } from "@/shared/validation/schemas";
+ import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
+@@ -126,39 +127,38 @@
+     const settingsPath = getClaudeSettingsPath();
+     const claudeDir = path.dirname(settingsPath);
+
+-    // Ensure .claude directory exists
+-    await fs.mkdir(claudeDir, { recursive: true });
+-
+-    // Backup current settings before modifying
+-    await createBackup("claude", settingsPath);
+-
+     // Read current settings
+     let currentSettings: Record<string, any> = {};
+-    try {
+-      const content = await fs.readFile(settingsPath, "utf-8");
+-      currentSettings = JSON.parse(content);
++    let currentContent = "";
++    try {
++      currentContent = await fs.readFile(settingsPath, "utf-8");
++      currentSettings = JSON.parse(currentContent);
+     } catch (error: any) {
+       if (error.code !== "ENOENT") {
+         throw error;
+       }
+     }
+
+-    // Claude Code gateway mode expects the unified root endpoint, not a forced /v1 suffix.
+-    if (env.ANTHROPIC_BASE_URL) {
+-      env.ANTHROPIC_BASE_URL = normalizeClaudeBaseUrl(env.ANTHROPIC_BASE_URL);
+-    }
+-
+-    // Merge new env with existing settings
+-    const newSettings = {
+-      ...currentSettings,
+-      env: {
+-        ...(currentSettings.env || {}),
+-        ...env,
+-      },
+-    };
++    if (!currentSettings || typeof currentSettings !== "object" || Array.isArray(currentSettings)) {
++      throw new Error("Expected a settings object");
++    }
++    const revision = createHash("sha256").update(currentContent).digest("hex");
++    const plan = planClaudeSettings(currentSettings, env);
++    if (rawBody.preview === true) {
++      return NextResponse.json({ preview: true, revision, changes: plan.changes });
++    }
++    if (rawBody.expectedRevision !== undefined && rawBody.expectedRevision !== revision) {
++      return NextResponse.json(
++        { error: "Settings changed; review the changes again" },
++        { status: 409 }
++      );
++    }
++
++    await fs.mkdir(claudeDir, { recursive: true });
++    await createBackup("claude", settingsPath);
+
+     // Write new settings
+-    await fs.writeFile(settingsPath, JSON.stringify(newSettings, null, 2));
++    await fs.writeFile(settingsPath, JSON.stringify(plan.settings, null, 2));
+
+     // Persist last-configured timestamp
+     try {
+diff --git a/src/lib/db/agentBridgeMappings.ts b/src/lib/db/agentBridgeMappings.ts
+--- a/src/lib/db/agentBridgeMappings.ts
++++ b/src/lib/db/agentBridgeMappings.ts
+@@ -6,6 +6,7 @@
+ import { getDbInstance } from "./core";
+ import type { AgentBridgeMappingRow } from "./_rowTypes";
+ import { setMitmAliasAll } from "./models/mitmAlias";
++import { REGISTRY } from "@omniroute/open-sse/config/providerRegistry";
+
+ /** Agents that have a registered alias key in standaloneRouting.cjs::AGENT_ROUTE_CONFIG. */
+ const MITM_ALIAS_AGENTS = new Set(["antigravity", "claude-code", "kiro"]);
+@@ -17,7 +18,17 @@
+       "SELECT agent_id, source_model, target_model, updated_at FROM agent_bridge_mappings WHERE agent_id = ? ORDER BY source_model ASC"
+     )
+     .all(agentId) as AgentBridgeMappingRow[];
+-  return rows;
++  if (agentId !== "claude-code" || rows.some((row) => row.source_model === "*")) return rows;
++  const existing = new Set(rows.map((row) => row.source_model));
++  const defaults = (REGISTRY.claude?.models ?? [])
++    .filter((model) => !existing.has(model.id))
++    .map((model) => ({
++      agent_id: agentId,
++      source_model: model.id,
++      target_model: `cc/${model.id}`,
++      updated_at: "",
++    }));
++  return [...rows, ...defaults].sort((a, b) => a.source_model.localeCompare(b.source_model));
+ }
+
+ export function setMappings(
+diff --git a/src/mitm/_internal/claudeModels.cjs b/src/mitm/_internal/claudeModels.cjs
+new file mode 100644
+--- /dev/null
++++ b/src/mitm/_internal/claudeModels.cjs
+@@ -0,0 +1,67 @@
++"use strict";
++
++const catalog = require("./claudeModels.json");
++
++function normalizeClaudeModelId(value) {
++  if (typeof value !== "string") return value;
++  return value.trim().replace(/^(?:cc|claude)\/(claude-[A-Za-z0-9._-]+)$/, "$1");
++}
++
++function versionOf(id, family) {
++  const match = id.match(new RegExp(`^claude-${family}-(\\d+(?:[.-]\\d+)*)(?:-latest)?$`));
++  if (!match) return null;
++  const parts = match[1].split(/[.-]/).map(Number);
++  const date = parts.length > 1 && String(parts.at(-1)).length === 8 ? parts.pop() : 0;
++  return { parts, date };
++}
++
++function compareVersions(a, b) {
++  for (let i = 0; i < Math.max(a.parts.length, b.parts.length); i++) {
++    const delta = (a.parts[i] || 0) - (b.parts[i] || 0);
++    if (delta) return delta;
++  }
++  return a.date - b.date;
++}
++
++function selectClaudeFamilyModels(models) {
++  const selected = { fable: "", opus: "", sonnet: "", haiku: "" };
++  for (const family of ["fable", "opus", "sonnet", "haiku"]) {
++    let best = null;
++    for (const model of models) {
++      const version = typeof model.id === "string" ? versionOf(model.id, family) : null;
++      if (version && (!best || compareVersions(version, best.version) > 0)) {
++        best = { id: model.id, version };
++      }
++    }
++    selected[family] = best?.id || "";
++  }
++  return selected;
++}
++
++function resolveClaudeMapping(model, mappings, models = catalog) {
++  const plain = normalizeClaudeModelId(model);
++  for (const key of [model, plain, "*"]) {
++    if (typeof key === "string" && Object.hasOwn(mappings, key) && mappings[key]) {
++      return mappings[key];
++    }
++  }
++  return models.some((entry) => entry.id === plain) ? { model: `cc/${plain}` } : null;
++}
++
++function unmappedClaudeModelError(model) {
++  return {
++    type: "error",
++    error: {
++      type: "invalid_request_error",
++      message: `Model ${JSON.stringify(String(model ?? "").slice(0, 200))} is not mapped in Agent Bridge for Claude Code. Configure a source model mapping.`,
++    },
++  };
++}
++
++module.exports = {
++  normalizeClaudeModelId,
++  selectClaudeFamilyModels,
++  resolveClaudeMapping,
++  unmappedClaudeModelError,
++  catalog,
++};
+diff --git a/src/mitm/_internal/claudeModels.json b/src/mitm/_internal/claudeModels.json
+new file mode 100644
+--- /dev/null
++++ b/src/mitm/_internal/claudeModels.json
+@@ -0,0 +1,124 @@
++[
++  {
++    "id": "claude-fable-5-1",
++    "name": "Claude Fable 5.1",
++    "contextLength": 1000000,
++    "maxOutputTokens": 128000,
++    "supportsReasoning": true,
++    "supportedThinkingEfforts": ["low", "medium", "high", "xhigh", "max"],
++    "supportsXHighEffort": true,
++    "supportsVision": true,
++    "unsupportedParams": ["temperature", "top_p", "top_k"]
++  },
++  {
++    "id": "claude-fable-5",
++    "name": "Claude Fable 5",
++    "contextLength": 1000000,
++    "maxOutputTokens": 128000,
++    "supportsReasoning": true,
++    "supportedThinkingEfforts": ["low", "medium", "high", "xhigh", "max"],
++    "supportsXHighEffort": true,
++    "unsupportedParams": ["temperature", "top_p", "top_k"]
++  },
++  {
++    "id": "claude-opus-5",
++    "name": "Claude Opus 5",
++    "contextLength": 1000000,
++    "maxOutputTokens": 128000,
++    "supportsReasoning": true,
++    "supportedThinkingEfforts": ["low", "medium", "high", "xhigh", "max"],
++    "supportsXHighEffort": true,
++    "unsupportedParams": ["temperature", "top_p", "top_k"]
++  },
++  {
++    "id": "claude-opus-5-5",
++    "name": "Claude Opus 5.5",
++    "contextLength": 1000000,
++    "maxOutputTokens": 128000,
++    "supportsReasoning": true,
++    "supportedThinkingEfforts": ["low", "medium", "high", "xhigh", "max"],
++    "supportsXHighEffort": true,
++    "supportsVision": true,
++    "unsupportedParams": ["temperature", "top_p", "top_k"]
++  },
++  {
++    "id": "claude-opus-4-8",
++    "name": "Claude Opus 4.8",
++    "contextLength": 1000000,
++    "maxOutputTokens": 128000,
++    "supportsReasoning": true,
++    "supportedThinkingEfforts": ["low", "medium", "high", "xhigh", "max"],
++    "supportsXHighEffort": true,
++    "unsupportedParams": ["temperature", "top_p", "top_k"]
++  },
++  {
++    "id": "claude-opus-4-7",
++    "name": "Claude Opus 4.7",
++    "contextLength": 1000000,
++    "maxOutputTokens": 128000,
++    "supportsReasoning": true,
++    "supportedThinkingEfforts": ["low", "medium", "high", "xhigh", "max"],
++    "supportsXHighEffort": true,
++    "unsupportedParams": ["temperature", "top_p", "top_k"]
++  },
++  {
++    "id": "claude-opus-4-6",
++    "name": "Claude Opus 4.6",
++    "supportsXHighEffort": false,
++    "contextLength": 1000000,
++    "maxOutputTokens": 128000,
++    "supportsReasoning": true,
++    "supportedThinkingEfforts": ["low", "medium", "high", "max"]
++  },
++  {
++    "id": "claude-opus-4-5-20251101",
++    "name": "Claude Opus 4.5",
++    "supportsXHighEffort": false,
++    "contextLength": 200000,
++    "maxOutputTokens": 64000,
++    "supportsReasoning": true,
++    "supportedThinkingEfforts": ["low", "medium", "high"]
++  },
++  {
++    "id": "claude-sonnet-5",
++    "name": "Claude Sonnet 5",
++    "contextLength": 1000000,
++    "maxOutputTokens": 128000,
++    "supportsXHighEffort": true,
++    "unsupportedParams": ["temperature", "top_p", "top_k"]
++  },
++  {
++    "id": "claude-sonnet-5-5",
++    "name": "Claude Sonnet 5.5",
++    "contextLength": 1000000,
++    "maxOutputTokens": 128000,
++    "supportsXHighEffort": true,
++    "supportedThinkingEfforts": ["low", "medium", "high", "xhigh"],
++    "unsupportedParams": ["temperature", "top_p", "top_k"]
++  },
++  {
++    "id": "claude-sonnet-4-6",
++    "name": "Claude Sonnet 4.6",
++    "supportsXHighEffort": false,
++    "contextLength": 1000000,
++    "maxOutputTokens": 64000
++  },
++  {
++    "id": "claude-sonnet-4-5-20250929",
++    "name": "Claude Sonnet 4.5",
++    "supportsXHighEffort": false,
++    "contextLength": 200000,
++    "maxOutputTokens": 64000
++  },
++  {
++    "id": "claude-haiku-4-5-20251001",
++    "name": "Claude Haiku 4.5",
++    "supportsXHighEffort": false,
++    "contextLength": 200000,
++    "maxOutputTokens": 64000
++  },
++  {
++    "id": "claude-haiku-5-5",
++    "name": "Claude Haiku 5.5"
++  }
++]
+diff --git a/src/mitm/_internal/standaloneRouting.cjs b/src/mitm/_internal/standaloneRouting.cjs
+--- a/src/mitm/_internal/standaloneRouting.cjs
++++ b/src/mitm/_internal/standaloneRouting.cjs
+@@ -1,4 +1,6 @@
+ "use strict";
++
++const { resolveClaudeMapping } = require("./claudeModels.cjs");
+
+ const AGENT_ROUTE_CONFIG = {
+   antigravity: {
+@@ -41,6 +43,10 @@
+
+   const config = getAgentRouteConfig(agentId);
+   const { fs, dbFile, getSqliteDb, aliasConfigShim } = deps;
++  const resolve = (mappings) =>
++    agentId === "claude-code"
++      ? resolveClaudeMapping(model, mappings)
++      : mappings[model] || mappings["*"] || null;
+
+   try {
+     const db = getSqliteDb();
+@@ -50,7 +56,7 @@
+         .get(config.aliasKey);
+       if (row) {
+         const mappings = aliasConfigShim.normalizeAliasMappings(JSON.parse(row.value));
+-        return mappings[model] || mappings["*"] || null;
++        return resolve(mappings);
+       }
+     }
+   } catch {
+@@ -61,13 +67,13 @@
+     if (fs.existsSync(dbFile)) {
+       const db = JSON.parse(fs.readFileSync(dbFile, "utf-8"));
+       const mappings = aliasConfigShim.normalizeAliasMappings(db.mitmAlias?.[config.aliasKey]);
+-      return mappings[model] || mappings["*"] || null;
++      return resolve(mappings);
+     }
+   } catch {
+     // Ignore malformed legacy state.
+   }
+
+-  return null;
++  return agentId === "claude-code" ? resolveClaudeMapping(model, {}) : null;
+ }
+
+ module.exports = {
+diff --git a/src/mitm/server.cjs b/src/mitm/server.cjs
+--- a/src/mitm/server.cjs
++++ b/src/mitm/server.cjs
+@@ -162,6 +162,7 @@
+ const forwardShim = require("./_internal/forwardTarget.cjs");
+ const aliasConfigShim = require("./_internal/aliasConfig.cjs");
+ const standaloneRoutingShim = require("./_internal/standaloneRouting.cjs");
++const claudeModelsShim = require("./_internal/claudeModels.cjs");
+ const nativeToolModelsShim = require("./_internal/nativeToolModels.cjs");
+ const writeBackpressureShim = require("./_internal/writeBackpressure.cjs");
+ const peerGuardShim = require("./_internal/peerGuard.cjs");
+@@ -885,6 +886,26 @@
+     const mappedOverride = getMappedOverride(model, agentId);
+
+     if (!mappedOverride) {
++      if (agentId === "claude-code") {
++        const failure = claudeModelsShim.unmappedClaudeModelError(model);
++        captureToInspector({
++          req,
++          bodyBuffer,
++          agentId,
++          sourceModel: model,
++          mappedModel: null,
++          status: 400,
++          respHeaders: { "content-type": "application/json" },
++          respBody: JSON.stringify(failure),
++          respSize: 0,
++          error: failure.error.message,
++          proxyLatencyMs: Date.now() - startedAt,
++          upstreamLatencyMs: 0,
++        });
++        res.writeHead(400, { "Content-Type": "application/json" });
++        res.end(JSON.stringify(failure));
++        return;
++      }
+       vlog(1, `[MITM] → PASSTHROUGH (model "${model}" has no MITM alias mapping)`);
+       return passthrough(req, res, rawBodyBuffer);
+     }
+diff --git a/src/shared/constants/cliTools.ts b/src/shared/constants/cliTools.ts
+--- a/src/shared/constants/cliTools.ts
++++ b/src/shared/constants/cliTools.ts
+@@ -37,15 +37,7 @@
+         name: "Default Model",
+         alias: "model",
+         envKey: "ANTHROPIC_MODEL",
+-        defaultValue: _cc.sonnet ? `cc/${_cc.sonnet}` : "cc/claude-sonnet-4-5-20250929",
+-        isTopLevel: true,
+-      },
+-      {
+-        id: "fable",
+-        name: "Claude Fable",
+-        alias: "fable",
+-        envKey: "ANTHROPIC_DEFAULT_FABLE_MODEL",
+-        defaultValue: _cc.fable ? `cc/${_cc.fable}` : "cc/claude-fable-5-1",
++        defaultValue: _cc.sonnet || "claude-sonnet-5-5",
+         isTopLevel: true,
+       },
+       {
+@@ -53,21 +45,21 @@
+         name: "Claude Opus",
+         alias: "opus",
+         envKey: "ANTHROPIC_DEFAULT_OPUS_MODEL",
+-        defaultValue: _cc.opus ? `cc/${_cc.opus}` : "cc/claude-opus-4-5-20251101",
++        defaultValue: _cc.opus || "claude-opus-5-5",
+       },
+       {
+         id: "sonnet",
+         name: "Claude Sonnet",
+         alias: "sonnet",
+         envKey: "ANTHROPIC_DEFAULT_SONNET_MODEL",
+-        defaultValue: _cc.sonnet ? `cc/${_cc.sonnet}` : "cc/claude-sonnet-4-5-20250929",
++        defaultValue: _cc.sonnet || "claude-sonnet-5-5",
+       },
+       {
+         id: "haiku",
+         name: "Claude Haiku",
+         alias: "haiku",
+         envKey: "ANTHROPIC_DEFAULT_HAIKU_MODEL",
+-        defaultValue: _cc.haiku ? `cc/${_cc.haiku}` : "cc/claude-haiku-4-5-20251001",
++        defaultValue: _cc.haiku || "claude-haiku-5-5",
+       },
+     ],
+   },
+diff --git a/src/shared/services/claudeCliConfig.ts b/src/shared/services/claudeCliConfig.ts
+--- a/src/shared/services/claudeCliConfig.ts
++++ b/src/shared/services/claudeCliConfig.ts
+@@ -1,3 +1,38 @@
++import { normalizeClaudeModelId } from "../../mitm/_internal/claudeModels.cjs";
++export { normalizeClaudeModelId };
++
++/** Merge only requested fields; Fable remains an independently managed owner choice. */
++export function planClaudeSettings<Settings extends Record<string, any>>(
++  currentSettings: Settings,
++  requestedEnv: Record<string, string>
++) {
++  const env = { ...(currentSettings.env || {}) };
++  for (const [key, value] of Object.entries(requestedEnv)) {
++    if (key === "ANTHROPIC_DEFAULT_FABLE_MODEL") continue;
++    env[key] =
++      key === "ANTHROPIC_MODEL" || /^ANTHROPIC_DEFAULT_[A-Z0-9_]+_MODEL$/.test(key)
++        ? normalizeClaudeModelId(value)
++        : value;
++  }
++  if (env.ANTHROPIC_BASE_URL) {
++    env.ANTHROPIC_BASE_URL = normalizeClaudeBaseUrl(env.ANTHROPIC_BASE_URL);
++  }
++  const previous = currentSettings.env || {};
++  const changes = Object.keys(requestedEnv)
++    .filter((key) => key !== "ANTHROPIC_DEFAULT_FABLE_MODEL" && previous[key] !== env[key])
++    .sort()
++    .map((key) => ({
++      key,
++      before: /TOKEN|SECRET|PASSWORD|API_KEY/i.test(key)
++        ? previous[key] === undefined
++          ? null
++          : "[redacted]"
++        : (previous[key] ?? null),
++      after: /TOKEN|SECRET|PASSWORD|API_KEY/i.test(key) ? "[redacted]" : env[key],
++    }));
++  return { settings: { ...currentSettings, env }, changes };
++}
++
+ export function normalizeClaudeBaseUrl(value: string): string {
+   return String(value || "")
+     .trim()

@@ -47,6 +47,21 @@ test("command mode with an existing executable is supported", async () => {
   assert.deepEqual(result, { supported: true, reason: null, composeCommand: null });
 });
 
+test("source update validation accepts a typed completion-only process probe", async () => {
+  const config = getAutoUpdateConfig(env({ AUTO_UPDATE_MODE: "source" }));
+  const calls: Array<{ command: string; args: string[]; timeout: number | undefined }> = [];
+  const result = await validateAutoUpdateRuntime(
+    config,
+    async (command, args, options) => {
+      calls.push({ command, args: [...args], timeout: options?.timeout });
+      return { stdout: "git version fixture", stderr: "" };
+    },
+    async () => true
+  );
+  assert.deepEqual(result, { supported: true, reason: null, composeCommand: null });
+  assert.deepEqual(calls, [{ command: "git", args: ["--version"], timeout: 10_000 }]);
+});
+
 test("buildCommandUpdateScript passes the version as one shell-quoted argument", () => {
   const script = buildCommandUpdateScript("3.8.52", "/opt/my updater/run.sh");
   assert.equal(script, "set -eu\nexec '/opt/my updater/run.sh' '3.8.52'");

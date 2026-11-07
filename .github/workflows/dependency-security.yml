@@ -1,0 +1,59 @@
+name: Dependency security preparation
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/dependency-security.yml
+      - nexa/security/dependency-targets-2026-11-06.json
+      - nexa/tests/prepare-dependency-security.mjs
+      - nexa/patches/package*.patch
+
+permissions:
+  contents: read
+
+jobs:
+  lock:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      NODE_OPTIONS: --max-old-space-size=512
+      npm_config_ignore_scripts: "true"
+      npm_config_update_notifier: "false"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "26.7.0"
+      - name: Prepare pinned source and dependency metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          application="$RUNNER_TEMP/dependency-application"
+          baseline="$RUNNER_TEMP/dependency-baseline"
+          git init "$application"
+          git -C "$application" remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+          git -C "$application" fetch --depth=1 upstream ad6f33f66bda34eba98645d3bfdabbde294bc843
+          git -C "$application" checkout --detach FETCH_HEAD
+          git -C "$application" branch upstream-main HEAD
+          mkdir "$baseline"
+          cp "$application/package.json" "$application/package-lock.json" "$baseline/"
+          cp -R "$GITHUB_WORKSPACE/nexa" "$application/nexa"
+          cd "$application"
+          node nexa/check/pristine-base.mjs
+          node nexa/apply.mjs --check
+          node nexa/apply.mjs
+          export npm_config_cache="$RUNNER_TEMP/dependency-npm-cache"
+          node "$GITHUB_WORKSPACE/nexa/tests/prepare-dependency-security.mjs" \
+            --application "$application" --baseline "$baseline" \
+            --targets "$GITHUB_WORKSPACE/nexa/security/dependency-targets-2026-11-06.json" \
+            --output "$RUNNER_TEMP/dependency-security-evidence"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: dependency-security-evidence
+          path: ${{ runner.temp }}/dependency-security-evidence/
+          if-no-files-found: error
+          retention-days: 30

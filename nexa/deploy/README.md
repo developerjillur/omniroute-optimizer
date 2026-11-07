@@ -2,7 +2,39 @@
 
 Owner: Jillur Rahman / NexaLance
 
-This directory is the versioned deployment source for the local production service. The portable kit is a historical setup reference; the installed `omni-ctl` command prefers `~/Developer/OmniRoute/nexa/deploy/omni-updater.sh`.
+This directory is the versioned deployment source for the local production service.
+Since 2026-10-28, `developerjillur/omniroute-optimizer` is the canonical management
+repository for Nexa fixes and release evidence. Its overlay is validated against
+the pinned pristine application base in an isolated fixture. The complete
+`~/Developer/OmniRoute` checkout is a reference/application checkout, not a second
+place to author fixes independently.
+
+The portable kit is a historical setup reference. The currently installed
+`omni-ctl` still prefers `~/Developer/OmniRoute/nexa/deploy/omni-updater.sh`; no
+installed command or production runtime was changed by the 2026-10-28 audit.
+Before deploying a new canonical change, prepare and validate an isolated
+application checkout using the exact reviewed optimizer commit. A source push or
+passing source-only CI is not a production build, install or deployment receipt.
+
+For v3.8.52, run `python3 nexa/deploy/check-upgrade-data.py --database <existing-storage.sqlite>`
+before preparing a migration clone and again before any approved live promotion.
+The check is read-only and must exit 0. Migration 207 removes or remaps old
+`opencode` / `oc` provider configuration; if any affected record exists, hold
+promotion and preserve that configuration until an explicit migration decision.
+The pinned upstream release is `ad6f33f66bda34eba98645d3bfdabbde294bc843`;
+do not substitute the upstream default branch or a later release. Keep the two
+custom SQL paths intact: their runtime ledger identities are namespaced, and
+the old applied timestamps and native cache values must survive the cloned-data
+acceptance check. Source tests alone do not establish a safe live data migration.
+
+For a canonical release, retain both the optimizer commit and the application
+integration commit in the build receipt. In a new isolated pristine application
+checkout, copy and verify the reviewed overlay, then save that overlay with normal
+hooks before applying it. This makes the existing `build:release` Git-based
+`BUILD_SHA` identify the actual integrated source. Never commit an applied tree or
+stamp the pristine upstream SHA as though it identified new Nexa fixes. Preserve
+the installed DNS shim alongside the previous runtime for rollback; the installed
+updater's older source path must not silently replace the reviewed canonical shim.
 
 ## Runtime layout
 
@@ -45,6 +77,48 @@ The updater first requires the root-owned hostname-scoped ingress helper; a miss
 The archive gate rejects missing native transport/recovery/event-stream files and the POSIX client-socket startup bug. An isolated installed prefix uses a cloned database and random auxiliary ports. Authenticated management/catalog, a real Anthropic-format inference and CORS isolation must pass before promotion. The default inference model is `cc/claude-opus-5-5`; set `NEXA_SMOKE_MODEL` to an explicit provider/model such as `codex/gpt-6.1-sol` to test the provider affected by a release. This selects one real inference target without fallback or quota-state changes, and the verification receipt records that target. Live acceptance checks the actual native ingress and backend with certificate validation enabled, not just `/healthz`.
 
 When `NEXA_DEPLOY_ARTIFACT` supplies an existing verified archive, release identity comes from its `dist/BUILD_SHA`; the updater logs its own source identity separately. Deployment receipts include the attempt timestamp so retrying the same application artifact preserves earlier evidence.
+
+### Published dependency graph
+
+A clean source dependency audit does not establish the graph installed by
+`npm install -g`. Root `overrides` do not apply when OmniRoute is itself a dependency.
+`publication-lock.mjs` reads npm's existing virtual source tree without network
+resolution, pins its effective overridden edges to their validated target versions,
+and excludes development workspace links from a publishable `npm-shrinkwrap.json`.
+The original source lock and source manifest remain unchanged.
+
+`seal-package.py` retains the unsealed archive and adds the publication lock to a
+new archive. Every original member, including package metadata and compiled assets,
+must retain its bytes and mode. The effective edge recipe, source lock and archive
+hashes are recorded. Creating this archive is preparation, not package acceptance.
+
+`install-publication.mjs` extracts the reviewed archive into a new prefix at the
+existing `lib/node_modules/omniroute` layout, then runs normal `npm ci` at that
+package root with the shipped lock. Workspace linking is disabled; production and
+optional dependencies retain their required lifecycle scripts. The prefix's normal
+executable links are recreated from the unchanged package metadata. No existing
+runtime is overwritten by preparation. Global installation of a nested tarball
+is not used for the candidate because it ignores the package-root override policy.
+
+The normal installer omits development tools while retaining required lifecycle
+scripts. After installation, `installed-publication.mjs` checks the actual tree
+against the shipped lock; a nested dependency absent from that lock blocks smoke.
+The release must also retain an audit of the actual installed production graph,
+including the separately shipped `dist` dependencies. Keep failed attempts and do
+not replace an installed audit with a source-only audit.
+
+The separate `Publication dependency regression` CI workflow exercises actual
+installs with a small public dependency fixture. Its global baseline must lose
+the override; the candidate must retain the validated version, omit development
+and workspace packages, run its required lifecycle script and executable, and
+execute the dependency correctly. This proves the publication mechanism; it does
+not stand in for installing and auditing the complete OmniRoute artifact.
+
+Isolated smoke decrypts an existing ordinary client key with the package's own
+storage implementation, verifies its authentication fingerprint, and excludes
+revoked, expired, restricted or quota-bypass credentials. It creates no keys and
+does not change permissions. Provider quota failure remains a failed inference
+gate; offline health, schema or CORS success is reported separately.
 
 Promotion retains the entire previous runtime prefix. Failure stops the candidate, preserves it, restores the old prefix and restores the pre-deployment SQLite snapshot. The candidate's database/WAL files are kept privately for recovery. A snapshot cannot preserve writes made after it was taken; the retained failed database is the source for recovering those writes. Open database handles block restoration rather than replacing an active database.
 

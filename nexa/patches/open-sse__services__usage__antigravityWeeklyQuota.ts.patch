@@ -1,0 +1,20 @@
+diff --git a/open-sse/services/usage/antigravityWeeklyQuota.ts b/open-sse/services/usage/antigravityWeeklyQuota.ts
+--- a/open-sse/services/usage/antigravityWeeklyQuota.ts
++++ b/open-sse/services/usage/antigravityWeeklyQuota.ts
+@@ -10,6 +10,7 @@
+ import { toRecord, toNumber } from "./scalars.ts";
+ import { type UsageQuota, parseResetTime } from "./quota.ts";
+ import { getAntigravityContentHeaders } from "../antigravityHeaders.ts";
++import { getAntigravityCacheIdentity } from "./antigravityCacheIdentity.ts";
+ import type { AntigravityClientProfile } from "../antigravityClientProfile.ts";
+ 
+ type JsonRecord = Record<string, unknown>;
+@@ -57,7 +58,7 @@
+   projectId: string | null | undefined,
+   clientProfile: AntigravityClientProfile
+ ): string {
+-  return `${accessToken.substring(0, 16)}:${projectId || "default"}:${clientProfile}`;
++  return getAntigravityCacheIdentity(accessToken, projectId, clientProfile);
+ }
+ 
+ export async function fetchAntigravityUserQuotaSummaryCached(

@@ -1,11 +1,12 @@
 diff --git a/src/app/(dashboard)/dashboard/cli-code/components/HermesAgentToolCard.tsx b/src/app/(dashboard)/dashboard/cli-code/components/HermesAgentToolCard.tsx
-index 669d90b5f..e8ac97927 100644
+index 145ed159dcf0eb42407b21bb472cb9755a3045da..ede4bf5e2e916c2e5a7098174d301a9ce4ea845e 100644
 --- a/src/app/(dashboard)/dashboard/cli-code/components/HermesAgentToolCard.tsx
 +++ b/src/app/(dashboard)/dashboard/cli-code/components/HermesAgentToolCard.tsx
-@@ -83,6 +83,17 @@ const HERMES_ROLES: Role[] = [
+@@ -82,6 +82,17 @@
+     id: "moa_aggregator",
      labelKey: "hermesRoleMoaAggregator",
      descriptionKey: "hermesRoleMoaAggregatorDesc",
-   },
++  },
 +  // nexa: MoA writing-panel slots (moa.presets.client-reply)
 +  {
 +    id: "moa_advisor_1",
@@ -16,7 +17,6 @@ index 669d90b5f..e8ac97927 100644
 +    id: "moa_advisor_2",
 +    labelKey: "hermesRoleMoaAdvisor2",
 +    descriptionKey: "hermesRoleMoaAdvisor2Desc",
-+  },
+   },
  ];
  
- const HERMES_AGENT_ZERO_CONFIG_PROVIDERS = ["opencode"];

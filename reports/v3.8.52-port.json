@@ -1,0 +1,2439 @@
+{
+  "upstreamVersion": "3.8.52",
+  "upstreamCommit": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
+  "previousCanonicalSource": "968fe6b68dac7ccd34f4652c9f967ed1a8bb2cc0",
+  "priorPatchPathsPreserved": 181,
+  "priorNewFilePathsPreserved": 116,
+  "sourceReconciliationOnly": true,
+  "fullBuild": false,
+  "deployment": false,
+  "files": [
+    {
+      "target": ".env.example",
+      "patch": "env-example.patch",
+      "disposition": "ported",
+      "candidateSha256": "3fcaf914ba14fe109caccef5d9fed967b8d2683541b083ad4377094bb4f37e96",
+      "baselinePatchSha256": "741f7e9f3c675163db94e5c9674a275d113ab878d83238bd8d00c09638501fc0"
+    },
+    {
+      "target": ".husky/pre-commit",
+      "patch": ".husky__pre-commit.patch",
+      "disposition": "ported",
+      "candidateSha256": "ab7aae9d7f4789a69351e2abebe5b580e684689d383e34a945ec4e2477926b52",
+      "baselinePatchSha256": "c310c9262fcea40dc379d2428058d14f2033d203abb01e12467a9499651cbe84"
+    },
+    {
+      "target": ".npmrc",
+      "patch": ".npmrc.patch",
+      "disposition": "ported",
+      "candidateSha256": "e9a2b54defed720394e53be940b93d5ba0a61be7b03caed8cb334c580a120cde",
+      "baselinePatchSha256": "8db9c700f5c7836352901be11d5a8fa2c045d56dd57b39dbd1df20fb42268306"
+    },
+    {
+      "target": "CLAUDE.md",
+      "patch": "CLAUDE.md.patch",
+      "disposition": "ported",
+      "candidateSha256": "634f51b53c9d235243f0003e3b97ebb8ec2f627e23a1c2536f04bec919f8258a",
+      "baselinePatchSha256": "69660eb4ef2cbdb39783f032b166dfd60fadcda8f7aa5d08750fd22e4f89a6a7"
+    },
+    {
+      "target": "Dockerfile",
+      "patch": "Dockerfile.patch",
+      "disposition": "ported",
+      "candidateSha256": "8254bef57733704541c13b48e8b9a2fac98d8fe5647b0c404cb97b489d30e2a3",
+      "baselinePatchSha256": "5c919cc624b72b48d940751909f8ba87eaa05b656c0288e24b0200d184804de0"
+    },
+    {
+      "target": "bin/cli/api.mjs",
+      "patch": "bin__cli__api.mjs.patch",
+      "disposition": "ported",
+      "candidateSha256": "fe47907ec893dda3189e31f3f1ee0a5a5cfe9c9b71e843a53b06e98120e227b0",
+      "baselinePatchSha256": "8a0c5dcf15eb0eb1dfb69dd6b64850dbb5858e4e6108867763ba8de91bcf16c0"
+    },
+    {
+      "target": "bin/cli/commands/doctor.mjs",
+      "patch": "bin__cli__commands__doctor.mjs.patch",
+      "disposition": "ported",
+      "candidateSha256": "dbb68108b31205d10cbab065d146b94ac76ac9c8fab5f5d54e7b8959e07026ef",
+      "baselinePatchSha256": "67a2f9d4c78d3a1baad2b3e1bef7799c1b78c178b727e2df4dcc2a945de28835"
+    },
+    {
+      "target": "bin/cli/utils/pid.mjs",
+      "patch": "bin__cli__utils__pid.mjs.patch",
+      "disposition": "retired-preserved",
+      "candidateSha256": "2f389c5b9ba7056ea5808089732a9ebebfdeae6fafc2719ff150ab102a1fc7aa",
+      "baselinePatchSha256": "b52cfb2a35454e25817744450f1ac5d87779df524476d1fb89623bdc0e762472"
+    },
+    {
+      "target": "bin/omniroute.mjs",
+      "patch": "bin__omniroute.mjs.patch",
+      "disposition": "ported",
+      "candidateSha256": "3e68b225baa10c53397ae315b6e282826a5df25fc39709edb18f200248bc1650",
+      "baselinePatchSha256": "0b4b05c73140480b8e6c4618ab990c722026df1a2104aef5751d747224669656"
+    },
+    {
+      "target": "config/quality/eslint-suppressions.json",
+      "patch": "config__quality__eslint-suppressions.json.patch",
+      "disposition": "ported",
+      "candidateSha256": "367bd9072c1207a9b54a0077c125b7dc16dc78fa40a7f2588f13b3e6b32678b8",
+      "baselinePatchSha256": "401e8c2756b54737e64b6fe259108676ee3c199d7105629b6c5b2bd24d7dca30"
+    },
+    {
+      "target": "docs/openapi.yaml",
+      "patch": "docs__openapi.yaml.patch",
+      "disposition": "ported",
+      "candidateSha256": "6a4e96fd4a6279c5b1f6896dd7b3cad4e4ae1d321ced1b973593db911208be2a",
+      "baselinePatchSha256": "03838581fe2cebfadc0ef51f0b97e6d917b2e9ed10dd451cb0364e0e5ce058d8"
+    },
+    {
+      "target": "docs/reference/ENVIRONMENT.md",
+      "patch": "docs__reference__ENVIRONMENT.md.patch",
+      "disposition": "ported",
+      "candidateSha256": "71eab4d91042d45e31cfa63aefc81ad47bbbb7384d9399c3834579ec4f94870e",
+      "baselinePatchSha256": "c124658a4f0f8328e97630b0ed7dded790d4bbb558174e7b8de08d11510031ad"
+    },
+    {
+      "target": "electron/main.js",
+      "patch": "electron__main.js.patch",
+      "disposition": "ported",
+      "candidateSha256": "2f2ac62d516b14c2794edb8847d01b475d2ba1209102145762e4ac30bf99c984",
+      "baselinePatchSha256": "df13060d9559f677c49c7c780cdfdfbf82f9f330ec470c22530b3c301b1b8bc8"
+    },
+    {
+      "target": "next.config.mjs",
+      "patch": "next.config.mjs.patch",
+      "disposition": "ported",
+      "candidateSha256": "ee99847c0ff63c23d70e6c53f0f15676d04c57c323bcf7978d33a74cb2eea691",
+      "baselinePatchSha256": "08ebda65a518627918b1b6144382f73817a6e4eca38cd25d4463486634df1c83"
+    },
+    {
+      "target": "open-sse/config/anthropicHeaders.ts",
+      "patch": "open-sse__config__anthropicHeaders.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "b2d79ded0c582eb21e37d0eea0846167bc25f91db801df6f3b38a21167787786",
+      "baselinePatchSha256": "72d98f32eb02cebc1e7153db7a1aae364bf6cf993a491ace202bf6564f879f64"
+    },
+    {
+      "target": "open-sse/config/codexIdentity.ts",
+      "patch": "open-sse__config__codexIdentity.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "8cccd9bccba9adcba9fb3d6becc45e390db13596222e9b93280779c33c4f26de",
+      "baselinePatchSha256": "ee890742d878ae1005f51b4a461e5017add9687ad6bd1f1e45e0642ca92251c2"
+    },
+    {
+      "target": "open-sse/config/providerModels.ts",
+      "patch": "open-sse__config__providerModels.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "f52b850e8e8df73d1f5eeca0b90c41050513ab0b77762e406eb7cdf4e31eb975",
+      "baselinePatchSha256": "ef97d25f8bd19dfe28d34afea5b2028fc823d4b18cf51af266c6bd5d397c1757"
+    },
+    {
+      "target": "open-sse/config/providers/registry/codex/index.ts",
+      "patch": "open-sse__config__providers__registry__codex__index.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "263f7328bf8480c508e3630f4bc1118171ca897af3470c6ef39451b90e737ee0",
+      "baselinePatchSha256": "cc02f4b92d513a98c3d0053975b4cc9764f0275e6a63799064bd08ae7f182886"
+    },
+    {
+      "target": "open-sse/executors/base/reasoningEffort.ts",
+      "patch": "open-sse__executors__base__reasoningEffort.ts.patch",
+      "disposition": "new-owner-patch",
+      "candidateSha256": "39e3d068e88da2332c300b6515a90e3cbcaeaa4234b22575d847945c2f2618da",
+      "baselinePatchSha256": null
+    },
+    {
+      "target": "open-sse/executors/base.ts",
+      "patch": "open-sse__executors__base.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "535334d1b6518d74324bbbf1c2ddd1e7223bd7d8f3304aa31fdf949dd7653ddf",
+      "baselinePatchSha256": "9ee917c3c51619e16a8887c3a4d862c7545f93d485e7fbffe8ffce9e36a40b00"
+    },
+    {
+      "target": "open-sse/executors/claudeIdentity.ts",
+      "patch": "open-sse__executors__claudeIdentity.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "fa77140da069e43d1402f0fa0375a2ccd4b6b25f4b97add93f4f9e5449886f47",
+      "baselinePatchSha256": "7c810af19b9a45848d7c4e31efce6cf905fce5be933fcef1dc352553d29175ca"
+    },
+    {
+      "target": "open-sse/executors/codex/reasoningSuffix.ts",
+      "patch": "open-sse__executors__codex__reasoningSuffix.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "b3c0edbee8cbd06251c3c4de0d29a34da9020cf7bc37d142f9ad3d863d57e3ab",
+      "baselinePatchSha256": "e0c555eb94afd86083c4b3c0578156ece01902aee280e62eaad5498d968acc49"
+    },
+    {
+      "target": "open-sse/executors/cursor/h2ProxyConnect.ts",
+      "patch": "open-sse__executors__cursor__h2ProxyConnect.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "065b9554865cfe7a3adf3635267146ff3cf928797e73fce0042be2b7ef474fcb",
+      "baselinePatchSha256": "48faf678c3f7e7aa182aa7812f8b235365377b7d5157e0d369c0e56bc46edb6b"
+    },
+    {
+      "target": "open-sse/handlers/chatCore/attemptLogging.ts",
+      "patch": "open-sse__handlers__chatCore__attemptLogging.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "c265ea55a69ca16b79dd204a6bef69bafe53c16ce950fb5ea2b3c31328d81d9e",
+      "baselinePatchSha256": "2db9812a844aff52588e3e311b4c0af64c8e6bc302a36a27dccd5797f4401c5f"
+    },
+    {
+      "target": "open-sse/handlers/chatCore/claudePassthroughBody.ts",
+      "patch": "open-sse__handlers__chatCore__claudePassthroughBody.ts.patch",
+      "disposition": "new-owner-patch",
+      "candidateSha256": "ee5e8d755ec7adbdbe750203ebe3d9d0b7eec3fca36ba33430a9d6ff5cc61c3c",
+      "baselinePatchSha256": null
+    },
+    {
+      "target": "open-sse/handlers/chatCore/compressionSettings.ts",
+      "patch": "open-sse__handlers__chatCore__compressionSettings.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "9b53a3d7b1b21e618546bab4496fb3e6d5b5585c008fb02fe5f9c2c187594dbd",
+      "baselinePatchSha256": "ea1a04d211196538454672bac8c84d4391ac5280bb84664da8d4351f0c08cc5d"
+    },
+    {
+      "target": "open-sse/handlers/chatCore/failureUsage.ts",
+      "patch": "open-sse__handlers__chatCore__failureUsage.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "0639d8f58bbc33119f7597b4482b55333bd26b9581bf51197fb106c98707089f",
+      "baselinePatchSha256": "8940e254a2f3c9270eb0fab49f8b48e3f11188901a7b031c55e1978aaf941852"
+    },
+    {
+      "target": "open-sse/handlers/chatCore/nonStreamingProviderLeg.ts",
+      "patch": "open-sse__handlers__chatCore__nonStreamingProviderLeg.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "598186e2fe08009cecabe323bb0c9bca0a8a77dd01d5ddb7e4e0d23ca5189d76",
+      "baselinePatchSha256": "a7dbd27862e5c0fa303be06a60cd38c30aebc406a09517f7e5dd9b08ef9a33bd"
+    },
+    {
+      "target": "open-sse/handlers/chatCore/nonStreamingResponse.ts",
+      "patch": "open-sse__handlers__chatCore__nonStreamingResponse.ts.patch",
+      "disposition": "new-owner-patch",
+      "candidateSha256": "b91583a988379a02ba1a392eaf434f68f03778453c1a7c43464cdb490237200d",
+      "baselinePatchSha256": null
+    },
+    {
+      "target": "open-sse/handlers/chatCore/passthroughHelpers.ts",
+      "patch": "open-sse__handlers__chatCore__passthroughHelpers.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "7b06f3baa2f080d4a44436f509f8d7cb0e667b7385f7445b77271ab0e6fc0d2e",
+      "baselinePatchSha256": "40adb3e74e37349f418fc2a8100c88d4ba2232ae70c4ac70c454263ffde8d747"
+    },
+    {
+      "target": "open-sse/handlers/chatCore/skipCredentialRefresh.ts",
+      "patch": "open-sse__handlers__chatCore__skipCredentialRefresh.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "6fca3d60a59aa3850a2674df51c0b8ddb368fb75aae6771b2096ae32e6524aa2",
+      "baselinePatchSha256": "9a79bdebe20a8bd2314cb4ddd90d7ad78beca7c4730fbbb19f512c9e043d3f59"
+    },
+    {
+      "target": "open-sse/handlers/chatCore/streamingPipeline.ts",
+      "patch": "open-sse__handlers__chatCore__streamingPipeline.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "3b494a5405936b63dd6385b1fb54b4fefac880e3a8979bc2fe5e4f1958ef80f8",
+      "baselinePatchSha256": "823f075ea9fdf5dba8cc35ca4307add4765f1357c08e350cf86eda7d81dd5d46"
+    },
+    {
+      "target": "open-sse/handlers/chatCore/streamingTail.ts",
+      "patch": "open-sse__handlers__chatCore__streamingTail.ts.patch",
+      "disposition": "new-owner-patch",
+      "candidateSha256": "1bdb931013310e907308b7923935f2612ef68ae635b454f7054c73f200605dd5",
+      "baselinePatchSha256": null
+    },
+    {
+      "target": "open-sse/handlers/chatCore/upstreamBody.ts",
+      "patch": "open-sse__handlers__chatCore__upstreamBody.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "6605faa762722651174c2d7a394c4ee45128c0d3b8818c539315a7aba0b4d6ed",
+      "baselinePatchSha256": "d7b204b951d85cd014221c31774a7377080fcbe996df5f26352bd7867a0a6d88"
+    },
+    {
+      "target": "open-sse/handlers/chatCore.ts",
+      "patch": "open-sse__handlers__chatCore.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "367d74e3fb34cf832cd415bd0f2a2ca3498eb38407861eb064092e46e8d515b7",
+      "baselinePatchSha256": "1df114fa3b63ec9e2f9c959d1854055cdaad58e14f9c695d13e3173cd6f6c0f0"
+    },
+    {
+      "target": "open-sse/handlers/responseTranslator.ts",
+      "patch": "open-sse__handlers__responseTranslator.ts.patch",
+      "disposition": "retired-preserved",
+      "candidateSha256": "b1b21cfe0bb6c74ebfb457596cc47562167f707450e6316128a3a7bec6b40862",
+      "baselinePatchSha256": "da08bb879b2f2e27493e0e4ce800818707d6fa710d52da3d7616db99d49a8f50"
+    },
+    {
+      "target": "open-sse/handlers/sseParser.ts",
+      "patch": "open-sse__handlers__sseParser.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "eb417b618e0e57dfad60b66f8b7ef90e375e9ced70450e605027a835cb9cdaec",
+      "baselinePatchSha256": "14741b44154da5d6d710cf35f09289537b0ee561ac32877144625506d055e4d2"
+    },
+    {
+      "target": "open-sse/handlers/usageExtractor.ts",
+      "patch": "open-sse__handlers__usageExtractor.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "39665c51718f100d4b8ff2a266902f1ae50bd99430b59f69d634e436c0f52ba0",
+      "baselinePatchSha256": "506780b150cc8a8ddcbddc29f11d41e2780acb4829e5d221454838508eebf8b8"
+    },
+    {
+      "target": "open-sse/mcp-server/__tests__/createComboTool.test.ts",
+      "patch": "open-sse__mcp-server____tests____createComboTool.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "e4d3c8aee29372bb02d124e46aca3d01641a1c4bd451a0b60dcf9e2373494a5b",
+      "baselinePatchSha256": "ec6b485235eabbcf8e0bade35b3f42aff89c3b9438b2f379e8c0839d649f5fa7"
+    },
+    {
+      "target": "open-sse/services/__tests__/antigravity-quota-family.test.ts",
+      "patch": "open-sse__services____tests____antigravity-quota-family.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "c9daa8e8244bab342edbe821779365047be9f335e13f909480d2f3264d58ec30",
+      "baselinePatchSha256": "a0045b098fa2bd826572d6c550773f3eb4b521abbdcacbc8579b430197af6e0a"
+    },
+    {
+      "target": "open-sse/services/antigravityQuotaFamily.ts",
+      "patch": "open-sse__services__antigravityQuotaFamily.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "b0dad39f26d9235e9e6dee3d9d9f570d8decd165c951c46978bc2c5631335dc1",
+      "baselinePatchSha256": "d09f868324f4956ef19aa73a10ebeb54ce14d455282d614d2681591a86ded46a"
+    },
+    {
+      "target": "open-sse/services/claudeCodeCCH.ts",
+      "patch": "open-sse__services__claudeCodeCCH.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "634367b141e348d02ceaa02bf15d655e22f67b23eba82ffd44602b979cd2db54",
+      "baselinePatchSha256": "4150dfd0b4776a96b274be0a14316a057b9650f0e9d791515195d3adefd7d62b"
+    },
+    {
+      "target": "open-sse/services/claudeCodeConstraints.ts",
+      "patch": "open-sse__services__claudeCodeConstraints.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "445fe89bf66aeee8a9f1f020a079144c50e2ca2893e2af8351fb3a389f2f3ac3",
+      "baselinePatchSha256": "82ff587476d7ef28292006d5e02af4fa7d6a7060448410ca2e0d2225b414584d"
+    },
+    {
+      "target": "open-sse/services/combo/executeTargetAttempt.ts",
+      "patch": "open-sse__services__combo__executeTargetAttempt.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "07b20f0150d2d3906730def0781a5f53d57b1ba4feefb0544f6ee0b27d16b487",
+      "baselinePatchSha256": "d75e14673b41e6c5e41fbbd17dc96385caffd5e874bede532cd0b48a3781bdba"
+    },
+    {
+      "target": "open-sse/services/errorClassifier.ts",
+      "patch": "open-sse__services__errorClassifier.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "121bde9a6524c7626f305ad1fcfed1811f68a2d656119fceca114d89bc05d9f3",
+      "baselinePatchSha256": "46be65f21e48ee39e2ef382a6a9b6838ad16124b0213f97d06a42cca61d9ae50"
+    },
+    {
+      "target": "open-sse/services/genericQuotaFetcher.ts",
+      "patch": "open-sse__services__genericQuotaFetcher.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "4db6711d91c5b66791d6fa6b8b14c40f6c09ac4d41cc3f40422faa91f07d4d07",
+      "baselinePatchSha256": "b3c629e094b5517601f24d4e6516c11767d68ec4416c36dd7ea6869bd6297522"
+    },
+    {
+      "target": "open-sse/services/model.ts",
+      "patch": "open-sse__services__model.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "4a8faea2fc84bd6b5579de4ad68e6b59b16cf0875757c22301a72dea27892d42",
+      "baselinePatchSha256": "d151f759a192db98edc185c2158a1e5f160033a2f3d2680db3289052130a1654"
+    },
+    {
+      "target": "open-sse/services/modelFamilyFallback.ts",
+      "patch": "open-sse__services__modelFamilyFallback.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "785b5769d77575a07ca50e0f806e0540892890910f105507233c886abedc416f",
+      "baselinePatchSha256": "a4c790122e761e6d70fe6dc8f58273fc920f810d3e85bb46e8a0569a95d1ba28"
+    },
+    {
+      "target": "open-sse/services/sessionManager.ts",
+      "patch": "open-sse__services__sessionManager.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "f50c08c719df9fb9110a28a34f5cdc71c7718164e34fd0b945f7d4f4cb6e5338",
+      "baselinePatchSha256": "631f41d532641321a3699231166f88af41322059e65a4b98e663b13e81347d13"
+    },
+    {
+      "target": "open-sse/translator/helpers/schemaCoercion.ts",
+      "patch": "open-sse__translator__helpers__schemaCoercion.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "3f1871c175e64df58c786f4eb0e9acbd1108c2a1e0418e061b6099358bac6b2e",
+      "baselinePatchSha256": "59839baedb44ead0f2a2c1851d7d94dd6d338e23e364cc2074bb38c6fa5a0922"
+    },
+    {
+      "target": "open-sse/translator/request/claude-to-openai.ts",
+      "patch": "open-sse__translator__request__claude-to-openai.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "4ecdc0b2c25ec0ab0bd7d07afa04c990c48241ad73ef86bbd1e7084b6294f52d",
+      "baselinePatchSha256": "7eb32ce5a44858dff705598f4686d8add873bcc77454b6e1681f2280b9f0541e"
+    },
+    {
+      "target": "open-sse/translator/request/openai-responses/helpers.ts",
+      "patch": "open-sse__translator__request__openai-responses__helpers.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "ba98291b04119b5c187784c756d88cc6392a9175051f10e76f2e7b7464147a08",
+      "baselinePatchSha256": "f57ca77d40fe95216a8f9e0969c1390e7eafc6fafc4d7db02499d7a3b30a041f"
+    },
+    {
+      "target": "open-sse/translator/response/claude-to-openai.ts",
+      "patch": "open-sse__translator__response__claude-to-openai.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "b06f7eb58195a9ae4fbf5dc810e8d19542f3553b20030d33930b470bd98e156d",
+      "baselinePatchSha256": "c9bbf6df8cd08796a6ffb38df21e914f26f78f10312a3085f5a1c83acde6021d"
+    },
+    {
+      "target": "open-sse/utils/earlyStreamKeepalive.ts",
+      "patch": "open-sse__utils__earlyStreamKeepalive.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "1ec1fd1ec015e8989152f33b8a62829c43b61b174a46a19757044ec4318c32f8",
+      "baselinePatchSha256": "93af95cce1dcb92779c80825e98b93e5b59fc176cd4631449b3dabd7fa6358be"
+    },
+    {
+      "target": "open-sse/utils/proxyFetch.ts",
+      "patch": "open-sse__utils__proxyFetch.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "ead22e80bafd3ef686b653be23cbe778804bb3017f9f290c21a5c40987febd47",
+      "baselinePatchSha256": "f620d0d897daf3279f5090203ccccd14dea76fd64fef8412aa59a6b6cfe043ee"
+    },
+    {
+      "target": "open-sse/utils/stream.ts",
+      "patch": "open-sse__utils__stream.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "e5f8e3d087c58a6151b7cc8f8d50e989033fc11fccdc45d8111228c837a35cd7",
+      "baselinePatchSha256": "9a04396e302b2ceea7f1a6cddc9c3c4d881f6b0e44224b313e9422272b9388f0"
+    },
+    {
+      "target": "open-sse/utils/streamClaudeEmptyBody.ts",
+      "patch": "open-sse__utils__streamClaudeEmptyBody.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "18ac23637b57cd0dddf45344a17a3d4cfee2972a1efa6782b25d55fb17be6c8a",
+      "baselinePatchSha256": "21dd9c455543203ecf4c8db163d5925273b3274ea93bfc75ffb085227803cb01"
+    },
+    {
+      "target": "open-sse/utils/streamHandler.ts",
+      "patch": "open-sse__utils__streamHandler.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "10458d5c64e195cd6c48336cea5ebae58a37e474d4797284fd3c064fad33e7ad",
+      "baselinePatchSha256": "fda56f1bbe14f900e377bcb00943ef6a8b8201e344024c9326a481668473bd51"
+    },
+    {
+      "target": "open-sse/utils/streamPayloadCollector.ts",
+      "patch": "open-sse__utils__streamPayloadCollector.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "a850e3a5047c8688891813124bb25135ee467cc5b75dfb0101e8c94cafb6f712",
+      "baselinePatchSha256": "3f18ecf61ba6996f65614aeb2db7e263223be1f7321f8e723d9365ddc3344dfe"
+    },
+    {
+      "target": "open-sse/utils/streamReadiness.ts",
+      "patch": "open-sse__utils__streamReadiness.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "e87af87457110098bd95df2f17293a86250430bb61caeea7ac6d7db158869205",
+      "baselinePatchSha256": "983882698b66055b644b804f411c9d5bfda083f9793a1fc83a2b7435fbc21064"
+    },
+    {
+      "target": "open-sse/utils/usageTracking.ts",
+      "patch": "open-sse__utils__usageTracking.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "25756fffd280e4e8cce6c8ea69cfd175b5036b6234bc38f64bec064c98cd28c5",
+      "baselinePatchSha256": "6b9f87fc29faf557ffdc0e52e37fbd4114cd6cf81551966350ffeff477fe4406"
+    },
+    {
+      "target": "public/openapi.yaml",
+      "patch": "public__openapi.yaml.patch",
+      "disposition": "ported",
+      "candidateSha256": "3f12f17dd249281e1273f274c27054394bcdd02a6302f3ed93835a5b8db4faff",
+      "baselinePatchSha256": "95fa12e5047b5e57640c2b7ab83d271190e0da87314cf45666614ad54e5895b1"
+    },
+    {
+      "target": "scripts/build/assembleStandalone.mjs",
+      "patch": "scripts__build__assembleStandalone.mjs.patch",
+      "disposition": "ported",
+      "candidateSha256": "178646848ce6b4d5b032556e88eb9dcbbd58f7fd530f6630d80a53c32e975ea8",
+      "baselinePatchSha256": "fb2a8b5c22bd3df0918cb009b92dff6435302229317d62969c3d10da1a7b64e3"
+    },
+    {
+      "target": "scripts/build/bootstrap-env.mjs",
+      "patch": "scripts__build__bootstrap-env.mjs.patch",
+      "disposition": "ported",
+      "candidateSha256": "c0009843709bd95ee15eef3884b9ee01e5671d5195969d5eaa873447bfe177b7",
+      "baselinePatchSha256": "bac51969703a986f98bd28b5ac3f0f9056b7c28fe12d346b973cbdf138796dde"
+    },
+    {
+      "target": "scripts/dev/run-standalone.mjs",
+      "patch": "scripts__dev__run-standalone.mjs.patch",
+      "disposition": "ported",
+      "candidateSha256": "dd3b4219ece4b86cdc45cafcf87e6e4af02191f50267ebcaada40b641628b9dd",
+      "baselinePatchSha256": "3403ac2ece8ac7e4b1965d0ca49c9e8fe440a65f67039cc7efbf505046e1768b"
+    },
+    {
+      "target": "src/app/(dashboard)/dashboard/analytics/CacheHealthTab.tsx",
+      "patch": "src__app__(dashboard)__dashboard__analytics__CacheHealthTab.tsx.patch",
+      "disposition": "ported",
+      "candidateSha256": "20cd01dfddc7563345d81996ad72184729365dee46d3a3b8ce961c03f5ced8a0",
+      "baselinePatchSha256": "c7bdae56a670e5720327157cdc42be0f3102f039e81745868886ec548888dab3"
+    },
+    {
+      "target": "src/app/(dashboard)/dashboard/cli-code/components/HermesAgentToolCard.tsx",
+      "patch": "src__app__(dashboard)__dashboard__cli-code__components__HermesAgentToolCard.tsx.patch",
+      "disposition": "ported",
+      "candidateSha256": "93cd87263a66c1c7f0dccd657aee792b3e1e74203ac5d02cbc5a06276973aa2b",
+      "baselinePatchSha256": "8550d82cc970c952a67365604a533ce1a924aea841324dd666a46cee8f5eb59e"
+    },
+    {
+      "target": "src/app/(dashboard)/dashboard/costs/CostOverviewTab.tsx",
+      "patch": "src__app__(dashboard)__dashboard__costs__CostOverviewTab.tsx.patch",
+      "disposition": "ported",
+      "candidateSha256": "317e08599cf4af6824f36ab7a4671bb2daac376a86b6b5e351f39ee102526107",
+      "baselinePatchSha256": "c8a4256591a7cbea6d871a39b4911a9964b47181cb6962cf7f21cfbeba214275"
+    },
+    {
+      "target": "src/app/(dashboard)/dashboard/costs/components/ApiKeyUsageLimitCard.tsx",
+      "patch": "src__app__(dashboard)__dashboard__costs__components__ApiKeyUsageLimitCard.tsx.patch",
+      "disposition": "ported",
+      "candidateSha256": "dc49aab88776cc2beadf4a61f86954c2112afb9eedc8b5fbe00f168e9b1eb9a5",
+      "baselinePatchSha256": "a3f330ad32b51bd1838ede25e272e7569be67e0d3a45b5c7a9f3adbe67296b8d"
+    },
+    {
+      "target": "src/app/(dashboard)/dashboard/costs/useApiKeyUsageLimits.ts",
+      "patch": "src__app__(dashboard)__dashboard__costs__useApiKeyUsageLimits.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "42d035955594a6da0b8c94df566b67e98182d5b4fd12cb4880a4d20e8ccd7117",
+      "baselinePatchSha256": "d751ad5fb2d88d5179193230c1c69a69a794eb321210516c8ff11e1f2657ef69"
+    },
+    {
+      "target": "src/app/(dashboard)/dashboard/providers/[id]/components/ProviderModalsPanel.tsx",
+      "patch": "src__app__(dashboard)__dashboard__providers__[id]__components__ProviderModalsPanel.tsx.patch",
+      "disposition": "ported",
+      "candidateSha256": "acbebb73b61f60e7cc109a760437941ac020844108978cb012cf096759f16ac9",
+      "baselinePatchSha256": "414711b9a0bbb9a0a16a42c351ac50966bb1d313ed3be30005ec05cdab17c1ab"
+    },
+    {
+      "target": "src/app/(dashboard)/dashboard/settings/components/QuotaPreflightCard.tsx",
+      "patch": "src__app__(dashboard)__dashboard__settings__components__QuotaPreflightCard.tsx.patch",
+      "disposition": "ported",
+      "candidateSha256": "bf9458dc197b441e7910e4e806cf42d91b938af24790ccee7732bdb0cb5bce7a",
+      "baselinePatchSha256": "33c5002d03cf8f5f79a9655d6b0a8a2d493d51dd9cc5d534bb5fec7cdcd7a584"
+    },
+    {
+      "target": "src/app/(dashboard)/dashboard/tools/agent-bridge/AgentBridgePageClient.tsx",
+      "patch": "src__app__(dashboard)__dashboard__tools__agent-bridge__AgentBridgePageClient.tsx.patch",
+      "disposition": "ported",
+      "candidateSha256": "9ede4b643ae346e7919b8d3995780b20d1053ecece7fbcc2baae7813aacddc8e",
+      "baselinePatchSha256": "c9a11f1fa4677b5f8103beb2f1c55b2a0043ef96f2b59cbfe939f1d7051d5dd2"
+    },
+    {
+      "target": "src/app/(dashboard)/dashboard/tools/agent-bridge/components/AgentCard.tsx",
+      "patch": "src__app__(dashboard)__dashboard__tools__agent-bridge__components__AgentCard.tsx.patch",
+      "disposition": "ported",
+      "candidateSha256": "3aa0fc52d6eec90b020e3a80115eceff7c79533e31db6dd463d4276e805129c4",
+      "baselinePatchSha256": "73ef8d506ef5ac420b4f1fcc06bc9f8dba85f0f2261c2dca38e53487576828db"
+    },
+    {
+      "target": "src/app/(dashboard)/dashboard/tools/agent-bridge/components/SetupWizard.tsx",
+      "patch": "src__app__(dashboard)__dashboard__tools__agent-bridge__components__SetupWizard.tsx.patch",
+      "disposition": "ported",
+      "candidateSha256": "72cd5f272eb60bce60421d40a790740d2f67471f692b8b9abec870d07f106fe2",
+      "baselinePatchSha256": "5462b8c37d952fe900c5757a72ad6965a1794d842bb8bc60ac9fc316e59d9713"
+    },
+    {
+      "target": "src/app/(dashboard)/dashboard/tools/traffic-inspector/hooks/useSessionRecorder.ts",
+      "patch": "src__app__(dashboard)__dashboard__tools__traffic-inspector__hooks__useSessionRecorder.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "b23c63876d6256f5c846b6c02147ec7696d33a0d9e7e2a611455ba2dfda09067",
+      "baselinePatchSha256": "9e2329b0cf19037b490b3f012de207b17f3ed3e84a4c25e42420bf6228ce92a3"
+    },
+    {
+      "target": "src/app/(dashboard)/dashboard/tools/traffic-inspector/hooks/useTrafficStream.ts",
+      "patch": "src__app__(dashboard)__dashboard__tools__traffic-inspector__hooks__useTrafficStream.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "b8d63c5bbf9798c18ee9282572905803af490cf81a21bb54cae7c95699edffd7",
+      "baselinePatchSha256": "5bea47a30653cd815bd44d2859a57e8650f3bfe0d821eb6329c878fd79a57b69"
+    },
+    {
+      "target": "src/app/(dashboard)/dashboard/usage/components/ProviderLimits/parts/QuotaCardExpanded.tsx",
+      "patch": "src__app__(dashboard)__dashboard__usage__components__ProviderLimits__parts__QuotaCardExpanded.tsx.patch",
+      "disposition": "ported",
+      "candidateSha256": "c5211266e7c81f7bf26c790a12db9ea656e39948e3909a76bdd00956210a2135",
+      "baselinePatchSha256": "293eef2b6919122dfd2be14d9b5329f589efe5992cf1bcec94d272d5a534b223"
+    },
+    {
+      "target": "src/app/api/cli-tools/hermes-agent-settings/route.ts",
+      "patch": "src__app__api__cli-tools__hermes-agent-settings__route.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "ff8162a6694e73909933f86f215c3f9857cc8ed515c9726b20d733783a04d0f8",
+      "baselinePatchSha256": "ceea87c77892f33fac78bdeda7d5f922ef42cb85db8bc2ccc9ad8ee486f7b205"
+    },
+    {
+      "target": "src/app/api/models/test/route.ts",
+      "patch": "src__app__api__models__test__route.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "3125c04281da6d133333cae05f06f6a55cc1b5a10623d946acab50e0796b4347",
+      "baselinePatchSha256": "6b436307221cba3d8566f5f49208d174a09e0403fe1a17638005b478e5a5f143"
+    },
+    {
+      "target": "src/app/api/providers/[id]/test/route.ts",
+      "patch": "src__app__api__providers__[id]__test__route.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "9100f35b9911ac6d191fb46ae1173238dfaec69ad57f240817978c9ef29f8598",
+      "baselinePatchSha256": "52ae4466e8992e65c763c59b266482694ab0617b1038d5c0abd759b5d4aeb5c1"
+    },
+    {
+      "target": "src/app/api/system/version/route.ts",
+      "patch": "src__app__api__system__version__route.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "41850153b6a24142ea01476ac3870527ff2cfa067795cd2cff0a6718a483c0c4",
+      "baselinePatchSha256": "245e0880196951fa8f57fe7f3a21863337e01fe833a69cf701a825035b618500"
+    },
+    {
+      "target": "src/app/api/tools/agent-bridge/state/route.ts",
+      "patch": "src__app__api__tools__agent-bridge__state__route.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "e4174c7b00c2d5456fba26c07f93a873b4ee716871208ac2e268eb48f42671b6",
+      "baselinePatchSha256": "4f8b65c54dbaecda13aae020c9703b61608e4872f7f12dae67ef928ae8ed0f0e"
+    },
+    {
+      "target": "src/app/api/usage/analytics/route.ts",
+      "patch": "src__app__api__usage__analytics__route.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "64184e7ada31289050e85849d5cf98e249fc507e6eab07db2076eea79ecb702a",
+      "baselinePatchSha256": "52236acaab920b642e9019ff2d197fb5f18148dd9ff815303ea22ac26dc7f946"
+    },
+    {
+      "target": "src/app/api/usage/cache-health/route.ts",
+      "patch": "src__app__api__usage__cache-health__route.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "dd67e97813ffa65fba3c3dcd4054658c45a233b0913c0811d1defaf6aa54836d",
+      "baselinePatchSha256": "d8cffe3b62000b95238d249419f3e4d29288e670e08aa6361202e94f90388bc4"
+    },
+    {
+      "target": "src/app/api/v1/chat/completions/route.ts",
+      "patch": "src__app__api__v1__chat__completions__route.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "785b697c83ee0c161ac56c7aa0e8094e1ca24f3326bb607cea257d8bf2d46a7a",
+      "baselinePatchSha256": "3145b9ece22bcae872458555c6f2ca3169403775a0bfd8a03b80aae8eb961b9a"
+    },
+    {
+      "target": "src/app/api/v1/messages/count_tokens/route.ts",
+      "patch": "src__app__api__v1__messages__count_tokens__route.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "8eab80385b66db1dcaecf2949ac5900dd856345b555eda9006a861c79d2df008",
+      "baselinePatchSha256": "983ed955f880933abc0088c0dfca79309d850325e57d9dcc87d69a6adb0fa0aa"
+    },
+    {
+      "target": "src/app/api/v1/models/catalog.ts",
+      "patch": "src__app__api__v1__models__catalog.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "3a5229e88a9b98ff5025e688436996e66cce306f7ac513dc2ab7170af88daffa",
+      "baselinePatchSha256": "22506da98a2f50e550163c59054ee53b46a22c0d8f68c0446fa94bdfe667d861"
+    },
+    {
+      "target": "src/domain/quotaCache.ts",
+      "patch": "src__domain__quotaCache.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "ce30bc9fe3ed141f7ecb2b12bc26ba46ee5b816e6886686a99c2d7a519469b74",
+      "baselinePatchSha256": "cf1600e4cfb273242b2b11d18e483b5a79347a2c58674eac0375c01a0104a374"
+    },
+    {
+      "target": "src/domain/quotaCacheState.ts",
+      "patch": "src__domain__quotaCacheState.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "b6f06f65a74354da28779ec296638c81c9a5b1e4100aa985ffd97eb7ce930b10",
+      "baselinePatchSha256": "bc325f47cf014b3626ed4ba288e49b7bc50a48506e72282a0cb3317d307b5b1a"
+    },
+    {
+      "target": "src/i18n/messages/en.json",
+      "patch": "src__i18n__messages__en.json.patch",
+      "disposition": "ported",
+      "candidateSha256": "96e5e33b6b03a520cc2ef2e4f7b2bc4c272de080d09b252c7140c0fa5f527808",
+      "baselinePatchSha256": "41f8a7e8a7eade7afd62495c828502216bb910edbc3811bffd76855ee1d97314"
+    },
+    {
+      "target": "src/i18n/messages/pt-BR.json",
+      "patch": "src__i18n__messages__pt-BR.json.patch",
+      "disposition": "ported",
+      "candidateSha256": "6db362d60b2e4486f75763e34cd1deaa920b57941b4da7adc5f077b38234f82e",
+      "baselinePatchSha256": "28ef9607a5db7d3ceba9b34b21cb0f66bffd5b2fb6185477bd094060ae72cb65"
+    },
+    {
+      "target": "src/i18n/messages/vi.json",
+      "patch": "src__i18n__messages__vi.json.patch",
+      "disposition": "ported",
+      "candidateSha256": "9987ea12b174a84865ec5e53aee00586b8629f6075e0386097719e074662ffbb",
+      "baselinePatchSha256": "39517a10b7f63159104e9a6e00173f798e92eae7aef1177bbf0171b952a9f983"
+    },
+    {
+      "target": "src/instrumentation-node.ts",
+      "patch": "src__instrumentation-node.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "a0f770a59610b0024983d7513aa41fea5bd1bfc648195472c88176556660eb2e",
+      "baselinePatchSha256": "38eddc147d54ad9fe3dd8a03c4cb17cacfbfa5f9348343778bd9699fff7f2479"
+    },
+    {
+      "target": "src/lib/api/modelTestRunner.ts",
+      "patch": "src__lib__api__modelTestRunner.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "742a5c749dce25237acb14c897f79a6df8d42a95ee102fec863e7f284d8d75cb",
+      "baselinePatchSha256": "a41ac5a0aafaa59e97017db5fe17872c400c36354cc37d05c28424cf5028321c"
+    },
+    {
+      "target": "src/lib/cli-helper/config-generator/hermes-agent.ts",
+      "patch": "src__lib__cli-helper__config-generator__hermes-agent.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "e6819f61c4d3c1d67d134f761207c618b5cbdf161da4742d719841d382541913",
+      "baselinePatchSha256": "1718ff773ab6e4d304301a9f76fc6b418b65788a4e9a3f4f5e20e50c75a6eca1"
+    },
+    {
+      "target": "src/lib/cloudSync.ts",
+      "patch": "src__lib__cloudSync.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "160e5fa7ed6ff3a585ad75520933eea493d7a331b1de22abe707ceb33d4bca3a",
+      "baselinePatchSha256": "f05c658eac21def75a68a64e51dc17ad859f6a516bed96a65b1267f2550d8f71"
+    },
+    {
+      "target": "src/lib/db/comboForecast.ts",
+      "patch": "src__lib__db__comboForecast.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "bde39efb335324e1c65ed9e033cfc86b62a7e6a509ce229730ca32cf0922be83",
+      "baselinePatchSha256": "702c1a8215d24f8de37e72c016b22e68225d63800dc523403811bf2c96d05ef8"
+    },
+    {
+      "target": "src/lib/db/compression.ts",
+      "patch": "src__lib__db__compression.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "d25d1fde4303a472633b865b74b27949b82e78c3833c1da52e647342013b72a9",
+      "baselinePatchSha256": "38191b03fd78c7c267bdc9c5cbb06f39026e7d47a093282cea825d4ea705e326"
+    },
+    {
+      "target": "src/lib/db/migrationRunner/constants.ts",
+      "patch": "src__lib__db__migrationRunner__constants.ts.patch",
+      "disposition": "new-owner-patch",
+      "candidateSha256": "55fc1b4e2c00e68994c0a488ffa80c0401e2bb974dad879f32a90403cdbc62bd",
+      "baselinePatchSha256": null
+    },
+    {
+      "target": "src/lib/db/migrationRunner/schemaState.ts",
+      "patch": "src__lib__db__migrationRunner__schemaState.ts.patch",
+      "disposition": "new-owner-patch",
+      "candidateSha256": "1f222b9500236651f3c63d3f7d9c431576407e9d6ca433f45ede5d10c103da20",
+      "baselinePatchSha256": null
+    },
+    {
+      "target": "src/lib/db/migrationRunner.ts",
+      "patch": "src__lib__db__migrationRunner.ts.patch",
+      "disposition": "new-owner-patch",
+      "candidateSha256": "b67618963139589af553b8ad5403d31123bbec75684b8fed62002c1dcd1edf92",
+      "baselinePatchSha256": null
+    },
+    {
+      "target": "src/lib/db/providers.ts",
+      "patch": "src__lib__db__providers.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "4cb7aa5889cd041fccb535c3547228b5d7787931620617451a310a8798d9cd24",
+      "baselinePatchSha256": "a02fdf411a1d7efff5da1426e2246ef7cc34b5074f5fa262c3b414b9fcf25210"
+    },
+    {
+      "target": "src/lib/db/quotaSnapshots.ts",
+      "patch": "src__lib__db__quotaSnapshots.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "f448d7313e3b6ce39712a87466d8661477b7150567a62b3730d6018e82e7addc",
+      "baselinePatchSha256": "23f1778d5f0412724c6e9aab2fc1a09a85bddcb8ad671ef958a6df8d12acfe81"
+    },
+    {
+      "target": "src/lib/db/settings/pricing.ts",
+      "patch": "src__lib__db__settings__pricing.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "72dff1492d4b92884c608ba4b6f3a9d5d55e846d54b0b64ee2ea569981d6667b",
+      "baselinePatchSha256": "e237811fcbb340634b9b8068fc9d6638eff339fc06b4aeb4c2f6a116c0301e91"
+    },
+    {
+      "target": "src/lib/db/usageAnalytics/sources.ts",
+      "patch": "src__lib__db__usageAnalytics__sources.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "b31d67cd06ebb0eaed31c08d228ad83b2021b0cd468a86235c1b6fd4ea1a4f8e",
+      "baselinePatchSha256": "09b137135169d02269410cc9e23233b63dba0e90e9b94fe0c70b301e450a7eb7"
+    },
+    {
+      "target": "src/lib/db/usageAnalytics.ts",
+      "patch": "src__lib__db__usageAnalytics.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "25f0ff62f5377bba9a98d0a0a7ec9669bb93539dc5b99602bc69feb6ea7b4199",
+      "baselinePatchSha256": "06ee7e39b247b5670042418fe9f576b4ee6b82638d7c7cf0a90ccc214d9de262"
+    },
+    {
+      "target": "src/lib/guardrails/registry.ts",
+      "patch": "src__lib__guardrails__registry.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "c2dc0384d48b2d8092ea155ed5e104b359d346d3c8e0ddd1eda4d4eec5d51217",
+      "baselinePatchSha256": "943401733d1f4459062e2ef569f1cac10c78da2c9a78e30911a2f076d300c8f5"
+    },
+    {
+      "target": "src/lib/resilience/settings/normalize.ts",
+      "patch": "src__lib__resilience__settings__normalize.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "89f577309daf53bdc13a3a0d3189ebe347baf7529ee9934468899afbc68c0776",
+      "baselinePatchSha256": "4c95e845846d7c09e99cc6f5843805abb0471c65b0ed8cb751406464517b3cb4"
+    },
+    {
+      "target": "src/lib/resilience/settings/types.ts",
+      "patch": "src__lib__resilience__settings__types.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "a27b5c960f7ce8b3eae306cbe0902c61b00372761668a3f8fc310f24b8c338b7",
+      "baselinePatchSha256": "784731521b746000b8bcc94d4ea250574fd0bb306b595e73052d73d662c28c92"
+    },
+    {
+      "target": "src/lib/resilience/settings.ts",
+      "patch": "src__lib__resilience__settings.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "328dca6d3569b29f771f2b90a4ed01b9420f7cfceac688889f4598e1ac847967",
+      "baselinePatchSha256": "2e0b11185b2952b37076e16f98306b3e6ce917ccc46c1e3dd1485911cbca1ae9"
+    },
+    {
+      "target": "src/lib/skills/serverOwnedToolLoop.ts",
+      "patch": "src__lib__skills__serverOwnedToolLoop.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "8243dea68a4994b6031a8e763060de6fc58250c65d56793e20b8aac1c8bc8982",
+      "baselinePatchSha256": "1bd3f0854cfef1b4c96f5eb8c9de6ee81a51c92de28029b72177529b104939fa"
+    },
+    {
+      "target": "src/lib/skills/toolLoopTypes.ts",
+      "patch": "src__lib__skills__toolLoopTypes.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "0170336830f0c1f5c1e36cd545633ed6debd49fed71b61e757b2a091f869916b",
+      "baselinePatchSha256": "f11b2766455358053b31d70ee15bffcfe64d55fe0d327a0545c61d2297f9985e"
+    },
+    {
+      "target": "src/lib/system/autoUpdate.ts",
+      "patch": "src__lib__system__autoUpdate.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "18ffa9604b3c9165b3f3342b71a5dbf2c9490cc9317a011a9670af9d48ffcff5",
+      "baselinePatchSha256": "cac7f8411efeea98444838a1af6ae6821130a383848542c8ddf709d284034e9f"
+    },
+    {
+      "target": "src/lib/tokenHealthCheck.ts",
+      "patch": "src__lib__tokenHealthCheck.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "5f543d19946b459cb10c6be919d4bbe544e2051328d17fe19c8f68ea136c3106",
+      "baselinePatchSha256": "4ab6c5a28e48d700caab1ffa0218e6fce448f6327b1d60f039509d67bc410018"
+    },
+    {
+      "target": "src/lib/usage/aggregateHistory.ts",
+      "patch": "src__lib__usage__aggregateHistory.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "b1ca5b36b656269beca37472c0f40e62aed1d0e548c09239eb31fdea5f101558",
+      "baselinePatchSha256": "5e607c70b3e3b6a9328041a961982dec9fcbf7a0254a48d7468b2a909c953f3c"
+    },
+    {
+      "target": "src/lib/usage/cacheHealth.ts",
+      "patch": "src__lib__usage__cacheHealth.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "cd346d0f2a087aaff778a9ef28039c5c62e824b326f19d063e0026b3ef8c097e",
+      "baselinePatchSha256": "b16a474af6ccf451bed654cba5a5abe3fbeb1195278af86b39031502fa7c6da4"
+    },
+    {
+      "target": "src/lib/usage/callContentProvenance.ts",
+      "patch": "src__lib__usage__callContentProvenance.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "9b823541f6e86d4e1757d8dccae09469f1844e37aef7dccee4f198bef1955646",
+      "baselinePatchSha256": "103b33c52ae21b9e6fce7776bf54cd9f706d3984b549b349af7f17e74b251cfc"
+    },
+    {
+      "target": "src/lib/usage/callLogArtifacts.ts",
+      "patch": "src__lib__usage__callLogArtifacts.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "385613e73ce76f1598117b91d1112d872566ecdb03eb31c2df9adbc0f7acc288",
+      "baselinePatchSha256": "4905bca2a844dc80b4d74db6794ee229d5489605a600acaf9755e969bf6e2615"
+    },
+    {
+      "target": "src/lib/usage/callLogs.ts",
+      "patch": "src__lib__usage__callLogs.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "7a17ae9bca32ad8f53f1625b16459504feba1fe44178e7496969d82e7f40bf00",
+      "baselinePatchSha256": "86d7481e40c4b82e6dab56d947b5350cda6d44ba740425182b955eb2ac2cbe67"
+    },
+    {
+      "target": "src/lib/usage/comboForecast.ts",
+      "patch": "src__lib__usage__comboForecast.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "1b927236e17572717282aa20423abee844ba339866402d07019c725280de7f21",
+      "baselinePatchSha256": "039ee159c47e958378ef9dc1c0fad528abd874183b9753c686bb4b370d10bb1e"
+    },
+    {
+      "target": "src/lib/usage/costCalculator.ts",
+      "patch": "src__lib__usage__costCalculator.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "c0e4e0430c35158d9e43ad3fb1de3689b7a7d7ad9c285c81d6dd15046a122372",
+      "baselinePatchSha256": "9cc17ff4e399d358c51492b871c4b02d1c115cd6f5f7b0c9bf0399bd66810fc9"
+    },
+    {
+      "target": "src/lib/usage/providerLimits.ts",
+      "patch": "src__lib__usage__providerLimits.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "f9ecda78948f6bb048b0767a9ec627b94fa4a622ce8c21d8495d2b2ee4a18684",
+      "baselinePatchSha256": "a76aba09ee84d1ecb477f356ececb36a12c89a55056912fb7d36c613ba475512"
+    },
+    {
+      "target": "src/lib/usage/providerWindowCosts.ts",
+      "patch": "src__lib__usage__providerWindowCosts.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "b3084835aa0f9adae1d79030de1527272e66a13cea9d06089be768767d0f2e2f",
+      "baselinePatchSha256": "6a2c536ef7bb6ee0514421919adce8d6410588254b1edc4a9f0c7e106f419b98"
+    },
+    {
+      "target": "src/lib/usage/usageHistory/duplicateEntry.ts",
+      "patch": "src__lib__usage__usageHistory__duplicateEntry.ts.patch",
+      "disposition": "new-owner-patch",
+      "candidateSha256": "20e999c513c6112027aa641090666e98c770ae2a414f9b0af02bd3bfa4b3c202",
+      "baselinePatchSha256": null
+    },
+    {
+      "target": "src/lib/usage/usageHistory/helpers.ts",
+      "patch": "src__lib__usage__usageHistory__helpers.ts.patch",
+      "disposition": "new-owner-patch",
+      "candidateSha256": "cac0c065c37b5ad25bd5caf8acdf7eac093c63d164967c57abce43fa28690ee7",
+      "baselinePatchSha256": null
+    },
+    {
+      "target": "src/lib/usage/usageHistory.ts",
+      "patch": "src__lib__usage__usageHistory.ts.patch",
+      "disposition": "retired-preserved",
+      "candidateSha256": "54ef92df9f1812101a036ce863c9408a465d96f534bdb9c3f21196c1617588b9",
+      "baselinePatchSha256": "5f0f174ead14b2810435b1486bbc42a4522645fad85dfa8638dba9c71eb44dbd"
+    },
+    {
+      "target": "src/lib/usage/usageStats.ts",
+      "patch": "src__lib__usage__usageStats.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "3ad370323b38de05440973f4b62bcbc6fcca8d68d96ceb0606207ce9f89e9f5b",
+      "baselinePatchSha256": "fb81f000fa6b07541d2aa409e4df17f9631d768069f9b0a2e030eb01455bdd83"
+    },
+    {
+      "target": "src/lib/usage/usageWriteRetry.ts",
+      "patch": "src__lib__usage__usageWriteRetry.ts.patch",
+      "disposition": "new-owner-patch",
+      "candidateSha256": "be2ce5191a6265414781683fd4c94f3f94eb54ee1c1ed424bb50ff63dbb14bcc",
+      "baselinePatchSha256": null
+    },
+    {
+      "target": "src/mitm/dns/dnsConfig.ts",
+      "patch": "src__mitm__dns__dnsConfig.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "950edf6075afb6a4eccec5a10346ca7c9723c1ef10eaa0888a5af049d57ba078",
+      "baselinePatchSha256": "9913eb8a2d9366bf85ba600ae999a68a47fe8c32771c8a13475b9d0ef3f21ace"
+    },
+    {
+      "target": "src/mitm/dns/provision.ts",
+      "patch": "src__mitm__dns__provision.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "d686a4653cc671fe86f35e18e45f038a61d737cf2db7d6d0f3c53bd2f4ee0d13",
+      "baselinePatchSha256": "d8392d8a93801f07c8239b4ca50849a45ef154b23a8358c58df7c7cdc3a975ef"
+    },
+    {
+      "target": "src/mitm/manager.ts",
+      "patch": "src__mitm__manager.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "deddf7caf8b9d593b88de3b32b50ea7298a12f42b3a4743b2db70d2fc924bbc6",
+      "baselinePatchSha256": "e66fe4426a8f40f585c68f62e67aa644635c2cbb06ab1d90e2fd347ae5f69563"
+    },
+    {
+      "target": "src/mitm/repair.ts",
+      "patch": "src__mitm__repair.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "a35cdc3b552d261928bcb749b0d1077a92f1486a15992a99b2ff690e505717c3",
+      "baselinePatchSha256": "66132f0462dc1fc730ae7b6ddce9c12ce9fa925c5049d41cf40ae0a46a1947bd"
+    },
+    {
+      "target": "src/mitm/server.cjs",
+      "patch": "src__mitm__server.cjs.patch",
+      "disposition": "ported",
+      "candidateSha256": "fa7dc6c7553009a0a8d395446d8f2d1ed9d1d7c52c8114cab3e94fd3b7b2ec84",
+      "baselinePatchSha256": "1b6c19ecd78f47affe17f5303d92cb580ddb119624ccfc188d01013e5fa03404"
+    },
+    {
+      "target": "src/mitm/stopDnsTeardown.ts",
+      "patch": "src__mitm__stopDnsTeardown.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "489f174b9d633545356dac2d626769a1f40147729a8627d01e62e8a9a8b28849",
+      "baselinePatchSha256": "f373623090df7cd358a7fc31cbf4a5ca7c0d0491480f60289ac876fd1852c31e"
+    },
+    {
+      "target": "src/shared/constants/codexClient.ts",
+      "patch": "src__shared__constants__codexClient.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "7b82911f5ef764b45eae8584f4c9d20165ace8b63bf5f7e532a55037506a879f",
+      "baselinePatchSha256": "a39b77e1836119bb8c0d3b1b1c73748c40d84cd9924c610a1890f41d8a6faff1"
+    },
+    {
+      "target": "src/shared/constants/pricing/frontier-labs.ts",
+      "patch": "src__shared__constants__pricing__frontier-labs.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "640c72491153fd37797b2b70c745e679a61ee02dbdd132a38339294fcb94994d",
+      "baselinePatchSha256": "04e813732b9564e20b048ae99740b9ac5833ac5db3def5e0b92b653f7bcbb002"
+    },
+    {
+      "target": "src/shared/constants/pricing/oauth-subscriptions.ts",
+      "patch": "src__shared__constants__pricing__oauth-subscriptions.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "c73e9b240be2977a2467a0f7115357cc3cb8e8a1602ed545e054b313cc1bfc33",
+      "baselinePatchSha256": "0f6745fb7384450ed67d3f692e0dbed41e62d0dc80091636e4fe6a10934e0aaf"
+    },
+    {
+      "target": "src/shared/constants/pricing/shared-tiers.ts",
+      "patch": "src__shared__constants__pricing__shared-tiers.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "b152279f13ff720f875800fe452f10502153f5c151bb60eef390dc6dbe08865a",
+      "baselinePatchSha256": "42c488ac703a0f4bfe23d88119b604cb195ea4d732f1a3a43df750dd89a41a40"
+    },
+    {
+      "target": "src/shared/network/safeOutboundFetch.ts",
+      "patch": "src__shared__network__safeOutboundFetch.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "094f902e6bd542ae0e9081c92a3a0a57da3b881d9ddc831ed86b2fc9e04aa235",
+      "baselinePatchSha256": "663a8e0877def5a0f38ade271da115a8226aa669dfc170bf926677380fdbcd90"
+    },
+    {
+      "target": "src/shared/utils/classify429.ts",
+      "patch": "src__shared__utils__classify429.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "14c039fa7d50d66a9838f8963a9b43ca8972252a6137d06685b23263f40d659d",
+      "baselinePatchSha256": "aafc954276913458f3963ab7c6e9f03203925a9d6b329f9bebddbf7e785de515"
+    },
+    {
+      "target": "src/shared/validation/schemas/pricing.ts",
+      "patch": "src__shared__validation__schemas__pricing.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "8e39bccc91233b2e380162367c6f9c099e141d2a618ca96c867023f34d2613a6",
+      "baselinePatchSha256": "ec4b73ee52085bfee080f67d0c2c1cc6b5a7b6359693600d9b96c28e5d4a7539"
+    },
+    {
+      "target": "src/shared/validation/schemas/settings.ts",
+      "patch": "src__shared__validation__schemas__settings.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "f97228dd31142d1e6eb78e4eddd4c824e506ac3ea6316cd3b6a059ab54912891",
+      "baselinePatchSha256": "992c16d776600cd79a61d0253881c095370551e5140a2c0f84ee5e7c6d1a3435"
+    },
+    {
+      "target": "src/sse/handlers/chat.ts",
+      "patch": "src__sse__handlers__chat.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "9589d89cea55fab39d02f0b2a0e3b9cf1c71f96dc0ac754958ce160e7300993d",
+      "baselinePatchSha256": "ad333d74be67ef54933883e8bd994ac73cb5f3ea35eb4af3d6a09659351ac747"
+    },
+    {
+      "target": "src/sse/handlers/quotaParkedSkipUsage.ts",
+      "patch": "src__sse__handlers__quotaParkedSkipUsage.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "3d156e35882eea7f930abfdeccdd550998c1da62990f8f4a6755bfc5988fc16f",
+      "baselinePatchSha256": "8679ec90793408cb9e6a1c49d0197c40676d94af2c99fb4486d708280008bf75"
+    },
+    {
+      "target": "src/sse/services/auth.ts",
+      "patch": "src__sse__services__auth.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "897ca9b8af4e042d8d116b43a2c8df1a1528836ea40a959bee4c6df449b7595c",
+      "baselinePatchSha256": "de5f9865674a745dce44c93d7559632af64c17deadf7c392a6947caff2f90b13"
+    },
+    {
+      "target": "src/sse/services/sessionAffinityPin.ts",
+      "patch": "src__sse__services__sessionAffinityPin.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "076afbd08d8453a41a830c4e41bc00dcfda8f3386e3ebbdd7ee3a396b852c5bc",
+      "baselinePatchSha256": "7c667ff0667e78845a2afe4777162ef6a62df54bf384516f0af6e630e86a7f94"
+    },
+    {
+      "target": "src/sse/services/tokenRefresh.ts",
+      "patch": "src__sse__services__tokenRefresh.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "4ee5470e55884538e32ceb7aef4e70f7138a616d8a942fea6c1a07cb5410047a",
+      "baselinePatchSha256": "812768230816f0a25ef3a260ed4beda82d5bbf834f8f6e20248f3e045531486a"
+    },
+    {
+      "target": "tests/e2e/providers-management.spec.ts",
+      "patch": "tests__e2e__providers-management.spec.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "fec59c12b4d879f478b30892d1c024513d2b59bbd2d96d14e03b1ec5301e7b63",
+      "baselinePatchSha256": "6b7b8de54300555f498e712f6b438f1c7d57398e6a0965afc9e65f81227638a7"
+    },
+    {
+      "target": "tests/integration/agent-bridge-cert-flow.test.ts",
+      "patch": "tests__integration__agent-bridge-cert-flow.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "99b87dae61e534f175c495ede101d9f1c53eecf97b7eff2b1ce92a3cee3d80b4",
+      "baselinePatchSha256": "ce774a2954071e0ee66dafd14f0153832893885bcc5c68f04d6587713b0c2b20"
+    },
+    {
+      "target": "tests/snapshots/provider/translate-path.json",
+      "patch": "tests__snapshots__provider__translate-path.json.patch",
+      "disposition": "ported",
+      "candidateSha256": "43cf4c36e35d667f168c54199788ccf96d07cceedd50211093c1b377fadc2d75",
+      "baselinePatchSha256": "d3bf7182e70bb1f3ccd5785383cd535ef53843b4086f7d9359b3b39ff30eb0d9"
+    },
+    {
+      "target": "tests/unit/agy-family-not-connection-cooldown.test.ts",
+      "patch": "tests__unit__agy-family-not-connection-cooldown.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "29e72fd2b915e2fc3cd022d8b41793f357cffd3626ca9d33694e619231c2a6a3",
+      "baselinePatchSha256": "bf3dab810dde5ab2d51dc1939af799c0a02aa6b560531f9376749499498c2843"
+    },
+    {
+      "target": "tests/unit/api/v1/relay-completions-errors.test.ts",
+      "patch": "tests__unit__api__v1__relay-completions-errors.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "d5a88b764d92143f3d84784ae2b2974b20a6d75793860616bc64c1d950040f4a",
+      "baselinePatchSha256": "9ec321b2f852100f1a37991706667e77531d8b185a63fde4757a13d6596ec248"
+    },
+    {
+      "target": "tests/unit/auto-update.test.ts",
+      "patch": "tests__unit__auto-update.test.ts.patch",
+      "disposition": "new-owner-patch",
+      "candidateSha256": "c7a5505bfa1df00c06b8c421b5a6b8a46632fa3ed41d50cb67f950e953149f86",
+      "baselinePatchSha256": null
+    },
+    {
+      "target": "tests/unit/call-log-cap.test.ts",
+      "patch": "tests__unit__call-log-cap.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "eaede0260a5bce4db2c663d96fb4382f0562c490f381c703711716479d4fef9e",
+      "baselinePatchSha256": "f46e19b3b39c551831686bbc34cdad92053e698c766d009cdc3b8ca04f2cb02f"
+    },
+    {
+      "target": "tests/unit/call-log-file-rotation.test.ts",
+      "patch": "tests__unit__call-log-file-rotation.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "14bf394a3c14a758c965d2e3217aa6a3e90db089101908bfa0ca09e00717821e",
+      "baselinePatchSha256": "01f137886b58413d02215b9b420b888de15f36e0f2f4f4425f5d70aa06a6f257"
+    },
+    {
+      "target": "tests/unit/catalog-updates-v3x.test.ts",
+      "patch": "tests__unit__catalog-updates-v3x.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "a3b9266da69047870affc060f4216e14bc2c854eaa9fcbda6fcd53ae9925cf2c",
+      "baselinePatchSha256": "1d8443b2afecb63de810e8099528a91e5db8f8dd75f940e8b67680d3329530aa"
+    },
+    {
+      "target": "tests/unit/cc-compatible-provider.test.ts",
+      "patch": "tests__unit__cc-compatible-provider.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "c742bbdfdd6ca8e9f1b674f5219a3011c18a2e98f601f78714805cca9936166b",
+      "baselinePatchSha256": "4d27efbdc76c2b8dbaed43bc43de6aeced56db3fa69e793646ea62e1ad8f1d25"
+    },
+    {
+      "target": "tests/unit/chatcore-translation-paths.test.ts",
+      "patch": "tests__unit__chatcore-translation-paths.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "f5fb9cf1c572851b085c8d73f59528f38c670c3ead43d2ca101b15c212bd5a1c",
+      "baselinePatchSha256": "87eb539f5f59e8d25f3a587aae10d78b2649a322d02d33ea5d51bcf42a28be4b"
+    },
+    {
+      "target": "tests/unit/classify429.test.ts",
+      "patch": "tests__unit__classify429.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "ae15274aa48b5cd770e31e9d6bdb1ab8bae9d9a3155012ef8788131c741c9691",
+      "baselinePatchSha256": "8c3be442070e8edd2e935990cefb40d41257ea5e920034152fd1130850af3549"
+    },
+    {
+      "target": "tests/unit/claude-directive-final-dispatch.test.ts",
+      "patch": "tests__unit__claude-directive-final-dispatch.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "4e840f2864f4a4f7d07902e9b228beb0b172e2c6e4b2ea9c34dbe69ca929b444",
+      "baselinePatchSha256": "146e6b1e264b292b97f83cbf76cd6255ed780371d07efeb3b116d57ab4f28442"
+    },
+    {
+      "target": "tests/unit/claude-fable-5-1.test.ts",
+      "patch": "tests__unit__claude-fable-5-1.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "b32f878e1d05661c1a0b50409832ced63fb449cb6935681fd58cb217e54f01f9",
+      "baselinePatchSha256": "d51bbc175311a9a95a19c5cf687fb3aba9e0963aa7cf80024748f92208dfe4e7"
+    },
+    {
+      "target": "tests/unit/cli-helper/config-generator.test.ts",
+      "patch": "tests__unit__cli-helper__config-generator.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "091bca21a21330aeed75d822821f5a3ac9775589374da2115c4cc236a051c9a4",
+      "baselinePatchSha256": "840a1af8256f963a9d2cd6be403fd3e080246d9ff091983f275f3e75ded47fb1"
+    },
+    {
+      "target": "tests/unit/cli-keys-api-key-fallback.test.ts",
+      "patch": "tests__unit__cli-keys-api-key-fallback.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "3e658c2bfb51d5112d7246a3eb7b77c9774f330748938efcdd8736fe9a1846c7",
+      "baselinePatchSha256": "b71eb92edae11a0024dea75c214222772e6ad399e68e888df6850ebc63e36122"
+    },
+    {
+      "target": "tests/unit/cli-provider-test-routes-10570.test.ts",
+      "patch": "tests__unit__cli-provider-test-routes-10570.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "42772d3f8df832682a96c6f50d0316df09ebca0bf48474d7e359a05289eaf049",
+      "baselinePatchSha256": "b4ea912e51b9355a28b20032380cdb30c6e91a4192c0dfa23f7f882180d9b048"
+    },
+    {
+      "target": "tests/unit/cli-serve-port-in-use-preflight.test.mjs",
+      "patch": "tests__unit__cli-serve-port-in-use-preflight.test.mjs.patch",
+      "disposition": "retired-preserved",
+      "candidateSha256": "a0ae150079a971166c4688654843a3ff1119d9ae444d8f97ac5a0eb6ffa7ba62",
+      "baselinePatchSha256": "a1427e692a5dac8ac34a7d175a64c7383a2b9ca3b08815ef91781e9da29149a5"
+    },
+    {
+      "target": "tests/unit/cloud-sync.test.ts",
+      "patch": "tests__unit__cloud-sync.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "a21ba4436b139970e349d8875716fbab4b5d745825189644ad6a2bc1387e0c3e",
+      "baselinePatchSha256": "18387b75989d9425bb62d608453f49f8eccfdec40bad6e185efdaf61bf85c4a6"
+    },
+    {
+      "target": "tests/unit/codex-astra.test.ts",
+      "patch": "tests__unit__codex-astra.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "0820ba9c62259af39a961637c0e9a1c0377d1bde561f2e7a14201b0005f9feb6",
+      "baselinePatchSha256": "d002d53e9b93cc8cbcf00d7b8c3bc1c61e0285c0f3427e69e2c705d6ff0c1187"
+    },
+    {
+      "target": "tests/unit/combo/quota-weighted-strategy.test.ts",
+      "patch": "tests__unit__combo__quota-weighted-strategy.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "4b720887ec4b4cffbf60ed1fe844e4b410dd88f7eacb908910a968306981d1d5",
+      "baselinePatchSha256": "6e01ef13bec002fd182e5328e1f07c2141e93446446dd520ba25bfeecb6985b8"
+    },
+    {
+      "target": "tests/unit/combo-routing-engine.test.ts",
+      "patch": "tests__unit__combo-routing-engine.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "4977d858b6c45d8c3d720f2fba4c09a23a70bb0f0cf1672e5408e16a154b3d3f",
+      "baselinePatchSha256": "3c66544ad2664bb604161afb982579e9bc1fa45b28a89aa2866ddfb5d183aaab"
+    },
+    {
+      "target": "tests/unit/combo-strategies.test.ts",
+      "patch": "tests__unit__combo-strategies.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "cef6d0a0db6894ef010cb0ed3a87b65f02835409eebe874375a7eb2721a4813b",
+      "baselinePatchSha256": "4d2be8dc8b9f27cfb4dcf2430b292d00da432a3c02d8b0a2b91e4bb7a71f9909"
+    },
+    {
+      "target": "tests/unit/csp-lan-ws-5083.test.ts",
+      "patch": "tests__unit__csp-lan-ws-5083.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "2544e96c20e11166015474f0ce4d9e95d315fc3277e6fbc1e6cb0d1ea02a225d",
+      "baselinePatchSha256": "db03f7b04ebcd532ab0e19785efd6c21292a6f14a5147f9992c9613aa0ab7de6"
+    },
+    {
+      "target": "tests/unit/db/no-migration-collisions.test.ts",
+      "patch": "tests__unit__db__no-migration-collisions.test.ts.patch",
+      "disposition": "new-owner-patch",
+      "candidateSha256": "adb987fc14631490feca1390b41a7cb62c0f87178ad176004c5100dd8bc79b80",
+      "baselinePatchSha256": null
+    },
+    {
+      "target": "tests/unit/db-migration-version-uniqueness.test.ts",
+      "patch": "tests__unit__db-migration-version-uniqueness.test.ts.patch",
+      "disposition": "new-owner-patch",
+      "candidateSha256": "70c64dc86f7b5aab251e65309913d73c147b556e6073ec2a5637b6a2da06bbca",
+      "baselinePatchSha256": null
+    },
+    {
+      "target": "tests/unit/executor-claude-identity.test.ts",
+      "patch": "tests__unit__executor-claude-identity.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "74db04e08b36c9d28304a1f65390abbfd94bc431a15cc9d33c206073e91f844d",
+      "baselinePatchSha256": "1c47e6a0339e2dfe66e3633424637ca7f657a03030e9cf12605246bdd27e9eaa"
+    },
+    {
+      "target": "tests/unit/executor-codex.test.ts",
+      "patch": "tests__unit__executor-codex.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "b1405a2151fa4aa40377489d3495fd11fd46e99acc07c65dd6d09fdb491d5581",
+      "baselinePatchSha256": "8f6cac1d6546d817766e940d484c08f20eb6ff5beb1eee4c3278ae42be7767aa"
+    },
+    {
+      "target": "tests/unit/guardrails-registry.test.ts",
+      "patch": "tests__unit__guardrails-registry.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "799fe179d18468ea6a88cd6d81c9f71fa48cba4e6d0d41033a13afd7963e3f74",
+      "baselinePatchSha256": "4ee034b398ac608f342ad74fcfa4a2e31178093ef9dec2609fe4a1fd0df0ce10"
+    },
+    {
+      "target": "tests/unit/hard-session-lease-bypass-inventory.test.ts",
+      "patch": "tests__unit__hard-session-lease-bypass-inventory.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "c590ed755a29890e8e1d656661e48d147939fdd6173fb89177158d6670102a78",
+      "baselinePatchSha256": "08a7859302219ae58ebb151d4860e03f5b1e7500a21cdbaea7c27c79c3cec36e"
+    },
+    {
+      "target": "tests/unit/mitm-server-cjs-backpressure-14528.test.ts",
+      "patch": "tests__unit__mitm-server-cjs-backpressure-14528.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "ff81fd0dc248b1ca8800f6b3469018250174d49d25224a816952e621ca7a2786",
+      "baselinePatchSha256": "05a3c1ff8111d158da99ae63c6fae00986444ec21c5eff6c638113f73bae4571"
+    },
+    {
+      "target": "tests/unit/model-family-fallback-notation.test.ts",
+      "patch": "tests__unit__model-family-fallback-notation.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "308ee3af5bcb063524c6412ca9433ac11e3572e412cbfb6394504f1a0995e6df",
+      "baselinePatchSha256": "937daee635d54c1976e4651fa6e6eca0c0674de43f0d83bd19af89fa601820cd"
+    },
+    {
+      "target": "tests/unit/provider-assets-generic-fallback.test.mjs",
+      "patch": "tests__unit__provider-assets-generic-fallback.test.mjs.patch",
+      "disposition": "ported",
+      "candidateSha256": "77527fe7ee1398089d73bcc4fdb5f22366f34ddd91f7e8fe862e38ebf563c4f6",
+      "baselinePatchSha256": "e40751d4fdd62266721889308038bb0724e416efc260ec93341d28539c45c9f2"
+    },
+    {
+      "target": "tests/unit/provider-translate-path-golden.test.ts",
+      "patch": "tests__unit__provider-translate-path-golden.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "d4875896698cf671d890e08823108af9ec8839097904fbc4e08f5fc2f30f3ab0",
+      "baselinePatchSha256": "8f9aeaa678874a836a8bf4145d5dadc649b30f41ae0e97c6fe8b7f2d545e5026"
+    },
+    {
+      "target": "tests/unit/proxyfetch-direct-response-start-flat-retry-budget-13703.test.ts",
+      "patch": "tests__unit__proxyfetch-direct-response-start-flat-retry-budget-13703.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "d8c2e356edde37ad1b7eccf4ae6fd1972add17983162b40f2c286c937985c00b",
+      "baselinePatchSha256": "5e9a98846dae340bea663b0fb0359e7ad706ce98935cdec59530a511fe0c4125"
+    },
+    {
+      "target": "tests/unit/proxyfetch-direct-response-start-timeout-10214.test.ts",
+      "patch": "tests__unit__proxyfetch-direct-response-start-timeout-10214.test.ts.patch",
+      "disposition": "retired-preserved",
+      "candidateSha256": "06b41066ec99f3ccfa79821c78e74d65e6b008ee86bbaba5898d45bf551da1d2",
+      "baselinePatchSha256": "71de0edf4cc3a2317585d1fc7e9a809c7a8d26deb15fd77a02dc49f6fa1c367d"
+    },
+    {
+      "target": "tests/unit/reasoning-routing.test.ts",
+      "patch": "tests__unit__reasoning-routing.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "200b9cea20e1b2d138a4426244dcdaa2ce07c9b341a569ef482d8acecd8568f9",
+      "baselinePatchSha256": "68730aeb9d715f0f8bca43e615a3096c26a4d6eaa9a6c5013bf3fce34ef7b3fd"
+    },
+    {
+      "target": "tests/unit/reset-aware-request-scope-12600.test.ts",
+      "patch": "tests__unit__reset-aware-request-scope-12600.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "ae69a0fc1e3540462b8f8e36e2347d7b70727a88f6516e1fe5c9eedce11479aa",
+      "baselinePatchSha256": "d76a761937f0e1014a00dea46e6200b2cf4f9d405229430879c65ac565dd8a30"
+    },
+    {
+      "target": "tests/unit/runner-janitor.test.ts",
+      "patch": "tests__unit__runner-janitor.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "f7ea630987b9d952438391f168b81a28954a6015bee3eb66bfc4814473a9425a",
+      "baselinePatchSha256": "0fa38ab0a94ef1632ef581d755dd8ee95a3582a50725ce894735e1bb1407288c"
+    },
+    {
+      "target": "tests/unit/safe-outbound-fetch-dns-guard.test.ts",
+      "patch": "tests__unit__safe-outbound-fetch-dns-guard.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "e8c27eb8e0c5318068f497d5454dc1b58658f99f7a3513f495f9b39226891e28",
+      "baselinePatchSha256": "7109e90e4b1c6d04172e24d29eb7cb69d60efd9894c683e425dcca0fe032afb3"
+    },
+    {
+      "target": "tests/unit/security/cloudsync-signature-fail-open-13679.test.ts",
+      "patch": "tests__unit__security__cloudsync-signature-fail-open-13679.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "136aad3ad0f453421b92e4436301d9eff63d26a1a81c3b7da7da92c09db15b02",
+      "baselinePatchSha256": "7575e1cc9fd4a7b4eb66558e506e69f19227b7508e169ac24c0c56028714c10a"
+    },
+    {
+      "target": "tests/unit/translator-resp-claude-to-openai.test.ts",
+      "patch": "tests__unit__translator-resp-claude-to-openai.test.ts.patch",
+      "disposition": "ported",
+      "candidateSha256": "d2e09fe81ca08a494d58d06bdfa3c3d71ef4b51caa1e13512b91eec1431f1079",
+      "baselinePatchSha256": "2cc45a9d8575895acccb188c617bfd56b27180b77590f8de23df65abe458edc6"
+    },
+    {
+      "target": "tests/unit/ui/agent-card-risk-modal.test.tsx",
+      "patch": "tests__unit__ui__agent-card-risk-modal.test.tsx.patch",
+      "disposition": "ported",
+      "candidateSha256": "177059025c9a1a01c206ed9770dc1dcd777819b55b64d860fd195614a3257c2d",
+      "baselinePatchSha256": "21477129730dc7f67a29365d47efc6102c24e534dcdba088b3498eafd5976e83"
+    },
+    {
+      "target": "tests/unit/ui/use-session-recorder.test.tsx",
+      "patch": "tests__unit__ui__use-session-recorder.test.tsx.patch",
+      "disposition": "ported",
+      "candidateSha256": "ddb260a0c219075b5ba5eab2807da425cff2b1ea576a6237b15f694730e48d3c",
+      "baselinePatchSha256": "393721a36e71a3a700cb19f14ff9073c93d352199108659a1b82c774b55ebc8f"
+    },
+    {
+      "target": "tests/unit/usage-history-provider-alias-13459.test.ts",
+      "patch": "tests__unit__usage-history-provider-alias-13459.test.ts.patch",
+      "disposition": "retired-preserved",
+      "candidateSha256": "44d37f44b8075abe9e6f0432b2b987fc52531e7b20d23323b802e7d0f50833d6",
+      "baselinePatchSha256": "ec1f934bd6c7f19c7a7d121d170aed37c7b01439dafd45e22738ec8d5e7fbb13"
+    },
+    {
+      "target": "tsconfig.json",
+      "patch": "tsconfig.patch",
+      "disposition": "ported",
+      "candidateSha256": "b15ea15f0b93ed9195f97f69862f3292c0d0b23440b5989800e5e36b9219e252",
+      "baselinePatchSha256": "b53a6af9831b073e75fae6a581774f586eb4766ec86b0a1dd51654c0b271c81b"
+    }
+  ],
+  "resolutionDecisions": [
+    {
+      "path": "Dockerfile",
+      "regions": 1,
+      "reason": "Retain the operator-pinned CLI 0.160.0; preserve other upstream Docker changes.",
+      "sha256": "8254bef57733704541c13b48e8b9a2fac98d8fe5647b0c404cb97b489d30e2a3"
+    },
+    {
+      "path": "bin/cli/utils/pid.mjs",
+      "regions": 1,
+      "reason": "Upstream now scopes lsof to LISTEN and adds address-aware parsing; the original listener-only fix is incorporated.",
+      "sha256": "2f389c5b9ba7056ea5808089732a9ebebfdeae6fafc2719ff150ab102a1fc7aa"
+    },
+    {
+      "path": "config/quality/eslint-suppressions.json",
+      "regions": 1,
+      "reason": "Keep both upstream suppression removals and the existing Nexa removal; never restore resolved warning budgets.",
+      "sha256": "367bd9072c1207a9b54a0077c125b7dc16dc78fa40a7f2588f13b3e6b32678b8"
+    },
+    {
+      "path": "docs/openapi.yaml",
+      "regions": 1,
+      "reason": "Do not restore a retired traffic-inspector endpoint; retain guards on current documented operations.",
+      "sha256": "6a4e96fd4a6279c5b1f6896dd7b3cad4e4ae1d321ced1b973593db911208be2a"
+    },
+    {
+      "path": "public/openapi.yaml",
+      "regions": 1,
+      "reason": "Keep public and canonical OpenAPI mirrors consistent without restoring retired endpoints.",
+      "sha256": "3f12f17dd249281e1273f274c27054394bcdd02a6302f3ed93835a5b8db4faff"
+    },
+    {
+      "path": ".env.example",
+      "regions": 1,
+      "reason": "Document new upstream optional controls and retain explicit local bridge timeout/cloud signature controls.",
+      "sha256": "3fcaf914ba14fe109caccef5d9fed967b8d2683541b083ad4377094bb4f37e96"
+    },
+    {
+      "path": "open-sse/config/providerModels.ts",
+      "regions": 1,
+      "reason": "Retain new published catalog mapping and Haiku capability compatibility.",
+      "sha256": "f52b850e8e8df73d1f5eeca0b90c41050513ab0b77762e406eb7cdf4e31eb975"
+    },
+    {
+      "path": "open-sse/executors/base.ts",
+      "regions": 5,
+      "reason": "Keep validation/tier/advisor changes; preserve sparse native Thread fields and bypass destructive recovery on that protocol.",
+      "sha256": "c36535f408730d72c44b72edd3484cee4eb606eadef5cc0e06e3805ef921b6af"
+    },
+    {
+      "path": "open-sse/executors/claudeIdentity.ts",
+      "regions": 1,
+      "reason": "Retain all upstream mid-conversation model prefixes plus existing dotted Sonnet spelling.",
+      "sha256": "fa77140da069e43d1402f0fa0375a2ccd4b6b25f4b97add93f4f9e5449886f47"
+    },
+    {
+      "path": "open-sse/executors/codex/reasoningSuffix.ts",
+      "regions": 1,
+      "reason": "Keep upstream Sol support and the existing reserve model family.",
+      "sha256": "b3c0edbee8cbd06251c3c4de0d29a34da9020cf7bc37d142f9ad3d863d57e3ab"
+    },
+    {
+      "path": "open-sse/handlers/chatCore/attemptLogging.ts",
+      "regions": 1,
+      "reason": "Adopt upstream error-body fallback; conflicting custom change was formatting only.",
+      "sha256": "c265ea55a69ca16b79dd204a6bef69bafe53c16ce950fb5ea2b3c31328d81d9e"
+    },
+    {
+      "path": "open-sse/handlers/chatCore/nonStreamingProviderLeg.ts",
+      "regions": 1,
+      "reason": "Preserve context-overflow rejection on every recovery send plus new buffered Responses failure handling.",
+      "sha256": "598186e2fe08009cecabe323bb0c9bca0a8a77dd01d5ddb7e4e0d23ca5189d76"
+    },
+    {
+      "path": "open-sse/handlers/responseTranslator.ts",
+      "regions": 1,
+      "reason": "Upstream centralized stop mapping now includes refusal/content_filter and other valid terminal mappings.",
+      "sha256": "b1b21cfe0bb6c74ebfb457596cc47562167f707450e6316128a3a7bec6b40862"
+    },
+    {
+      "path": "open-sse/handlers/sseParser.ts",
+      "regions": 1,
+      "reason": "Retain actual error and incomplete_details in buffered Responses results.",
+      "sha256": "eb417b618e0e57dfad60b66f8b7ef90e375e9ced70450e605027a835cb9cdaec"
+    },
+    {
+      "path": "open-sse/handlers/usageExtractor.ts",
+      "regions": 3,
+      "reason": "Combine exact provider cost/credits validation with native metered usage and cache TTL accounting.",
+      "sha256": "23690b3df108b6b6d4c265c0f9be3f4424365d8c7380647ee58aa707fc7635f2"
+    },
+    {
+      "path": "open-sse/services/antigravityQuotaFamily.ts",
+      "regions": 1,
+      "reason": "Preserve Gemini flash/pro family membership and upstream session plus weekly quota windows.",
+      "sha256": "b0dad39f26d9235e9e6dee3d9d9f570d8decd165c951c46978bc2c5631335dc1"
+    },
+    {
+      "path": "open-sse/translator/helpers/schemaCoercion.ts",
+      "regions": 2,
+      "reason": "Retain the new predicate-based invalid-regex sanitizer; native scalar normalization applies only to the Responses sanitizer; recurse through conditional schema fields.",
+      "sha256": "8f8ccaa69cf51372d0fc27fa33eed1e069a544afe7851a0d0691e60dd510824f"
+    },
+    {
+      "path": "open-sse/translator/request/claude-to-openai.ts",
+      "regions": 4,
+      "reason": "Preserve upstream native Gemini/web-search and parallel-tool semantics while keeping reserved advisor/deferred sentinels off unsupported function surfaces.",
+      "sha256": "4ecdc0b2c25ec0ab0bd7d07afa04c990c48241ad73ef86bbd1e7084b6294f52d"
+    },
+    {
+      "path": "open-sse/translator/request/openai-responses/helpers.ts",
+      "regions": 2,
+      "reason": "Use shared model effort caps and preserve both upstream Kiro model patterns.",
+      "sha256": "ba98291b04119b5c187784c756d88cc6392a9175051f10e76f2e7b7464147a08"
+    },
+    {
+      "path": "open-sse/translator/response/claude-to-openai.ts",
+      "regions": 2,
+      "reason": "Combine native metered usage/signatures with upstream thinking store and non-inclusive prompt cache metadata.",
+      "sha256": "b4cd9b3cd521443d3ef928e070d2a921651d08a2ae35ff7a0ada03984a130b3d"
+    },
+    {
+      "path": "open-sse/utils/stream.ts",
+      "regions": 5,
+      "reason": "Retain upstream stream failure snapshots and trailing summary handling while collecting native Claude envelopes and exact metered TTL usage.",
+      "sha256": "8d4a9fde05a3c18a4b1601eda1b3d8fe54a10814573849f85081c921147d2cd1"
+    },
+    {
+      "path": "open-sse/utils/streamClaudeEmptyBody.ts",
+      "regions": 1,
+      "reason": "Keep upstream clean empty-turn terminal handling and explicit native refusal lifecycle validation.",
+      "sha256": "45dc7faf6cac216d8464fbc71f5d432ec8a2548ac0226c9d8a7369087217b5ac"
+    },
+    {
+      "path": "open-sse/utils/streamHandler.ts",
+      "regions": 7,
+      "reason": "Preserve trusted upstream empty-turn receipts and stall tracking alongside strict native suggestion and hidden thinking progress contracts.",
+      "sha256": "de5dfd6e86511e830e69202a59b995de11126099e22df9c1b0a44813ef20b6b6"
+    },
+    {
+      "path": "open-sse/utils/streamReadiness.ts",
+      "regions": 1,
+      "reason": "Preserve upstream progress accounting and the exact native Claude stop reason.",
+      "sha256": "75ec95d9188169c6dc1ee9d94e85fda235a38cefef5b8dd8a38c16556f1ab9e3"
+    },
+    {
+      "path": "open-sse/utils/usageTracking.ts",
+      "regions": 2,
+      "reason": "Retain process-global symbol identity, exact provider credits/costs and custom native cache TTL fields.",
+      "sha256": "25756fffd280e4e8cce6c8ea69cfd175b5036b6234bc38f64bec064c98cd28c5"
+    },
+    {
+      "path": "src/app/api/system/version/route.ts",
+      "regions": 1,
+      "reason": "Preserve socket-free Docker update flow and operator-owned external command mode.",
+      "sha256": "41850153b6a24142ea01476ac3870527ff2cfa067795cd2cff0a6718a483c0c4"
+    },
+    {
+      "path": "src/lib/system/autoUpdate.ts",
+      "regions": 3,
+      "reason": "Preserve Docker image detection and explicit custom update command settings.",
+      "sha256": "da4b9a585d28bffb655efa75aa7aa593c9073cacc8bc5a11957b7fdc41ec6000"
+    },
+    {
+      "path": "src/shared/constants/codexClient.ts",
+      "regions": 1,
+      "reason": "Retain the tested pinned CLI identity 0.160.0.",
+      "sha256": "7b82911f5ef764b45eae8584f4c9d20165ace8b63bf5f7e532a55037506a879f"
+    },
+    {
+      "path": "src/shared/constants/pricing/frontier-labs.ts",
+      "regions": 1,
+      "reason": "Preserve new upstream long-context tiers while keeping the configured Sol 6.1 tariff.",
+      "sha256": "ea1dc218e8836736060dcca77d8222cc0c7da1a2b70bdb04a7ec6678e0f61d81"
+    },
+    {
+      "path": "src/shared/validation/schemas/pricing.ts",
+      "regions": 1,
+      "reason": "Preserve long-context pricing validation and the 1-hour cache creation tariff.",
+      "sha256": "8e39bccc91233b2e380162367c6f9c099e141d2a618ca96c867023f34d2613a6"
+    },
+    {
+      "path": "src/lib/guardrails/registry.ts",
+      "regions": 1,
+      "reason": "Keep client override opt-in and preserve both independent header aliases within that gate.",
+      "sha256": "c2dc0384d48b2d8092ea155ed5e104b359d346d3c8e0ddd1eda4d4eec5d51217"
+    },
+    {
+      "path": "src/app/api/providers/[id]/test/route.ts",
+      "regions": 1,
+      "reason": "Use upstream CAS-aware health persistence and preserve Google verification snapshot fencing.",
+      "sha256": "9100f35b9911ac6d191fb46ae1173238dfaec69ad57f240817978c9ef29f8598"
+    },
+    {
+      "path": "src/mitm/manager.ts",
+      "regions": 4,
+      "reason": "Combine upstream unexpected-exit DNS recovery with shared lifecycle ownership, confirmed listener readiness, and safe child termination.",
+      "sha256": "8c79aab0e1203d83b2c71b0c9d1d46724ab4f42bebc8aeb770ec723dc4e914d4"
+    },
+    {
+      "path": "src/mitm/server.cjs",
+      "regions": 2,
+      "reason": "Preserve existing loopback binding and native buffering/router timeouts, adding upstream independent peer validation.",
+      "sha256": "fa7dc6c7553009a0a8d395446d8f2d1ed9d1d7c52c8114cab3e94fd3b7b2ec84"
+    },
+    {
+      "path": "src/sse/services/auth.ts",
+      "regions": 6,
+      "reason": "Preserve scoped provider pools, opt-in quota policy and upstream stall cooldowns; retain selected-test fencing, Google verification state and native session selection.",
+      "sha256": "60ab54eb76c88e732690c7945fa676350ec1ee8fd4ae21448d27c0bc6cbc31af"
+    },
+    {
+      "path": "src/sse/handlers/chat.ts",
+      "regions": 3,
+      "reason": "Retain upstream authorization/model policy checks and native Thread account ownership; a Thread replay error returns without account health mutation.",
+      "sha256": "9589d89cea55fab39d02f0b2a0e3b9cf1c71f96dc0ac754958ce160e7300993d"
+    },
+    {
+      "path": "open-sse/utils/proxyFetch.ts",
+      "regions": 9,
+      "reason": "Adopt upstream extracted TLS policies and response-start method gating; retain custom pre-connect-only recovery and no replay after ambiguous inference acceptance.",
+      "sha256": "013856ee466a3c6f019b92a2dc17193de7bfd2f82e3379919aade17e6d6c7fcb"
+    },
+    {
+      "path": "src/app/(dashboard)/dashboard/usage/components/ProviderLimits/parts/QuotaCardExpanded.tsx",
+      "regions": 2,
+      "reason": "Preserve upstream refreshed quota layout and add the existing display-only catalog list beneath its windows.",
+      "sha256": "c5211266e7c81f7bf26c790a12db9ea656e39948e3909a76bdd00956210a2135"
+    },
+    {
+      "path": "src/app/api/usage/analytics/route.ts",
+      "regions": 1,
+      "reason": "Preserve upstream stored-cost plus residual-token accounting and exact custom cache TTL/long-context fields.",
+      "sha256": "4880de7dc6d7aa38ca94a425569ca4403d321424edfc008c98d86a189f99624e"
+    },
+    {
+      "path": "src/domain/quotaCache.ts",
+      "regions": 4,
+      "reason": "Retain upstream predictive quota/credit opt-ins; preserve token-refresh-aware fetches and scheduled Claude reset windows.",
+      "sha256": "ce30bc9fe3ed141f7ecb2b12bc26ba46ee5b816e6886686a99c2d7a519469b74"
+    },
+    {
+      "path": "src/lib/api/modelTestRunner.ts",
+      "regions": 4,
+      "reason": "Retain upstream audio/custom-prompt model probes and selected-account cancellation/stream scope fencing.",
+      "sha256": "742a5c749dce25237acb14c897f79a6df8d42a95ee102fec863e7f284d8d75cb"
+    },
+    {
+      "path": "src/lib/usage/providerLimits.ts",
+      "regions": 1,
+      "reason": "Keep future exhausted Claude windows parked before live model refresh; manual refresh remains available.",
+      "sha256": "f9ecda78948f6bb048b0767a9ec627b94fa4a622ce8c21d8495d2b2ee4a18684"
+    },
+    {
+      "path": "src/lib/usage/providerWindowCosts.ts",
+      "regions": 2,
+      "reason": "Combine upstream recorded-cost matching with TTL-aware residual token pricing and long-context selection.",
+      "sha256": "a0b3cd2335d9afc9050f9702e0a25177601a6544472fef0e9b235db324de7503"
+    },
+    {
+      "path": "src/lib/usage/aggregateHistory.ts",
+      "regions": 2,
+      "reason": "Preserve exact provider-billed archival costs and use TTL rates only for rows without a reported cost.",
+      "sha256": "b1ca5b36b656269beca37472c0f40e62aed1d0e548c09239eb31fdea5f101558"
+    },
+    {
+      "path": "src/lib/usage/costCalculator.ts",
+      "regions": 7,
+      "reason": "Preserve upstream exact-cost and credit-metered rules, inclusive reasoning accounting and nested tiers; retain native 1-hour writes, legacy Sol tiers and service-tier multipliers.",
+      "sha256": "a5caeb3092eb191a49bfead6df1b2632bc2045e983f6ee0bc941bf251eca95f9"
+    },
+    {
+      "path": "src/lib/db/usageAnalytics.ts",
+      "regions": 14,
+      "reason": "Retain upstream priceable-token/stored-cost separation, custom TTL sums and per-request long-context buckets throughout analytics.",
+      "sha256": "da8351907f084021de34e3975be5463036fc26783273b2d9a71734fbeee5c93e"
+    },
+    {
+      "path": "src/lib/db/usageAnalytics/sources.ts",
+      "regions": 2,
+      "reason": "Keep UNION column parity and exact-cost raw columns alongside nullable native TTL fields.",
+      "sha256": "b31d67cd06ebb0eaed31c08d228ad83b2021b0cd468a86235c1b6fd4ea1a4f8e"
+    },
+    {
+      "path": "src/lib/usage/usageStats.ts",
+      "regions": 5,
+      "reason": "Keep upstream exact cost masks and price native TTL fields only on records whose token tariff remains the cost basis.",
+      "sha256": "540b336357463b5a8e04cfbd02d1b9be2348ada198211a3b20811140b82641db"
+    },
+    {
+      "path": "tests/unit/proxyfetch-direct-response-start-timeout-10214.test.ts",
+      "regions": 8,
+      "reason": "Upstream rewrote the old timeout tests to distinguish safe reads, ambiguous POSTs and Request-carried aborts; retain that stronger suite and the separate Nexa no-replay tests.",
+      "sha256": "b3551f6e8c913a3a518471ae36d1d4e588f5b1fbc3cc0520cf6f539abe513ca9"
+    },
+    {
+      "path": "tests/unit/cli-serve-port-in-use-preflight.test.mjs",
+      "regions": 1,
+      "reason": "Retain the upstream listener-only regression and address-aware parsing assertions.",
+      "sha256": "a0ae150079a971166c4688654843a3ff1119d9ae444d8f97ac5a0eb6ffa7ba62"
+    },
+    {
+      "path": "tests/unit/executor-codex.test.ts",
+      "regions": 3,
+      "reason": "Assert the retained exact 0.160.0 client fingerprint.",
+      "sha256": "b1405a2151fa4aa40377489d3495fd11fd46e99acc07c65dd6d09fdb491d5581"
+    },
+    {
+      "path": "tests/unit/usage-history-provider-alias-13459.test.ts",
+      "regions": 2,
+      "reason": "Upstream now independently timestamps real alias events, incorporating the original dedup flake fix.",
+      "sha256": "44d37f44b8075abe9e6f0432b2b987fc52531e7b20d23323b802e7d0f50833d6"
+    },
+    {
+      "path": "tests/unit/proxyfetch-direct-response-start-flat-retry-budget-13703.test.ts",
+      "regions": 1,
+      "reason": "Retain upstream safe-read budget checks and explicit deadline timer cleanup.",
+      "sha256": "d8c2e356edde37ad1b7eccf4ae6fd1972add17983162b40f2c286c937985c00b"
+    },
+    {
+      "path": "tests/unit/classify429.test.ts",
+      "regions": 1,
+      "reason": "Keep upstream compound RetryInfo delays and existing Anthropic extra-usage quota classification coverage.",
+      "sha256": "ae15274aa48b5cd770e31e9d6bdb1ab8bae9d9a3155012ef8788131c741c9691"
+    },
+    {
+      "path": "tests/snapshots/provider/translate-path.json",
+      "regions": 9,
+      "reason": "Change only known pinned CLI versions and platform normalization; retain all other new upstream snapshot content.",
+      "sha256": "43cf4c36e35d667f168c54199788ccf96d07cceedd50211093c1b377fadc2d75"
+    },
+    {
+      "path": "src/lib/usage/callLogs.ts",
+      "regions": 3,
+      "reason": "Preserve upstream write-lock retry, row-first pending artifact publication and final accepted identifier; port native metering into the extracted row builder/writer.",
+      "sha256": "183b25a0b4230f8fc512c19c9c607fea90688df2797ad63721597592a1b5ea9d"
+    },
+    {
+      "path": "src/lib/usage/usageHistory.ts",
+      "regions": 4,
+      "reason": "Preserve upstream immutable retry timestamps, request-scoped API-key attribution and extracted row mapping/dedup writer; native TTL behavior moves to those owning helpers.",
+      "sha256": "54ef92df9f1812101a036ce863c9408a465d96f534bdb9c3f21196c1617588b9"
+    },
+    {
+      "path": "open-sse/handlers/chatCore.ts",
+      "regions": 7,
+      "reason": "Move the existing native request, suggestion, error retention and hidden-thinking contracts into the new upstream helper owners, preserving the upstream orchestration and policy wiring.",
+      "sha256": "3dd18dfddff6f14cbb679ee72b856c62d3e6f0c671a5b04e2a31ed0429eca1de"
+    },
+    {
+      "atUtc": "2026-10-28T05:44:57.433315+00:00",
+      "target": "open-sse/executors/base/reasoningEffort.ts",
+      "decision": "Preserve verified native Codex effort ceilings while retaining upstream max behavior for other providers."
+    },
+    {
+      "atUtc": "2026-10-28T05:44:57.433506+00:00",
+      "target": "src/shared/constants/pricing/oauth-subscriptions.ts",
+      "decision": "Remove duplicate Sol alias keys and retain the existing long-context tariff fields in the effective Codex row."
+    },
+    {
+      "atUtc": "2026-10-28T05:44:57.433516+00:00",
+      "target": "open-sse/utils/proxyFetch.ts",
+      "decision": "Use upstream replay-safe helper with the same method/body contract at all retained TLS fallback sites."
+    },
+    {
+      "atUtc": "2026-10-28T05:44:57.433523+00:00",
+      "target": "open-sse/utils/streamClaudeEmptyBody.ts",
+      "decision": "Preserve strict empty response errors; only verified native refusal completion is exempted."
+    },
+    {
+      "atUtc": "2026-10-28T05:44:57.433530+00:00",
+      "target": "tests/unit/cloud-sync.test.ts",
+      "decision": "Use a signed fixture response without weakening signature verification."
+    },
+    {
+      "atUtc": "2026-10-28T05:44:57.433536+00:00",
+      "target": "tests/unit/catalog-updates-v3x.test.ts",
+      "decision": "Resolve the contradictory unknown-price assertion against existing configured native Sol estimates; assert the retained rates."
+    },
+    {
+      "atUtc": "2026-10-28T06:48:37.889202+00:00",
+      "target": "open-sse/utils/streamHandler.ts",
+      "decision": "Use native content probing without treating opaque signatures as output; actual top-level native stops govern legitimacy, while max_tokens and non-native behavior remain preserved."
+    },
+    {
+      "atUtc": "2026-10-28T07:23:23.776561+00:00",
+      "target": "src/shared/validation/schemas/settings.ts",
+      "decision": "Accept the runtime-supported waitForCooldown.budgetMs with bounded integer validation while preserving strict keys and existing Nexa global concurrency."
+    },
+    {
+      "atUtc": "2026-10-28T07:27:53.775321+00:00",
+      "target": "open-sse/translator/response/claude-to-openai.ts",
+      "decision": "Keep an explicit content_filter terminal when translating to OpenAI; remove the duplicate refusal branch. Preserve native payloads and prohibit any new refusal retry."
+    },
+    {
+      "atUtc": "2026-10-28T07:42:23.554158+00:00",
+      "target": "tests/unit/auto-update.test.ts",
+      "decision": "Supply all required auxiliary configuration defaults in nine existing source/compose fixtures. Keep production types, runtime defaults, every existing assertion and mocked spawn behavior intact."
+    },
+    {
+      "atUtc": "2026-10-28T08:17:35.687517+00:00",
+      "target": "src/lib/system/autoUpdate.ts",
+      "decision": "Express the existing process-probe dependency as a typed promise of the fulfilled execFile result with the exact cwd/timeout options consumed; child-process control remains with spawnImpl. Ordinary async probes now satisfy the honest runtime contract without casts or loss of required config fields."
+    }
+  ],
+  "validationAttempts": [
+    {
+      "sourceCommit": "b3c3d5a5906f9bc50381b1689070cd150ab9ace4",
+      "runUrl": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/40639840969",
+      "accepted": false,
+      "node26": {
+        "native": {
+          "pass": 156,
+          "tests": 157
+        },
+        "extended": {
+          "pass": 171,
+          "tests": 171
+        },
+        "stream": {
+          "pass": 392,
+          "tests": 392
+        },
+        "migrations": {
+          "pass": 10,
+          "tests": 10
+        },
+        "compatibility": {
+          "pass": 1166,
+          "tests": 1168
+        },
+        "tooling": {
+          "pass": 35,
+          "tests": 35
+        }
+      },
+      "node24Migrations": {
+        "pass": 6,
+        "tests": 6
+      },
+      "coreTypecheck": "pass",
+      "lint": "pass",
+      "docsAll": "pass",
+      "fullTypes": {
+        "pristine": 6572,
+        "applied": 6529,
+        "ceiling": 5830,
+        "ceilingRaised": false
+      },
+      "cacheCostRedAccepted": false,
+      "cacheCostRedReason": "The fixture inspected only message_stop after message_delta had already emitted the terminal usage. Its undefined-usage assertion is not the intended cache-marker regression.",
+      "remainingWork": [
+        "strict thinking-only native empty-content boundary",
+        "collect all translated usage frames and prove the targeted cache-marker assertion",
+        "complete effort test reporting",
+        "compiler comparison fixture working directory",
+        "committed formatting",
+        "full historical-schema preservation fixture"
+      ]
+    },
+    {
+      "sourceCommit": "d806ca646098d9fdd81f937ebf1c340a719f3468",
+      "runUrl": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/40642844559",
+      "accepted": false,
+      "native": {
+        "pass": 158,
+        "tests": 159
+      },
+      "nativeProduction": {
+        "pass": 159,
+        "tests": 160
+      },
+      "stream": {
+        "pass": 392,
+        "tests": 392
+      },
+      "efforts": {
+        "node26": 102,
+        "node24": 102,
+        "completeMarkersVerified": true
+      },
+      "fullTypes": {
+        "pristine": 6572,
+        "applied": 6529,
+        "newIdentities": 0,
+        "changedTypeMessageGroups": 217,
+        "ceilingAtThisAttempt": 5830
+      },
+      "cacheCostRedTargetVerified": true,
+      "coreTypecheck": "pass",
+      "lint": "pass",
+      "docsAll": "pass",
+      "historyFixtureStatus": "rejected environment setup: the old release heals account identity columns before migration 127",
+      "extendedSuiteStatus": "reported 157 passing cases, but 14 previously reported trailing cases are absent; not accepted as complete coverage",
+      "remainingNativeIssue": "outer wrapper still counted an opaque thinking signature as output",
+      "privateRuntimeDataUsed": false
+    },
+    {
+      "sourceCommit": "a00f615a1ba20a61592ad98023f9e4c7f922fb4a",
+      "runUrl": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/40646262083",
+      "accepted": false,
+      "counts": {
+        "tooling-node24.tap": {
+          "tests": 41,
+          "pass": 40,
+          "fail": 1,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "tooling-node26.tap": {
+          "tests": 41,
+          "pass": 41,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-production.tap": {
+          "tests": 162,
+          "pass": 162,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "production-migrations.tap": {
+          "tests": 7,
+          "pass": 6,
+          "fail": 1,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "stream-green.tap": {
+          "tests": 392,
+          "pass": 392,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "effort-primary.tap": {
+          "tests": 102,
+          "pass": 102,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-extended.tap": {
+          "tests": 171,
+          "pass": 171,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "upgrade-migrations.tap": {
+          "tests": 11,
+          "pass": 10,
+          "fail": 1,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "effort-production.tap": {
+          "tests": 102,
+          "pass": 102,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-green.tap": {
+          "tests": 161,
+          "pass": 161,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "upgrade-compatibility.tap": {
+          "tests": 1180,
+          "pass": 1179,
+          "fail": 1,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-red.tap": {
+          "tests": 25,
+          "pass": 9,
+          "fail": 16,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "deployment-helpers.tap": {
+          "tests": 59,
+          "pass": 58,
+          "fail": 0,
+          "skipped": 1,
+          "cancelled": 0
+        },
+        "cache-cost-red.tap": {
+          "tests": 1,
+          "pass": 0,
+          "fail": 1,
+          "skipped": 0,
+          "cancelled": 0
+        }
+      },
+      "fullTypes": {
+        "pristine": 6572,
+        "applied": 6531,
+        "newIdentities": 2,
+        "ceiling": 6529,
+        "cause": "Duplicate fixture bootstrap variable; fix required, no budget increase."
+      },
+      "nativeBoundaryFixesVerified": true,
+      "extendedComplete": true,
+      "historyFixtureStatus": "import rejected: duplicate tables declaration in synthetic bootstrap fixture",
+      "remainingWork": [
+        "remove duplicate bootstrap declaration without changing preservation assertions",
+        "commit reviewed formatting",
+        "reject partial abnormal compiler diagnostics and global configuration errors"
+      ],
+      "fullBuild": false,
+      "deployment": false,
+      "privateRuntimeDataUsed": false
+    },
+    {
+      "sourceCommit": "487662e121890ba70519fa4bc3d148d75863b226",
+      "runUrl": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/40649173644",
+      "accepted": false,
+      "reason": "Only formatter-generated source inventory drift and uncommitted formatting remain; all executed application functional gates passed.",
+      "counts": {
+        "tooling-node24.tap": {
+          "tests": 45,
+          "pass": 44,
+          "fail": 1,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "tooling-node26.tap": {
+          "tests": 45,
+          "pass": 45,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-production.tap": {
+          "tests": 162,
+          "pass": 162,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "production-migrations.tap": {
+          "tests": 7,
+          "pass": 7,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "stream-green.tap": {
+          "tests": 392,
+          "pass": 392,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "effort-primary.tap": {
+          "tests": 102,
+          "pass": 102,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-extended.tap": {
+          "tests": 171,
+          "pass": 171,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "upgrade-migrations.tap": {
+          "tests": 11,
+          "pass": 11,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "effort-production.tap": {
+          "tests": 102,
+          "pass": 102,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-green.tap": {
+          "tests": 161,
+          "pass": 161,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "upgrade-compatibility.tap": {
+          "tests": 1180,
+          "pass": 1180,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-red.tap": {
+          "tests": 25,
+          "pass": 9,
+          "fail": 16,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "deployment-helpers.tap": {
+          "tests": 63,
+          "pass": 62,
+          "fail": 0,
+          "skipped": 1,
+          "cancelled": 0
+        },
+        "cache-cost-red.tap": {
+          "tests": 1,
+          "pass": 0,
+          "fail": 1,
+          "skipped": 0,
+          "cancelled": 0
+        }
+      },
+      "fullTypes": {
+        "pristine": 6572,
+        "applied": 6529,
+        "ceiling": 6529,
+        "newIdentities": 0,
+        "completed": true
+      },
+      "coreTypecheck": "pass",
+      "lint": "pass",
+      "docsAll": "pass",
+      "completeHistoricalBootstrapVerified": true,
+      "fullBuild": false,
+      "deployment": false,
+      "privateRuntimeDataUsed": false
+    },
+    {
+      "sourceCommit": "955ff8405bae7f2b7ab7c8135e9541823305d2fb",
+      "runUrl": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/40652479495",
+      "accepted": false,
+      "counts": {
+        "tooling-node24.tap": {
+          "tests": 48,
+          "pass": 48,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "tooling-node26.tap": {
+          "tests": 48,
+          "pass": 48,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-production.tap": {
+          "tests": 171,
+          "pass": 170,
+          "fail": 1,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "production-migrations.tap": {
+          "tests": 7,
+          "pass": 7,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "stream-green.tap": {
+          "tests": 392,
+          "pass": 392,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "effort-primary.tap": {
+          "tests": 102,
+          "pass": 102,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-extended.tap": {
+          "tests": 171,
+          "pass": 171,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "upgrade-migrations.tap": {
+          "tests": 11,
+          "pass": 11,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "effort-production.tap": {
+          "tests": 102,
+          "pass": 102,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-green.tap": {
+          "tests": 164,
+          "pass": 164,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "upgrade-compatibility.tap": {
+          "tests": 1196,
+          "pass": 1195,
+          "fail": 1,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-red.tap": {
+          "tests": 28,
+          "pass": 10,
+          "fail": 18,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "deployment-helpers.tap": {
+          "tests": 63,
+          "pass": 62,
+          "fail": 0,
+          "skipped": 1,
+          "cancelled": 0
+        },
+        "resilience-budget-red.tap": {
+          "tests": 6,
+          "pass": 3,
+          "fail": 3,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "cache-cost-red.tap": {
+          "tests": 1,
+          "pass": 0,
+          "fail": 1,
+          "skipped": 0,
+          "cancelled": 0
+        }
+      },
+      "fullTypes": {
+        "pristine": 6572,
+        "applied": 6528,
+        "ceiling": 6529,
+        "newIdentities": 8,
+        "accepted": false
+      },
+      "nativeFilteredTerminalTests": "pass",
+      "historicalMigrations": "11/11 and 7/7 pass",
+      "resilienceRedAccepted": false,
+      "resilienceRedReason": "A third failure came from a test incorrectly accepting empty PATCH; existing upstream requires at least one section. Preserve rejection and test a valid partial payload.",
+      "newTypeCause": "Valid config fixtures exposed eight mocks constrained to PromiseWithChild despite process probes only awaiting the fulfilled result. Express the actual typed completion contract and retain child control with spawnImpl.",
+      "committedFormatting": "pass",
+      "tooling": "48/48 on both runtimes",
+      "fullBuild": false,
+      "deployment": false,
+      "privateRuntimeDataUsed": false
+    },
+    {
+      "sourceCommit": "c0914911ecd0f6d3914f82882ad0d446b0355389",
+      "runUrl": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/40656582381",
+      "accepted": false,
+      "reason": "One new test diagnostic: deepEqual narrows parsed to the exact expected input shape before a subsequent optional-property access. Preserve every assertion and read the optional fields before the equality assertion.",
+      "counts": {
+        "tooling-node24.tap": {
+          "tests": 48,
+          "pass": 48,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "tooling-node26.tap": {
+          "tests": 48,
+          "pass": 48,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-production.tap": {
+          "tests": 178,
+          "pass": 178,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "production-migrations.tap": {
+          "tests": 7,
+          "pass": 7,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "stream-green.tap": {
+          "tests": 392,
+          "pass": 392,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "effort-primary.tap": {
+          "tests": 102,
+          "pass": 102,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-extended.tap": {
+          "tests": 171,
+          "pass": 171,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "upgrade-migrations.tap": {
+          "tests": 11,
+          "pass": 11,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "effort-production.tap": {
+          "tests": 102,
+          "pass": 102,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-green.tap": {
+          "tests": 164,
+          "pass": 164,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "resilience-budget-green.tap": {
+          "tests": 6,
+          "pass": 6,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "upgrade-compatibility.tap": {
+          "tests": 1197,
+          "pass": 1197,
+          "fail": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "native-red.tap": {
+          "tests": 28,
+          "pass": 10,
+          "fail": 18,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "deployment-helpers.tap": {
+          "tests": 63,
+          "pass": 62,
+          "fail": 0,
+          "skipped": 1,
+          "cancelled": 0
+        },
+        "resilience-budget-red.tap": {
+          "tests": 6,
+          "pass": 4,
+          "fail": 2,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "cache-cost-red.tap": {
+          "tests": 1,
+          "pass": 0,
+          "fail": 1,
+          "skipped": 0,
+          "cancelled": 0
+        }
+      },
+      "fullTypes": {
+        "pristine": 6572,
+        "applied": 6511,
+        "ceiling": 6529,
+        "newIdentities": 1,
+        "completed": true
+      },
+      "functionalGates": "pass",
+      "coreTypes": "pass",
+      "lint": "pass",
+      "docsAll": "pass",
+      "formatting": "pass",
+      "resilienceRedAccepted": true,
+      "fullBuild": false,
+      "deployment": false
+    }
+  ],
+  "compilerBudgetReconciliation": {
+    "version": "3.8.52",
+    "value": 6529,
+    "pristine": 6572,
+    "newDiagnosticIdentities": 0,
+    "previousReleaseRecordPreserved": true,
+    "direction": "down",
+    "operatorApproved": true,
+    "fullBuildAuthorized": false,
+    "deploymentAuthorized": false
+  },
+  "upstreamIssueReview": [
+    {
+      "issueUrl": "https://github.com/cheaper-inference/OmniRoute/issues/18390",
+      "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
+      "sourceFindingConfirmed": true,
+      "requestQueueGlobalConcurrency": "already preserved by existing Nexa overlay",
+      "waitBudget": "strict schema rejects a runtime-supported numeric setting; add optional integer 0..300000",
+      "normalizerGitBlob": "01dfce6643b0f2a7167ccdf62e69861ee23ff0f8",
+      "tests": 6,
+      "expectedFocusedRedFailures": 2,
+      "baselineScope": "applied overlay with only the budgetMs acceptance field reversed",
+      "fixturePatchSha256": "4d4554813b6113c5aa424b2de68a9cae8da3414702db3ce0a559ec98c97e24b4",
+      "liveConfigurationWrites": 0,
+      "fullBuild": false,
+      "deployment": false,
+      "acceptanceEvidence": "Exact source native-validation.json and its retained TAP files; prepared source alone is not acceptance."
+    },
+    {
+      "issueUrl": "https://github.com/cheaper-inference/OmniRoute/issues/17324",
+      "sourceFindingConfirmed": "streaming content_filter fell through to stop while buffered normalization preserves it",
+      "scope": "preserve a declared filtered terminal; remove duplicate refusal case",
+      "testsAdded": [
+        "native opaque-thinking filtered terminal keeps bytes, signature and usage",
+        "streaming filtered terminal remains content_filter",
+        "buffered filtered terminal remains content_filter"
+      ],
+      "limits": [
+        "No live reproduction of damaged-history retry loop",
+        "No existing conversation edits or model refusal retries"
+      ],
+      "liveGenerationCalls": 0,
+      "fullBuild": false,
+      "deployment": false,
+      "acceptanceEvidence": "Exact source native-validation.json and its retained TAP files; prepared source alone is not acceptance."
+    }
+  ],
+  "validationAuthority": {
+    "workflow": ".github/workflows/native-reliability.yml",
+    "receipt": "native-test-output/native-validation.json",
+    "acceptance": "Every mandatory workflow step must have a successful outcome for the exact source commit, including complete historical-schema preservation, targeted RED/GREEN proofs, both runtime versions and zero new compiler identities.",
+    "fullBuild": false,
+    "deployment": false
+  },
+  "compilerMessageReview": {
+    "reviewedRun": 40646262083,
+    "changedGroups": 217,
+    "inferredUnionCardinalityOnly": 215,
+    "embeddingSettingsUnionOrder": "same literal alternatives in inferred function signatures",
+    "autoUpdateConfigFixture": "nine partial source/compose fixtures now include required auxiliary fields; production contract retained",
+    "nextSourceVerification": "complete compiler comparison and seven existing mocked upstream tests required",
+    "budget": 6529,
+    "budgetIncreased": false
+  }
+}

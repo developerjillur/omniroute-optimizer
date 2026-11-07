@@ -1,5 +1,5 @@
 diff --git a/open-sse/translator/request/openai-responses/helpers.ts b/open-sse/translator/request/openai-responses/helpers.ts
-index 8065bddb3..d3f3614da 100644
+index ec23be02533f33d935036519690206970416a66d..0272628a3a39196e78bc795307fe70838b8de057 100644
 --- a/open-sse/translator/request/openai-responses/helpers.ts
 +++ b/open-sse/translator/request/openai-responses/helpers.ts
 @@ -1,5 +1,10 @@
@@ -14,21 +14,21 @@ index 8065bddb3..d3f3614da 100644
  
  export type JsonRecord = Record<string, unknown>;
  export const RESPONSES_STORE_MARKER = "_omnirouteResponsesStore";
-@@ -50,8 +55,6 @@ export function imageUrlToText(value: unknown): string {
+@@ -50,8 +55,6 @@
    return toString(record.url);
  }
  
 -const CODEX_MAX_EFFORT_MODEL_PATTERN =
--  /^(?:gpt-5\.6-(?:sol|terra|luna)|gpt-6-(?:astra|sol|luna))(?:-(?:none|low|medium|high|xhigh|max|ultra))?$/;
+-  /^(?:gpt-5\.6-(?:sol|terra|luna)|gpt-6(?:\.1)?-(?:astra|sol|luna))(?:-(?:none|low|medium|high|xhigh|max|ultra))?$/;
  const KIRO_GPT_5_6_MODEL_PATTERN =
    /^(?:kiro|kr)\/gpt-5\.6-(?:sol|terra|luna)(?:-(?:none|low|medium|high|xhigh|max))?$/;
- 
-@@ -61,7 +64,7 @@ function supportsNativeMaxReasoningEffort(model: unknown): boolean {
+ const KIRO_OPUS_5_5_MODEL_PATTERN = /^(?:kiro|kr)\/claude-opus-5(?:\.|-)5(?:-thinking)?$/;
+@@ -67,7 +70,7 @@
      .toLowerCase()
      .replace(/^(?:codex|cx)\//, "");
    return (
 -    CODEX_MAX_EFFORT_MODEL_PATTERN.test(normalizedModel) ||
 +    getCodexAliasEffortCap(splitCodexReasoningSuffix(normalizedModel).baseModel) !== null ||
-     KIRO_GPT_5_6_MODEL_PATTERN.test(toString(model).trim().toLowerCase())
+     KIRO_GPT_5_6_MODEL_PATTERN.test(kiroModel) ||
+     KIRO_OPUS_5_5_MODEL_PATTERN.test(kiroModel)
    );
- }

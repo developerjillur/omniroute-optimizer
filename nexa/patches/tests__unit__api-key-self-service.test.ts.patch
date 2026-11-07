@@ -1,0 +1,12 @@
+diff --git a/tests/unit/api-key-self-service.test.ts b/tests/unit/api-key-self-service.test.ts
+--- a/tests/unit/api-key-self-service.test.ts
++++ b/tests/unit/api-key-self-service.test.ts
+@@ -127,7 +127,7 @@
+   assert.equal(status.usage.cost.remainingUsd, null);
+   assert.equal(status.usage.cost.usedPercent, null);
+   assert.equal(status.usage.cost.period, "monthly");
+-  assert.equal(status.usage.tokens.totalTokens, 1065);
++  assert.equal(status.usage.tokens.totalTokens, 930);
+   assert.equal(dbParams[0][0], "key-a");
+   assert.equal(dbParams[0][1], "2026-05-01T00:00:00.000Z");
+   assert.equal("accountQuota" in status, false);

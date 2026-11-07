@@ -76,11 +76,21 @@ export default function QuotaModelList({ provider }: Props) {
 
     const out: ModelGroup[] = [];
     if (session.length)
-      out.push({ key: "session", label: "quotaModelsSession", fallback: "Session", models: session });
+      out.push({
+        key: "session",
+        label: "quotaModelsSession",
+        fallback: "Session",
+        models: session,
+      });
     if (spark.length)
       out.push({ key: "spark", label: "quotaModelsSpark", fallback: "Spark pool", models: spark });
     if (review.length)
-      out.push({ key: "review", label: "quotaModelsReview", fallback: "Code review", models: review });
+      out.push({
+        key: "review",
+        label: "quotaModelsReview",
+        fallback: "Code review",
+        models: review,
+      });
     return out.length ? out : null;
   }, [provider]);
 
@@ -120,10 +130,7 @@ export default function QuotaModelList({ provider }: Props) {
               >
                 {model.name}
                 {model.gated && (
-                  <span
-                    className="material-symbols-outlined text-[11px] leading-none"
-                    aria-hidden
-                  >
+                  <span className="material-symbols-outlined text-[11px] leading-none" aria-hidden>
                     lock
                   </span>
                 )}

@@ -1,8 +1,8 @@
 diff --git a/tests/unit/cli-keys-api-key-fallback.test.ts b/tests/unit/cli-keys-api-key-fallback.test.ts
-index 98cb83311..5e78bce79 100644
+index 98cb83311b35659240205071d80a43c3712dab8f..5e78bce79e5a29b74577169c32e11c61e3e82975 100644
 --- a/tests/unit/cli-keys-api-key-fallback.test.ts
 +++ b/tests/unit/cli-keys-api-key-fallback.test.ts
-@@ -6,7 +6,7 @@ const ORIGINAL_BASE_URL = process.env.OMNIROUTE_BASE_URL;
+@@ -6,7 +6,7 @@
  
  async function withFetchMock(
    handler: (url: URL, init?: RequestInit) => Response | Promise<Response>,
@@ -11,7 +11,7 @@ index 98cb83311..5e78bce79 100644
  ) {
    process.env.OMNIROUTE_BASE_URL = "http://127.0.0.1:20128";
    globalThis.fetch = ((input: string | URL | Request, init?: RequestInit) =>
-@@ -26,25 +26,31 @@ test("keys regenerate falls back from registered keys to ordinary API keys", asy
+@@ -26,25 +26,31 @@
    const logs: string[] = [];
    const originalLog = console.log;
  
@@ -59,7 +59,7 @@ index 98cb83311..5e78bce79 100644
    assert.match(logs.join("\n"), /sk-test-regenerated-key/);
  });
  
-@@ -54,24 +60,27 @@ test("keys reveal falls back from registered keys to ordinary API keys", async (
+@@ -54,24 +60,27 @@
    const originalLog = console.log;
    const originalWrite = process.stderr.write;
  

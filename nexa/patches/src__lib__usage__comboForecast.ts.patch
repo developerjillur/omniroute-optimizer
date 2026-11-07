@@ -1,0 +1,13 @@
+diff --git a/src/lib/usage/comboForecast.ts b/src/lib/usage/comboForecast.ts
+index 2bbf20bb9c81f3abc5ad5f359c69f8006ea5f068..f74cadb6f1e04d51f8cf2b5669d895c838235cfb 100644
+--- a/src/lib/usage/comboForecast.ts
++++ b/src/lib/usage/comboForecast.ts
+@@ -106,6 +106,8 @@
+         output: row.outputTokens,
+         cacheRead: row.cacheReadTokens,
+         cacheCreation: row.cacheCreationTokens,
++        cacheCreation5m: row.cacheCreation5mTokens,
++        cacheCreation1h: row.cacheCreation1hTokens,
+         reasoning: row.reasoningTokens,
+       },
+       { provider: row.provider, model: row.model, serviceTier: "standard" }

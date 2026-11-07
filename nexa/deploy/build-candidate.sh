@@ -9,7 +9,7 @@ unset OMNIROUTE_BUILD_BACKEND_ONLY OMNIROUTE_BUILD_PROFILE OMNIROUTE_SKIP_STANDA
 npx --no-install fumadocs-mdx
 npm run typecheck:core
 node --import tsx/esm --test --test-concurrency=1 tests/unit/nexa-google-account-health.test.ts tests/unit/nexa-google-account-routing.test.ts tests/unit/nexa-google-quota-token-refresh.test.ts tests/unit/nexa-model-test-connection.test.ts tests/unit/model-test-route.test.ts tests/unit/model-test-runner.test.ts tests/unit/probe-testall-isolation.test.ts tests/unit/token-refresh-serialized-stale-rotation.test.ts
-node --test --test-concurrency=1 nexa/deploy/bootstrap-launchdaemon.test.mjs nexa/deploy/native-ingress.test.mjs nexa/deploy/ensure-free-space.test.mjs nexa/deploy/stop-owned-bridge.test.mjs nexa/deploy/run-bounded-build.test.mjs nexa/deploy/bridge-gate.test.mjs nexa/deploy/dashboard-gate.test.mjs nexa/deploy/build-candidate.test.mjs nexa/deploy/tsc-ratchet.test.mjs tests/unit/deployment-policy.test.mjs
+node --test --test-concurrency=1 nexa/deploy/bootstrap-launchdaemon.test.mjs nexa/deploy/native-ingress.test.mjs nexa/deploy/ensure-free-space.test.mjs nexa/deploy/stop-owned-bridge.test.mjs nexa/deploy/run-bounded-build.test.mjs nexa/deploy/bridge-gate.test.mjs nexa/deploy/dashboard-gate.test.mjs nexa/deploy/build-candidate.test.mjs nexa/deploy/tsc-ratchet.test.mjs nexa/deploy/smoke-package-migrations.test.mjs nexa/deploy/package-install.test.mjs tests/unit/deployment-policy.test.mjs
 node scripts/check/check-tsc-ratchet.mjs --ratchet | tee "$OUTDIR/tsc-ratchet.log"
 if grep -q 'tscErrors=SKIP' "$OUTDIR/tsc-ratchet.log" || ! grep -Eq '^tscErrors=[0-9]+$' "$OUTDIR/tsc-ratchet.log"; then
   printf '%s\n' 'TypeScript ratchet did not complete; production build blocked.' >&2
@@ -23,4 +23,11 @@ node nexa/deploy/dashboard-gate.mjs dist/.build/next
 npm run build:cli-api
 npm run build:cli
 OMNIROUTE_ALLOW_CANARY_BUILD=1 npm run check:pack-artifact
-/usr/local/bin/node /usr/local/lib/node_modules/npm/bin/npm-cli.js pack --pack-destination "$OUTDIR"
+mkdir "$OUTDIR/unsealed"
+/usr/local/bin/node /usr/local/lib/node_modules/npm/bin/npm-cli.js pack --pack-destination "$OUTDIR/unsealed"
+node nexa/deploy/publication-lock.mjs "$PWD" /usr/local/lib/node_modules/npm/package.json "$OUTDIR/publication-lock"
+PACKAGE_VERSION="$(node -p 'require("./package.json").version')"
+python3 nexa/deploy/seal-package.py "$OUTDIR/unsealed/omniroute-$PACKAGE_VERSION.tgz" \
+  package-lock.json "$OUTDIR/publication-lock/npm-shrinkwrap.json" \
+  "$OUTDIR/omniroute-$PACKAGE_VERSION.tgz" \
+  --effective-edges "$OUTDIR/publication-lock/effective-edges.json"

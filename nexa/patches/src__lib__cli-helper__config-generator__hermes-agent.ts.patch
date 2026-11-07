@@ -1,8 +1,8 @@
 diff --git a/src/lib/cli-helper/config-generator/hermes-agent.ts b/src/lib/cli-helper/config-generator/hermes-agent.ts
-index 605f0781b..fd0b9a73b 100644
+index 605f0781b7505392a439322f4b55f8fdaf0d348f..fd0b9a73b75cfe1b36bb3e823ed573778c8f42ef 100644
 --- a/src/lib/cli-helper/config-generator/hermes-agent.ts
 +++ b/src/lib/cli-helper/config-generator/hermes-agent.ts
-@@ -74,13 +74,37 @@ export const HERMES_AGENT_ROLES = [
+@@ -74,13 +74,37 @@
      label: "MoA Aggregator",
      description: "Mixture-of-Agents synthesis model",
    },
@@ -21,7 +21,7 @@ index 605f0781b..fd0b9a73b 100644
  ] as const;
  
  export type HermesAgentRole = (typeof HERMES_AGENT_ROLES)[number]["id"];
- 
++
 +// nexa: canonical OmniRoute effort vocabulary (shared/reasoning/effortStandardization.ts).
 +// Forwarded per provider family by the existing translators (Anthropic thinking,
 +// Gemini thinkingConfig, xAI reasoning.effort, Responses API).
@@ -29,7 +29,7 @@ index 605f0781b..fd0b9a73b 100644
 +
 +const MOA_ROLE_IDS = ["moa_aggregator", "moa_advisor_1", "moa_advisor_2"] as const;
 +const MOA_PRESET_NAME = "client-reply";
-+
+ 
  export interface HermesAgentRoleSelection {
    role: HermesAgentRole;
    model: string;
@@ -40,7 +40,7 @@ index 605f0781b..fd0b9a73b 100644
  }
  
  export interface HermesAgentConfigPayload {
-@@ -181,9 +205,34 @@ export async function generateHermesAgentConfig(
+@@ -181,9 +205,34 @@
      if (Object.keys(next.providers).length === 0) delete next.providers;
    }
  
@@ -75,7 +75,7 @@ index 605f0781b..fd0b9a73b 100644
  
      if (role === "default") {
        next.model = {
-@@ -197,14 +246,50 @@ export async function generateHermesAgentConfig(
+@@ -197,14 +246,50 @@
          model,
          provider: "omniroute",
        };
@@ -127,7 +127,7 @@ index 605f0781b..fd0b9a73b 100644
      }
    }
  
-@@ -267,5 +352,23 @@ export async function getCurrentHermesAgentRoles(): Promise<
+@@ -267,5 +352,23 @@
      }
    }
  

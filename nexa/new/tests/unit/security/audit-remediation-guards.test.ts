@@ -37,7 +37,12 @@ test("H2/guard: ALLOWS loopback / dev / explicit-override / enforced+strong-pass
     { NODE_ENV: "production", HOSTNAME: "127.0.0.1", INITIAL_PASSWORD: "CHANGEME" }, // loopback
     { NODE_ENV: "development", HOSTNAME: "0.0.0.0" }, // not prod
     { NODE_ENV: "production", HOSTNAME: "0.0.0.0", OMNIROUTE_ALLOW_INSECURE_PUBLIC: "true" }, // override
-    { NODE_ENV: "production", HOSTNAME: "0.0.0.0", REQUIRE_API_KEY: "true", INITIAL_PASSWORD: "s3cret!" }, // safe
+    {
+      NODE_ENV: "production",
+      HOSTNAME: "0.0.0.0",
+      REQUIRE_API_KEY: "true",
+      INITIAL_PASSWORD: "s3cret!",
+    }, // safe
   ];
   for (const env of allow) {
     assert.equal(evaluatePublicBindSafety(env).refuse, false, JSON.stringify(env));
@@ -78,6 +83,8 @@ test("M4: db/health route sanitizes error messages (Hard Rule #12)", () => {
   assert.match(src, /import\s*\{\s*sanitizeErrorMessage\s*\}/, "must import the sanitizer");
   const returns = src.match(/status:\s*500/g) || [];
   const sanitized = src.match(/sanitizeErrorMessage\(message\)/g) || [];
-  assert.ok(sanitized.length >= returns.length && sanitized.length >= 2,
-    "every 500 error path must wrap the message in sanitizeErrorMessage");
+  assert.ok(
+    sanitized.length >= returns.length && sanitized.length >= 2,
+    "every 500 error path must wrap the message in sanitizeErrorMessage"
+  );
 });

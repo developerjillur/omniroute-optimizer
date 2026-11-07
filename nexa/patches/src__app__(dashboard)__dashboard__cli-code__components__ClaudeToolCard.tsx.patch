@@ -1,0 +1,129 @@
+diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.tsx b/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.tsx
+--- a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.tsx
++++ b/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.tsx
+@@ -11,6 +11,7 @@
+ import {
+   getStoredClaudeAuthValue,
+   normalizeClaudeBaseUrl,
++  normalizeClaudeModelId,
+ } from "@/shared/services/claudeCliConfig";
+
+ const CLOUD_URL = process.env.NEXT_PUBLIC_CLOUD_URL;
+@@ -68,6 +69,7 @@
+   const [claudeStatus, setClaudeStatus] = useState(null);
+   const [checkingClaude, setCheckingClaude] = useState(false);
+   const [applying, setApplying] = useState(false);
++  const [settingsPreview, setSettingsPreview] = useState(null);
+   const [restoring, setRestoring] = useState(false);
+   const [message, setMessage] = useState(null);
+   const [showInstallGuide, setShowInstallGuide] = useState(false);
+@@ -171,7 +173,7 @@
+     return normalizeClaudeBaseUrl(url);
+   };
+
+-  const handleApplySettings = async () => {
++  const handleApplySettings = async (reviewed = false) => {
+     setApplying(true);
+     setMessage(null);
+     try {
+@@ -184,11 +186,19 @@
+
+       tool.defaultModels.forEach((model) => {
+         const targetModel = modelMappings[model.alias] || model.defaultValue || "";
+-        if (targetModel && model.envKey) env[model.envKey] = targetModel;
++        if (targetModel && model.envKey) env[model.envKey] = normalizeClaudeModelId(targetModel);
+       });
+
+-      const postBody: Record<string, unknown> = { env };
++      let postBody: Record<string, unknown> = { env, preview: true };
+       if (selectedKeyId) postBody.keyId = selectedKeyId;
++      if (reviewed) {
++        if (!settingsPreview) return;
++        postBody = {
++          ...settingsPreview.postBody,
++          preview: false,
++          expectedRevision: settingsPreview.revision,
++        };
++      }
+
+       const res = await fetch("/api/cli-tools/claude-settings", {
+         method: "POST",
+@@ -196,14 +206,16 @@
+         body: JSON.stringify(postBody),
+       });
+       const data = await res.json();
++      if (res.ok && data.preview) {
++        setSettingsPreview({ ...data, postBody });
++        return;
++      }
+       if (res.ok) {
++        setSettingsPreview(null);
+         setMessage({ type: "success", text: t("settingsApplied") });
+-        setClaudeStatus((prev) => ({
+-          ...prev,
+-          hasBackup: true,
+-          settings: { ...prev?.settings, env },
+-        }));
++        await checkClaudeStatus();
+       } else {
++        setSettingsPreview(null);
+         setMessage({
+           type: "error",
+           text:
+@@ -265,7 +277,7 @@
+
+     tool.defaultModels.forEach((model) => {
+       const targetModel = modelMappings[model.alias];
+-      if (targetModel && model.envKey) env[model.envKey] = targetModel;
++      if (targetModel && model.envKey) env[model.envKey] = normalizeClaudeModelId(targetModel);
+     });
+
+     return [
+@@ -511,6 +523,32 @@
+               </div>
+
+               {/* Opt-in (default off): Claude Code auto-permission classifier compat mode. */}
++              {settingsPreview && (
++                <div
++                  className="rounded border border-border p-3 space-y-2"
++                  role="region"
++                  aria-label="settings.json"
++                >
++                  <p className="text-sm font-semibold">{t("preview")} — settings.json</p>
++                  <ul className="text-xs space-y-2 break-all">
++                    {settingsPreview.changes.map((change) => (
++                      <li key={change.key}>
++                        <code>{change.key}</code>: <code>{change.before ?? "∅"}</code>
++                        {" → "}
++                        <code>{change.after}</code>
++                      </li>
++                    ))}
++                  </ul>
++                  <div className="flex gap-2">
++                    <Button size="sm" onClick={() => handleApplySettings(true)} loading={applying}>
++                      {t("apply")}
++                    </Button>
++                    <Button size="sm" variant="outline" onClick={() => setSettingsPreview(null)}>
++                      {t("clear")}
++                    </Button>
++                  </div>
++                </div>
++              )}
+               <ClaudeClassifierCompatToggle />
+
+               {/* Info link to the discovery-alias gate (claude/<provider>/<model> mirror ids) */}
+@@ -534,12 +572,12 @@
+                 <Button
+                   variant="primary"
+                   size="sm"
+-                  onClick={handleApplySettings}
++                  onClick={() => handleApplySettings()}
+                   disabled={!hasActiveProviders}
+                   loading={applying}
+                 >
+                   <span className="material-symbols-outlined text-[14px] mr-1">save</span>
+-                  {t("apply")}
++                  {t("preview")}
+                 </Button>
+                 <Button
+                   variant="outline"

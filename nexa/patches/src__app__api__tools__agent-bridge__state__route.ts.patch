@@ -1,5 +1,5 @@
 diff --git a/src/app/api/tools/agent-bridge/state/route.ts b/src/app/api/tools/agent-bridge/state/route.ts
-index 6d5941c13..ea4f0a293 100644
+index 6d5941c13ffdeb3e3328e52667e5060910c6051c..ea4f0a293ffac41e174d1f4c877c78e529abca4d 100644
 --- a/src/app/api/tools/agent-bridge/state/route.ts
 +++ b/src/app/api/tools/agent-bridge/state/route.ts
 @@ -7,7 +7,7 @@
@@ -11,7 +11,7 @@ index 6d5941c13..ea4f0a293 100644
  import { isSudoPasswordRequired, checkDNSEntryForAgent } from "@/mitm/dns/dnsConfig";
  import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
  import { createErrorResponse } from "@/lib/api/errorResponse";
-@@ -23,6 +23,8 @@ import fs from "fs";
+@@ -23,6 +23,8 @@
  
  export async function GET(): Promise<Response> {
    try {

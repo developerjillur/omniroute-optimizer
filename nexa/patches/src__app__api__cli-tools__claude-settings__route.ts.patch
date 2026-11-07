@@ -1,0 +1,82 @@
+diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-tools/claude-settings/route.ts
+--- a/src/app/api/cli-tools/claude-settings/route.ts
++++ b/src/app/api/cli-tools/claude-settings/route.ts
+@@ -3,6 +3,7 @@
+ import { NextResponse } from "next/server";
+ import fs from "fs/promises";
+ import path from "path";
++import { createHash } from "node:crypto";
+ import { requireCliToolsAuth } from "@/lib/api/requireCliToolsAuth";
+ import {
+   ensureCliConfigWriteAllowed,
+@@ -10,7 +11,7 @@
+   getCliRuntimeStatus,
+ } from "@/shared/services/cliRuntime";
+ import { createBackup } from "@/shared/services/backupService";
+-import { normalizeClaudeBaseUrl } from "@/shared/services/claudeCliConfig";
++import { planClaudeSettings } from "@/shared/services/claudeCliConfig";
+ import { saveCliToolLastConfigured, deleteCliToolLastConfigured } from "@/lib/db/cliToolState";
+ import { cliSettingsEnvSchema } from "@/shared/validation/schemas";
+ import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
+@@ -126,39 +127,38 @@
+     const settingsPath = getClaudeSettingsPath();
+     const claudeDir = path.dirname(settingsPath);
+
+-    // Ensure .claude directory exists
+-    await fs.mkdir(claudeDir, { recursive: true });
+-
+-    // Backup current settings before modifying
+-    await createBackup("claude", settingsPath);
+-
+     // Read current settings
+     let currentSettings: Record<string, any> = {};
+-    try {
+-      const content = await fs.readFile(settingsPath, "utf-8");
+-      currentSettings = JSON.parse(content);
++    let currentContent = "";
++    try {
++      currentContent = await fs.readFile(settingsPath, "utf-8");
++      currentSettings = JSON.parse(currentContent);
+     } catch (error: any) {
+       if (error.code !== "ENOENT") {
+         throw error;
+       }
+     }
+
+-    // Claude Code gateway mode expects the unified root endpoint, not a forced /v1 suffix.
+-    if (env.ANTHROPIC_BASE_URL) {
+-      env.ANTHROPIC_BASE_URL = normalizeClaudeBaseUrl(env.ANTHROPIC_BASE_URL);
+-    }
+-
+-    // Merge new env with existing settings
+-    const newSettings = {
+-      ...currentSettings,
+-      env: {
+-        ...(currentSettings.env || {}),
+-        ...env,
+-      },
+-    };
++    if (!currentSettings || typeof currentSettings !== "object" || Array.isArray(currentSettings)) {
++      throw new Error("Expected a settings object");
++    }
++    const revision = createHash("sha256").update(currentContent).digest("hex");
++    const plan = planClaudeSettings(currentSettings, env);
++    if (rawBody.preview === true) {
++      return NextResponse.json({ preview: true, revision, changes: plan.changes });
++    }
++    if (rawBody.expectedRevision !== undefined && rawBody.expectedRevision !== revision) {
++      return NextResponse.json(
++        { error: "Settings changed; review the changes again" },
++        { status: 409 }
++      );
++    }
++
++    await fs.mkdir(claudeDir, { recursive: true });
++    await createBackup("claude", settingsPath);
+
+     // Write new settings
+-    await fs.writeFile(settingsPath, JSON.stringify(newSettings, null, 2));
++    await fs.writeFile(settingsPath, JSON.stringify(plan.settings, null, 2));
+
+     // Persist last-configured timestamp
+     try {

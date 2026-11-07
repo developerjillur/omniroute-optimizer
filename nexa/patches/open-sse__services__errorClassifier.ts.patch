@@ -1,10 +1,21 @@
+diff --git a/open-sse/services/errorClassifier.ts b/open-sse/services/errorClassifier.ts
+index 581e850f2a5c8adc0cd595b43cf2fa61e14bd456..59436b966d7e869c18748b4c1db858f52aaf064c 100644
 --- a/open-sse/services/errorClassifier.ts
 +++ b/open-sse/services/errorClassifier.ts
-@@ -364,6 +364,7 @@
+@@ -80,6 +80,8 @@
+     // to emit a tool_use block) is a legitimate terminal state, not a silent
+     // failure. Only flag empty content when no such terminal stop_reason is present.
+     const stopReason = typeof body.stop_reason === "string" ? body.stop_reason : "";
++    // Only a native message envelope can use the refusal terminal exemption.
++    if (body.type === "message" && stopReason === "refusal") return false;
+     // #14160: same exemption for the Claude wire shape on trusted first-party APIs.
+     if (
+       (trustedEmptyStop && NORMAL_STOP_CLAUDE_STOP.has(stopReason)) ||
+@@ -370,6 +372,7 @@
  // not provider/model health. Keep every expression bounded to avoid ReDoS on
  // upstream-controlled error bodies.
  const RESOURCE_NOT_FOUND_PATTERNS = [
-+  /\bno thread state was found for the requested [`"']?previous_message_id\b/i,
++  /\bno thread state (?:was found|is available) for the requested [`"']?previous_message_id\b/i,
    /\bfiles?\b[^\n]{0,160}\b(?:not found|does not exist)\b/i,
    /\b(?:not found|does not exist)\b[^\n]{0,160}\bfiles?\b/i,
    /\b(?:input[_ -]?file|file[_ -]?id|item|response|vector[_ -]?store|upload)\b[^\n]{0,160}\b(?:not found|does not exist)\b/i,

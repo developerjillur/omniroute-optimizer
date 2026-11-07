@@ -1,0 +1,22 @@
+diff --git a/tests/unit/db/no-migration-collisions.test.ts b/tests/unit/db/no-migration-collisions.test.ts
+index e2a1a244ed7b67c64ace0881a3feb01a0cc9974c..ba2ca608c8c06315d9bc9da819fc16fd777309d2 100644
+--- a/tests/unit/db/no-migration-collisions.test.ts
++++ b/tests/unit/db/no-migration-collisions.test.ts
+@@ -1,3 +1,4 @@
++import { resolveMigrationIdentity } from "../../../src/lib/db/migrationIdentity.ts";
+ /**
+  * PM-02 — CI guard against migration version-number collisions.
+  *
+@@ -31,9 +32,9 @@
+ 
+   const byVersion = new Map<string, string[]>();
+   for (const file of files) {
+-    const m = file.match(/^(\d+)_(.+)\.sql$/);
+-    if (!m) continue;
+-    const [, version, name] = m;
++    const identity = resolveMigrationIdentity(file);
++    if (!identity) continue;
++    const { version, name } = identity;
+     if (!byVersion.has(version)) byVersion.set(version, []);
+     byVersion.get(version)!.push(name);
+   }

@@ -89,7 +89,19 @@ test("native messages retain protocol, compressed bodies, status and selected ho
     res.end(
       mode === "sse"
         ? 'event: message_stop\ndata: {"type":"message_stop"}\n\n'
-        : JSON.stringify({ type: mode === "error" ? "error" : "message" })
+        : JSON.stringify(
+            mode === "error"
+              ? { type: "error", error: { type: "rate_limit_error", message: "Synthetic limit" } }
+              : {
+                  id: "msg_synthetic_native_transport",
+                  type: "message",
+                  role: "assistant",
+                  model,
+                  content: [{ type: "text", text: "Synthetic reply" }],
+                  stop_reason: "end_turn",
+                  usage: { input_tokens: 1, output_tokens: 1 },
+                }
+          )
     );
   });
   const listen = (server: net.Server) =>
@@ -266,6 +278,7 @@ test("native messages retain protocol, compressed bodies, status and selected ho
             path.join(root, "db.json"),
             JSON.stringify({ mitmAlias: { "claude-code": { [model]: target } } })
           );
+          let ownResponseBody = "";
           const status = await new Promise<number | undefined>((resolve, reject) => {
             const req = https.request(
               {
@@ -283,19 +296,27 @@ test("native messages retain protocol, compressed bodies, status and selected ho
                 },
               },
               (res) => {
-                res.resume();
+                res.on("data", (chunk) => {
+                  ownResponseBody += chunk;
+                });
                 res.on("end", () => resolve(res.statusCode));
               }
             );
             req.on("error", reject);
             req.end(JSON.stringify(nextTurn));
           });
-          assert.equal(status, 200);
+          assert.equal(status, 200, `${target}: ${ownResponseBody.slice(0, 1500)}`);
           const forwarded = received.at(-1)!;
           assert.equal(forwarded.url, "/v1/messages?beta=true");
           assert.equal(forwarded.headers["x-session-id"], "synthetic-session");
           assert.equal(forwarded.headers["anthropic-beta"], "synthetic-beta");
-          assert.deepEqual(forwarded.body, { ...nextTurn, model: target });
+          assert.equal(JSON.parse(ownResponseBody).type, "message");
+          // Native non-streaming replies are buffered from an upstream stream.
+          assert.deepEqual(forwarded.body, {
+            ...nextTurn,
+            model: target,
+            stream: target.startsWith("claude/") ? true : nextTurn.stream,
+          });
         }
       } finally {
         fs.writeFileSync(

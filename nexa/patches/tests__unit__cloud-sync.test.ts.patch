@@ -1,8 +1,8 @@
 diff --git a/tests/unit/cloud-sync.test.ts b/tests/unit/cloud-sync.test.ts
-index 6123b8b67..e725f9e7a 100644
+index 58803832f29f62581b06d57cb9519f2a24792e72..2a7f55627482675a498d527f21c1b9be629e4084 100644
 --- a/tests/unit/cloud-sync.test.ts
 +++ b/tests/unit/cloud-sync.test.ts
-@@ -4,6 +4,7 @@ import fs from "node:fs";
+@@ -4,6 +4,7 @@
  import os from "node:os";
  import path from "node:path";
  import { pathToFileURL } from "node:url";
@@ -10,7 +10,7 @@ index 6123b8b67..e725f9e7a 100644
  
  const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-cloud-sync-"));
  const ORIGINAL_DATA_DIR = process.env.DATA_DIR;
-@@ -11,6 +12,7 @@ const ORIGINAL_CLOUD_URL = process.env.CLOUD_URL;
+@@ -11,6 +12,7 @@
  const ORIGINAL_PUBLIC_CLOUD_URL = process.env.NEXT_PUBLIC_CLOUD_URL;
  const ORIGINAL_TIMEOUT = process.env.CLOUD_SYNC_TIMEOUT_MS;
  const ORIGINAL_CLOUD_SECRETS = process.env.OMNIROUTE_CLOUD_SYNC_SECRETS;
@@ -18,7 +18,7 @@ index 6123b8b67..e725f9e7a 100644
  const ORIGINAL_FETCH = globalThis.fetch;
  const cloudSyncModuleUrl = pathToFileURL(path.join(process.cwd(), "src/lib/cloudSync.ts")).href;
  
-@@ -44,6 +46,7 @@ async function resetStorage() {
+@@ -48,6 +50,7 @@
    delete process.env.NEXT_PUBLIC_CLOUD_URL;
    delete process.env.CLOUD_SYNC_TIMEOUT_MS;
    delete process.env.OMNIROUTE_CLOUD_SYNC_SECRETS;
@@ -26,7 +26,7 @@ index 6123b8b67..e725f9e7a 100644
  }
  
  test.beforeEach(async () => {
-@@ -80,6 +83,11 @@ test.after(() => {
+@@ -85,6 +88,11 @@
    } else {
      process.env.OMNIROUTE_CLOUD_SYNC_SECRETS = ORIGINAL_CLOUD_SECRETS;
    }
@@ -37,8 +37,26 @@ index 6123b8b67..e725f9e7a 100644
 +  }
  });
  
- test("cloudSync returns a configuration error when the cloud URL is missing", async () => {
-@@ -155,6 +163,8 @@ test("cloudSync returns a generic error when the API responds with a non-OK stat
+ test("cloud route rejects enabling without upload consent before any network call", async () => {
+@@ -150,11 +158,16 @@
+ 
+ test("explicit enable can perform the initial upload while disabled", async () => {
+   process.env.CLOUD_URL = "https://cloud.example";
++  const responseSecret = "explicit-enable-signed-fixture";
++  process.env.OMNIROUTE_CLOUD_SYNC_SECRET = responseSecret;
+   await settingsDb.updateSettings({ cloudEnabled: false });
+   let calls = 0;
+   globalThis.fetch = async () => {
+     calls++;
+-    return new Response(JSON.stringify({ changes: {}, data: {} }));
++    const body = JSON.stringify({ changes: {}, data: {} });
++    return new Response(body, {
++      headers: { "X-Cloud-Sig": createHmac("sha256", responseSecret).update(body).digest("hex") },
++    });
+   };
+   const cloudSync = await loadCloudSync("explicit-enable");
+   const result = await cloudSync.syncToCloud("machine-1", null, { explicitEnable: true });
+@@ -243,6 +256,8 @@
  test("cloudSync syncs data upstream and refreshes only locally stale provider tokens", async () => {
    process.env.NEXT_PUBLIC_CLOUD_URL = "https://cloud.example";
    process.env.OMNIROUTE_CLOUD_SYNC_SECRETS = "true";
@@ -47,7 +65,7 @@ index 6123b8b67..e725f9e7a 100644
  
    const stale = await providersDb.createProviderConnection({
      provider: "openai",
-@@ -212,9 +222,13 @@ test("cloudSync syncs data upstream and refreshes only locally stale provider to
+@@ -300,9 +315,13 @@
          },
        },
      };

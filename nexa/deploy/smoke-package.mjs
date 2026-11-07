@@ -5,6 +5,11 @@ import net from "node:net";
 import { spawn, execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { smokeModel } from "./smoke-model.mjs";
+import { inspectNativeUsageSchema } from "./native-usage-schema.mjs";
+import { packageInstallEnvironment } from "./package-install.mjs";
+import { readSmokeApiKey } from "./smoke-api-key.mjs";
+import { inspectInstalledPublication } from "./installed-publication.mjs";
+import { installPublication } from "./install-publication.mjs";
 
 const [archive, destination] = process.argv.slice(2);
 if (!archive || !destination) throw Error("usage: smoke-package.mjs <archive> <new destination>");
@@ -27,29 +32,19 @@ if (!reuse) {
   ]);
   fs.chmodSync(path.join(data, "storage.sqlite"), 0o600);
   const installLog = fs.openSync(path.join(root, "install.log"), "w", 0o600);
-  execFileSync(
-    "/usr/local/bin/node",
-    [
-      "/usr/local/lib/node_modules/npm/bin/npm-cli.js",
-      "install",
-      "-g",
-      "--prefix",
-      prefix,
-      "--no-fund",
-      "--no-audit",
-      path.resolve(archive),
-    ],
-    {
-      stdio: ["ignore", installLog, installLog],
-      env: {
-        ...process.env,
-        PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin",
-        DATA_DIR: data,
-      },
-    }
-  );
+  await installPublication(prefix, archive, {
+    log: ["ignore", installLog, installLog],
+    env: packageInstallEnvironment({
+      ...process.env,
+      PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin",
+      DATA_DIR: data,
+    }),
+  });
   fs.closeSync(installLog);
 }
+const installedPublication = await inspectInstalledPublication(
+  path.join(prefix, "lib/node_modules/omniroute")
+);
 const installedServer = fs.readFileSync(
   path.join(prefix, "lib/node_modules/omniroute/src/mitm/server.cjs")
 );
@@ -109,15 +104,7 @@ try {
   if (!ready) throw Error("Isolated package did not become healthy");
   process.env.DATA_DIR = data;
   const { apiFetch } = await import(pathToFileURL(path.join(pkg, "bin/cli/api.mjs")).href);
-  const localKey = execFileSync(
-    "python3",
-    [
-      "-c",
-      "import sqlite3,sys; c=sqlite3.connect('file:'+sys.argv[1]+'?mode=ro',uri=True); row=c.execute(\"SELECT key FROM api_keys WHERE is_active=1 AND revoked_at IS NULL AND is_banned=0 ORDER BY CASE WHEN scopes LIKE '%manage%' THEN 0 ELSE 1 END LIMIT 1\").fetchone(); print(row[0] if row else '',end='')",
-      path.join(data, "storage.sqlite"),
-    ],
-    { encoding: "utf8" }
-  );
+  const localKey = await readSmokeApiKey(data, pkg);
   if (!localKey) throw Error("An existing local inference key is required for package smoke");
   for (const route of ["/api/settings", "/api/tools/agent-bridge/state", "/api/v1/models"]) {
     const response = await apiFetch(route, { baseUrl: base, apiKey: localKey, retry: false });
@@ -128,28 +115,7 @@ try {
         throw Error("Packaged Bridge state lost the configured port");
     }
   }
-  const nativeUsageSchema = JSON.parse(
-    execFileSync(
-      "python3",
-      [
-        "-c",
-        "import sqlite3,json,sys; c=sqlite3.connect('file:'+sys.argv[1]+'?mode=ro',uri=True); print(json.dumps({'columns':[r[1] for r in c.execute('PRAGMA table_info(call_logs)')],'migration':c.execute(\"SELECT name FROM _omniroute_migrations WHERE version='197'\").fetchone()}))",
-        path.join(data, "storage.sqlite"),
-      ],
-      { encoding: "utf8" }
-    )
-  );
-  if (
-    !nativeUsageSchema.migration ||
-    nativeUsageSchema.migration[0] !== "native_claude_cache_details" ||
-    [
-      "tokens_cache_creation_5m",
-      "tokens_cache_creation_1h",
-      "native_session_tag",
-      "native_cache_group_tag",
-    ].some((column) => !nativeUsageSchema.columns.includes(column))
-  )
-    throw Error("Isolated installed package did not apply native usage migration 197");
+  inspectNativeUsageSchema(data);
   const inference = await apiFetch("/v1/messages", {
     baseUrl: base,
     apiKey: localKey,
@@ -187,6 +153,7 @@ try {
     managementAuth: true,
     bridgeState: true,
     modelCatalog: true,
+    installedPublication,
     nativeUsageSchema: true,
     anthropicInference: true,
     inferenceModel,

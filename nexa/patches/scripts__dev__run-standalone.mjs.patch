@@ -1,8 +1,8 @@
 diff --git a/scripts/dev/run-standalone.mjs b/scripts/dev/run-standalone.mjs
-index 0a87f8e35..9067c08de 100644
+index 0a6a046822b00ee6b3af6eb30acc12655c325e5d..fa0008bb30314acd6e54f9728ebe77bf1deb917e 100644
 --- a/scripts/dev/run-standalone.mjs
 +++ b/scripts/dev/run-standalone.mjs
-@@ -10,6 +10,7 @@ import {
+@@ -12,6 +12,7 @@
    spawnWithForwardedSignals,
  } from "../build/runtime-env.mjs";
  import { bootstrapEnv } from "../build/bootstrap-env.mjs";
@@ -10,7 +10,7 @@ index 0a87f8e35..9067c08de 100644
  
  const env = bootstrapEnv();
  const runtimePorts = resolveRuntimePorts(env);
-@@ -23,6 +24,17 @@ const maxOldSpaceMb = resolveMaxOldSpaceMb(childEnv.OMNIROUTE_MEMORY_MB);
+@@ -28,6 +29,17 @@
  warnConflictingHeapLimits(childEnv, maxOldSpaceMb);
  childEnv.NODE_OPTIONS = buildStandaloneNodeOptions(childEnv, maxOldSpaceMb);
  

@@ -1,8 +1,8 @@
 diff --git a/src/lib/usage/providerLimits.ts b/src/lib/usage/providerLimits.ts
-index 5c4d4bb99..cd4db90ae 100644
+index 94038dda496d150467cf709b3bc6471ec11a75f7..de0e56405c59af5c8f1b7ec23b59f5a23ad61734 100644
 --- a/src/lib/usage/providerLimits.ts
 +++ b/src/lib/usage/providerLimits.ts
-@@ -13,7 +13,8 @@ import {
+@@ -13,7 +13,8 @@
    type ProviderLimitsCacheEntry,
  } from "@/lib/db/providerLimits";
  import { syncToCloud } from "@/lib/cloudSync";
@@ -12,7 +12,7 @@ index 5c4d4bb99..cd4db90ae 100644
  import { buildClaudeExtraUsageConnectionUpdate } from "@/lib/providers/claudeExtraUsage";
  import { clearRecoveredProviderState } from "@/sse/services/auth";
  import { getMachineId } from "@/shared/utils/machine";
-@@ -971,11 +972,13 @@ export async function syncAllProviderLimits(
+@@ -998,11 +999,13 @@
    const caches: Record<string, ProviderLimitsCacheEntry> = {};
    const errors: Record<string, string> = {};
  
@@ -26,7 +26,7 @@ index 5c4d4bb99..cd4db90ae 100644
        const { cache } = result.value;
        const previous = getProviderLimitsCache(connectionId);
        if (cache === previous) {
-@@ -992,6 +995,13 @@ export async function syncAllProviderLimits(
+@@ -1019,6 +1022,13 @@
  
    const fetchOne = async (connection: ProviderConnectionLike) => {
      const existingCache = getProviderLimitsCache(connection.id);
@@ -37,10 +37,10 @@ index 5c4d4bb99..cd4db90ae 100644
 +    if (source === "scheduled" && existingCache && checkAt && checkAt > Date.now()) {
 +      return { connectionId: connection.id, cache: existingCache };
 +    }
+     await refreshLiveModelIds(connection.provider);
      const forceRefresh =
        source === "manual" ||
-       shouldRefreshProviderLimitsCache(connection, existingCache || undefined);
-@@ -1035,8 +1045,8 @@ export async function syncAllProviderLimits(
+@@ -1063,8 +1073,8 @@
  
    return {
      total: connections.length,

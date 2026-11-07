@@ -1,8 +1,8 @@
 diff --git a/tests/unit/provider-translate-path-golden.test.ts b/tests/unit/provider-translate-path-golden.test.ts
-index 36e81677d..619428347 100644
+index 36e81677d17086a7997af50c45bbad42b118874a..6194283471a01dd907550385f2115131b50ef263 100644
 --- a/tests/unit/provider-translate-path-golden.test.ts
 +++ b/tests/unit/provider-translate-path-golden.test.ts
-@@ -79,6 +79,7 @@ function sanitize(headers: Record<string, unknown>): Record<string, unknown> {
+@@ -79,6 +79,7 @@
          "<PLATFORM>"
        )
        .replace(/(antigravity\/ide\/\d+\.\d+\.\d+) [^/\s]+\/[^\s)]+/g, "$1 <OS>/<ARCH>")

@@ -1,11 +1,12 @@
 diff --git a/src/lib/db/usageAnalytics.ts b/src/lib/db/usageAnalytics.ts
-index cb654bc0f..929454086 100644
+index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c709a780fe6 100644
 --- a/src/lib/db/usageAnalytics.ts
 +++ b/src/lib/db/usageAnalytics.ts
-@@ -10,6 +10,16 @@
+@@ -10,6 +10,17 @@
   */
  
  import { getDbInstance } from "./core";
++import { cacheTtlTokenSql, withCacheTtlColumns } from "./usageAnalytics/cacheTtl";
 +import { GPT_6_1_SOL_LONG_CONTEXT_THRESHOLD } from "@/shared/constants/pricing/shared-tiers";
 +
 +// Partition this model by each request, never by a summed day/model token total.
@@ -19,15 +20,60 @@ index cb654bc0f..929454086 100644
  import type { AnalyticsParams } from "./usageAnalytics/sources";
  
  export { buildUnifiedSource, buildPresetUnifiedSource } from "./usageAnalytics/sources";
-@@ -116,6 +126,7 @@ export function getDailyUsage(unifiedSource: string, params: AnalyticsParams): D
+@@ -30,7 +41,9 @@
+         COALESCE(SUM(cost_tokens_output), 0) as costCompletionTokens,
+         COALESCE(SUM(cost_tokens_cache_read), 0) as costCacheReadTokens,
+         COALESCE(SUM(cost_tokens_cache_creation), 0) as costCacheCreationTokens,
+-        COALESCE(SUM(cost_tokens_reasoning), 0) as costReasoningTokens`;
++        COALESCE(SUM(cost_tokens_reasoning), 0) as costReasoningTokens,
++        COALESCE(SUM(CASE WHEN cost_tokens_cache_creation > 0 THEN ${cacheTtlTokenSql().five} ELSE 0 END), 0) as costCacheCreation5mTokens,
++        COALESCE(SUM(CASE WHEN cost_tokens_cache_creation > 0 THEN ${cacheTtlTokenSql().hour} ELSE 0 END), 0) as costCacheCreation1hTokens`;
+ 
+ /** The same split for queries that read usage_history directly. */
+ function rawCostSums(table: string): string {
+@@ -43,11 +56,15 @@
+         ${priceable("tokens_output")} as costCompletionTokens,
+         ${priceable("tokens_cache_read")} as costCacheReadTokens,
+         ${priceable("tokens_cache_creation")} as costCacheCreationTokens,
+-        ${priceable("tokens_reasoning")} as costReasoningTokens`;
++        ${priceable("tokens_reasoning")} as costReasoningTokens,
++        COALESCE(SUM(CASE WHEN ${table}.provider_cost_usd IS NULL THEN ${cacheTtlTokenSql(table+".").five} ELSE 0 END), 0) as costCacheCreation5mTokens,
++        COALESCE(SUM(CASE WHEN ${table}.provider_cost_usd IS NULL THEN ${cacheTtlTokenSql(table+".").hour} ELSE 0 END), 0) as costCacheCreation1hTokens`;
+ }
+ 
+ /** Priceable-token fields carried by every cost row. */
+ export interface CostTokenFields {
++  costCacheCreation5mTokens?: number;
++  costCacheCreation1hTokens?: number;
+   costPromptTokens: number;
+   costCompletionTokens: number;
+   costCacheReadTokens: number;
+@@ -152,6 +169,7 @@
  // ---------------------------------------------------------------------------
  
- export interface DailyCostRow {
+ export interface DailyCostRow extends CostTokenFields {
 +  longContext?: number;
    date: string;
    provider: string;
    model: string;
-@@ -142,6 +153,7 @@ export function getDailyCostRows(unifiedSource: string, params: AnalyticsParams)
+@@ -160,6 +178,8 @@
+   completionTokens: number;
+   cacheReadTokens: number;
+   cacheCreationTokens: number;
++  cacheCreation5mTokens?: number;
++  cacheCreation1hTokens?: number;
+   reasoningTokens: number;
+   storedCost: number;
+   isAggregated: number;
+@@ -170,6 +190,7 @@
+  */
+ export function getDailyCostRows(unifiedSource: string, params: AnalyticsParams): DailyCostRow[] {
+   const db = getDbInstance();
++  const ttlSource = withCacheTtlColumns(unifiedSource, params);
+   return db
+     .prepare(
+       `
+@@ -178,16 +199,19 @@
          LOWER(provider) as provider,
          LOWER(model) as model,
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
@@ -35,24 +81,46 @@ index cb654bc0f..929454086 100644
          COALESCE(SUM(tokens_input), 0) as promptTokens,
          COALESCE(SUM(tokens_output), 0) as completionTokens,
          COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
-@@ -150,7 +162,7 @@ export function getDailyCostRows(unifiedSource: string, params: AnalyticsParams)
+         COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
++        COALESCE(SUM(${cacheTtlTokenSql().five}), 0) as cacheCreation5mTokens,
++        COALESCE(SUM(${cacheTtlTokenSql().hour}), 0) as cacheCreation1hTokens,
+         COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
          COALESCE(SUM(stored_cost), 0.0) as storedCost,
-         MAX(is_aggregated) as isAggregated
-       FROM ${unifiedSource} AS _u
+         MAX(is_aggregated) as isAggregated,
+         ${UNIFIED_COST_TOKEN_SUMS}
+-      FROM ${unifiedSource} AS _u
 -      GROUP BY DATE(timestamp), LOWER(provider), LOWER(model), serviceTier
++      FROM ${ttlSource} AS _u
 +      GROUP BY DATE(timestamp), LOWER(provider), LOWER(model), serviceTier, longContext
        ORDER BY date ASC
      `
      )
-@@ -192,6 +204,7 @@ export function getHeatmapRows(heatmapConditions: string[], params: AnalyticsPar
+@@ -229,6 +253,7 @@
  // ---------------------------------------------------------------------------
  
- export interface ModelUsageRow {
+ export interface ModelUsageRow extends CostTokenFields {
 +  longContext?: number;
    model: string;
    provider: string;
    serviceTier: string;
-@@ -221,6 +234,7 @@ export function getModelUsageRows(unifiedSource: string, params: AnalyticsParams
+@@ -237,6 +262,8 @@
+   completionTokens: number;
+   cacheReadTokens: number;
+   cacheCreationTokens: number;
++  cacheCreation5mTokens?: number;
++  cacheCreation1hTokens?: number;
+   reasoningTokens: number;
+   totalTokens: number;
+   avgLatencyMs: number;
+@@ -251,6 +278,7 @@
+  */
+ export function getModelUsageRows(unifiedSource: string, params: AnalyticsParams): ModelUsageRow[] {
+   const db = getDbInstance();
++  const ttlSource = withCacheTtlColumns(unifiedSource, params);
+   return db
+     .prepare(
+       `
+@@ -258,11 +286,14 @@
          LOWER(model) as model,
          LOWER(provider) as provider,
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
@@ -60,7 +128,19 @@ index cb654bc0f..929454086 100644
          COALESCE(SUM(requests), 0) as requests,
          COALESCE(SUM(tokens_input), 0) as promptTokens,
          COALESCE(SUM(tokens_output), 0) as completionTokens,
-@@ -237,7 +251,7 @@ export function getModelUsageRows(unifiedSource: string, params: AnalyticsParams
+         COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
+         COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
++        COALESCE(SUM(${cacheTtlTokenSql().five}), 0) as cacheCreation5mTokens,
++        COALESCE(SUM(${cacheTtlTokenSql().hour}), 0) as cacheCreation1hTokens,
+         COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
+         COALESCE(SUM(tokens_input + tokens_output), 0) as totalTokens,
+         COALESCE(AVG(latency_ms), 0) as avgLatencyMs,
+@@ -271,11 +302,11 @@
+         COALESCE(SUM(stored_cost), 0.0) as storedCost,
+         MAX(is_aggregated) as isAggregated,
+         ${UNIFIED_COST_TOKEN_SUMS}
+-      FROM ${unifiedSource} AS _u
++      FROM ${ttlSource} AS _u
        -- Keep cost inputs separated by day. Historical provider rows do not
        -- always use one cache-token convention, and computeCostFromPricing's
        -- non-cached-input clamp is intentionally non-linear across those rows.
@@ -69,15 +149,32 @@ index cb654bc0f..929454086 100644
        ORDER BY requests DESC
      `
      )
-@@ -247,6 +261,7 @@ export function getModelUsageRows(unifiedSource: string, params: AnalyticsParams
+@@ -285,6 +316,7 @@
  // ---------------------------------------------------------------------------
  
- export interface ProviderCostRow {
+ export interface ProviderCostRow extends CostTokenFields {
 +  longContext?: number;
    provider: string;
    model: string;
    serviceTier: string;
-@@ -274,6 +289,7 @@ export function getProviderCostRows(
+@@ -292,6 +324,8 @@
+   completionTokens: number;
+   cacheReadTokens: number;
+   cacheCreationTokens: number;
++  cacheCreation5mTokens?: number;
++  cacheCreation1hTokens?: number;
+   reasoningTokens: number;
+   storedCost: number;
+   isAggregated: number;
+@@ -305,6 +339,7 @@
+   params: AnalyticsParams
+ ): ProviderCostRow[] {
+   const db = getDbInstance();
++  const ttlSource = withCacheTtlColumns(unifiedSource, params);
+   return db
+     .prepare(
+       `
+@@ -312,16 +347,19 @@
          LOWER(provider) as provider,
          LOWER(model) as model,
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
@@ -85,24 +182,47 @@ index cb654bc0f..929454086 100644
          COALESCE(SUM(tokens_input), 0) as promptTokens,
          COALESCE(SUM(tokens_output), 0) as completionTokens,
          COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
-@@ -282,7 +298,7 @@ export function getProviderCostRows(
+         COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
++        COALESCE(SUM(${cacheTtlTokenSql().five}), 0) as cacheCreation5mTokens,
++        COALESCE(SUM(${cacheTtlTokenSql().hour}), 0) as cacheCreation1hTokens,
+         COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
          COALESCE(SUM(stored_cost), 0.0) as storedCost,
-         MAX(is_aggregated) as isAggregated
-       FROM ${unifiedSource} AS _u
+         MAX(is_aggregated) as isAggregated,
+         ${UNIFIED_COST_TOKEN_SUMS}
+-      FROM ${unifiedSource} AS _u
 -      GROUP BY DATE(timestamp), LOWER(provider), LOWER(model), serviceTier
++      FROM ${ttlSource} AS _u
 +      GROUP BY DATE(timestamp), LOWER(provider), LOWER(model), serviceTier, longContext
      `
      )
      .all(params) as ProviderCostRow[];
-@@ -330,6 +346,7 @@ export function getProviderUsageRows(
+@@ -369,6 +407,7 @@
  // ---------------------------------------------------------------------------
  
- export interface AccountCostRow {
+ export interface AccountCostRow extends CostTokenFields {
 +  longContext?: number;
    accountKey: string;
    provider: string;
    model: string;
-@@ -376,13 +393,14 @@ export function getAccountCostRows(whereClause: string, params: AnalyticsParams)
+@@ -377,6 +416,8 @@
+   completionTokens: number;
+   cacheReadTokens: number;
+   cacheCreationTokens: number;
++  cacheCreation5mTokens?: number;
++  cacheCreation1hTokens?: number;
+   reasoningTokens: number;
+   storedCost: number;
+   isAggregated: number;
+@@ -408,6 +449,8 @@
+           usage_history.tokens_output,
+           usage_history.tokens_cache_read,
+           usage_history.tokens_cache_creation,
++          usage_history.tokens_cache_creation_5m,
++          usage_history.tokens_cache_creation_1h,
+           usage_history.tokens_reasoning,
+           usage_history.provider_cost_usd
+         FROM usage_history
+@@ -418,14 +461,17 @@
          LOWER(account_events.provider) as provider,
          LOWER(account_events.model) as model,
          COALESCE(NULLIF(account_events.service_tier, ''), 'standard') as serviceTier,
@@ -111,22 +231,34 @@ index cb654bc0f..929454086 100644
          COALESCE(SUM(account_events.tokens_output), 0) as completionTokens,
          COALESCE(SUM(account_events.tokens_cache_read), 0) as cacheReadTokens,
          COALESCE(SUM(account_events.tokens_cache_creation), 0) as cacheCreationTokens,
-         COALESCE(SUM(account_events.tokens_reasoning), 0) as reasoningTokens
++        COALESCE(SUM(${cacheTtlTokenSql("account_events.").five}), 0) as cacheCreation5mTokens,
++        COALESCE(SUM(${cacheTtlTokenSql("account_events.").hour}), 0) as cacheCreation1hTokens,
+         COALESCE(SUM(account_events.tokens_reasoning), 0) as reasoningTokens,
+         ${rawCostSums("account_events")}
        FROM account_events
 -      GROUP BY DATE(account_events.timestamp), accountKey, LOWER(account_events.provider), LOWER(account_events.model), serviceTier
 +      GROUP BY DATE(account_events.timestamp), accountKey, LOWER(account_events.provider), LOWER(account_events.model), serviceTier, longContext
      `
      )
      .all(params) as AccountCostRow[];
-@@ -489,6 +507,7 @@ export function getAccountUsageRows(
+@@ -532,6 +578,7 @@
  // ---------------------------------------------------------------------------
  
- export interface ApiKeyUsageRow {
+ export interface ApiKeyUsageRow extends CostTokenFields {
 +  longContext?: number;
    apiKeyId: string | null;
    apiKeyGroupKey: string;
    provider: string;
-@@ -523,6 +542,7 @@ export function getApiKeyUsageRows(
+@@ -542,6 +589,8 @@
+   completionTokens: number;
+   cacheReadTokens: number;
+   cacheCreationTokens: number;
++  cacheCreation5mTokens?: number;
++  cacheCreation1hTokens?: number;
+   reasoningTokens: number;
+   totalTokens: number;
+   storedCost: number;
+@@ -568,17 +617,20 @@
          LOWER(provider) as provider,
          LOWER(model) as model,
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
@@ -134,8 +266,13 @@ index cb654bc0f..929454086 100644
          COUNT(*) as requests,
          COALESCE(SUM(tokens_input), 0) as promptTokens,
          COALESCE(SUM(tokens_output), 0) as completionTokens,
-@@ -532,7 +552,7 @@ export function getApiKeyUsageRows(
-         COALESCE(SUM(tokens_input + tokens_output), 0) as totalTokens
+         COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
+         COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
++        COALESCE(SUM(${cacheTtlTokenSql().five}), 0) as cacheCreation5mTokens,
++        COALESCE(SUM(${cacheTtlTokenSql().hour}), 0) as cacheCreation1hTokens,
+         COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
+         COALESCE(SUM(tokens_input + tokens_output), 0) as totalTokens,
+         ${rawCostSums("usage_history")}
        FROM usage_history
        ${apiKeyWhereClause}
 -      GROUP BY DATE(timestamp), COALESCE(NULLIF(api_key_id, ''), NULLIF(api_key_name, ''), 'unknown'), NULLIF(api_key_id, ''), LOWER(provider), LOWER(model), serviceTier
@@ -143,15 +280,30 @@ index cb654bc0f..929454086 100644
      `
      )
      .all(params) as ApiKeyUsageRow[];
-@@ -541,6 +561,7 @@ export function getApiKeyUsageRows(
+@@ -642,6 +694,7 @@
  // ---------------------------------------------------------------------------
  
- export interface ServiceTierUsageRow {
+ export interface ServiceTierUsageRow extends CostTokenFields {
 +  longContext?: number;
    serviceTier: string;
    provider: string;
    model: string;
-@@ -568,6 +589,7 @@ export function getServiceTierUsageRows(
+@@ -650,6 +703,8 @@
+   completionTokens: number;
+   cacheReadTokens: number;
+   cacheCreationTokens: number;
++  cacheCreation5mTokens?: number;
++  cacheCreation1hTokens?: number;
+   reasoningTokens: number;
+   totalTokens: number;
+   storedCost: number;
+@@ -664,11 +719,13 @@
+   params: AnalyticsParams
+ ): ServiceTierUsageRow[] {
+   const db = getDbInstance();
++  const ttlSource = withCacheTtlColumns(unifiedSource, params);
+   return db
+     .prepare(
        `
        SELECT
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
@@ -159,24 +311,50 @@ index cb654bc0f..929454086 100644
          LOWER(provider) as provider,
          LOWER(model) as model,
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
-@@ -581,7 +603,7 @@ export function getServiceTierUsageRows(
+@@ -677,13 +734,15 @@
+         COALESCE(SUM(tokens_output), 0) as completionTokens,
+         COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
+         COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
++        COALESCE(SUM(${cacheTtlTokenSql().five}), 0) as cacheCreation5mTokens,
++        COALESCE(SUM(${cacheTtlTokenSql().hour}), 0) as cacheCreation1hTokens,
+         COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
+         COALESCE(SUM(tokens_input + tokens_output), 0) as totalTokens,
          COALESCE(SUM(stored_cost), 0.0) as storedCost,
-         MAX(is_aggregated) as isAggregated
-       FROM ${unifiedSource} AS _u
+         MAX(is_aggregated) as isAggregated,
+         ${UNIFIED_COST_TOKEN_SUMS}
+-      FROM ${unifiedSource} AS _u
 -      GROUP BY DATE(timestamp), serviceTier, LOWER(provider), LOWER(model)
++      FROM ${ttlSource} AS _u
 +      GROUP BY DATE(timestamp), serviceTier, LOWER(provider), LOWER(model), longContext
      `
      )
      .all(params) as ServiceTierUsageRow[];
-@@ -668,6 +690,7 @@ export function getWeeklyPatternRows(
+@@ -770,6 +829,7 @@
  // ---------------------------------------------------------------------------
  
- export interface PresetCostModelRow {
+ export interface PresetCostModelRow extends CostTokenFields {
 +  longContext?: number;
    model: string;
    provider: string;
    serviceTier: string;
-@@ -696,6 +719,7 @@ export function getPresetCostModelRows(
+@@ -777,6 +837,8 @@
+   completionTokens: number;
+   cacheReadTokens: number;
+   cacheCreationTokens: number;
++  cacheCreation5mTokens?: number;
++  cacheCreation1hTokens?: number;
+   reasoningTokens: number;
+   storedCost: number;
+   isAggregated: number;
+@@ -791,6 +853,7 @@
+   params: AnalyticsParams
+ ): PresetCostModelRow[] {
+   const db = getDbInstance();
++  const ttlSource = withCacheTtlColumns(presetUnifiedSource, params);
+   return db
+     .prepare(
+       `
+@@ -798,16 +861,19 @@
          LOWER(model) as model,
          LOWER(provider) as provider,
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
@@ -184,12 +362,35 @@ index cb654bc0f..929454086 100644
          COALESCE(SUM(tokens_input), 0) as promptTokens,
          COALESCE(SUM(tokens_output), 0) as completionTokens,
          COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
-@@ -704,7 +728,7 @@ export function getPresetCostModelRows(
+         COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
++        COALESCE(SUM(${cacheTtlTokenSql().five}), 0) as cacheCreation5mTokens,
++        COALESCE(SUM(${cacheTtlTokenSql().hour}), 0) as cacheCreation1hTokens,
+         COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
          COALESCE(SUM(stored_cost), 0.0) as storedCost,
-         MAX(is_aggregated) as isAggregated
-       FROM ${presetUnifiedSource} AS _pu
+         MAX(is_aggregated) as isAggregated,
+         ${UNIFIED_COST_TOKEN_SUMS}
+-      FROM ${presetUnifiedSource} AS _pu
 -      GROUP BY DATE(timestamp), LOWER(model), LOWER(provider), serviceTier
++      FROM ${ttlSource} AS _pu
 +      GROUP BY DATE(timestamp), LOWER(model), LOWER(provider), serviceTier, longContext
      `
      )
      .all(params) as PresetCostModelRow[];
+@@ -828,6 +894,8 @@
+   completionTokens: number;
+   cacheReadTokens: number;
+   cacheCreationTokens: number;
++  cacheCreation5mTokens?: number;
++  cacheCreation1hTokens?: number;
+   reasoningTokens: number;
+   totalTokens: number;
+   avgLatencyMs: number;
+@@ -872,6 +940,8 @@
+         COALESCE(SUM(tokens_output), 0) as completionTokens,
+         COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
+         COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
++        COALESCE(SUM(${cacheTtlTokenSql().five}), 0) as cacheCreation5mTokens,
++        COALESCE(SUM(${cacheTtlTokenSql().hour}), 0) as cacheCreation1hTokens,
+         COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
+         COALESCE(SUM(tokens_input + tokens_output), 0) as totalTokens,
+         COALESCE(AVG(latency_ms), 0) as avgLatencyMs,

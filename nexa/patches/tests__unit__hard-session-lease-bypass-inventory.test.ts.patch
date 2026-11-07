@@ -1,8 +1,8 @@
 diff --git a/tests/unit/hard-session-lease-bypass-inventory.test.ts b/tests/unit/hard-session-lease-bypass-inventory.test.ts
-index 7d21b58d1..3c3a29eca 100644
+index 29916f917b67fa8a039808712da4ac262bd9c9a7..1601f596f6bc46d79af489d5716b1c61dc12532b 100644
 --- a/tests/unit/hard-session-lease-bypass-inventory.test.ts
 +++ b/tests/unit/hard-session-lease-bypass-inventory.test.ts
-@@ -76,7 +76,7 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
+@@ -102,7 +102,7 @@
      "src/lib/search/executeWebSearch.ts": 2,
      "src/lib/skills/webFetchExecution.ts": 1,
      "src/sse/handlers/chat.ts": 2,
@@ -11,7 +11,7 @@ index 7d21b58d1..3c3a29eca 100644
      "src/sse/services/imageCredentialRetry.ts": 1,
    },
    executor: {
-@@ -236,7 +236,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
+@@ -302,7 +302,10 @@
      "src/shared/services/codexCatalogRevalidation.ts": 2,
      "src/shared/services/modelSyncScheduler.ts": 1,
      "src/sse/handlers/chatHelpers.ts": 1,

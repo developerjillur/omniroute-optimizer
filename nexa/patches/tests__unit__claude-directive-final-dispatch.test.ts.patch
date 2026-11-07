@@ -1,8 +1,8 @@
 diff --git a/tests/unit/claude-directive-final-dispatch.test.ts b/tests/unit/claude-directive-final-dispatch.test.ts
-index c1b3622c5..bf65df178 100644
+index c1b3622c50bbd036de89a63f0b45bb4e22b36a2f..bf65df178f8fc66fe116ffa266b3c3e9835af1da 100644
 --- a/tests/unit/claude-directive-final-dispatch.test.ts
 +++ b/tests/unit/claude-directive-final-dispatch.test.ts
-@@ -101,7 +101,7 @@ test("final Claude dispatch hoists a leading non-empty system message", async ()
+@@ -101,7 +101,7 @@
        {
          type: "text",
          text: "Escaped initial prompt.",

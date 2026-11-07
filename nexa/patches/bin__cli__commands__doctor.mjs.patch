@@ -1,8 +1,8 @@
 diff --git a/bin/cli/commands/doctor.mjs b/bin/cli/commands/doctor.mjs
-index 087101b..fad7552 100644
+index 5645f80bf200ca52a3a1d4a78bd6f2f5f934a864..dd4e1ea500230495ab1ebfd0ef38e1014c5fe832 100644
 --- a/bin/cli/commands/doctor.mjs
 +++ b/bin/cli/commands/doctor.mjs
-@@ -312,7 +312,19 @@ async function checkNativeBinary(rootDir) {
+@@ -326,7 +326,19 @@
      );
      const compatible = isNativeBinaryCompatible(binaryPath);
      if (!compatible) {

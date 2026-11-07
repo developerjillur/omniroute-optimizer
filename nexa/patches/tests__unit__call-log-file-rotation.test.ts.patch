@@ -1,8 +1,8 @@
 diff --git a/tests/unit/call-log-file-rotation.test.ts b/tests/unit/call-log-file-rotation.test.ts
-index 4e5cf8036..305765840 100644
+index 786f8bfcf9f1694e8aa3a96269b86c9357b8d494..f35f393620f8ae10be0e995616b9627e9af1eae1 100644
 --- a/tests/unit/call-log-file-rotation.test.ts
 +++ b/tests/unit/call-log-file-rotation.test.ts
-@@ -359,7 +359,8 @@ test("overflow cleanup removes at most 100 artifacts and continues across calls"
+@@ -582,7 +582,8 @@
  
  test("orphan cleanup scans at most 100 candidates, resumes, and protects fresh files", () => {
    assert.ok(CALL_LOGS_DIR);
@@ -12,7 +12,7 @@ index 4e5cf8036..305765840 100644
    fs.mkdirSync(dayDir, { recursive: true });
    const old = new Date(Date.now() - 10 * 60_000);
    for (let i = 0; i < 205; i++) {
-@@ -367,16 +368,25 @@ test("orphan cleanup scans at most 100 candidates, resumes, and protects fresh f
+@@ -590,16 +591,25 @@
      fs.writeFileSync(file, "{}");
      fs.utimesSync(file, old, old);
    }

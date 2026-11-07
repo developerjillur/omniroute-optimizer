@@ -1,8 +1,8 @@
 diff --git a/src/app/(dashboard)/dashboard/tools/traffic-inspector/hooks/useTrafficStream.ts b/src/app/(dashboard)/dashboard/tools/traffic-inspector/hooks/useTrafficStream.ts
-index 0226667a7..e744a1e7e 100644
+index 0226667a7c9f8e0319aa66f59234da3bb8b6d04f..e744a1e7e91978459431b74c36c6f039fcd4a811 100644
 --- a/src/app/(dashboard)/dashboard/tools/traffic-inspector/hooks/useTrafficStream.ts
 +++ b/src/app/(dashboard)/dashboard/tools/traffic-inspector/hooks/useTrafficStream.ts
-@@ -5,7 +5,7 @@ import type { InterceptedRequest, ListFilters, WsEvent } from "@/mitm/inspector/
+@@ -5,7 +5,7 @@
  import { matchesTrafficFilter } from "@/lib/inspector/matchesTrafficFilter";
  import type { FiltersState } from "./useTrafficFilters";
  
@@ -11,7 +11,7 @@ index 0226667a7..e744a1e7e 100644
  const INITIAL_BACKOFF_MS = 500;
  const MAX_BACKOFF_MS = 30_000;
  const BACKOFF_MULTIPLIER = 2;
-@@ -32,7 +32,7 @@ export function useTrafficStream(
+@@ -32,7 +32,7 @@
    const [paused, setPaused] = useState(false);
    const [pendingCount, setPendingCount] = useState(0);
  
@@ -20,7 +20,7 @@ index 0226667a7..e744a1e7e 100644
    const backoffRef = useRef(INITIAL_BACKOFF_MS);
    const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
    const mountedRef = useRef(true);
-@@ -56,13 +56,11 @@ export function useTrafficStream(
+@@ -56,13 +56,11 @@
  
      const connect = () => {
        if (!mountedRef.current) return;
@@ -36,7 +36,7 @@ index 0226667a7..e744a1e7e 100644
        wsRef.current = ws;
  
        ws.onopen = () => {
-@@ -99,31 +97,23 @@ export function useTrafficStream(
+@@ -99,30 +97,22 @@
              setRequests((prev) => [event.data, ...prev].slice(0, 1000));
            }
          } else if (event.type === "update") {
@@ -64,11 +64,10 @@ index 0226667a7..e744a1e7e 100644
            // Use ref so we always call the current connect version
            connectRef.current();
          }, delay);
-       };
+-      };
 -
 -      ws.onerror = () => {
 -        ws.close();
--      };
+       };
      };
  
-     // Store in ref for reconnect callback

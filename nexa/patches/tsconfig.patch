@@ -1,5 +1,5 @@
 diff --git a/tsconfig.json b/tsconfig.json
-index 58a407464..1a5ba1c37 100644
+index 58a407464fab72c5b58216433786c5fed812b842..1a5ba1c376f3871ae8f7a0355b1bad669f5f26a6 100644
 --- a/tsconfig.json
 +++ b/tsconfig.json
 @@ -44,6 +44,7 @@

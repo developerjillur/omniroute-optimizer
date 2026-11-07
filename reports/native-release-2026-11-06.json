@@ -1,0 +1,122 @@
+{
+  "asOfUtc": "2026-11-06T01:43:09.114089+00:00",
+  "canonicalRepository": "https://github.com/developerjillur/omniroute-optimizer",
+  "releaseVersion": "3.8.52",
+  "runtimeSourceCommit": "9f3317269994273d95cab3efea4bda5bac6a86e3",
+  "packagedNexaTree": "3f5f9a924116ec7059212cd4a02672926ffa2f97",
+  "upstreamCommit": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
+  "applicationIntegrationCommit": "d6d071ef0b79ff00fba6c0ca7f7a54ce948bf0bc",
+  "liveBuildSHA": "d6d071ef0",
+  "archive": {
+    "file": "omniroute-3.8.52.tgz",
+    "bytes": 70946019,
+    "sha256": "d194caaab47ac86301c04742895c35b88c23215b326483ac6a6f7fae0f793a22",
+    "published": false
+  },
+  "newPackageBuildComplete": true,
+  "isolatedPackageAcceptance": "PASS",
+  "livePromotion": "PASS",
+  "livePromotionCompletedAtUtc": "2026-11-06T01:33:11.882085+00:00",
+  "liveAcceptanceCompletedAtUtc": "2026-11-06T01:36:57.821Z",
+  "runtimeCi": {
+    "commit": "9f3317269994273d95cab3efea4bda5bac6a86e3",
+    "url": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/41966643610",
+    "conclusion": "success"
+  },
+  "localValidation": {
+    "focusedMac": 31,
+    "routing": 63,
+    "deployHelpers": 76,
+    "bridge": 678,
+    "nativeRequests": 79,
+    "securityDiagnostics": 34,
+    "countsMayOverlap": true,
+    "compilerDiagnostics": 6510,
+    "approvedCompilerCeiling": 6529,
+    "pristineCompilerDiagnostics": 6572,
+    "newDiagnosticIdentities": 0,
+    "staticPages": 639
+  },
+  "resource": {
+    "buildCapMiB": 8192,
+    "buildHeapMiB": 5120,
+    "buildPeakMiB": 7160.83,
+    "buildMinimumHeadGiB": 15.106674194335938,
+    "isolatedInstallPeakMiB": 2909.91,
+    "liveInstallCapMiB": 6144,
+    "liveInstallPeakMiB": 3144.265625,
+    "liveInstallMinimumHeadGiB": 15.125518798828125,
+    "earlierBuildStoppedAtMiB": 8223,
+    "earlierFailureRetained": true,
+    "watchdogBypassed": false
+  },
+  "acceptance": {
+    "certificateVerifiedHttpsIPv4IPv6": 200,
+    "coreHealth": 200,
+    "nativeBackendAndIngressTls": "PASS",
+    "dashboardRoutesAndAssets": "PASS",
+    "originalApiKeyAuthWithoutCliToken": "PASS",
+    "nativeClaudeSse": "PASS",
+    "gptBufferedToolOnlyMessages": "PASS",
+    "inferenceRequests": 2,
+    "clientRetries": 0,
+    "toolExecuted": false,
+    "claudeToGptRemapAcceptanceClaimed": false
+  },
+  "preservation": {
+    "runtimeAndDataPaths": true,
+    "launchJobDefinitions": true,
+    "hostsBinderAndCA": true,
+    "existingApiKeySecretsAndPermissions": true,
+    "accountsAndMappings": true,
+    "historyCounts": true,
+    "oldRuntimeAndFinalStoppedDatabaseRetained": true,
+    "sourceCheckoutPristine": true,
+    "privateDataPublished": false,
+    "normalHooksRequired": true
+  },
+  "localEvidenceSha256": {
+    "full-candidate-v2.json": "0db97ca70612fefbfc4ec3a6d7e2022e7e4edfd373a187cbaed2fe70fc014cc8",
+    "artifact-verified-v2.json": "698c1a40abb00d6a1a2f17c754a3cff2938cf479761072f0250b528ec5ec8f65",
+    "isolated-package-smoke-v1.json": "f709c5d72b1eed99d9f7f78ff68ae9be1d466d1cd4b4f967f2ab3797ea007dad",
+    "isolated-config-preservation-v2.json": "af996700803f95830b2da6686ee8b632a531a904f919db1d3fa0a09cc1ad07b0",
+    "runtime-backup-verified-v1.json": "010e70555b4a275844423f88fccbe66a9b06772c73dd79df3a8900a0a0c7e250",
+    "root-ingress-installed-v1.json": "a3e3666a53cd25e077fa3c0257a346fb7316f3d172c057e0ce6c32552422cad2",
+    "live-promotion-v1.json": "6b6779407166dc6b4b84c4fe73e9b249748909d677586e3fc915740c8c0580ff",
+    "live-acceptance-v2.json": "e27f78937d7922b68e94a9d69c508f5e686072fe89e9844d245d63b68956bda6",
+    "application-restored-pristine-v1.json": "e777fe5160e5e7dbd65845aa50f3854432b203747754e7e58a80ef28067283b2"
+  },
+  "limits": [
+    "No additional macOS reboot with this package was performed.",
+    "Native Claude streaming and GPT Messages translation were exercised on separate unchanged routes.",
+    "The complete ten-day metadata deduplication and application-log classification remain incomplete.",
+    "The compiler has accepted pre-existing diagnostics; this is not a zero-error or full native-feature parity claim.",
+    "Optional nested fsevents installation reported a missing binding.gyp in both prefixes; normal npm installs exited zero and production acceptance passed. The optional development watcher was not separately certified."
+  ],
+  "standaloneBridgeCorrection": {
+    "record": "native-bridge-retry-2026-11-06.json",
+    "status": "LIVE_CORRECTION_VERIFIED",
+    "sourceAndDistServerSHA256": "598ce01b7e43f92189bbf17c2361597ea527b00d7b26cb6f7234be4cc1b6e9d2",
+    "additionalRegressionsPassed": 46,
+    "baseArchiveDoesNotContainLaterCorrection": true,
+    "verifiedArchiveSHA256": "f664648322d7b940d9516a963e21bb1d3edb21efdd66a68f536a6b1e6396d10c",
+    "verifiedArchiveBytes": 70896044,
+    "completeCorrectedArchiveRetained": true
+  },
+  "sourceValidationAfterBridgeCorrection": {
+    "sourceCommit": "68dba2d734d169b57631464aa360a99c78a8cddb",
+    "runId": 42149613611,
+    "url": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/42149613611",
+    "conclusion": "success",
+    "artifactSha256": "a6bdf3a202e7110f876ee9ef694a7909d6744dfce0f32dad4faaf0456f6c87b4",
+    "fullTypecheck": {
+      "completed": true,
+      "diagnostics": 6510,
+      "baseline": 6529
+    },
+    "fullLint": true,
+    "docsAll": true,
+    "productionNodeValidation": true,
+    "coversLaterQualityUsageChanges": false
+  }
+}

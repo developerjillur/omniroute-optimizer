@@ -1,8 +1,8 @@
 diff --git a/.npmrc b/.npmrc
-index 4e3c82f07..336992e8f 100644
+index 4e3c82f071f3348bd7b3bb86c621cdbd35b2ebbf..336992e8fbf6e90c1419aa907d35bbc54a3b3da8 100644
 --- a/.npmrc
 +++ b/.npmrc
-@@ -21,3 +21,19 @@ fetch-retry-maxtimeout=120000
+@@ -21,3 +21,19 @@
  # which previously left `@huggingface/transformers` missing after `npm install`
  # and broke startup with a crash in the transformers loader.
  onnxruntime-node-install=skip

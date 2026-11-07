@@ -2,7 +2,33 @@
 
 Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। OmniRoute-এর pristine upstream source অপরিবর্তিত রেখে custom পরিবর্তনগুলো `nexa/` folder-এ রাখা হয়েছে।
 
-## Handoff ও বর্তমান অবস্থা — ২০২৬-১০-১৭
+## চলমান release — ২০২৬-১১-০৬
+
+Local gateway এখন **v3.8.52 / `d6d071ef0`**। Full production build, isolated installed-package smoke ও ব্যবহারকারীর অনুমোদিত live promotion পাস। Certificate-verified IPv4/IPv6 HTTPS, quota/Agent Bridge dashboard assets, native TLS stream ও GPT buffered tool-only Messages response যাচাই হয়েছে। এরপর বাস্তব native request-এ পাওয়া readiness/parser mismatch ও advisor tool-model prefix leak scoped Bridge update দিয়ে সংশোধিত; ৪৬/৪৬ regression এবং দীর্ঘ request-সহ live recovery যাচাই হয়েছে। Existing runtime/data path, startup definitions, account/key permissions ও model mappings সংরক্ষিত।
+
+Runtime source `9f3317269994273d95cab3efea4bda5bac6a86e3`; application integration `d6d071ef0b79ff00fba6c0ca7f7a54ce948bf0bc`। পরের documentation commit packaged runtime identity বদলায় না। [Release note](nexa/docs/RELEASE-3.8.52-2026-11-06.md) ও [public release receipt](reports/native-release-2026-11-06.json)-এ exact artifact, validation, preservation ও limits আছে। নতুন package দিয়ে macOS reboot এবং পূর্ণ দশ দিনের audit এখনও অসম্পূর্ণ; native hosted-feature parity দাবি করা হচ্ছে না।
+
+## Routed quality ও usage — ২০২৬-১১-০৬
+
+Self-service ও self-tracked provider total-এ inclusive cache/reasoning দ্বিতীয়বার যোগ হওয়ার সংশোধন এবং Responses request-এ সরবরাহ করা assistant phase সংরক্ষণের পরিবর্তন Nexa overlay-এ আছে। [Source note](nexa/docs/ROUTED-QUALITY-USAGE-2026-11-06.md) ও [validation contract](reports/routed-quality-usage-2026-11-06.json)-এ synthetic RED/green, transcript/tool fidelity এবং সীমা দেওয়া আছে। Model output quality, subscription allowance এবং gateway token display পৃথকভাবে যাচাই করতে হবে; এই source change নতুন live deployment বা Claude–GPT parity-এর দাবি নয়। ব্যক্তিগত session/log data এখানে প্রকাশিত হয় না।
+
+Bridge recovery source `68dba2d734d169b57631464aa360a99c78a8cddb`-এর [পূর্ণ source CI](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42149613611) পাস করেছে; full TypeScript ratchet `6510 ≤ 6529`, lint, docs ও দুই Node runtime-এর gate-সহ। পরবর্তী quality/usage source-এর জন্য তার নিজস্ব commit-specific checks প্রয়োজন।
+
+## Canonical management — ২০২৬-১০-২৮
+
+OmniRoute-এর Nexa fixes, regression tests, validation ও release evidence এখন এই repository থেকে পরিচালিত হবে। `nexa/`-ই custom source; pristine application base আলাদা isolated fixture-এ apply করে পরীক্ষা করা হয়। Live database, credentials, request bodies ও ব্যক্তিগত কথোপকথন এই repository-তে রাখা হয় না।
+
+বর্তমান কাজ `nexalance` reference `72230a52a` থেকে আগের validated overlay updates এনেছে এবং native refusal/summary, Thread error classification ও bounded upstream DNS recovery সংশোধন করেছে। [বর্তমান audit receipt](reports/native-reliability-2026-10-28.json)-এ data coverage, যাচাই ও বাকি gates আলাদা আছে। [Native reliability CI](.github/workflows/native-reliability.yml) pinned application source ও synthetic fixtures ব্যবহার করে; ব্যক্তিগত runtime data প্রয়োজন হয় না। Accepted v3.8.51 source validation-এ Node 26-এর 712টি regression, production Node 24-এর 157টি native regression, core typecheck, full lint ও docs-all PASS; full TypeScript ratchet `5803 ≤ 5830`। বর্তমান source SHA-এর definitive ফল [PR #1-এর checks](https://github.com/developerjillur/omniroute-optimizer/pull/1) ও commit-specific CI receipt-এ আছে। ওই audit snapshot-এর পরে ২০২৬-১১-০৬-এর full build ও live promotion সম্পন্ন হয়েছে; বর্তমান ফল উপরের release record-এ আছে।
+
+সব commit স্বাভাবিক Git hooks এবং Jillur Rahman-এর author/committer identity-তে হবে। `--no-verify` ব্যবহার করা হবে না। কোনো upstream repository-তে এই workflow push বা PR করে না।
+
+## v3.8.52 source alignment — ২০২৬-১০-২৮
+
+Stable upstream `ad6f33f66bda34eba98645d3bfdabbde294bc843`-এ source pin করা হয়েছে। [Port record](reports/v3.8.52-port.json)-এ আগের patch paths এবং নতুন helper owners আছে। ছয়টি historical patch মুছে ফেলা হয়নি; exact base/blob/patch hash মেলা সাপেক্ষে retired registry সেগুলো বাদ দেয়। Custom SQL `197/198`-এর path রেখে namespaced ledger identity ব্যবহার করা হয়েছে, যাতে upstream-এর একই numbered migration-ও প্রয়োগ হতে পারে।
+
+এই version-এর source acceptance-এর জন্য exact commit-এর সব mandatory CI gate ও `native-validation.json` receipt প্রয়োজন। আগের 3.8.51 CI ফল নতুন version-এর acceptance নয়। [Upgrade note](nexa/docs/UPGRADE-3.8.52-2026-10-28.md)-এ native terminals, settings contract, migration ও compiler budget-এর নিয়ম এবং সীমা আছে। Source port-এর পরের full build, package installation ও live migration-এর যাচাইকৃত ফল ২০২৬-১১-০৬ release record-এ আছে।
+
+## Historical handoff — ২০২৬-১০-১৭
 
 সব handoff, setup guide, investigation, QA ও restore note [সম্পূর্ণ handoff index](docs/handoffs/README.md)-এ আছে। ৫১টি historical document-এর public copy, current handoff, migration verification এবং content-hash manifest এক জায়গায় পাওয়া যায়।
 
@@ -12,19 +38,19 @@ Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। Om
 
 Historical documents-এর পুরোনো status-এর পরে পাওয়া ফল current handoff-এ দেওয়া আছে। Private identifiers/references সরানো হয়েছে; T7-এর originals, raw evidence ও rollback files এই publication পরিবর্তন করে না।
 
-## সংরক্ষিত source
+## বর্তমান source ও inventory
 
-| বিষয়                    | মান                                        |
-| ----------------------- | ------------------------------------------ |
-| Source repository       | `developerjillur/OmniRoute`                |
-| Source branch           | `nexalance`                                |
-| Source commit           | `2b4158371223293db12d3a6de00a9b22d44600fb` |
-| Upstream version        | `3.8.51`                                   |
-| Pristine upstream base  | `c1e30b7676975feb298b49eff6ff58923c04b89e` |
-| `nexa/` tree SHA        | `1bacd361751ca84dae89fbea0324fd8198f052b5` |
-| Versioned overlay files | 342                                        |
+| বিষয়                             | মান                                        |
+| -------------------------------- | ------------------------------------------ |
+| Canonical repository             | `developerjillur/omniroute-optimizer`      |
+| Reference application repository | `developerjillur/OmniRoute`                |
+| Reference overlay branch         | `nexalance`                                |
+| Reference overlay commit         | `72230a52a548b9fdc8dda0495c893f5193e5d64d` |
+| Pristine upstream base           | `ad6f33f66bda34eba98645d3bfdabbde294bc843` |
+| Upstream version                 | `3.8.52`                                   |
+| Managed overlay files            | 464                                        |
 
-`nexa/`-এর সব 342টি file মূল source commit-এর সঙ্গে byte-for-byte মিলে। প্রতিটি file-এর path, size, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এর 266টি entry-তে 166টি patch, 95টি নতুন file এবং 5টি tooling entry আছে; অন্যান্য tracked file-এ deployment scripts, tests ও documentation রয়েছে।
+বর্তমান `nexa/`-তে reference overlay-এর সঙ্গে নতুন reliability fixes আছে; তাই সব file reference commit-এর হুবহু copy—এমন দাবি করা হচ্ছে না। প্রতিটি managed file-এর byte count, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এ 347টি entry: 206টি active patch, 135টি নতুন application/test file ও 6টি tooling entry। ৬টি retired patch মূল path-এ সংরক্ষিত। অতিরিক্ত deployment, overlay tests ও documentation-ও inventory-তে রয়েছে।
 
 ## কী রয়েছে
 
@@ -35,8 +61,9 @@ Historical documents-এর পুরোনো status-এর পরে পাও
 - Google connection routing ও verification-state handling, native Agent Bridge TLS/DNS/lifecycle, CLI ও packaging-এর fixes।
 - Bounded build, isolated package smoke, database snapshot, deployment ও rollback scripts।
 - পূর্বের QA evidence, source validation notes এবং overlay পরিচালনার documentation।
+- [Dependency security preparation](nexa/docs/DEPENDENCY-SECURITY-2026-11-06.md): pinned application-এর framework security corrections-এর জন্য পৃথক lock/audit evidence; source candidate প্রস্তুতি live update বা build নয়।
 
-## সর্বশেষ release — ২০২৬-১০-১৪
+## Historical deployed release — ২০২৬-১০-১৪
 
 Source ও deployed runtime `2b4158371`। Native Artifact reconnect/creation, streaming progress, bounded timeout/Thread recovery, GPT-6.1 Sol pricing এবং native usage/transport accounting-এর fixes এই snapshot-এ রয়েছে।
 
@@ -105,3 +132,5 @@ Application-এ পরিবর্তন শুধু overlay apply-এর স�
 এখানে tracked `nexa/` source এবং reviewed public handoff/report copies আছে। Live database, API keys, OAuth credentials, secret environment, certificate private keys, runtime prefixes, build archives এবং local task caches অন্তর্ভুক্ত নেই। Account state ও production settings source snapshot থেকে পুনরুদ্ধার করা যাবে না।
 
 OmniRoute-derived code-এর মূল MIT license [LICENSE](LICENSE)-এ অক্ষত রাখা হয়েছে; বিস্তারিত [NOTICE.md](NOTICE.md)-এ।
+
+Claude Code model ID ও settings preview-এর নতুন সংশোধন [model-ID record](nexa/docs/CLAUDE-CODE-MODEL-IDS-2026-11-08.md)-এ আছে। এই পরিবর্তন আগের compiled package-এ নেই; নতুন source CI, build ও live acceptance প্রয়োজন।

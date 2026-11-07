@@ -1,8 +1,8 @@
 diff --git a/src/app/(dashboard)/dashboard/tools/agent-bridge/components/SetupWizard.tsx b/src/app/(dashboard)/dashboard/tools/agent-bridge/components/SetupWizard.tsx
-index 61882824d..d2cb4dcce 100644
+index 61882824d8663af32e9293381735b29cddc76c25..d2cb4dccef52d02df2a319cfc44b857b643508c7 100644
 --- a/src/app/(dashboard)/dashboard/tools/agent-bridge/components/SetupWizard.tsx
 +++ b/src/app/(dashboard)/dashboard/tools/agent-bridge/components/SetupWizard.tsx
-@@ -81,7 +81,7 @@ export function SetupWizard({
+@@ -81,7 +81,7 @@
    }, [step, target.id]);
  
    // Fix #8656 Issue A: Use server-level cert trust as fallback

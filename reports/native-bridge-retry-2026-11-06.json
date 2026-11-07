@@ -1,0 +1,87 @@
+{
+  "asOfUtc": "2026-11-06T02:16:11.861128+00:00",
+  "status": "LIVE_CORRECTION_VERIFIED",
+  "baseVersion": "3.8.52",
+  "baseBuildSHA": "d6d071ef0",
+  "correctedSourceAndDistServerSHA256": "598ce01b7e43f92189bbf17c2361597ea527b00d7b26cb6f7234be4cc1b6e9d2",
+  "toolModelHelperSHA256": "912e4c52d523d3a8b153e855a20f99bd87069a29585f14db3a485f0387132d46",
+  "fullFrontendRebuiltAgain": false,
+  "defects": [
+    {
+      "id": "readiness-output-contract",
+      "rootCause": "A parenthetical phrase inserted between the port and arrow prevented the parent from recognizing a bound worker; the parent terminated the healthy child after ten seconds.",
+      "baselineAssertionFailures": 4,
+      "candidateCasesPassed": 4
+    },
+    {
+      "id": "advisor-tool-model-prefix",
+      "rootCause": "A local cc/claude-* tool model could reach the provider wire. Normalize only local Claude namespaces on the mapped native forward boundary.",
+      "baselineAssertionFailures": 6,
+      "candidateCasesPassed": 14
+    }
+  ],
+  "focusedNativeRegressions": {
+    "tests": 46,
+    "pass": 46,
+    "fail": 0,
+    "skipped": 0,
+    "networkCalls": 0
+  },
+  "live": {
+    "appliedAtUtc": "2026-11-06T02:12:11.889331+00:00",
+    "sameWorkerSecondsObserved": 60.97,
+    "prefixedAdvisorNativeRequest": 200,
+    "expectedTextAndMessageStop": true,
+    "clientRetries": 0,
+    "coreRestarted": false,
+    "nativeAppSessionsStopped": false,
+    "configMappingsAndSignaturesChanged": false,
+    "subsequentRequestMetadata": {
+      "firstUtc": "2026-11-06T02:12:53.176Z",
+      "lastUtc": "2026-11-06T02:15:58.056Z",
+      "requests": 14,
+      "success200": 14,
+      "non200": 0,
+      "longestMs": 43099,
+      "oneReleaseProbeIncluded": true
+    }
+  },
+  "localEvidenceSha256": {
+    "bridge-production-readiness-red-v1.json": "6e6e1bccef0b69598d69babf15ed99217c87a330947160af983fbbec499309da",
+    "native-tool-model-red-green-v2.json": "72ca93b1e57a6da45449d449444ecf4458b3e0def4a43090f4ee432f78d4ca1f",
+    "bridge-retry-hotfix-regressions-stage-v1.json": "6ce32fae4074eefa6f23ea4a7deb9a0d289663cdd9e537f0a73d5dfb994226eb",
+    "bridge-retry-hotfix-installed-v1.json": "678b59398e4e11e25ab19841932e246a10884898a5acc8e09667c2cfd3e2bd0f",
+    "live-native-advisor-acceptance-v1.json": "52624794cd2a33bf67a6cd61155794a55f50d4b1bb4bbd13a346de3902f9576d",
+    "post-hotfix-user-request-metadata-v1.json": "f3cffd760e50a4da716101c9e634bc4a689d77c9d9dda8d91ceffa5358f23e2b"
+  },
+  "limits": [
+    "These local corrections postdate the original full-build source CI; the new source CI is separate.",
+    "No additional operating-system restart or blanket native feature parity is claimed.",
+    "A failed native turn requires a new user request to resume; historical transcripts were not edited."
+  ],
+  "correctedCompleteArchive": {
+    "sha256": "f664648322d7b940d9516a963e21bb1d3edb21efdd66a68f536a6b1e6396d10c",
+    "bytes": 70896044,
+    "baseFullBuildRetained": true,
+    "standaloneCorrectionMembers": 5,
+    "packageContractPassed": true,
+    "installedFilesMatch": true,
+    "isolatedReinstallRepeated": false
+  },
+  "sourceValidationAfterBridgeCorrection": {
+    "sourceCommit": "68dba2d734d169b57631464aa360a99c78a8cddb",
+    "runId": 42149613611,
+    "url": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/42149613611",
+    "conclusion": "success",
+    "artifactSha256": "a6bdf3a202e7110f876ee9ef694a7909d6744dfce0f32dad4faaf0456f6c87b4",
+    "fullTypecheck": {
+      "completed": true,
+      "diagnostics": 6510,
+      "baseline": 6529
+    },
+    "fullLint": true,
+    "docsAll": true,
+    "productionNodeValidation": true,
+    "coversLaterQualityUsageChanges": false
+  }
+}

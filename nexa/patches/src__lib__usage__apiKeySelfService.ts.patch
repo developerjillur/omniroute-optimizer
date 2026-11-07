@@ -1,0 +1,14 @@
+diff --git a/src/lib/usage/apiKeySelfService.ts b/src/lib/usage/apiKeySelfService.ts
+--- a/src/lib/usage/apiKeySelfService.ts
++++ b/src/lib/usage/apiKeySelfService.ts
+@@ -172,8 +172,8 @@
+     cacheReadTokens,
+     cacheCreationTokens,
+     reasoningTokens,
+-    totalTokens:
+-      inputTokens + outputTokens + cacheReadTokens + cacheCreationTokens + reasoningTokens,
++    // Stored input/output already include cache and reasoning subcategories.
++    totalTokens: inputTokens + outputTokens,
+   };
+ }
+ 

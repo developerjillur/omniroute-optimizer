@@ -94,6 +94,7 @@ test("restart preserves model-specific quota without parking other Claude models
 
 test("known global walls retain the latest reset with bounded slow polling", () => {
   const now = Date.now();
+  mock.method(Date, "now", () => now);
   const sessionReset = now + 600000;
   const weeklyReset = now + 86400000;
   quota.setQuotaCache("schedule", "claude", {
@@ -108,6 +109,21 @@ test("known global walls retain the latest reset with bounded slow polling", () 
   assert.equal(schedule.shouldRefreshQuotaEntry(entry, now + 31 * 60000, now + 30 * 60000), false);
   assert.equal(schedule.shouldRefreshQuotaEntry(entry, now + 60 * 60000, now + 30 * 60000), true);
   assert.equal(schedule.shouldRefreshQuotaEntry(entry, weeklyReset), true);
+});
+
+test("parked quota polling starts from the actual observation time", () => {
+  const requestStartedAt = Date.UTC(2026, 10, 6);
+  const observedAt = requestStartedAt + 7;
+  mock.method(Date, "now", () => observedAt);
+  const reset = new Date(observedAt + 86400000).toISOString();
+  quota.setQuotaCache("observation-time", "claude", {
+    "weekly (7d)": window("weekly_all", reset),
+  });
+  const entry = quota.getQuotaCache("observation-time")!;
+  assert.equal(entry.fetchedAt, observedAt);
+  assert.equal(schedule.shouldRefreshQuotaEntry(entry, requestStartedAt + 30 * 60000), false);
+  assert.equal(schedule.shouldRefreshQuotaEntry(entry, observedAt + 30 * 60000 - 1), false);
+  assert.equal(schedule.shouldRefreshQuotaEntry(entry, observedAt + 30 * 60000), true);
 });
 
 test("a failed reset refresh is rescheduled, not repeated on every background tick", () => {

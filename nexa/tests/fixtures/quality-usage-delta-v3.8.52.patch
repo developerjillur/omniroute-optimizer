@@ -1,0 +1,116 @@
+diff --git a/src/lib/usage/apiKeySelfService.ts b/src/lib/usage/apiKeySelfService.ts
+--- a/src/lib/usage/apiKeySelfService.ts
++++ b/src/lib/usage/apiKeySelfService.ts
+@@ -172,8 +172,8 @@
+     cacheReadTokens,
+     cacheCreationTokens,
+     reasoningTokens,
+-    totalTokens:
+-      inputTokens + outputTokens + cacheReadTokens + cacheCreationTokens + reasoningTokens,
++    // Stored input/output already include cache and reasoning subcategories.
++    totalTokens: inputTokens + outputTokens,
+   };
+ }
+ 
+diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
+--- a/src/lib/usage/usageStats.ts
++++ b/src/lib/usage/usageStats.ts
+@@ -246,10 +246,11 @@
+ }
+ 
+ /**
+- * Sum of all token columns recorded for one provider connection in the current
++ * Inclusive input plus output recorded for one provider connection in the current
+  * UTC calendar month. Powers SELF-TRACKED provider quotas (e.g. Xiaomi MiMo
+  * Token Plan), where the upstream exposes no API-key usage endpoint — OmniRoute
+  * counts the tokens it routed and compares against the known monthly limit.
++ * Cache and reasoning columns are breakdowns, already included in input/output.
+  * Only reflects traffic that went THROUGH OmniRoute (not the provider's panel).
+  */
+ export function getMonthlyProviderTokensForConnection(
+@@ -265,10 +266,7 @@
+   const row = db
+     .prepare(
+       `SELECT COALESCE(SUM(tokens_input), 0)
+-            + COALESCE(SUM(tokens_output), 0)
+-            + COALESCE(SUM(tokens_cache_read), 0)
+-            + COALESCE(SUM(tokens_cache_creation), 0)
+-            + COALESCE(SUM(tokens_reasoning), 0) AS total
++            + COALESCE(SUM(tokens_output), 0) AS total
+        FROM usage_history
+        WHERE provider = ? AND connection_id = ? AND timestamp >= ?`
+     )
+diff --git a/open-sse/translator/request/openai-responses/toResponses.ts b/open-sse/translator/request/openai-responses/toResponses.ts
+--- a/open-sse/translator/request/openai-responses/toResponses.ts
++++ b/open-sse/translator/request/openai-responses/toResponses.ts
+@@ -313,6 +313,10 @@
+         input.push({
+           type: "message",
+           role: "assistant",
++          // A replayed progress update must not become a completed final answer.
++          ...(msg.phase === "commentary" || msg.phase === "final_answer" || msg.phase === null
++            ? { phase: msg.phase }
++            : {}),
+           content: outputContent,
+           status: "completed",
+         });
+
+diff --git a/open-sse/services/usage/antigravity.ts b/open-sse/services/usage/antigravity.ts
+--- a/open-sse/services/usage/antigravity.ts
++++ b/open-sse/services/usage/antigravity.ts
+@@ -49,6 +49,7 @@
+   type AntigravityQuotaGroup,
+ } from "./antigravityWeeklyQuota.ts";
+ import { getAntigravityQuotaFamily } from "../antigravityQuotaFamily.ts";
++import { getAntigravityCacheIdentity } from "./antigravityCacheIdentity.ts";
+ 
+ type JsonRecord = Record<string, unknown>;
+ type SubscriptionCacheEntry = {
+@@ -138,7 +139,7 @@
+     const row = db
+       .prepare(
+         `SELECT COALESCE(SUM(
+-           COALESCE(tokens_input, 0) + COALESCE(tokens_output, 0) + COALESCE(tokens_reasoning, 0)
++           COALESCE(tokens_input, 0) + COALESCE(tokens_output, 0)
+          ), 0) AS tokens
+          FROM usage_history
+          WHERE provider = ?
+@@ -186,7 +187,7 @@
+   projectId: string | null | undefined,
+   clientProfile: AntigravityClientProfile
+ ): string {
+-  return `${accessToken.substring(0, 16)}:${projectId || "default"}:${clientProfile}`;
++  return getAntigravityCacheIdentity(accessToken, projectId, clientProfile);
+ }
+ 
+ async function fetchAntigravityAvailableModelsCached(
+@@ -793,7 +794,7 @@
+   options: AntigravityUsageOptions = {}
+ ): Promise<unknown> {
+   const profile = getAntigravityClientProfile({ providerSpecificData });
+-  const cacheKey = `${accessToken.substring(0, 16)}:${profile}`;
++  const cacheKey = getAntigravityCacheIdentity(accessToken, null, profile);
+ 
+   if (options.forceRefresh) {
+     _antigravitySubCache.delete(cacheKey);
+
+diff --git a/open-sse/services/usage/antigravityWeeklyQuota.ts b/open-sse/services/usage/antigravityWeeklyQuota.ts
+--- a/open-sse/services/usage/antigravityWeeklyQuota.ts
++++ b/open-sse/services/usage/antigravityWeeklyQuota.ts
+@@ -10,6 +10,7 @@
+ import { toRecord, toNumber } from "./scalars.ts";
+ import { type UsageQuota, parseResetTime } from "./quota.ts";
+ import { getAntigravityContentHeaders } from "../antigravityHeaders.ts";
++import { getAntigravityCacheIdentity } from "./antigravityCacheIdentity.ts";
+ import type { AntigravityClientProfile } from "../antigravityClientProfile.ts";
+ 
+ type JsonRecord = Record<string, unknown>;
+@@ -57,7 +58,7 @@
+   projectId: string | null | undefined,
+   clientProfile: AntigravityClientProfile
+ ): string {
+-  return `${accessToken.substring(0, 16)}:${projectId || "default"}:${clientProfile}`;
++  return getAntigravityCacheIdentity(accessToken, projectId, clientProfile);
+ }
+ 
+ export async function fetchAntigravityUserQuotaSummaryCached(

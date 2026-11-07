@@ -1,5 +1,5 @@
 diff --git a/open-sse/services/sessionManager.ts b/open-sse/services/sessionManager.ts
-index 28612f6c5..7c42645f4 100644
+index a8c385caaece25cc690ede68d6b7781b406773ff..ed2548e360a2e9056ad7faf885d1fed865b5f9c0 100644
 --- a/open-sse/services/sessionManager.ts
 +++ b/open-sse/services/sessionManager.ts
 @@ -6,6 +6,7 @@
@@ -10,7 +10,7 @@ index 28612f6c5..7c42645f4 100644
  
  interface SessionEntry {
    createdAt: number;
-@@ -105,6 +106,8 @@ export function generateSessionId(
+@@ -105,6 +106,8 @@
    options: SessionFingerprintOptions = {}
  ): string | null {
    if (!body || typeof body !== "object") return null;
@@ -19,7 +19,7 @@ index 28612f6c5..7c42645f4 100644
    const parts: string[] = [];
  
    // Model contributes to fingerprint
-@@ -340,7 +343,10 @@ export function extractExternalSessionId(
+@@ -340,7 +343,10 @@
      h.get("x-omniroute-session") ?? // OmniRoute-specific form
      h.get("session-id") ?? // Bare session-id
      null;

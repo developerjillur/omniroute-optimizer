@@ -1,50 +1,104 @@
 diff --git a/open-sse/utils/streamHandler.ts b/open-sse/utils/streamHandler.ts
-index cef58650b..c77c24619 100644
+index ef6323f30f21d5e4ca599847cfd6990367e35c4f..74fb132a06d0469085e543aa7f593c898d827dad 100644
 --- a/open-sse/utils/streamHandler.ts
 +++ b/open-sse/utils/streamHandler.ts
-@@ -6,6 +6,7 @@ import { PENDING_REQUEST_CLEARED_MARKER } from "./stream.ts";
- import { createCompletedResponsesToolHandoffWatcher } from "./responsesToolHandoff.ts";
- import { createStreamContentWatcher, type StreamContentWatcher } from "./streamReadiness.ts";
- import { hasOpenReasoning } from "./emptyTurnRetry.ts";
+@@ -14,6 +14,7 @@
+   buildSyntheticResponsesFailureId,
+   SYNTHETIC_RESPONSES_SEQUENCE_NUMBER,
+ } from "./responsesSequence.ts";
 +import { createAnthropicThinkingProgressWatcher } from "./anthropicStreamProgress.ts";
  
  // Stream handler with disconnect detection - shared for all providers
  
-@@ -601,6 +602,7 @@ function resolveSilentCloseOutcome(input: {
-   clientTerminalSeen: boolean;
+@@ -608,10 +609,29 @@
    clientResponseFormat?: string | null;
    contentWatcher: StreamContentWatcher;
+   permitsEmptyTurn?: () => boolean;
 +  allowEmptyCompletion?: boolean;
  }): SilentCloseOutcome | null {
    if (!input.bytesWereForwarded) return null;
  
-@@ -638,6 +640,8 @@ function resolveSilentCloseOutcome(input: {
- 
-   const watcher = input.contentWatcher;
-   if (watcher.sawError()) return null;
-+  // Only a verified optional suggestion completion may close without model text.
-+  if (input.clientTerminalSeen && input.allowEmptyCompletion === true) return null;
-   if (watcher.sawSseFrame() && !watcher.sawContent() && !watcher.sawLegitEmptyTerminal()) {
-     return { kind: "error", reason: "Provider returned empty content" };
+-  if (!input.clientTerminalSeen) {
++  const watcher = input.contentWatcher;
++  const nativeClaude = input.clientResponseFormat === FORMATS.CLAUDE;
++  const terminalSeen = nativeClaude ? watcher.sawClaudeMessageStop?.() === true : input.clientTerminalSeen;
++  const legitimateEmpty = nativeClaude
++    ? terminalSeen && ["length", "tool_calls", "content_filter", "max_tokens", "tool_use"].includes(watcher.getClaudeStopReason() || "")
++    : watcher.sawLegitEmptyTerminal();
++  if (watcher.sawError()) return null;
++  // Native refusals may contain only hidden thinking. Preserve the refusal,
++  // but still report a transport that never delivered the final message_stop.
++  if (
++    input.clientResponseFormat === FORMATS.CLAUDE &&
++    watcher.getClaudeStopReason() === "refusal"
++  ) {
++    return terminalSeen
++      ? null
++      : { kind: "error", reason: "Upstream stream ended without a terminal marker" };
++  }
++
++  if (!terminalSeen) {
+     if (input.clientResponseFormat === FORMATS.CLAUDE && input.contentWatcher.sawContent()) {
+       // #7699 — upstream dropped after content reached the client on a Claude
+       // stream. Keep the partial response: emit a clean max_tokens completion
+@@ -643,12 +663,12 @@
+     }
    }
-@@ -648,7 +652,7 @@ function resolveSilentCloseOutcome(input: {
+ 
+-  const watcher = input.contentWatcher;
+-  if (watcher.sawError()) return null;
+-  if (watcher.sawSseFrame() && !watcher.sawContent() && !watcher.sawLegitEmptyTerminal()) {
++  // Only a verified optional suggestion completion may close without model text.
++  if (terminalSeen && input.allowEmptyCompletion === true) return null;
++  if (watcher.sawSseFrame() && !watcher.sawContent() && !legitimateEmpty) {
+     // A translated/client stop is insufficient: the executed native protocol
+     // must also have supplied an ordinary terminal on a trusted origin.
+-    if (!(input.clientTerminalSeen && input.permitsEmptyTurn?.())) {
++    if (!(terminalSeen && input.permitsEmptyTurn?.())) {
+       return { kind: "error", reason: "Provider returned empty content" };
+     }
+   }
+@@ -659,13 +679,15 @@
  export function createDisconnectAwareStream(
    transformStream,
    streamController,
--  options: { highWaterMark?: number } = {}
-+  options: { highWaterMark?: number; allowEmptyCompletion?: () => boolean } = {}
+-  options: { highWaterMark?: number; permitsEmptyTurn?: () => boolean } = {}
++  options: { highWaterMark?: number; permitsEmptyTurn?: () => boolean; allowEmptyCompletion?: () => boolean } = {}
  ) {
    const reader = transformStream.readable.getReader();
    const writer = transformStream.writable.getWriter();
-@@ -747,6 +751,7 @@ export function createDisconnectAwareStream(
-               clientTerminalSeen,
+   const terminalDecoder = new TextDecoder();
+   const contentDecoder = new TextDecoder();
+-  const contentWatcher = createStreamContentWatcher();
++  const contentWatcher = createStreamContentWatcher({
++    contentProbe: streamController.clientResponseFormat === FORMATS.CLAUDE,
++  });
+   const completedToolHandoffWatcher = createCompletedResponsesToolHandoffWatcher();
+   const toolHandoffDecoder = new TextDecoder();
+   let terminalTail = "";
+@@ -693,10 +715,9 @@
+     terminalTail += terminalDecoder.decode(chunk, { stream: true });
+     // Scan before bounding retained state: a compaction terminal frame can
+     // exceed the tail budget because encrypted_content is carried inline.
+-    clientTerminalSeen = hasClientTerminalSseMarker(
+-      terminalTail,
+-      streamController.clientResponseFormat
+-    );
++    clientTerminalSeen = streamController.clientResponseFormat === FORMATS.CLAUDE
++      ? contentWatcher.sawClaudeMessageStop?.() === true
++      : hasClientTerminalSseMarker(terminalTail, streamController.clientResponseFormat);
+     if (terminalTail.length > 4096) {
+       terminalTail = terminalTail.slice(-4096);
+     }
+@@ -737,6 +758,7 @@
                clientResponseFormat: streamController.clientResponseFormat,
                contentWatcher,
+               permitsEmptyTurn: options.permitsEmptyTurn,
 +              allowEmptyCompletion: options.allowEmptyCompletion?.() === true,
              });
  
              if (silentClose?.kind === "truncated") {
-@@ -886,6 +891,8 @@ export function pipeWithDisconnect(
+@@ -885,6 +907,8 @@
      stallTimeoutMs?: number;
      activeTimeoutMs?: number;
      contentStallTimeoutMs?: number;
@@ -53,16 +107,15 @@ index cef58650b..c77c24619 100644
      highWaterMark?: number;
    } = {}
  ) {
-@@ -907,7 +914,7 @@ export function pipeWithDisconnect(
-     return createDisconnectAwareStream(
-       { readable: transformedBody, writable: createNoopAbortWritable() },
+@@ -908,6 +932,7 @@
        streamController,
--      { highWaterMark: opts.highWaterMark }
-+      { highWaterMark: opts.highWaterMark, allowEmptyCompletion: opts.allowEmptyCompletion }
+       {
+         highWaterMark: opts.highWaterMark,
++        allowEmptyCompletion: opts.allowEmptyCompletion,
+         permitsEmptyTurn: () => hasTrustedEmptyTurn(providerResponse),
+       }
      );
-   }
- 
-@@ -989,6 +996,9 @@ export function pipeWithDisconnect(
+@@ -988,6 +1013,9 @@
    let contentStallTimer: ReturnType<typeof setTimeout> | null = null;
    let contentStallFired = false;
    const upstreamContentWatcher = createStreamContentWatcher();
@@ -72,24 +125,20 @@ index cef58650b..c77c24619 100644
    const upstreamContentDecoder = new TextDecoder();
    // Stall diagnostics: what the upstream had sent when the content watchdog
    // trips. Counters live at this tap because it is the only point seeing raw
-@@ -1149,6 +1159,12 @@ export function pipeWithDisconnect(
-         noteStallText(decoded);
+@@ -1154,7 +1182,7 @@
          upstreamContentWatcher.note(decoded);
-         if (upstreamContentWatcher.sawContent()) clearContentStall();
-+        else if (thinkingProgress?.note(decoded)) {
-+          // Hidden reasoning emits empty thinking deltas. Give each validated
-+          // progress event the same inactivity window; the active cap never resets.
-+          clearContentStall();
-+          armContentStall();
-+        }
-       }
-       controller.enqueue(chunk);
-     },
-@@ -1164,6 +1180,6 @@ export function pipeWithDisconnect(
-   return createDisconnectAwareStream(
-     { readable: transformedBody, writable: createNoopAbortWritable() },
+         if (upstreamContentWatcher.sawContent()) {
+           clearContentStall();
+-        } else if (upstreamContentWatcher.reasoningProgress() > reasoningBefore) {
++        } else if (upstreamContentWatcher.reasoningProgress() > reasoningBefore || thinkingProgress?.note(decoded)) {
+           clearContentStall();
+           armContentStall();
+         }
+@@ -1175,6 +1203,7 @@
      wrappedController,
--    { highWaterMark: opts.highWaterMark }
-+    { highWaterMark: opts.highWaterMark, allowEmptyCompletion: opts.allowEmptyCompletion }
+     {
+       highWaterMark: opts.highWaterMark,
++      allowEmptyCompletion: opts.allowEmptyCompletion,
+       permitsEmptyTurn: () => hasTrustedEmptyTurn(providerResponse),
+     }
    );
- }

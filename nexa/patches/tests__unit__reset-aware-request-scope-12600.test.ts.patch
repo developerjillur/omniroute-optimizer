@@ -1,8 +1,8 @@
 diff --git a/tests/unit/reset-aware-request-scope-12600.test.ts b/tests/unit/reset-aware-request-scope-12600.test.ts
-index d035175c2..dff16f297 100644
+index d035175c2b7db3149f741fd151d50eaa7896c543..dff16f29784a2341a91990df4b0869b706887368 100644
 --- a/tests/unit/reset-aware-request-scope-12600.test.ts
 +++ b/tests/unit/reset-aware-request-scope-12600.test.ts
-@@ -128,13 +128,16 @@ test("unscoped provider-limits conversion retains conservative global windows",
+@@ -128,13 +128,16 @@
  });
  
  test("reset-aware fetch scope is family-wide for Antigravity and * otherwise", () => {

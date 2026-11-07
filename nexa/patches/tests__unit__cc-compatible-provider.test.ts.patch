@@ -1,8 +1,8 @@
 diff --git a/tests/unit/cc-compatible-provider.test.ts b/tests/unit/cc-compatible-provider.test.ts
-index e4c81bb07..b325ce464 100644
+index e4c81bb073795ae1f0081e424fd7a670d33701bc..b325ce4640c364b66e401834cecea4f899a7a007 100644
 --- a/tests/unit/cc-compatible-provider.test.ts
 +++ b/tests/unit/cc-compatible-provider.test.ts
-@@ -780,16 +780,9 @@ test("handleChatCore preserves client cache markers for Claude Code requests to
+@@ -780,16 +780,9 @@
      type: "ephemeral",
      ttl: "5m",
    });

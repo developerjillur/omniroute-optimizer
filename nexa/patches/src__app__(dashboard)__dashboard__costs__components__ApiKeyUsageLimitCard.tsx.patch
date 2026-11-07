@@ -1,8 +1,8 @@
 diff --git a/src/app/(dashboard)/dashboard/costs/components/ApiKeyUsageLimitCard.tsx b/src/app/(dashboard)/dashboard/costs/components/ApiKeyUsageLimitCard.tsx
-index bf7e1feb1..f078cb536 100644
+index bf7e1feb10344bf9195dd59d3f1eaf4cc01406d9..f078cb536cdd0c71430327b1a7986843fce6b347 100644
 --- a/src/app/(dashboard)/dashboard/costs/components/ApiKeyUsageLimitCard.tsx
 +++ b/src/app/(dashboard)/dashboard/costs/components/ApiKeyUsageLimitCard.tsx
-@@ -88,11 +88,18 @@ export function ApiKeyUsageLimitCard({
+@@ -88,11 +88,18 @@
    const [saving, setSaving] = useState(false);
    const [error, setError] = useState<string | null>(null);
  

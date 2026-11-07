@@ -1,5 +1,5 @@
 diff --git a/src/lib/usage/callLogs.ts b/src/lib/usage/callLogs.ts
-index 9aba8bf66..5ebd9d98c 100644
+index fd7c75920822ba150463218be6b588f5f01f0860..5eb46b17eb90ea47bed0a61b3ff8a3b42ac8c049 100644
 --- a/src/lib/usage/callLogs.ts
 +++ b/src/lib/usage/callLogs.ts
 @@ -1,3 +1,4 @@
@@ -7,7 +7,7 @@ index 9aba8bf66..5ebd9d98c 100644
  /**
   * Structured call log management.
   *
-@@ -104,6 +105,9 @@ type CallLogSummaryRow = {
+@@ -100,6 +101,9 @@
    tokens_out: number | null;
    tokens_cache_read: number | null;
    tokens_cache_creation: number | null;
@@ -17,7 +17,7 @@ index 9aba8bf66..5ebd9d98c 100644
    tokens_reasoning: number | null;
    tokens_compressed: number | null;
    reasoning_source?: string | null;
-@@ -246,6 +250,8 @@ function buildArtifact(
+@@ -226,6 +230,8 @@
      tokensOut: number;
      tokensCacheRead: number | null;
      tokensCacheCreation: number | null;
@@ -26,7 +26,7 @@ index 9aba8bf66..5ebd9d98c 100644
      tokensReasoning: number | null;
      tokensCompressed: number | null;
      requestType: string | null;
-@@ -281,6 +287,8 @@ function buildArtifact(
+@@ -261,6 +267,8 @@
          out: logEntry.tokensOut,
          cacheRead: logEntry.tokensCacheRead,
          cacheWrite: logEntry.tokensCacheCreation,
@@ -35,7 +35,7 @@ index 9aba8bf66..5ebd9d98c 100644
          reasoning: logEntry.tokensReasoning,
          compressed: logEntry.tokensCompressed,
        },
-@@ -488,6 +496,8 @@ function mapSummaryRow(row: CallLogSummaryRow) {
+@@ -398,6 +406,8 @@
        out: toNumber(row.tokens_out),
        cacheRead: row.tokens_cache_read != null ? toNumber(row.tokens_cache_read) : null,
        cacheWrite: row.tokens_cache_creation != null ? toNumber(row.tokens_cache_creation) : null,
@@ -44,87 +44,74 @@ index 9aba8bf66..5ebd9d98c 100644
        reasoning: row.tokens_reasoning != null ? toNumber(row.tokens_reasoning) : null,
        compressed: row.tokens_compressed != null ? toNumber(row.tokens_compressed) : null,
      },
-@@ -608,6 +618,11 @@ async function saveCallLogOperation(entry: any): Promise<void> {
-     // (resolveAccountName, artifact write) may cross async boundaries.
-     const resilienceActions = serializeResilienceActions();
-     const hasResilienceColumn = hasCallLogsColumn("resilience_actions");
-+    const hasNativeUsageColumns =
-+      hasCallLogsColumn("native_session_tag") &&
-+      hasCallLogsColumn("native_cache_group_tag") &&
-+      hasCallLogsColumn("tokens_cache_creation_5m") &&
-+      hasCallLogsColumn("tokens_cache_creation_1h");
- 
-     const account = await resolveAccountName(entry.connectionId || null);
-     const rawProvider: string = entry.provider || "-";
-@@ -646,26 +661,10 @@ async function saveCallLogOperation(entry: any): Promise<void> {
-         : null;
-     const reasoningDurationMs =
-       reasoningObservation.source === "encrypted" ? streamDurationMs : null;
--    const readEffortValue = (body: unknown): string | null => {
--      if (body === null || typeof body !== "object" || Array.isArray(body)) return null;
--      const record = body as Record<string, unknown>;
--      const direct = record.reasoning_effort;
--      if (typeof direct === "string" && direct.trim().length > 0) return direct;
--      const nested = record.reasoning;
--      if (nested !== null && typeof nested === "object" && !Array.isArray(nested)) {
--        const effort = (nested as Record<string, unknown>).effort;
--        if (typeof effort === "string" && effort.trim().length > 0) return effort;
--      }
--      return null;
--    };
--    const reasoningEffortRequested =
--      reasoningObservation.source === "encrypted"
--        ? readEffortValue(entry.clientRequestBody ?? entry.requestBody)
--        : null;
--    const reasoningEffortUpstream =
--      reasoningObservation.source === "encrypted"
--        ? readEffortValue(entry.upstreamRequestBody)
--        : null;
-+    const reasoningEffortRequested = readRequestedEffort(
-+      entry.clientRequestBody ?? entry.requestBody
-+    );
-+    const reasoningEffortUpstream = readRequestedEffort(entry.upstreamRequestBody);
-     const errorType = toStoredErrorType(
-       classifyCallLogError(entry.status, entry.error, entry.provider)
-     );
-@@ -712,6 +711,23 @@ async function saveCallLogOperation(entry: any): Promise<void> {
-       tokensOut: toNumber(getLoggedOutputTokens(entry.tokens)),
-       tokensCacheRead: getPromptCacheReadTokensOrNull(entry.tokens),
-       tokensCacheCreation: getPromptCacheCreationTokensOrNull(entry.tokens),
-+      tokensCacheCreation5m:
-+        Number.isInteger(entry.cacheCreation5mTokens) && entry.cacheCreation5mTokens >= 0
-+          ? entry.cacheCreation5mTokens
-+          : null,
-+      tokensCacheCreation1h:
-+        Number.isInteger(entry.cacheCreation1hTokens) && entry.cacheCreation1hTokens >= 0
-+          ? entry.cacheCreation1hTokens
-+          : null,
-+      nativeSessionTag:
-+        typeof entry.nativeSessionTag === "string" && /^[0-9a-f]{64}$/.test(entry.nativeSessionTag)
-+          ? entry.nativeSessionTag
-+          : null,
-+      nativeCacheGroupTag:
-+        typeof entry.nativeCacheGroupTag === "string" &&
-+        /^[0-9a-f]{64}$/.test(entry.nativeCacheGroupTag)
-+          ? entry.nativeCacheGroupTag
-+          : null,
-       tokensReasoning,
-       reasoningSource: reasoningObservation.source,
-       reasoningChars: reasoningObservation.chars,
-@@ -790,6 +806,12 @@ async function saveCallLogOperation(entry: any): Promise<void> {
-     // Optional column (migration 191) — only fixed identifiers are spliced in.
-     const resilienceCol = hasResilienceColumn ? ", resilience_actions" : "";
-     const resilienceParam = hasResilienceColumn ? ", @resilienceActions" : "";
-+    const nativeUsageCol = hasNativeUsageColumns
-+      ? ", tokens_cache_creation_5m, tokens_cache_creation_1h, native_session_tag, native_cache_group_tag"
-+      : "";
-+    const nativeUsageParam = hasNativeUsageColumns
-+      ? ", @tokensCacheCreation5m, @tokensCacheCreation1h, @nativeSessionTag, @nativeCacheGroupTag"
-+      : "";
-     const insertStmt = db.prepare(
-       `
+@@ -581,24 +591,8 @@
+       ? 1
+       : null;
+   const reasoningDurationMs = reasoningObservation.source === "encrypted" ? streamDurationMs : null;
+-  const readEffortValue = (body: unknown): string | null => {
+-    if (body === null || typeof body !== "object" || Array.isArray(body)) return null;
+-    const record = body as Record<string, unknown>;
+-    const direct = record.reasoning_effort;
+-    if (typeof direct === "string" && direct.trim().length > 0) return direct;
+-    const nested = record.reasoning;
+-    if (nested !== null && typeof nested === "object" && !Array.isArray(nested)) {
+-      const effort = (nested as Record<string, unknown>).effort;
+-      if (typeof effort === "string" && effort.trim().length > 0) return effort;
+-    }
+-    return null;
+-  };
+-  const reasoningEffortRequested =
+-    reasoningObservation.source === "encrypted"
+-      ? readEffortValue(entry.clientRequestBody ?? entry.requestBody)
+-      : null;
+-  const reasoningEffortUpstream =
+-    reasoningObservation.source === "encrypted" ? readEffortValue(entry.upstreamRequestBody) : null;
++  const reasoningEffortRequested = readRequestedEffort(entry.clientRequestBody ?? entry.requestBody);
++  const reasoningEffortUpstream = readRequestedEffort(entry.upstreamRequestBody);
+   const errorType = toStoredErrorType(
+     classifyCallLogError(entry.status, entry.error, entry.provider)
+   );
+@@ -643,6 +637,23 @@
+     tokensOut: toNumber(getLoggedOutputTokens(entry.tokens)),
+     tokensCacheRead: getPromptCacheReadTokensOrNull(entry.tokens),
+     tokensCacheCreation: getPromptCacheCreationTokensOrNull(entry.tokens),
++    tokensCacheCreation5m:
++      Number.isInteger(entry.cacheCreation5mTokens) && entry.cacheCreation5mTokens >= 0
++        ? entry.cacheCreation5mTokens
++        : null,
++    tokensCacheCreation1h:
++      Number.isInteger(entry.cacheCreation1hTokens) && entry.cacheCreation1hTokens >= 0
++        ? entry.cacheCreation1hTokens
++        : null,
++    nativeSessionTag:
++      typeof entry.nativeSessionTag === "string" && /^[0-9a-f]{64}$/.test(entry.nativeSessionTag)
++        ? entry.nativeSessionTag
++        : null,
++    nativeCacheGroupTag:
++      typeof entry.nativeCacheGroupTag === "string" &&
++      /^[0-9a-f]{64}$/.test(entry.nativeCacheGroupTag)
++        ? entry.nativeCacheGroupTag
++        : null,
+     tokensReasoning,
+     reasoningSource: reasoningObservation.source,
+     reasoningChars: reasoningObservation.chars,
+@@ -741,6 +752,15 @@
+   // Optional column (migration 191) — only fixed identifiers are spliced in.
+   const resilienceCol = hasResilienceColumn ? ", resilience_actions" : "";
+   const resilienceParam = hasResilienceColumn ? ", @resilienceActions" : "";
++  const hasNativeUsageColumns =
++    hasCallLogsColumn("native_session_tag") && hasCallLogsColumn("native_cache_group_tag") &&
++    hasCallLogsColumn("tokens_cache_creation_5m") && hasCallLogsColumn("tokens_cache_creation_1h");
++  const nativeUsageCol = hasNativeUsageColumns
++    ? ", tokens_cache_creation_5m, tokens_cache_creation_1h, native_session_tag, native_cache_group_tag"
++    : "";
++  const nativeUsageParam = hasNativeUsageColumns
++    ? ", @tokensCacheCreation5m, @tokensCacheCreation1h, @nativeSessionTag, @nativeCacheGroupTag"
++    : "";
+   const insertStmt = db.prepare(
+     `
        INSERT INTO call_logs (
-@@ -805,7 +827,7 @@ async function saveCallLogOperation(entry: any): Promise<void> {
+@@ -756,7 +776,7 @@
          has_request_body, has_response_body, has_pipeline_details, request_summary,
          correlation_id, model_pinned, session_tag, response_id, error_type,
          video_content_removed, has_content, usage_provenance,
@@ -133,7 +120,7 @@ index 9aba8bf66..5ebd9d98c 100644
        )
        VALUES (
          @id, @timestamp, @method, @path, @status, @model, @requestedModel, @provider,
-@@ -820,7 +842,7 @@ async function saveCallLogOperation(entry: any): Promise<void> {
+@@ -771,7 +791,7 @@
          @hasRequestBody, @hasResponseBody, @hasPipelineDetails, @requestSummary,
          @correlationId, @modelPinned, @sessionTag, @responseId, @errorType,
          @videoContentRemoved, @hasContent, @usageProvenance,
@@ -141,4 +128,4 @@ index 9aba8bf66..5ebd9d98c 100644
 +        @addedWaitMs, @addedWaitCause${resilienceParam}${nativeUsageParam}
        )
      `
-     );
+   );

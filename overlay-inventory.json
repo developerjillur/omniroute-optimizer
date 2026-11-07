@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
   "upstreamVersion": "3.8.52",
-  "trackedNexaFiles": 494,
-  "totalNexaBytes": 2239851,
+  "trackedNexaFiles": 495,
+  "totalNexaBytes": 2240221,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -3257,6 +3257,13 @@
       "gitBlobSha": "7fc84afee41bcd1d6d720ccbeef20fdb2106ae43",
       "bytes": 705,
       "sha256": "88e5c946ba9cab0108524c8a896c7c874348535456a2b715efa6616a86118819"
+    },
+    {
+      "path": "nexa/tests/fixtures/claude-settings-type-contract.tsconfig.json",
+      "mode": "100644",
+      "gitBlobSha": "ffff5a3d47898e2a54349738b0881c2615693672",
+      "bytes": 370,
+      "sha256": "238da876799eea5c3b7ef19824d02b094a945809a77531026169dd08e5852fcd"
     },
     {
       "path": "nexa/tests/fixtures/native-attribution-delta-v3.8.52.patch",

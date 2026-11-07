@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 333,
-    "patches": 197,
-    "new": 130,
+    "total": 347,
+    "patches": 206,
+    "new": 135,
     "tooling": 6,
     "upstreamCandidates": 28,
     "nexaSpecific": 99,
-    "needsReview": 206,
+    "needsReview": 220,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
   },
@@ -146,6 +146,22 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "open-sse/config/providerModels.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__config__providerRegistry.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/config/providerRegistry.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__config__providers__registry__claude__index.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/config/providers/registry/claude/index.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -594,6 +610,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/src__app__(dashboard)__dashboard__cli-code__components__ClaudeToolCard.tsx.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.tsx",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/src__app__(dashboard)__dashboard__cli-code__components__HermesAgentToolCard.tsx.patch",
       "layer": "patch",
       "class": "needs-review",
@@ -686,6 +710,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "src/app/(dashboard)/dashboard/usage/components/ProviderLimits/parts/QuotaCardExpanded.tsx",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/src__app__api__cli-tools__claude-settings__route.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/app/api/cli-tools/claude-settings/route.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -841,6 +873,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "src/lib/cloudSync.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/src__lib__db__agentBridgeMappings.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/lib/db/agentBridgeMappings.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -1101,6 +1141,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/src__mitm___internal__standaloneRouting.cjs.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/mitm/_internal/standaloneRouting.cjs",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/src__mitm__dns__dnsConfig.ts.patch",
       "layer": "patch",
       "class": "needs-review",
@@ -1155,6 +1203,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/src__shared__constants__cliTools.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/shared/constants/cliTools.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/src__shared__constants__codexClient.ts.patch",
       "layer": "patch",
       "class": "upstream-candidate",
@@ -1191,6 +1247,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "src/shared/network/safeOutboundFetch.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/src__shared__services__claudeCliConfig.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/shared/services/claudeCliConfig.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -1375,6 +1439,14 @@
       "layer": "patch",
       "class": "nexa-specific",
       "target": "tests/unit/claude-fable-5-1.test.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/tests__unit__claude-opus-5-5.test.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "tests/unit/claude-opus-5-5.test.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -1926,6 +1998,22 @@
       "upstreamPR": null
     },
     {
+      "file": "new/src/mitm/_internal/claudeModels.cjs",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "src/mitm/_internal/claudeModels.cjs",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/src/mitm/_internal/claudeModels.json",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "src/mitm/_internal/claudeModels.json",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
       "file": "new/src/mitm/_internal/nativeToolModels.cjs",
       "layer": "new",
       "class": "needs-review",
@@ -2241,6 +2329,30 @@
       "layer": "new",
       "class": "needs-review",
       "target": "tests/unit/claude-fallback-quota-classification.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/claude-model-id-mappings.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/claude-model-id-mappings.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/claude-model-id-routing.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/claude-model-id-routing.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/claude-model-settings-route.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/claude-model-settings-route.test.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },

@@ -1,0 +1,45 @@
+diff --git a/src/shared/constants/cliTools.ts b/src/shared/constants/cliTools.ts
+--- a/src/shared/constants/cliTools.ts
++++ b/src/shared/constants/cliTools.ts
+@@ -37,15 +37,7 @@
+         name: "Default Model",
+         alias: "model",
+         envKey: "ANTHROPIC_MODEL",
+-        defaultValue: _cc.sonnet ? `cc/${_cc.sonnet}` : "cc/claude-sonnet-4-5-20250929",
+-        isTopLevel: true,
+-      },
+-      {
+-        id: "fable",
+-        name: "Claude Fable",
+-        alias: "fable",
+-        envKey: "ANTHROPIC_DEFAULT_FABLE_MODEL",
+-        defaultValue: _cc.fable ? `cc/${_cc.fable}` : "cc/claude-fable-5-1",
++        defaultValue: _cc.sonnet || "claude-sonnet-5-5",
+         isTopLevel: true,
+       },
+       {
+@@ -53,21 +45,21 @@
+         name: "Claude Opus",
+         alias: "opus",
+         envKey: "ANTHROPIC_DEFAULT_OPUS_MODEL",
+-        defaultValue: _cc.opus ? `cc/${_cc.opus}` : "cc/claude-opus-4-5-20251101",
++        defaultValue: _cc.opus || "claude-opus-5-5",
+       },
+       {
+         id: "sonnet",
+         name: "Claude Sonnet",
+         alias: "sonnet",
+         envKey: "ANTHROPIC_DEFAULT_SONNET_MODEL",
+-        defaultValue: _cc.sonnet ? `cc/${_cc.sonnet}` : "cc/claude-sonnet-4-5-20250929",
++        defaultValue: _cc.sonnet || "claude-sonnet-5-5",
+       },
+       {
+         id: "haiku",
+         name: "Claude Haiku",
+         alias: "haiku",
+         envKey: "ANTHROPIC_DEFAULT_HAIKU_MODEL",
+-        defaultValue: _cc.haiku ? `cc/${_cc.haiku}` : "cc/claude-haiku-4-5-20251001",
++        defaultValue: _cc.haiku || "claude-haiku-5-5",
+       },
+     ],
+   },

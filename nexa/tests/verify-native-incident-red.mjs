@@ -3,6 +3,21 @@ import fs from "node:fs";
 
 const [family, filename] = process.argv.slice(2);
 const expected = {
+  "claude-model-ids": {
+    tests: 12,
+    failures: [
+      "Claude CLI defaults are plain current native IDs and do not choose Fable",
+      "family versions compare numerically, ignore insertion order and exclude previews",
+      "Claude mapping normalizes the native source prefix cc/",
+      "Claude mapping normalizes the native source prefix claude/",
+      "new native registry entries work in the standalone Bridge without stored mapping writes",
+      "settings normalization preserves user data, explicit non-Claude routes and Fable",
+      "the production missing-mapping branch returns a named Anthropic error before upstream",
+      "actual settings route previews without writes, then applies normalized IDs on a copy",
+      "a settings edit after preview is preserved and returns a conflict before backup",
+      "preview does not create a missing settings file",
+    ],
+  },
   "native-attribution": {
     tests: 8,
     failures: [

@@ -113,6 +113,12 @@ const receipt = {
     green: tap("quality-usage-green.tap"),
     modelQualityBenchmark: false,
   },
+  claudeCodeModelIds: {
+    baseline: tap("claude-model-ids-red.tap", true),
+    green: tap("claude-model-ids-green.tap"),
+    ownerSettingsUsed: false,
+    liveModelMatrixExecuted: false,
+  },
   resilienceSettings: {
     baseline: tap("resilience-budget-red.tap", true),
     green: tap("resilience-budget-green.tap"),

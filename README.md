@@ -50,7 +50,7 @@ Historical documents-এর পুরোনো status-এর পরে পাও
 | Upstream version                 | `3.8.52`                                   |
 | Managed overlay files            | 464                                        |
 
-বর্তমান `nexa/`-তে reference overlay-এর সঙ্গে নতুন reliability fixes আছে; তাই সব file reference commit-এর হুবহু copy—এমন দাবি করা হচ্ছে না। প্রতিটি managed file-এর byte count, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এ 333টি entry: 197টি active patch, 130টি নতুন application/test file ও 6টি tooling entry। ৬টি retired patch মূল path-এ সংরক্ষিত। অতিরিক্ত deployment, overlay tests ও documentation-ও inventory-তে রয়েছে।
+বর্তমান `nexa/`-তে reference overlay-এর সঙ্গে নতুন reliability fixes আছে; তাই সব file reference commit-এর হুবহু copy—এমন দাবি করা হচ্ছে না। প্রতিটি managed file-এর byte count, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এ 347টি entry: 206টি active patch, 135টি নতুন application/test file ও 6টি tooling entry। ৬টি retired patch মূল path-এ সংরক্ষিত। অতিরিক্ত deployment, overlay tests ও documentation-ও inventory-তে রয়েছে।
 
 ## কী রয়েছে
 
@@ -132,3 +132,5 @@ Application-এ পরিবর্তন শুধু overlay apply-এর স�
 এখানে tracked `nexa/` source এবং reviewed public handoff/report copies আছে। Live database, API keys, OAuth credentials, secret environment, certificate private keys, runtime prefixes, build archives এবং local task caches অন্তর্ভুক্ত নেই। Account state ও production settings source snapshot থেকে পুনরুদ্ধার করা যাবে না।
 
 OmniRoute-derived code-এর মূল MIT license [LICENSE](LICENSE)-এ অক্ষত রাখা হয়েছে; বিস্তারিত [NOTICE.md](NOTICE.md)-এ।
+
+Claude Code model ID ও settings preview-এর নতুন সংশোধন [model-ID record](nexa/docs/CLAUDE-CODE-MODEL-IDS-2026-11-08.md)-এ আছে। এই পরিবর্তন আগের compiled package-এ নেই; নতুন source CI, build ও live acceptance প্রয়োজন।

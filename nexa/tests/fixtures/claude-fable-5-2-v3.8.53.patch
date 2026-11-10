@@ -175,14 +175,31 @@ index 77cd83b42064ec002ef4d6a03b54c9655f8caef9..61c784748f70ff855a864cafe1d78b9b
    if (isAnthropicThinkingSignatureError(errorArgs)) {
      recoveryBody = stripHistoricalThinkingForSignatureRecovery(args.body, failure.message);
 diff --git a/open-sse/handlers/chatCore/serviceTier.ts b/open-sse/handlers/chatCore/serviceTier.ts
-index e79fb4a8bfe0d267940d569a9f6b11da0c2b41ad..66707260ee18d14a03595e4e3e0384d447d47807 100644
+index e79fb4a8bfe0d267940d569a9f6b11da0c2b41ad..52fba73373a783a2cda540715730f2ffe8b5119d 100644
 --- a/open-sse/handlers/chatCore/serviceTier.ts
 +++ b/open-sse/handlers/chatCore/serviceTier.ts
-@@ -16,11 +16,15 @@
+@@ -1,13 +1,4 @@
+-/**
+- * chatCore Codex service-tier resolvers (Quality Gate v2 / Fase 9 — chatCore god-file
+- * decomposition, #3501).
+- *
+- * Pure, side-effect-free extraction of the two service-tier resolvers that used to be inline
+- * closures at the top of handleChatCore. Both are no-ops for non-Codex providers; for Codex they
+- * read the client-supplied `service_tier`, normalize it, and fall back to the per-connection
+- * request defaults. Behaviour is byte-identical to the previous inline code — the handler now binds
+- * `provider`/`providerSpecificData` once and delegates here.
+- */
++/** Pure request and provider-reported service tiers for Codex and native Claude speed accounting. */
+ 
+ import {
+   getCodexRequestDefaults,
+@@ -15,12 +6,16 @@
+   type CodexServiceTier,
  } from "@/lib/providers/requestDefaults";
  
- /** The effective service tier carried through a request: "standard" or a normalized Codex tier. */
+-/** The effective service tier carried through a request: "standard" or a normalized Codex tier. */
 -export type EffectiveServiceTier = "standard" | CodexServiceTier;
++/** The effective Codex tier or native Claude speed carried through a request. */
 +export type EffectiveServiceTier = "standard" | "fast" | CodexServiceTier;
 +
 +function isNativeClaudeProvider(provider: string | null | undefined): boolean {
@@ -197,7 +214,7 @@ index e79fb4a8bfe0d267940d569a9f6b11da0c2b41ad..66707260ee18d14a03595e4e3e0384d4
   * default applies, falling back to "standard".
   */
  export function resolveEffectiveServiceTier(
-@@ -28,6 +32,13 @@
+@@ -28,6 +23,13 @@
    providerSpecificData: unknown,
    requestBody?: unknown
  ): EffectiveServiceTier {
@@ -211,7 +228,7 @@ index e79fb4a8bfe0d267940d569a9f6b11da0c2b41ad..66707260ee18d14a03595e4e3e0384d4
    if (provider !== "codex") return "standard";
    const requestRecord =
      requestBody && typeof requestBody === "object" && !Array.isArray(requestBody)
-@@ -42,8 +53,8 @@
+@@ -42,8 +44,8 @@
  }
  
  /**
@@ -222,7 +239,7 @@ index e79fb4a8bfe0d267940d569a9f6b11da0c2b41ad..66707260ee18d14a03595e4e3e0384d4
   * and otherwise descends through nested `response` envelopes up to `maxDepth` levels.
   */
  export function resolveReportedServiceTier(
-@@ -53,7 +64,7 @@
+@@ -53,7 +55,7 @@
  ): EffectiveServiceTier | null {
    if (
      maxDepth <= 0 ||
@@ -231,7 +248,7 @@ index e79fb4a8bfe0d267940d569a9f6b11da0c2b41ad..66707260ee18d14a03595e4e3e0384d4
      !payload ||
      typeof payload !== "object" ||
      Array.isArray(payload)
-@@ -61,6 +72,15 @@
+@@ -61,6 +63,15 @@
      return null;
    }
    const record = payload as Record<string, unknown>;
@@ -259,6 +276,58 @@ index c3243522cd8813327d9de6ed2a2e075cb0de0c07..273f444afc9da7f5c7ca210ee2fe9708
    "claude-fable-5-1": { inputCostPer1M: 10.0, outputCostPer1M: 50.0, isFree: false },
    "claude-fable-5": { inputCostPer1M: 15.0, outputCostPer1M: 75.0, isFree: false },
    "claude-opus-5-5": { inputCostPer1M: 4.0, outputCostPer1M: 20.0, isFree: false },
+diff --git a/open-sse/utils/anthropicThinkingReplay.ts b/open-sse/utils/anthropicThinkingReplay.ts
+index 1221e6ba8cdb3f96408f827385d1c7f87993573f..2c4006cd98488fffbed7535c9f08a010a2f8ca9a 100644
+--- a/open-sse/utils/anthropicThinkingReplay.ts
++++ b/open-sse/utils/anthropicThinkingReplay.ts
+@@ -1,3 +1,4 @@
++import { modelRequiresPreservedThinkingPrefix } from "../config/claudeCodeCompatibleIdentity.ts";
+ import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../config/defaultThinkingSignature.ts";
+ 
+ type RecordValue = Record<string, unknown>;
+@@ -49,6 +50,8 @@
+ /** Call only at an Anthropic dispatch boundary, never on GPT/GLM replay. */
+ export function sanitizeAnthropicThinkingReplay<T>(body: T): T {
+   if (!record(body) || !Array.isArray(body.messages)) return body;
++  if (typeof body.model === "string" && modelRequiresPreservedThinkingPrefix(body.model))
++    return body;
+   for (const [messageIndex, message] of body.messages.entries()) {
+     if (!record(message) || message.role !== "assistant" || !Array.isArray(message.content))
+       continue;
+diff --git a/open-sse/utils/streamPayloadCollector.ts b/open-sse/utils/streamPayloadCollector.ts
+index bdf6b883a703469b70d63285ad45cab3fc1c22d4..2d9b2727978da3d4a0603c2a544f8bd22cd7a541 100644
+--- a/open-sse/utils/streamPayloadCollector.ts
++++ b/open-sse/utils/streamPayloadCollector.ts
+@@ -517,6 +517,7 @@
+   let role = "assistant";
+   let stopReason: string | null = null;
+   let stopDetails: unknown = undefined;
++  let inputTransformations: unknown = undefined;
+   let stopSequence: string | null = null;
+   // Context Editing (`anthropic-beta: context-management-2025-06-27`) surfaces
+   // `context_management.applied_edits[]` on the final `message_delta` snapshot. Preserve it
+@@ -543,6 +544,11 @@
+         model = toString(message.model, model);
+         role = toString(message.role, role);
+         mergeUsage(usage, message.usage);
++        if ("input_transformations" in message) {
++          inputTransformations = cloneLogPayload(message.input_transformations);
++        } else if ("input_transformations" in payload) {
++          inputTransformations = cloneLogPayload(payload.input_transformations);
++        }
+         if ("stop_details" in message) stopDetails = cloneLogPayload(message.stop_details);
+         return;
+       }
+@@ -696,6 +702,9 @@
+         content,
+         stop_reason: stopReason,
+         ...(stopDetails !== undefined ? { stop_details: stopDetails } : {}),
++        ...(inputTransformations !== undefined
++          ? { input_transformations: inputTransformations }
++          : {}),
+         ...(stopSequence ? { stop_sequence: stopSequence } : {}),
+         ...(Object.keys(usage).length > 0 ? { usage } : {}),
+         ...(contextManagement ? { context_management: contextManagement } : {}),
 diff --git a/src/lib/usage/costCalculator.ts b/src/lib/usage/costCalculator.ts
 index a53bd0a8a8de8084550aee98c95cb1f6cdcde97c..28231fb71dc00fe52f35e0d1aad122ce5fe53149 100644
 --- a/src/lib/usage/costCalculator.ts

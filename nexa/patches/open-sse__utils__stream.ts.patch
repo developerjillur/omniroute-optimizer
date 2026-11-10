@@ -1,5 +1,5 @@
 diff --git a/open-sse/utils/stream.ts b/open-sse/utils/stream.ts
-index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab8f8ba934 100644
+index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3435bc35b 100644
 --- a/open-sse/utils/stream.ts
 +++ b/open-sse/utils/stream.ts
 @@ -1,3 +1,4 @@
@@ -78,7 +78,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
      case "message_stop":
        lifecycle.hasMessageStop = true;
        break;
-@@ -600,6 +606,13 @@
+@@ -600,15 +606,14 @@
  ): boolean {
    const type = getClaudeEventType(payload);
    if (!type || lifecycle.hasError || lifecycle.hasContentBlock) return false;
@@ -90,9 +90,18 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
 +      : lifecycle.stopReason;
 +  if (stopReason === "refusal") return false;
    if (!hasClaudeAssistantLifecycle(lifecycle)) return false;
-   const delta = (payload as JsonRecord).delta;
-   // A bare `event: message_delta` line: its data line carries the stop_reason and decides.
-@@ -812,6 +825,7 @@
+-  const delta = (payload as JsonRecord).delta;
+-  // A bare `event: message_delta` line: its data line carries the stop_reason and decides.
+-  if (type === "message_delta" && !delta) return false;
+-  // A refusal has no content by design; forward it so the client sees why.
+-  const stopReason =
+-    (delta && typeof delta === "object" ? (delta as JsonRecord).stop_reason : null) ??
+-    lifecycle.stopReason;
+-  if (stopReason === "refusal") return false;
+   return type === "message_delta" || type === "message_stop";
+ }
+ 
+@@ -812,6 +817,7 @@
      requestToolIdentityMap = null,
      streamBufferBytes = DEFAULT_STREAM_BUFFER_BYTES,
      pendingRequestId = null,
@@ -100,7 +109,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
    } = options;
    // Request-body-size metric (for monitoring payload size distribution & correlation with TTFT).
    // The size is JSON-serialised byte count; stored as a performance mark detail so monitoring
-@@ -1091,8 +1105,39 @@
+@@ -1091,8 +1097,39 @@
    let streamTimedOut = false;
    const claudeEmptyResponseLifecycle = createClaudeEmptyResponseLifecycle();
    // #12398: `timing.firstByteAt` doubles as "any upstream chunk ever arrived".
@@ -140,7 +149,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
      shouldAbortEmptyClaudeStream(claudeEmptyResponseLifecycle, timing.firstByteAt !== null);
    // `event:` framing is only part of the SSE protocol for OpenAI Responses API
    // and Claude Messages API passthrough; a plain OpenAI Chat-Completions-format
-@@ -1244,7 +1289,10 @@
+@@ -1244,7 +1281,10 @@
        `[STREAM] Empty Claude stream at flush - emitting error (${provider || "provider"}:${model || "unknown"})`
      );
      const errorBody = buildErrorBody(502, msg);
@@ -152,7 +161,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
      const errOutput = formatSSE(errorEvent, FORMATS.CLAUDE);
      reqLogger?.appendConvertedChunk?.(errOutput);
      clientPayloadCollector.push(errorEvent);
-@@ -1314,6 +1362,7 @@
+@@ -1314,6 +1354,7 @@
  
      if (
        sourceFormat === FORMATS.CLAUDE &&
@@ -160,7 +169,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
        shouldInjectClaudeEmptyResponseBeforeCurrentEvent(claudeEmptyResponseLifecycle, itemSanitized)
      ) {
        emitClaudeEmptyStreamErrorAndAbort(controller);
-@@ -1486,7 +1535,7 @@
+@@ -1486,7 +1527,7 @@
      const failure = prepareTranslatedStreamFailure(payload);
      if (!failure) return false;
      failure.internalFailure.streamSnapshot ??= buildStreamFailureSnapshot(providerPayloadCollector);
@@ -169,7 +178,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
      const output = formatTranslatedStreamError(failure.record, sourceFormat);
      reqLogger?.appendConvertedChunk?.(output);
      forward(controller, encoder.encode(output));
-@@ -1638,7 +1687,7 @@
+@@ -1638,7 +1679,7 @@
              if (trimmed.startsWith("data:")) {
                const providerPayload = parsedPassthroughData ?? parseSSELine(trimmed);
                if (providerPayload) {
@@ -178,7 +187,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
                  if ((providerPayload as { done?: unknown }).done === true) {
                    continue;
                  }
-@@ -1748,7 +1797,7 @@
+@@ -1748,7 +1789,7 @@
                      passthroughResponsesId = responseId;
                    }
                    // Responses SSE: only extract usage, forward payload as-is
@@ -187,7 +196,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
                    if (extracted) {
                      usage = mergeUsageSnapshot(usage, extracted);
                    }
-@@ -2087,21 +2136,8 @@
+@@ -2087,21 +2128,8 @@
                  } else if (isClaudeSSE) {
                    // Claude SSE: extract usage, track content, forward as-is
                    const thinkingSignatureInjected = injectThinkingSignature(parsed, provider);
@@ -211,7 +220,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
                    if (
                      shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
                        claudeEmptyResponseLifecycle,
-@@ -2166,7 +2202,7 @@
+@@ -2166,7 +2194,7 @@
                          Object.keys(parsed.choices[0].delta).length === 0 &&
                          !parsed.choices[0]?.finish_reason))
                    ) {
@@ -220,7 +229,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
                      if (hasValidUsage(emptyChoicesUsage) && !passthroughForwardedUsageSummary) {
                        usage = resolveTrailingUsageSummary(
                          emptyChoicesUsage,
-@@ -2258,7 +2294,10 @@
+@@ -2258,7 +2286,10 @@
                        choices: [
                          {
                            ...parsed.choices[0],
@@ -232,7 +241,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
                            finish_reason: null,
                          },
                          ...parsed.choices.slice(1),
-@@ -2390,7 +2429,7 @@
+@@ -2390,7 +2421,7 @@
                        reasoningDelta
                      );
  
@@ -241,7 +250,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
                    if (extracted) {
                      usage = mergeUsageSnapshot(usage, extracted);
                    }
-@@ -2544,7 +2583,7 @@
+@@ -2544,7 +2575,7 @@
  
            if (shouldDropResponsesCommentary && dropCommentary(parsed as JsonRecord)) continue;
            nativeClaudeUsage?.observe(parsed);
@@ -250,7 +259,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
            if (parsed && parsed.done) {
              continue;
            }
-@@ -2699,13 +2738,19 @@
+@@ -2699,13 +2730,19 @@
            }
  
            // Extract usage
@@ -271,7 +280,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
                if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
                if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
                if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
-@@ -2804,10 +2849,20 @@
+@@ -2804,10 +2841,20 @@
                  reqLogger?.appendConvertedChunk?.(output);
                  forward(controller, encoder.encode(output));
                },
@@ -295,7 +304,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
                setPassthroughResponsesId: (value: string) => {
                  passthroughResponsesId = value;
                },
-@@ -2874,7 +2929,7 @@
+@@ -2874,7 +2921,7 @@
                }
                let bufferedPayload = parseSSELine(bufferedLine);
                if (bufferedPayload) {
@@ -304,7 +313,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
                  bufferedProjectedFailure = projectStreamFailureEvent(bufferedPayload);
                  if (bufferedProjectedFailure) {
                    bufferedPayload = bufferedProjectedFailure.publicPayload;
-@@ -2887,6 +2942,10 @@
+@@ -2887,6 +2934,10 @@
                  }
                  if (sanitizeUsagePayloadForRequest(bufferedPayload, body, clientResponseFormat))
                    output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
@@ -315,7 +324,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
                  if (
                    shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
                      claudeEmptyResponseLifecycle,
-@@ -3145,20 +3204,23 @@
+@@ -3145,20 +3196,23 @@
                    message.content = "";
                  }
  
@@ -353,7 +362,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
                  onComplete({
                    status: 200,
                    usage,
-@@ -3180,7 +3242,7 @@
+@@ -3180,7 +3234,7 @@
                    // reasoning-heavy stream (live incident 2026-09-04) -- see
                    // providerPayloadCollector's own `format:` construction comment above.
                    providerPayload: providerPayloadCollector.build(
@@ -362,7 +371,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
                        ? providerPayloadCollector.getSummary()
                        : { object: "chat.completion", ...responseBody },
                      { includeEvents: false }
-@@ -3197,7 +3259,8 @@
+@@ -3197,7 +3251,8 @@
                    // reasoning as providerPayload above; clientPayloadCollector's own `format:`
                    // construction above gives it the same live, cap-independent reducer.
                    clientPayload: clientPayloadCollector.build(
@@ -372,7 +381,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
                        ? clientPayloadCollector.getSummary()
                        : responseBody,
                      { includeEvents: false }
-@@ -3290,20 +3353,26 @@
+@@ -3290,20 +3345,26 @@
                if (emitTranslatedFailureAndAbort(controller, parsed)) return;
                if (targetFormat === FORMATS.OPENAI) normalizeArrayContentChunk(parsed);
                nativeClaudeUsage?.observe(parsed);
@@ -401,7 +410,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
                    if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
                    if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
                    if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
-@@ -3390,6 +3459,7 @@
+@@ -3390,6 +3451,7 @@
            // (all-empty `choices: []`) instead of completing with an empty 200.
            if (
              mode === STREAM_MODE.TRANSLATE &&
@@ -409,7 +418,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
              rejectEmptyChoicesStream({
                forwardedValuableChunk,
                hasValidUsage: hasValidUsage(state?.usage),
-@@ -3569,6 +3639,7 @@
+@@ -3569,6 +3631,7 @@
                };
                onComplete({
                  status: 200,
@@ -417,7 +426,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
                  usage: accountingUsage,
                  cacheEvidence: state?.cacheEvidence,
                  responseBody,
-@@ -3586,7 +3657,7 @@
+@@ -3586,7 +3649,7 @@
                  // reasoning-heavy stream (live incident 2026-09-04) -- see
                  // providerPayloadCollector's own `format:` construction comment above.
                  providerPayload: providerPayloadCollector.build(
@@ -426,7 +435,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
                      ? providerPayloadCollector.getSummary()
                      : { object: "chat.completion", ...responseBody },
                    { includeEvents: false }
-@@ -3655,7 +3726,8 @@
+@@ -3655,7 +3718,8 @@
    requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null = null,
    clientTools: unknown = null,
    streamBufferBytes: number = DEFAULT_STREAM_BUFFER_BYTES,
@@ -436,7 +445,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
  ) {
    return createSSEStream({
      mode: STREAM_MODE.TRANSLATE,
-@@ -3678,6 +3750,7 @@
+@@ -3678,6 +3742,7 @@
      streamBufferBytes,
      clientTools,
      pendingRequestId,
@@ -444,7 +453,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..2910052d7c675469de1f6ca4a85a66ab
    });
  }
  
-@@ -3698,6 +3771,9 @@
+@@ -3698,6 +3763,9 @@
  ) {
    return createSSEStream({
      mode: STREAM_MODE.PASSTHROUGH,

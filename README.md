@@ -2,6 +2,12 @@
 
 Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। OmniRoute-এর pristine upstream source অপরিবর্তিত রেখে custom পরিবর্তনগুলো `nexa/` folder-এ রাখা হয়েছে।
 
+## v3.8.53 ও Fable 5.2 — build অপেক্ষায়
+
+নতুন released base `191dce8d534ceb56c28a08e71381284a9a87838f`-এ Nexa customization port এবং `claude-fable-5-2` support প্রস্তুত করা হচ্ছে। Imported model ও owner settings অক্ষত রেখে native context/effort, signed-prefix preservation, tool payload ও standard/fast cache pricing পরীক্ষা হচ্ছে। প্রথম source patch/lock preparation ও production dependency audit পাস; পূর্ণ functional/type/lint/docs acceptance এখনও commit-specific CI-তে নির্ধারিত হবে। [Upgrade note](nexa/docs/FABLE-5.2-UPGRADE-3.8.53-2026-11-10.md)-এ scope ও সীমা আছে।
+
+ব্যবহারকারীর নির্দেশে production build, package acceptance ও live promotion অপেক্ষায় আছে। নিচের চলমান v3.8.52 release record ঐতিহাসিক deployment evidence; নতুন source প্রস্তুতি live upgrade নয়।
+
 ## চলমান release — ২০২৬-১১-০৬
 
 Local gateway এখন **v3.8.52 / `d6d071ef0`**। Full production build, isolated installed-package smoke ও ব্যবহারকারীর অনুমোদিত live promotion পাস। Certificate-verified IPv4/IPv6 HTTPS, quota/Agent Bridge dashboard assets, native TLS stream ও GPT buffered tool-only Messages response যাচাই হয়েছে। এরপর বাস্তব native request-এ পাওয়া readiness/parser mismatch ও advisor tool-model prefix leak scoped Bridge update দিয়ে সংশোধিত; ৪৬/৪৬ regression এবং দীর্ঘ request-সহ live recovery যাচাই হয়েছে। Existing runtime/data path, startup definitions, account/key permissions ও model mappings সংরক্ষিত।
@@ -40,17 +46,17 @@ Historical documents-এর পুরোনো status-এর পরে পাও
 
 ## বর্তমান source ও inventory
 
-| বিষয়                             | মান                                        |
-| -------------------------------- | ------------------------------------------ |
-| Canonical repository             | `developerjillur/omniroute-optimizer`      |
-| Reference application repository | `developerjillur/OmniRoute`                |
-| Reference overlay branch         | `nexalance`                                |
-| Reference overlay commit         | `72230a52a548b9fdc8dda0495c893f5193e5d64d` |
-| Pristine upstream base           | `ad6f33f66bda34eba98645d3bfdabbde294bc843` |
-| Upstream version                 | `3.8.52`                                   |
-| Managed overlay files            | 464                                        |
+| বিষয়                             | মান                                                           |
+| -------------------------------- | ------------------------------------------------------------- |
+| Canonical repository             | `developerjillur/omniroute-optimizer`                         |
+| Reference application repository | `developerjillur/OmniRoute`                                   |
+| Reference overlay branch         | `nexalance`                                                   |
+| Reference overlay commit         | `72230a52a548b9fdc8dda0495c893f5193e5d64d`                    |
+| Pristine upstream base           | `191dce8d534ceb56c28a08e71381284a9a87838f`                    |
+| Upstream version                 | `3.8.53`                                                      |
+| Managed overlay files            | exact count: [overlay-inventory.json](overlay-inventory.json) |
 
-বর্তমান `nexa/`-তে reference overlay-এর সঙ্গে নতুন reliability fixes আছে; তাই সব file reference commit-এর হুবহু copy—এমন দাবি করা হচ্ছে না। প্রতিটি managed file-এর byte count, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এ 347টি entry: 206টি active patch, 135টি নতুন application/test file ও 6টি tooling entry। ৬টি retired patch মূল path-এ সংরক্ষিত। অতিরিক্ত deployment, overlay tests ও documentation-ও inventory-তে রয়েছে।
+বর্তমান `nexa/`-তে reference overlay-এর সঙ্গে নতুন reliability fixes আছে; তাই সব file reference commit-এর হুবহু copy—এমন দাবি করা হচ্ছে না। প্রতিটি managed file-এর byte count, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এ 356টি entry: 213টি active patch, 137টি নতুন application/test file ও 6টি tooling entry। ৯টি retired patch মূল path-এ সংরক্ষিত। অতিরিক্ত deployment, overlay tests ও documentation-ও inventory-তে রয়েছে।
 
 ## কী রয়েছে
 

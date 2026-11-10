@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { handleChatCore } from "../../open-sse/handlers/chatCore.ts";
 import { closeCallLogSaves } from "../../src/lib/usage/callLogs.ts";
-import { resetDbInstance } from "../../src/lib/db/core.ts";
+import { getDbInstance, resetDbInstance } from "../../src/lib/db/core.ts";
 
 test.after(async () => {
   await closeCallLogSaves();
@@ -19,7 +19,7 @@ test("production Fable 5.2 native dispatch preserves signed history, tools, effo
     role: "assistant",
     model,
     content: [],
-    input_transformations: [{ type: "thinking_block_dropped", message_index: 1 }],
+    input_transformations: [{ reason: "model_binding_mismatch" }],
     usage: { input_tokens: 10, output_tokens: 0, speed: "fast", cache_read_input_tokens: 1000 },
   };
   const wire =
@@ -34,10 +34,21 @@ test("production Fable 5.2 native dispatch preserves signed history, tools, effo
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async (_url, init) => {
     captured.push(JSON.parse(String(init?.body)));
-    return new Response(wire, { headers: { "content-type": "text/event-stream" } });
+    return new Response(
+      wire.replace('"speed":"fast"', `"speed":"${upstreamMessage.usage.speed}"`),
+      {
+        headers: { "content-type": "text/event-stream" },
+      }
+    );
   };
   try {
-    for (const effort of ["low", "medium", "high", "xhigh", "max"]) {
+    const cases = ["low", "medium", "high", "xhigh", "max"].map((effort) => ({
+      effort,
+      reportedSpeed: "fast",
+    }));
+    cases.push({ effort: "high", reportedSpeed: "standard" });
+    for (const { effort, reportedSpeed } of cases) {
+      upstreamMessage.usage.speed = reportedSpeed;
       const body = {
         model,
         max_tokens: 64,
@@ -69,6 +80,12 @@ test("production Fable 5.2 native dispatch preserves signed history, tools, effo
       const before = structuredClone(body);
       const result = await handleChatCore({
         body,
+        onCredentialsRefreshed: undefined,
+        onRequestSuccess: undefined,
+        onStreamFailure: undefined,
+        onDisconnect: undefined,
+        connectionId: "fable52-fixture-account",
+        comboName: null,
         modelInfo: { provider: "claude", model, extendedContext: false },
         credentials: {
           accessToken: "sk-ant-oat-fixture",
@@ -107,5 +124,19 @@ test("production Fable 5.2 native dispatch preserves signed history, tools, effo
   } finally {
     globalThis.fetch = originalFetch;
   }
-  assert.equal(captured.length, 5, "one dispatch per effort with no replay or external generation");
+  assert.equal(captured.length, 6, "one dispatch per case with no replay or external generation");
+  let rows: Array<{ service_tier: string }> = [];
+  for (let attempt = 0; attempt < 100 && rows.length < 6; attempt++) {
+    rows = getDbInstance()
+      .prepare("SELECT service_tier FROM call_logs WHERE model=?")
+      .all(model) as typeof rows;
+    if (rows.length < 6) await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  assert.equal(rows.length, 6);
+  assert.equal(rows.filter((row) => row.service_tier === "fast").length, 5);
+  assert.equal(
+    rows.filter((row) => row.service_tier === "standard").length,
+    1,
+    "provider-reported speed must correct the requested estimate"
+  );
 });

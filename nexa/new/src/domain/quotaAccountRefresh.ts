@@ -4,13 +4,15 @@ import { isGoogleCloudAccount } from "@/lib/providers/googleAccountHealth";
 // expired access token is temporary; a Google verification barrier is separate.
 export async function getQuotaUsageWithRefreshedToken(connection: Record<string, unknown>) {
   const { getUsageForProvider } = await import("@omniroute/open-sse/services/usage.ts");
-  const provider = String(connection.provider || "");
+  const storedProvider = String(connection.provider || "");
+  const provider = storedProvider === "agy" ? "antigravity" : storedProvider;
+  const usageConnection = provider === storedProvider ? connection : { ...connection, provider };
   if (provider !== "claude" && !isGoogleCloudAccount(provider)) {
-    return getUsageForProvider(connection);
+    return getUsageForProvider(usageConnection);
   }
   const { checkAndRefreshToken } = await import("@/sse/services/tokenRefresh");
   const fresh = await checkAndRefreshToken(provider, {
-    ...connection,
+    ...usageConnection,
     connectionId: connection.id,
   });
   return getUsageForProvider(fresh);

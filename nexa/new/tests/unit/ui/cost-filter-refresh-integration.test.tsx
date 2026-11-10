@@ -15,7 +15,8 @@ vi.mock("@/app/(dashboard)/dashboard/costs/components/CostCharts", () => ({
   ProviderSpendCard: () => null,
   WeeklyPatternCard: () => null,
 }));
-vi.mock("@/shared/components", () => ({
+vi.mock("@/shared/components", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/shared/components")>()),
   Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   EmptyState: ({ description }: { description: string }) => <div>{description}</div>,
   SegmentedControl: () => null,

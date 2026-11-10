@@ -1,5 +1,5 @@
 diff --git a/src/app/api/usage/analytics/route.ts b/src/app/api/usage/analytics/route.ts
-index 29309258e304d7833787c23e119b64d48e2e9455..9ed492bba93d2c0f2fd5400cf430096a9dddf225 100644
+index 29309258e304d7833787c23e119b64d48e2e9455..33d04d69929db233f7acf178b93798ca9bfa3f32 100644
 --- a/src/app/api/usage/analytics/route.ts
 +++ b/src/app/api/usage/analytics/route.ts
 @@ -378,7 +378,9 @@
@@ -26,7 +26,7 @@ index 29309258e304d7833787c23e119b64d48e2e9455..9ed492bba93d2c0f2fd5400cf430096a
          model,
          serviceTier,
          flatRateAsZero,
-+        longContext: toNumber(row.longContext) === 1,
++        longContext: toNumber(r.longContext) === 1,
        }
      )
    );

@@ -1,12 +1,29 @@
 diff --git a/open-sse/handlers/chatCore/serviceTier.ts b/open-sse/handlers/chatCore/serviceTier.ts
-index e79fb4a8bfe0d267940d569a9f6b11da0c2b41ad..66707260ee18d14a03595e4e3e0384d447d47807 100644
+index e79fb4a8bfe0d267940d569a9f6b11da0c2b41ad..52fba73373a783a2cda540715730f2ffe8b5119d 100644
 --- a/open-sse/handlers/chatCore/serviceTier.ts
 +++ b/open-sse/handlers/chatCore/serviceTier.ts
-@@ -16,11 +16,15 @@
+@@ -1,13 +1,4 @@
+-/**
+- * chatCore Codex service-tier resolvers (Quality Gate v2 / Fase 9 — chatCore god-file
+- * decomposition, #3501).
+- *
+- * Pure, side-effect-free extraction of the two service-tier resolvers that used to be inline
+- * closures at the top of handleChatCore. Both are no-ops for non-Codex providers; for Codex they
+- * read the client-supplied `service_tier`, normalize it, and fall back to the per-connection
+- * request defaults. Behaviour is byte-identical to the previous inline code — the handler now binds
+- * `provider`/`providerSpecificData` once and delegates here.
+- */
++/** Pure request and provider-reported service tiers for Codex and native Claude speed accounting. */
+ 
+ import {
+   getCodexRequestDefaults,
+@@ -15,12 +6,16 @@
+   type CodexServiceTier,
  } from "@/lib/providers/requestDefaults";
  
- /** The effective service tier carried through a request: "standard" or a normalized Codex tier. */
+-/** The effective service tier carried through a request: "standard" or a normalized Codex tier. */
 -export type EffectiveServiceTier = "standard" | CodexServiceTier;
++/** The effective Codex tier or native Claude speed carried through a request. */
 +export type EffectiveServiceTier = "standard" | "fast" | CodexServiceTier;
 +
 +function isNativeClaudeProvider(provider: string | null | undefined): boolean {
@@ -21,7 +38,7 @@ index e79fb4a8bfe0d267940d569a9f6b11da0c2b41ad..66707260ee18d14a03595e4e3e0384d4
   * default applies, falling back to "standard".
   */
  export function resolveEffectiveServiceTier(
-@@ -28,6 +32,13 @@
+@@ -28,6 +23,13 @@
    providerSpecificData: unknown,
    requestBody?: unknown
  ): EffectiveServiceTier {
@@ -35,7 +52,7 @@ index e79fb4a8bfe0d267940d569a9f6b11da0c2b41ad..66707260ee18d14a03595e4e3e0384d4
    if (provider !== "codex") return "standard";
    const requestRecord =
      requestBody && typeof requestBody === "object" && !Array.isArray(requestBody)
-@@ -42,8 +53,8 @@
+@@ -42,8 +44,8 @@
  }
  
  /**
@@ -46,7 +63,7 @@ index e79fb4a8bfe0d267940d569a9f6b11da0c2b41ad..66707260ee18d14a03595e4e3e0384d4
   * and otherwise descends through nested `response` envelopes up to `maxDepth` levels.
   */
  export function resolveReportedServiceTier(
-@@ -53,7 +64,7 @@
+@@ -53,7 +55,7 @@
  ): EffectiveServiceTier | null {
    if (
      maxDepth <= 0 ||
@@ -55,7 +72,7 @@ index e79fb4a8bfe0d267940d569a9f6b11da0c2b41ad..66707260ee18d14a03595e4e3e0384d4
      !payload ||
      typeof payload !== "object" ||
      Array.isArray(payload)
-@@ -61,6 +72,15 @@
+@@ -61,6 +63,15 @@
      return null;
    }
    const record = payload as Record<string, unknown>;

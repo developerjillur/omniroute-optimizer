@@ -54,6 +54,11 @@ jobs:
           git -C "$fixture" fetch --depth=1 upstream c1e30b7676975feb298b49eff6ff58923c04b89e
           git -C "$fixture" archive c1e30b7676975feb298b49eff6ff58923c04b89e src/lib/db/migrations src/lib/db/core.ts src/lib/db/schemaColumns.ts | tar -x -C "$previousFixture"
           echo "NEXA_PREVIOUS_MIGRATIONS_DIR=$previousFixture/src/lib/db/migrations" >> "$GITHUB_ENV"
+          previous52="$RUNNER_TEMP/upstream-3.8.52-schema"
+          mkdir "$previous52"
+          git -C "$fixture" fetch --depth=1 upstream ad6f33f66bda34eba98645d3bfdabbde294bc843
+          git -C "$fixture" archive ad6f33f66bda34eba98645d3bfdabbde294bc843 src/lib/db/migrations src/lib/db/core.ts src/lib/db/schemaColumns.ts | tar -x -C "$previous52"
+          echo "NEXA_PREVIOUS_MIGRATIONS_V52_DIR=$previous52/src/lib/db/migrations" >> "$GITHUB_ENV"
           test ! -e "$fixture/nexa"
           cp -R "$GITHUB_WORKSPACE/nexa" "$fixture/nexa"
           cd "$fixture"
@@ -76,6 +81,10 @@ jobs:
           npm ci --ignore-scripts --no-audit --no-fund
           npm rebuild better-sqlite3 --foreground-scripts
           npx --no-install fumadocs-mdx
+      - name: Parse all applied source before functional tests
+        id: syntax
+        working-directory: ${{ runner.temp }}/omniroute-fixture
+        run: node nexa/tests/check-applied-syntax.mjs
       - name: Verify Claude Code model IDs and non-destructive settings writes
         id: claude_model_ids
         timeout-minutes: 3
@@ -349,7 +358,7 @@ jobs:
           python3 - <<'PYCODE'
           import json, os
           steps = json.loads(os.environ["UPGRADE_GATE_OUTCOMES"])
-          expected = ['claude_model_ids', 'dependency_security', 'native_attribution', 'quality_usage', 'native_incidents', 'resilience_budget', 'effort_tests', 'production_efforts', 'cache_cost_baseline', 'production_migrations', 'deployment_helpers', 'migrations', 'fable52', 'native_tests', 'extended_tests', 'stream_tests', 'compatibility', 'interface_tests', 'core_types', 'docs_types', 'full_types', 'compare_types', 'lint', 'docs', 'production_tooling', 'production', 'formatting']
+          expected = ['syntax', 'claude_model_ids', 'dependency_security', 'native_attribution', 'quality_usage', 'native_incidents', 'resilience_budget', 'effort_tests', 'production_efforts', 'cache_cost_baseline', 'production_migrations', 'deployment_helpers', 'migrations', 'fable52', 'native_tests', 'extended_tests', 'stream_tests', 'compatibility', 'interface_tests', 'core_types', 'docs_types', 'full_types', 'compare_types', 'lint', 'docs', 'production_tooling', 'production', 'formatting']
           failed = {name: steps.get(name, {}).get("outcome", "missing") for name in expected if steps.get(name, {}).get("outcome") != "success"}
           print(json.dumps({"failedGates": failed}, indent=2))
           if failed: raise SystemExit(1)

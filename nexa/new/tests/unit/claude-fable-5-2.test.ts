@@ -15,6 +15,8 @@ import { normalizeClaudeAdaptiveThinking } from "../../open-sse/services/claudeA
 import { getModelPricing } from "../../open-sse/services/providerCostData.ts";
 import { buildClaudePassthroughBody } from "../../open-sse/handlers/chatCore/claudePassthroughBody.ts";
 import { executeWithAnthropicThinkingSignatureRecovery } from "../../open-sse/handlers/chatCore/passthroughHelpers.ts";
+import { sanitizeAnthropicThinkingReplay } from "../../open-sse/utils/anthropicThinkingReplay.ts";
+import { createStructuredSSECollector } from "../../open-sse/utils/streamPayloadCollector.ts";
 import {
   resolveEffectiveServiceTier,
   resolveReportedServiceTier,
@@ -31,6 +33,50 @@ const MODEL = "claude-fable-5-2";
 const EFFORTS = ["low", "medium", "high", "xhigh", "max"];
 const require = createRequire(import.meta.url);
 const bridge = require("../../src/mitm/_internal/claudeModels.cjs");
+
+test("retained native summaries keep provider transformations and speed beyond the event cap", () => {
+  const transformations = [{ reason: "model_binding_mismatch" }];
+  const collector = createStructuredSSECollector({ format: "claude", maxEvents: 1, maxBytes: 64 });
+  collector.push({
+    type: "message_start",
+    message: {
+      id: "msg_fable_fixture",
+      model: MODEL,
+      input_transformations: transformations,
+      usage: { input_tokens: 4, speed: "standard" },
+    },
+  });
+  transformations[0].reason = "changed-after-ingest";
+  collector.push({
+    type: "message_delta",
+    delta: { stop_reason: "refusal", stop_details: { category: "fixture" } },
+    usage: { output_tokens: 1 },
+  });
+  collector.push({ type: "message_stop" });
+  const summary = collector.getSummary() as Record<string, unknown>;
+  assert.deepEqual(summary.input_transformations, [{ reason: "model_binding_mismatch" }]);
+  assert.equal((summary.usage as Record<string, unknown>).speed, "standard");
+  assert.equal(summary.stop_reason, "refusal");
+});
+
+test("Fable 5.2 leaves its complete thinking prefix to provider validation", () => {
+  const messages = [
+    {
+      role: "assistant",
+      content: [
+        { type: "thinking", thinking: "", signature: "" },
+        { type: "thinking", thinking: "", signature: "fixture-later-signed" },
+        { type: "text", text: "retained answer" },
+      ],
+    },
+  ];
+  const body = { model: MODEL, messages };
+  assert.equal(sanitizeAnthropicThinkingReplay(body), body);
+  const legacy = { model: "claude-opus-5-5", messages };
+  const sanitized = sanitizeAnthropicThinkingReplay(legacy);
+  assert.notEqual(sanitized, legacy);
+  assert.deepEqual(sanitized.messages[0].content, [{ type: "text", text: "retained answer" }]);
+});
 
 test("Fable 5.2 is discoverable on verified Claude surfaces with exact native limits", () => {
   for (const provider of [
@@ -201,6 +247,7 @@ for (const message of [
 test("Fable 5.2 prices standard and reported fast usage with separate 5m and 1h cache writes", () => {
   for (const provider of ["anthropic", "cc"]) {
     const price = getDefaultPricing()[provider][MODEL];
+    assert.ok(price, `${provider}/${MODEL} requires a pricing row`);
     assert.deepEqual(
       [price.input, price.output, price.cached, price.cache_creation, price.cache_creation_1h],
       [8, 40, 0.2, 10, 16]

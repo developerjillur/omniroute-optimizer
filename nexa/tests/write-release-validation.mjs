@@ -9,6 +9,7 @@ const directory = process.env.RUNNER_TEMP;
 assert.ok(directory);
 const outcomes = JSON.parse(process.env.UPGRADE_GATE_OUTCOMES);
 const required = [
+  "syntax",
   "claude_model_ids",
   "dependency_security",
   "native_attribution",
@@ -73,6 +74,20 @@ function tap(name, expectedFailure = false, allowedSkips = []) {
     counts,
     ...(allowedSkips.length ? { notValidated: allowedSkips } : {}),
   };
+}
+for (const version of ["3.8.51", "3.8.52"]) {
+  const expected = `the complete v${version} schema upgrades with native history, credentials, settings and artifact references intact`;
+  for (const file of [
+    "upgrade-migrations.tap",
+    "production-migrations.tap",
+    "upgrade-compatibility.tap",
+  ]) {
+    const output = fs.readFileSync(path.join(directory, file), "utf8");
+    assert.ok(
+      output.split("\n").some((line) => /^ok \d+ - /.test(line) && line.endsWith(expected)),
+      `${file}: ${expected}`
+    );
+  }
 }
 const primaryRuntime = fs
   .readFileSync(path.join(directory, "primary-node-version.txt"), "utf8")

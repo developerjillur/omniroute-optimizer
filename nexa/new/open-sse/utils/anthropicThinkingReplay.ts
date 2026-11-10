@@ -1,3 +1,4 @@
+import { modelRequiresPreservedThinkingPrefix } from "../config/claudeCodeCompatibleIdentity.ts";
 import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../config/defaultThinkingSignature.ts";
 
 type RecordValue = Record<string, unknown>;
@@ -49,6 +50,8 @@ function dropThinkingSuffix<T>(body: T, start: Position): T {
 /** Call only at an Anthropic dispatch boundary, never on GPT/GLM replay. */
 export function sanitizeAnthropicThinkingReplay<T>(body: T): T {
   if (!record(body) || !Array.isArray(body.messages)) return body;
+  if (typeof body.model === "string" && modelRequiresPreservedThinkingPrefix(body.model))
+    return body;
   for (const [messageIndex, message] of body.messages.entries()) {
     if (!record(message) || message.role !== "assistant" || !Array.isArray(message.content))
       continue;

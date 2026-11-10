@@ -1,8 +1,8 @@
 diff --git a/src/app/api/v1/models/catalog.ts b/src/app/api/v1/models/catalog.ts
-index 5b64120e7b3f30b219e5f7be31ab721cfff7b689..368e3ad4a4e42370aa57b9347b30fe75d47390e7 100644
+index 5b64120e7b3f30b219e5f7be31ab721cfff7b689..c9f6def5afdde5851facd4e8dddd735b1f3ddca6 100644
 --- a/src/app/api/v1/models/catalog.ts
 +++ b/src/app/api/v1/models/catalog.ts
-@@ -7,6 +7,7 @@ import { getSettings } from "@/lib/db/settings";
+@@ -7,6 +7,7 @@
  import { getUserDatabaseSettings } from "@/lib/db/databaseSettings";
  import { createLazyConnectionView } from "@/lib/db/providers/lazyConnectionView";
  import { extractAliasBackedModels } from "./aliasBackedModels";
@@ -10,7 +10,7 @@ index 5b64120e7b3f30b219e5f7be31ab721cfff7b689..368e3ad4a4e42370aa57b9347b30fe75
  import {
    buildSyncedModelIdsByCanonicalProvider,
    shouldSuppressStaticModelForExclusiveListing,
-@@ -165,6 +166,7 @@ export { getCustomVisionCapabilityFields };
+@@ -165,6 +166,7 @@
  import {
    CATALOG_CACHE_TTL_MS_DEFAULT,
    resolveCachedCatalogResponse,
@@ -18,7 +18,7 @@ index 5b64120e7b3f30b219e5f7be31ab721cfff7b689..368e3ad4a4e42370aa57b9347b30fe75
    type BackgroundRefreshScheduler,
  } from "./catalogCache";
  
-@@ -172,13 +174,17 @@ export {
+@@ -172,12 +174,16 @@
    CATALOG_STALE_WHILE_REVALIDATE_MS,
    __resetCatalogBuilderRunsForTest,
    __getCatalogBuilderRunsForTest,
@@ -28,20 +28,18 @@ index 5b64120e7b3f30b219e5f7be31ab721cfff7b689..368e3ad4a4e42370aa57b9347b30fe75
    __forceCatalogInFlightRejectionForTest,
  } from "./catalogCache";
  export type { CachedCatalog, BackgroundRefreshScheduler } from "./catalogCache";
- 
++
 +export function __expireCatalogCacheForTest(msAgo = 1): void {
 +  expireInnerCatalogForTests(msAgo);
 +  expireCoalescedCatalogForTests();
 +}
-+
+ 
  /**
   * Per-call options for {@link getUnifiedModelsResponse}.
-  *
-@@ -217,6 +223,29 @@ function resolveCombosOnly(
-   return settings?.exposeCombosOnly === true && options.ignoreExposeCombosOnly !== true;
+@@ -218,6 +224,29 @@
  }
  
-+/**
+ /**
 + * Public entry point: unified OpenAI-compatible model catalog, behind a
 + * short-TTL request-coalescing cache (QA P1 — fixes the concurrent-`/v1/models`
 + * latency stair-step). Preserves the exact `(request, corsHeaders, options)` signature so
@@ -52,7 +50,7 @@ index 5b64120e7b3f30b219e5f7be31ab721cfff7b689..368e3ad4a4e42370aa57b9347b30fe75
 +export async function getUnifiedModelsResponse(
 +  request: Request,
 +  corsHeaders: Record<string, string> = {},
-+  options: { scheduleBackgroundRefresh?: BackgroundRefreshScheduler } = {}
++  options: CatalogResponseOptions = {}
 +): Promise<Response> {
 +  const { response, cacheStatus, buildMs } = await getCoalescedCatalog(request, () =>
 +    buildUnifiedModelsResponse(request, corsHeaders, options)
@@ -64,10 +62,11 @@ index 5b64120e7b3f30b219e5f7be31ab721cfff7b689..368e3ad4a4e42370aa57b9347b30fe75
 +  return response;
 +}
 +
- /**
++/**
   * Build unified OpenAI-compatible model catalog response.
   * Reused by `/api/v1/models` and `/api/v1` to avoid semantic drift (T09).
-@@ -226,7 +255,7 @@ function resolveCombosOnly(
+  *
+@@ -226,7 +255,7 @@
   * rebuild starts only once the stale body has been flushed. Omitted by non-route
   * callers, which fall back to the cache module's own default.
   */

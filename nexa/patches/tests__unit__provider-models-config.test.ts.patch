@@ -1,0 +1,18 @@
+diff --git a/tests/unit/provider-models-config.test.ts b/tests/unit/provider-models-config.test.ts
+index 51f4d3d143200aa62d4d84f6b9ae6d3d3db08f16..07acb30d7d8cf08580679655c594454173caa2a3 100644
+--- a/tests/unit/provider-models-config.test.ts
++++ b/tests/unit/provider-models-config.test.ts
+@@ -125,11 +125,11 @@
+   assert.equal(getModelTargetFormat("gh", "kimi-k3"), "openai");
+ });
+ 
+-test("verified Anthropic launch catalogs keep Fable 5.1 first", () => {
++test("verified Anthropic launch catalogs keep Fable 5.2 first", () => {
+   for (const provider of ["anthropic", "cc", "cw"]) {
+     assert.equal(
+       getProviderModels(provider)[0]?.id,
+-      "claude-fable-5-1",
++      "claude-fable-5-2",
+       `${provider} must list the strongest Claude model first`
+     );
+   }

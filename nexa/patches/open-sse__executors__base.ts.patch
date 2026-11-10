@@ -1,8 +1,11 @@
 diff --git a/open-sse/executors/base.ts b/open-sse/executors/base.ts
-index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da15f936332 100644
+index 27dd027..4afcf40 100644
 --- a/open-sse/executors/base.ts
 +++ b/open-sse/executors/base.ts
-@@ -3,9 +3,12 @@
+@@ -1,11 +1,15 @@
++import { modelRequiresPreservedThinkingPrefix } from "../config/claudeCodeCompatibleIdentity.ts";
+ import {
+   observeProviderHttpSend,
    selectHttpResponse,
    type HttpAttemptSelection,
  } from "../utils/providerHttpAttempts.ts";
@@ -15,7 +18,7 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
  import { getRegistryEntry, requireCompatibleBaseUrl } from "../config/providerRegistry.ts";
  import { resolveFetchStartTimeout } from "../utils/fetchStartTimeoutPolicy.ts";
  import {
-@@ -94,6 +97,22 @@
+@@ -94,6 +98,22 @@
  } from "../services/assistantPrefill.ts";
  import { randomUUID } from "node:crypto";
  import {
@@ -38,7 +41,7 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
    getClaudeCodeVersion,
    CLAUDE_CODE_STAINLESS_VERSION,
    buildUserIdJson,
-@@ -240,6 +259,7 @@
+@@ -240,6 +260,7 @@
  };
  
  export type CountTokensInput = {
@@ -46,7 +49,7 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
    body: Record<string, unknown>;
    credentials: ProviderCredentials;
    log?: ExecutorLog | null;
-@@ -692,19 +712,37 @@
+@@ -692,19 +713,37 @@
      return query ? `${normalizedPath}?${query}` : normalizedPath;
    }
  
@@ -87,16 +90,23 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
  
      let timeoutId: ReturnType<typeof setTimeout> | null = null;
      let activeSignal = signal || null;
-@@ -771,6 +809,23 @@
+@@ -771,6 +810,30 @@
        contextEditing,
      } = input;
      assertValidationCredentials(input.validationDispatch, credentials);
 +    const isClaudeCodeClient =
 +      clientHeaders?.["x-app"] === "cli" || isClaudeCodeOriginatedHeaders(clientHeaders);
 +    const nativeThreadFields =
-+      this.provider === "claude" && isClaudeCodeClient && isNativeClaudeThreadRequest(body)
++      this.provider === "claude" &&
++      isClaudeCodeClient &&
++      (isNativeClaudeThreadRequest(body) || modelRequiresPreservedThinkingPrefix(model))
 +        ? captureNativeClaudeThreadFields(body as Record<string, unknown>)
 +        : null;
++    const capturedNativeBeta = nativeThreadFields ? nativeClaudeThreadBeta(clientHeaders) : null;
++    const preservedNativeBeta =
++      capturedNativeBeta && modelRequiresPreservedThinkingPrefix(model)
++        ? mergeClientAnthropicBeta("", capturedNativeBeta, undefined, model, body, true)
++        : capturedNativeBeta;
 +    const nativeThreadSessionId = nativeThreadFields
 +      ? getNativeClaudeSessionId(body, clientHeaders)
 +      : null;
@@ -111,7 +121,7 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
      const fallbackCount = this.getFallbackCount();
      let lastError: unknown = null;
      let lastStatus = 0;
-@@ -940,7 +995,7 @@
+@@ -940,7 +1003,7 @@
  
        const rawTransformedBody = await this.transformRequest(
          model,
@@ -120,7 +130,7 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
          stream,
          requestCredentials
        );
-@@ -1055,13 +1110,6 @@
+@@ -1055,13 +1118,6 @@
            }
          };
  
@@ -134,7 +144,7 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
          // Anthropic's user:sessions:claude_code OAuth scope expects CLI-shaped
          // traffic. Apply the cloak whenever we have an OAuth token, regardless
          // of upstream client.
-@@ -1078,16 +1126,20 @@
+@@ -1078,16 +1134,20 @@
          ) {
            const tb = transformedBody as Record<string, unknown>;
            detachClaudeCodeRewriteTargets(tb);
@@ -159,7 +169,7 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
  
            // NOTE (issue #2260): This is the native `claude` provider OAuth path.
            // It is intentionally NOT routed through applyCcBridgeTransformPipeline.
-@@ -1178,22 +1230,38 @@
+@@ -1178,22 +1238,38 @@
              // must opt in with x-omniroute-thinking; force-injecting adaptive thinking
              // leaks non-standard reasoning replay fields back into those clients.
              const isHaiku = typeof tb.model === "string" && tb.model.includes("haiku");
@@ -203,7 +213,7 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
                tb.thinking = { type: "adaptive" };
                tb.context_management = {
                  edits: [{ type: "clear_thinking_20251015", keep: "all" }],
-@@ -1204,7 +1272,11 @@
+@@ -1204,7 +1280,11 @@
              // When an operator budget (custom/adaptive mode) produced an enabled block
              // upstream, remap it to adaptive + output_config.effort here.
              const th = tb.thinking as Record<string, unknown> | undefined;
@@ -216,7 +226,7 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
                const b = typeof th.budget_tokens === "number" ? th.budget_tokens : 0;
                tb.thinking = { type: "adaptive" };
                tb.output_config = {
-@@ -1232,10 +1304,9 @@
+@@ -1232,10 +1312,9 @@
            let deviceId: string;
            let accountUUID: string;
  
@@ -230,7 +240,7 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
            const cloakIdentity = isClaudeCodeClient || hasClaudeOAuthToken;
            const upstreamUserId = cloakIdentity ? null : parseUpstreamMetadataUserId(tb);
            if (upstreamUserId) {
-@@ -1249,7 +1320,16 @@
+@@ -1249,7 +1328,16 @@
                : passthroughUpstreamSessionId(
                    clientHeaders as Record<string, string | undefined> | undefined
                  );
@@ -248,7 +258,7 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
              deviceId = resolveCliUserID(psd, seed);
              accountUUID = resolveAccountUUID(psd, seed, activeCredentials?.accessToken);
              identitySource = headerSid
-@@ -1276,7 +1356,9 @@
+@@ -1276,7 +1364,9 @@
            stripClaudeSystemPrefixBlocks(sysBlocks, SENTINEL);
            sysBlocks.unshift({ type: "text", text: billingLine }, { type: "text", text: SENTINEL });
            tb.system = sysBlocks;
@@ -259,7 +269,7 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
  
            // Run the configurable system-transforms pipeline for the native
            // `claude` provider (issue #2260 / comment 4459544580). The default
-@@ -1286,7 +1368,9 @@
+@@ -1286,7 +1376,9 @@
            // `inject_billing_header` — billing + sentinel are already
            // prepended above. Users can extend the pipeline via Settings UI.
            {
@@ -270,7 +280,7 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
              if (transformResult.appliedOpKinds.length > 0) {
                console.log(
                  `[SystemTransforms] claude-native: ${transformResult.appliedOpKinds.join(", ")}`
-@@ -1344,7 +1428,8 @@
+@@ -1344,7 +1436,8 @@
                  // model that does not qualify (e.g. Haiku), which Anthropic rejects (#10119).
                  model,
                  // Gate skills-2025-10-02 on presence of code_execution tool in transformed body (#14200):
@@ -280,7 +290,7 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
                ),
                "anthropic-dangerous-direct-browser-access": "true",
                "x-app": "cli",
-@@ -1490,6 +1575,19 @@
+@@ -1490,6 +1583,19 @@
            connectionOptedIn: ccRequestDefaults.redactThinking === true,
            claudeOAuth: this.provider === "claude" && hasClaudeOAuthToken,
          });
@@ -289,7 +299,7 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
 +            transformedBody as Record<string, unknown>,
 +            nativeThreadFields
 +          );
-+          const negotiatedBeta = nativeClaudeThreadBeta(clientHeaders);
++          const negotiatedBeta = preservedNativeBeta;
 +          if (negotiatedBeta) headers["anthropic-beta"] = negotiatedBeta;
 +        }
 +        // Foreign model summaries have no Anthropic signature. Sanitize after
@@ -300,12 +310,12 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
          stripInternalBodyFields(transformedBody);
  
          const shouldFingerprint =
-@@ -1513,6 +1611,14 @@
+@@ -1513,6 +1619,14 @@
          }
  
          mergeUpstreamExtraHeaders(finalHeaders, upstreamExtraHeaders);
 +        if (nativeThreadFields) {
-+          const negotiatedBeta = nativeClaudeThreadBeta(clientHeaders);
++          const negotiatedBeta = preservedNativeBeta;
 +          if (negotiatedBeta) {
 +            for (const key of Object.keys(finalHeaders))
 +              if (key.toLowerCase() === "anthropic-beta") delete finalHeaders[key];
@@ -315,7 +325,7 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
          if (this.provider === "cline" || this.provider === "clinepass") {
            applyClineProtocolHeaders(finalHeaders, {
              taskId: headers["X-Task-ID"],
-@@ -1593,6 +1699,7 @@
+@@ -1593,6 +1707,7 @@
  
          // Context Editing 400-fallback for Claude-compatible relays.
          if (
@@ -323,7 +333,7 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
            response.status === HTTP_STATUS.BAD_REQUEST &&
            contextEditing?.enabled &&
            !contextEditingDisabled &&
-@@ -1628,6 +1735,7 @@
+@@ -1628,6 +1743,7 @@
          // nested budget in the live transformedBody, and retry the same URL once.
          // Subsequent requests never pay this 400→retry round-trip.
          if (
@@ -331,7 +341,7 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
            response.status === HTTP_STATUS.BAD_REQUEST &&
            thinkingBudgetClampedMax === null &&
            transformedBody &&
-@@ -1676,6 +1784,7 @@
+@@ -1676,6 +1792,7 @@
          // → getLearnedReasoningEffort), clamp the live transformedBody by
          // re-running the sanitizer, and retry the same URL once.
          if (
@@ -339,29 +349,50 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
            (response.status === HTTP_STATUS.BAD_REQUEST ||
              response.status === HTTP_STATUS.UNPROCESSABLE_ENTITY) &&
            !reasoningEffortClamped &&
-@@ -1727,6 +1836,7 @@
+@@ -1727,21 +1844,23 @@
          }
  
          // Generic reactive 400 field-downgrade; each field is stripped at most once.
-+        if (!nativeThreadFields) {
-         response = await applyFieldDowngradeRecovery({
-           response,
-           url,
-@@ -1741,7 +1851,9 @@
-           log,
-         });
- 
+-        response = await applyFieldDowngradeRecovery({
+-          response,
+-          url,
+-          provider: this.provider,
+-          model,
+-          body: transformedBody,
+-          fetchOptions,
+-          fetchFn: fetchWithStartTimeout,
+-          serializeBody: serializeRetryBody,
+-          strippedFields,
+-          protectedFields: forcedCodexTier ? ["service_tier"] : undefined,
+-          log,
+-        });
+-
 -        if (!advisorResultsReplaced) {
++        if (!nativeThreadFields) {
++          response = await applyFieldDowngradeRecovery({
++            response,
++            url,
++            provider: this.provider,
++            model,
++            body: transformedBody,
++            fetchOptions,
++            fetchFn: fetchWithStartTimeout,
++            serializeBody: serializeRetryBody,
++            strippedFields,
++            protectedFields: forcedCodexTier ? ["service_tier"] : undefined,
++            log,
++          });
 +        }
 +
 +        if (!nativeThreadFields && !advisorResultsReplaced) {
            const advisorRecovery = await applyAdvisorUndecryptableRecovery({
              response,
              url,
-@@ -1844,6 +1956,18 @@
+@@ -1844,9 +1963,22 @@
            continue;
          }
  
++        const upstreamHttpSelection = selectHttpResponse(response);
 +        if (nativeThreadSessionId && activeCredentials?.connectionId) {
 +          const connectionId = activeCredentials.connectionId;
 +          response = observeNativeClaudeThreadResponse(response, (messageId) =>
@@ -376,4 +407,8 @@ index 27dd0276d254bf4b2a03efb59d44f1c44bd1d6aa..b22ec6303ae944a699a441c596bb0da1
 +        }
          return {
            response,
-           upstreamHttpSelection: selectHttpResponse(response),
+-          upstreamHttpSelection: selectHttpResponse(response),
++          upstreamHttpSelection,
+           url,
+           headers: finalHeaders,
+           transformedBody: serializedBody,

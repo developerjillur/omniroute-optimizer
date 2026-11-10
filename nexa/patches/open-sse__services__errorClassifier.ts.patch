@@ -1,8 +1,20 @@
 diff --git a/open-sse/services/errorClassifier.ts b/open-sse/services/errorClassifier.ts
-index 3c6740cb116bfe787abb911c5ac079a1b1d516ab..60235167800fd25c8256922c7d0beea77b139ce2 100644
+index 3c6740c..fdf055f 100644
 --- a/open-sse/services/errorClassifier.ts
 +++ b/open-sse/services/errorClassifier.ts
-@@ -82,6 +82,8 @@ export function isEmptyContentResponse(
+@@ -15,8 +15,9 @@
+ // successful completion (truncated at the token limit, or a tool-call turn) —
+ // NOT a silent "fake success" failure. Used to avoid rewriting a valid HTTP 200
+ // (e.g. a Claude Code `max_tokens: 1` connectivity ping) into a synthetic 502.
+-// A "refusal" is the model declining under usage policy; the client must see it.
+-const LEGIT_EMPTY_CLAUDE_STOP = new Set(["max_tokens", "tool_use", "refusal"]);
++// Native message refusals are handled separately below; a non-native payload
++// must not claim that exemption by spoofing the same stop reason.
++const LEGIT_EMPTY_CLAUDE_STOP = new Set(["max_tokens", "tool_use"]);
+ const LEGIT_EMPTY_OPENAI_FINISH = new Set(["length", "tool_calls", "content_filter"]);
+ 
+ // #14160: first-party APIs where an empty completion carrying a NORMAL terminal
+@@ -82,6 +83,8 @@
      // to emit a tool_use block) is a legitimate terminal state, not a silent
      // failure. Only flag empty content when no such terminal stop_reason is present.
      const stopReason = typeof body.stop_reason === "string" ? body.stop_reason : "";
@@ -11,7 +23,7 @@ index 3c6740cb116bfe787abb911c5ac079a1b1d516ab..60235167800fd25c8256922c7d0beea7
      // #14160: same exemption for the Claude wire shape on trusted first-party APIs.
      if (
        (trustedEmptyStop && NORMAL_STOP_CLAUDE_STOP.has(stopReason)) ||
-@@ -375,6 +377,7 @@ function responseBodyToString(responseBody: unknown): string {
+@@ -375,6 +378,7 @@
  // not provider/model health. Keep every expression bounded to avoid ReDoS on
  // upstream-controlled error bodies.
  const RESOURCE_NOT_FOUND_PATTERNS = [

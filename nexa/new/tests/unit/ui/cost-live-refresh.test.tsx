@@ -8,7 +8,8 @@ import {
   type ApiKeyUsageLimitPayload,
 } from "@/app/(dashboard)/dashboard/costs/components/ApiKeyUsageLimitCard";
 
-vi.mock("@/shared/components", () => ({
+vi.mock("@/shared/components", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/shared/components")>()),
   Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 

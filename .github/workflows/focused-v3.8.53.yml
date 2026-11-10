@@ -1,0 +1,106 @@
+name: Focused v3.8.53 compatibility
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/fable-5-2-v3-8-53]
+
+permissions:
+  contents: read
+
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      NODE_OPTIONS: --max-old-space-size=2048
+      NODE_ENV: test
+      DISABLE_SQLITE_AUTO_BACKUP: "true"
+      MITM_AUTO_RECOVER: "false"
+      OMNIROUTE_SKIP_SYSTEM_TRUST: "1"
+      OMNIROUTE_SKIP_DNS_WRITE: "1"
+      ADOBE_FIREFLY_BROWSER_REFRESH: "0"
+      APP_LOG_TO_FILE: "false"
+      OMNIROUTE_SSE_COMMENTS: "false"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24.15.0"
+      - name: Prepare the exact released source and candidate overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          node nexa/tests/verify-source-inventory.mjs
+          fixture="$RUNNER_TEMP/focused-application"
+          git init "$fixture"
+          git -C "$fixture" remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+          git -C "$fixture" fetch --depth=1 upstream 191dce8d534ceb56c28a08e71381284a9a87838f
+          git -C "$fixture" checkout --detach FETCH_HEAD
+          git -C "$fixture" branch upstream-main HEAD
+          cp -R "$GITHUB_WORKSPACE/nexa" "$fixture/nexa"
+          cd "$fixture"
+          node nexa/check/pristine-base.mjs
+          node nexa/gen-manifest.mjs
+          cmp nexa/manifest.json "$GITHUB_WORKSPACE/nexa/manifest.json"
+          node nexa/apply.mjs --check
+          node nexa/apply.mjs
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm rebuild better-sqlite3 --foreground-scripts
+      - name: Parse the applied source
+        id: syntax
+        working-directory: ${{ runner.temp }}/focused-application
+        run: node nexa/tests/check-applied-syntax.mjs
+      - name: Native prefix, refusal, transport and quota regressions
+        id: native
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/focused-application"
+          export DATA_DIR="$RUNNER_TEMP/focused-data"
+          export TMPDIR="$RUNNER_TEMP"
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/claude-fable-5-2.test.ts tests/unit/claude-fable-5-2-native.test.ts tests/unit/native-claude-refusal-terminal.test.ts tests/unit/native-claude-thread-chatcore.test.ts tests/unit/native-thinking-signature-switch.test.ts tests/unit/native-usage-fidelity.test.ts tests/unit/inference-transport-no-replay.test.ts tests/unit/nexa-google-quota-token-refresh.test.ts | tee "$RUNNER_TEMP/focused-native.tap"
+      - name: Existing interface interactions
+        id: interface
+        continue-on-error: true
+        working-directory: ${{ runner.temp }}/focused-application
+        run: node node_modules/vitest/vitest.mjs run --config vitest.config.ts --maxWorkers=1 tests/unit/ui/agent-bridge-stop-password.test.tsx tests/unit/ui/cost-filter-refresh-integration.test.tsx tests/unit/ui/cost-live-refresh.test.tsx
+      - name: Core typecheck
+        id: core
+        continue-on-error: true
+        working-directory: ${{ runner.temp }}/focused-application
+        run: npm run typecheck:core
+      - name: Preserve actual focused outcomes
+        if: always()
+        env:
+          FOCUSED_OUTCOMES: ${{ toJSON(steps) }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          steps = json.loads(os.environ['FOCUSED_OUTCOMES'])
+          failed = {name: steps.get(name, {}).get('outcome', 'missing') for name in ['syntax','native','interface','core'] if steps.get(name, {}).get('outcome') != 'success'}
+          tap = Path(os.environ['RUNNER_TEMP']) / 'focused-native.tap'
+          counts = {}
+          if tap.is_file():
+              output = tap.read_text()
+              for name in ['tests','pass','fail','skipped','cancelled']:
+                  matches = re.findall(r'^# '+name+r' (\d+)$', output, re.M)
+                  counts[name] = int(matches[-1]) if matches else None
+          if not counts.get('tests') or any(counts.get(name) != 0 for name in ['fail','skipped','cancelled']):
+              failed['tapCounts'] = counts
+          receipt = {'sourceCommit':os.environ['GITHUB_SHA'],'failedGates':failed,'counts':counts,'fullTypecheckExecuted':False,'productionBuildExecuted':False,'liveChanged':False}
+          (Path(os.environ['RUNNER_TEMP'])/'focused-validation.json').write_text(json.dumps(receipt,indent=2)+'\n')
+          print(json.dumps(receipt,indent=2))
+          if failed: raise SystemExit(1)
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: focused-compatibility
+          path: |
+            ${{ runner.temp }}/focused-native.tap
+            ${{ runner.temp }}/focused-validation.json

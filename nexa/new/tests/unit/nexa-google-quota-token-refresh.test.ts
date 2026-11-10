@@ -44,12 +44,17 @@ for (const provider of ["agy", "antigravity"]) {
     });
     const usageTokens: string[] = [];
     let renewals = 0;
+    const paths: string[] = [];
     globalThis.fetch = async (url, options: RequestInit = {}) => {
-      if (String(url).includes("/token")) {
+      const target = url instanceof Request ? url.url : String(url);
+      paths.push(new URL(target).pathname);
+      if (target.includes("/token")) {
         renewals++;
         return Response.json({ access_token: `fresh-${provider}`, expires_in: 3600 });
       }
-      const authorization = new Headers(options.headers).get("Authorization");
+      const authorization = new Headers(
+        options.headers ?? (url instanceof Request ? url.headers : undefined)
+      ).get("Authorization");
       if (authorization) usageTokens.push(authorization);
       return Response.json({
         models: {},
@@ -59,7 +64,18 @@ for (const provider of ["agy", "antigravity"]) {
     };
     try {
       await getQuotaUsageWithRefreshedToken(row);
-      assert.equal(renewals, 1);
+      assert.equal(
+        renewals,
+        1,
+        JSON.stringify({
+          provider,
+          storedProvider: row.provider,
+          expiresAt: row.expiresAt,
+          hasRefreshToken: Boolean(row.refreshToken),
+          hasAccessToken: Boolean(row.accessToken),
+          paths,
+        })
+      );
       assert.ok(usageTokens.length > 0, "quota polling must actually fetch usage");
       assert.ok(
         usageTokens.every((token) => token === `Bearer fresh-${provider}`),

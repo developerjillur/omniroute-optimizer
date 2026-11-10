@@ -13,6 +13,7 @@ test("production Fable 5.2 native dispatch preserves signed history, tools, effo
   const model = "claude-fable-5-2";
   const session = "52345678-1234-4123-8123-123456789abc";
   const captured: Record<string, unknown>[] = [];
+  const betas: string[] = [];
   const upstreamMessage = {
     id: "msg_fable52_fixture",
     type: "message",
@@ -34,6 +35,7 @@ test("production Fable 5.2 native dispatch preserves signed history, tools, effo
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async (_url, init) => {
     captured.push(JSON.parse(String(init?.body)));
+    betas.push(new Headers(init?.headers).get("anthropic-beta") || "");
     return new Response(
       wire.replace('"speed":"fast"', `"speed":"${upstreamMessage.usage.speed}"`),
       {
@@ -119,6 +121,8 @@ test("production Fable 5.2 native dispatch preserves signed history, tools, effo
       assert.deepEqual(sent.tools, before.tools);
       assert.deepEqual(sent.output_config, before.output_config);
       assert.equal(sent.speed, "fast");
+      assert.ok(betas.at(-1)!.includes("oauth-2025-04-20"));
+      assert.equal(betas.at(-1)!.includes("context-1m-2025-08-07"), false);
       assert.deepEqual(body.messages, before.messages);
     }
   } finally {

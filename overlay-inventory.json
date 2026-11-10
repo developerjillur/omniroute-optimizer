@@ -7,7 +7,7 @@
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
   "trackedNexaFiles": 516,
-  "totalNexaBytes": 2388189,
+  "totalNexaBytes": 2391015,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -1259,9 +1259,9 @@
     {
       "path": "nexa/new/tests/unit/claude-fable-5-2-native.test.ts",
       "mode": "100644",
-      "gitBlobSha": "022488cc9b6230620c4106d2e05c7ab2fe54e5f5",
-      "bytes": 6002,
-      "sha256": "e085b7d2f5b7e6400ee87bfac00cac50e637ae9906290c110bbc413d3a91270e"
+      "gitBlobSha": "4f580968be2adf495acd750032a390eaa4dd95d9",
+      "bytes": 6241,
+      "sha256": "bc0aec24af54e77dfd0e4e293944aaae153e43157758a0204ae01c2a6fbf764e"
     },
     {
       "path": "nexa/new/tests/unit/claude-fable-5-2.test.ts",
@@ -1581,9 +1581,9 @@
     {
       "path": "nexa/new/tests/unit/nexa-google-quota-token-refresh.test.ts",
       "mode": "100644",
-      "gitBlobSha": "f1af682bd75af708da70d525a40c3935203b0cda",
-      "bytes": 2978,
-      "sha256": "660ddb95bd2a4eb8d424b6ad2f9f8819ac954df25012cec6b7b9a6aa7211dc77"
+      "gitBlobSha": "7d86db1dc81722a2d5fc3d4111881cca5944182a",
+      "bytes": 3468,
+      "sha256": "95d323e613534ae3dbd29405a72c52c0c776e54c51d99db45d2c3345bd2adc1c"
     },
     {
       "path": "nexa/new/tests/unit/nexa-model-test-connection.test.ts",
@@ -1658,9 +1658,9 @@
     {
       "path": "nexa/new/tests/unit/ui/cost-live-refresh.test.tsx",
       "mode": "100644",
-      "gitBlobSha": "748ec89990d63ea99aa953c05b2f298cc56f8ce1",
-      "bytes": 6552,
-      "sha256": "cfd131465ac6ca8d2529d9fb8bde40163f95d1ccc96afa4f9566b71a60d7f092"
+      "gitBlobSha": "2168c5763a0a654acb016bc8a74b2fcc49b33d33",
+      "bytes": 6641,
+      "sha256": "2ecc6e19f3f3c42b18ba5a9c8b6e22eb3e0cc2e857f00fb9d6370796b9ceeed6"
     },
     {
       "path": "nexa/new/tests/unit/ui/native-cache-panel.test.ts",
@@ -1861,9 +1861,9 @@
     {
       "path": "nexa/patches/open-sse__executors__base.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "f8c997cfeeff49ba4ff39df773c70d49123d21e3",
-      "bytes": 17196,
-      "sha256": "c65b3c66af70294af1320bbad438a2a7e40946e09d22dd0231b8d1adddac640b"
+      "gitBlobSha": "63cd2f00b6e1a308b8b74885c25319f6d3a700cb",
+      "bytes": 18557,
+      "sha256": "9b3f8713a66722929fd221c1e3e6b456ef2a8a1ec6408990b3dbcd218dded853"
     },
     {
       "path": "nexa/patches/open-sse__executors__base__reasoningEffort.ts.patch",
@@ -2057,9 +2057,9 @@
     {
       "path": "nexa/patches/open-sse__services__errorClassifier.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "5ee65466f4055701e5602853d31252939aebe8ef",
-      "bytes": 1492,
-      "sha256": "b4720e00b843fd69ecdff1a7401f79b184b12e4233c751a3d18db0c9e0ce8283"
+      "gitBlobSha": "618c4eb0f71ee96684ae49a8cb3d6a455ffea7bd",
+      "bytes": 2139,
+      "sha256": "ca449773b32f2ff4baa77b66ac0ee76e6d80595e72f74c645d831490b456df7d"
     },
     {
       "path": "nexa/patches/open-sse__services__genericQuotaFetcher.ts.patch",

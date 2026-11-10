@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main, feat/fable-5-2-v3-8-53]
+    branches: [main]
 
 permissions:
   contents: read

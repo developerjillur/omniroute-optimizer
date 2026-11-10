@@ -59,23 +59,45 @@ test("retained native summaries keep provider transformations and speed beyond t
   assert.equal(summary.stop_reason, "refusal");
 });
 
-test("Fable 5.2 leaves its complete thinking prefix to provider validation", () => {
-  const messages = [
-    {
-      role: "assistant",
-      content: [
-        { type: "thinking", thinking: "", signature: "" },
-        { type: "thinking", thinking: "", signature: "fixture-later-signed" },
-        { type: "text", text: "retained answer" },
-      ],
-    },
-  ];
-  const body = { model: MODEL, messages };
+test("Fable 5.2 keeps signed native empty thinking and retains safe foreign-signature cleanup", () => {
+  const native = { type: "thinking", thinking: "", signature: "fixture-native-signed-empty" };
+  const body = {
+    model: MODEL,
+    messages: [
+      { role: "assistant", content: [native, { type: "text", text: "retained native answer" }] },
+    ],
+  };
   assert.equal(sanitizeAnthropicThinkingReplay(body), body);
-  const legacy = { model: "claude-opus-5-5", messages };
-  const sanitized = sanitizeAnthropicThinkingReplay(legacy);
-  assert.notEqual(sanitized, legacy);
-  assert.deepEqual(sanitized.messages[0].content, [{ type: "text", text: "retained answer" }]);
+  const switched = {
+    model: MODEL,
+    messages: [
+      ...body.messages,
+      {
+        role: "assistant",
+        content: [
+          { type: "thinking", thinking: "foreign reasoning", signature: "" },
+          { type: "text", text: "retained foreign answer" },
+        ],
+      },
+      {
+        role: "assistant",
+        content: [
+          { type: "thinking", thinking: "", signature: "fixture-dependent-signature" },
+          { type: "tool_use", id: "tool_fixture", name: "Read", input: {} },
+        ],
+      },
+    ],
+  };
+  const sanitized = sanitizeAnthropicThinkingReplay(switched);
+  assert.notEqual(sanitized, switched);
+  assert.deepEqual(sanitized.messages[0], body.messages[0]);
+  assert.deepEqual(sanitized.messages[1].content, [
+    { type: "text", text: "retained foreign answer" },
+  ]);
+  assert.deepEqual(sanitized.messages[2].content, [
+    { type: "tool_use", id: "tool_fixture", name: "Read", input: {} },
+  ]);
+  assert.equal(switched.messages[1].content.length, 2, "the input history remains unmodified");
 });
 
 test("Fable 5.2 is discoverable on verified Claude surfaces with exact native limits", () => {

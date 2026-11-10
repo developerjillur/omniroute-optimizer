@@ -7,7 +7,7 @@
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
   "trackedNexaFiles": 516,
-  "totalNexaBytes": 2388711,
+  "totalNexaBytes": 2388189,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -783,9 +783,9 @@
     {
       "path": "nexa/new/open-sse/utils/anthropicThinkingReplay.ts",
       "mode": "100644",
-      "gitBlobSha": "2c4006cd98488fffbed7535c9f08a010a2f8ca9a",
-      "bytes": 3838,
-      "sha256": "7db56d89aa94a1dd3a276919e8f4723abae6b4acc130c1e2b5d777c51ac5aa57"
+      "gitBlobSha": "1221e6ba8cdb3f96408f827385d1c7f87993573f",
+      "bytes": 3633,
+      "sha256": "d8a9de41308f9331291329ea3ac20b7e00e91c5db2ddd4698cd1739a0b23cca6"
     },
     {
       "path": "nexa/new/open-sse/utils/anthropicUsage.ts",
@@ -1266,9 +1266,9 @@
     {
       "path": "nexa/new/tests/unit/claude-fable-5-2.test.ts",
       "mode": "100644",
-      "gitBlobSha": "6315e974f0b7f423b79b5161a351af4a86971151",
-      "bytes": 11777,
-      "sha256": "de59c0a37c0d65080c1a2cad5dea461890bf5df0bd89847a9b3fcc3a312cff13"
+      "gitBlobSha": "aacb6c52636929aed3bbe993072e57dd8970bef8",
+      "bytes": 12523,
+      "sha256": "6a759ea27ae16779b139352a5fd2379d040ef81d291cc28e0a004ea123e877f1"
     },
     {
       "path": "nexa/new/tests/unit/claude-fallback-quota-classification.test.ts",
@@ -3352,9 +3352,9 @@
     {
       "path": "nexa/tests/fixtures/claude-fable-5-2-v3.8.53.patch",
       "mode": "100644",
-      "gitBlobSha": "7c83e02ae8ab72bb23e002b63e93e35dc514c494",
-      "bytes": 30021,
-      "sha256": "ca82c2e1987e265462ba36aea89903739bf652a35df573ac74b9f7dad87d1074"
+      "gitBlobSha": "a1b72422e3bd0b4eba2ad95875741efc443a8283",
+      "bytes": 28958,
+      "sha256": "71cd7128e18d18b83700e95229ba76dd4f7273dfdb1fb492c68f2d5c64ab6b2e"
     },
     {
       "path": "nexa/tests/fixtures/claude-model-ids-delta-v3.8.52.patch",

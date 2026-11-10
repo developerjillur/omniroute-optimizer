@@ -77,3 +77,38 @@ test("the shipped TypeScript crypto module loads from an installed dependency pa
   assert.equal(cryptoModule.looksEncrypted("enc:v1:fixture"), true);
   assert.equal(cryptoModule.decrypt("enc:v1:fixture"), "fixture");
 });
+
+test("packaged crypto resolves its bundled streaming utility without a workspace installation", async () => {
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), "smoke-bundled-module-"));
+  const packageRoot = path.join(fixture, "node_modules/omniroute");
+  const cryptoDirectory = path.join(packageRoot, "src/lib/db");
+  const utilityDirectory = path.join(packageRoot, "open-sse/utils");
+  fs.mkdirSync(cryptoDirectory, { recursive: true });
+  fs.mkdirSync(utilityDirectory, { recursive: true });
+  fs.writeFileSync(
+    path.join(utilityDirectory, "fixture.ts"),
+    "export function unseal(value: string): string { return value.slice(7); }\n"
+  );
+  fs.writeFileSync(
+    path.join(cryptoDirectory, "encryption.ts"),
+    'import { unseal } from "@omniroute/open-sse/utils/fixture.ts";\n' +
+      "export function decrypt(value: string): string { return unseal(value); }\n"
+  );
+  const cryptoModule = await loadPackagedEncryption(packageRoot);
+  assert.equal(cryptoModule.decrypt("enc:v1:fixture"), "fixture");
+  assert.equal(fs.existsSync(path.join(packageRoot, "node_modules/@omniroute/open-sse")), false);
+});
+
+test("a streaming alias cannot load a source file outside the installed package", async () => {
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), "smoke-bundled-escape-"));
+  const packageRoot = path.join(fixture, "node_modules/omniroute");
+  const cryptoDirectory = path.join(packageRoot, "src/lib/db");
+  fs.mkdirSync(cryptoDirectory, { recursive: true });
+  fs.mkdirSync(path.join(packageRoot, "open-sse"));
+  fs.writeFileSync(path.join(packageRoot, "outside.ts"), "export const value = 'outside';\n");
+  fs.writeFileSync(
+    path.join(cryptoDirectory, "encryption.ts"),
+    'export { value } from "@omniroute/open-sse/../outside.ts";\n'
+  );
+  await assert.rejects(loadPackagedEncryption(packageRoot), /escapes or is absent/);
+});

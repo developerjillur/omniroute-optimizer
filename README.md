@@ -2,19 +2,21 @@
 
 Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। OmniRoute-এর pristine upstream source অপরিবর্তিত রেখে custom পরিবর্তনগুলো `nexa/` folder-এ রাখা হয়েছে।
 
-## v3.8.53 ও Fable 5.2 — build অপেক্ষায়
+## v3.8.53 ও Fable 5.2 — live update সম্পন্ন
 
 Released base `191dce8d534ceb56c28a08e71381284a9a87838f`-এ আগের Nexa customization port এবং `claude-fable-5-2` native routing/metadata source validation সম্পন্ন। Imported model, explicit mappings ও owner-selected defaults অক্ষত। Native signed prefix, selected effort, tool payload, refusal, Thread continuity, HTTP-attempt identity এবং standard/fast cache pricing সংরক্ষণ করা হয়েছে।
 
-[`10b61dd`-এর পূর্ণ source CI](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42745190221) পাস: Fable ২২/২২, compatibility ১৩৫০/১৩৫০, stream ৩৯৬/৩৯৬ এবং Node 24 native ২৭৮/২৭৮; migrations, core types, lint, docs ও production dependency audit-সহ সব required gate সফল। Full TypeScript `7314 ≤ 7314`; pristine upstream `7361`, নতুন diagnostic identity `0`। এটি inherited backlog শূন্য হওয়ার দাবি নয়।
+[`7f4efcc`-এর পূর্ণ source CI](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42751361265)-এর ২৮টি required gate পাস: Fable ২২/২২, compatibility ১৩৬৩/১৩৬৩, stream ৩৯৬/৩৯৬ এবং Node 24 native ২৭৮/২৭৮। Full TypeScript `7314 ≤ 7314`; নতুন diagnostic identity `0`। এই inherited backlog শূন্য হওয়ার দাবি নয়।
 
-[Exact source receipt](reports/fable-5.2-v3.8.53-source-2026-11-10.json)-এ runtime versions, test counts/hashes, budget ও limits আছে। [Upgrade note](nexa/docs/FABLE-5.2-UPGRADE-3.8.53-2026-11-10.md)-এ compatibility scope আছে। Linux CI-তে macOS wildcard listener-এর একটি platform-specific test skip ছিল; actual package, macOS ও live model acceptance build-এর পরে প্রয়োজন।
+২০২৬-১১-১০-এর অনুমোদিত full production build ও live promotion সম্পন্ন: **v3.8.53 / `f5f57a83`**। Isolated package-এ Fable 5.2 inference এবং live Agent Bridge দিয়ে certificate-verified native TLS stream পাস; actual model `claude-fable-5-2`, HTTP `200`, `end_turn` ও `message_stop` পাওয়া গেছে। Source-level Bridge ৬৯৭/৬৯৭ ও interface ৪১/৪১ local test পাস।
 
-ব্যবহারকারীর নির্দেশে production build, package acceptance ও live promotion অপেক্ষায় আছে। নিচের চলমান v3.8.52 release record ঐতিহাসিক deployment evidence; নতুন source প্রস্তুতি live upgrade নয়।
+Fresh package-root install-এ ১০৩৬ dependency-এর version lock-এর সঙ্গে মিলেছে। Isolated ও live root/colocated dependency audit-এ সব severity মিলিয়ে finding `0`। Publication manifest-এর source workspace discovery বন্ধ করা হয়েছে; compiled asset bytes ও বাকি package members অক্ষত। Existing settings, account/key permission, mappings, history এবং startup/configuration paths সংরক্ষিত।
 
-## চলমান release — ২০২৬-১১-০৬
+[Release receipt](reports/native-release-2026-11-10.json) ও [upgrade note](nexa/docs/FABLE-5.2-UPGRADE-3.8.53-2026-11-10.md)-এ exact artifact, source/package/live evidence ও limits আছে। Official app-এর চলমান session পরিচালনা, সব model-এর live matrix, output-quality parity এবং নতুন package নিয়ে macOS restart এই acceptance-এর অন্তর্ভুক্ত নয়। নিচের v3.8.52 release record ঐতিহাসিক।
 
-Local gateway এখন **v3.8.52 / `d6d071ef0`**। Full production build, isolated installed-package smoke ও ব্যবহারকারীর অনুমোদিত live promotion পাস। Certificate-verified IPv4/IPv6 HTTPS, quota/Agent Bridge dashboard assets, native TLS stream ও GPT buffered tool-only Messages response যাচাই হয়েছে। এরপর বাস্তব native request-এ পাওয়া readiness/parser mismatch ও advisor tool-model prefix leak scoped Bridge update দিয়ে সংশোধিত; ৪৬/৪৬ regression এবং দীর্ঘ request-সহ live recovery যাচাই হয়েছে। Existing runtime/data path, startup definitions, account/key permissions ও model mappings সংরক্ষিত।
+## ঐতিহাসিক live release — ২০২৬-১১-০৬
+
+২০২৬-১১-০৬-এর local gateway ছিল **v3.8.52 / `d6d071ef0`**। Full production build, isolated installed-package smoke ও ব্যবহারকারীর অনুমোদিত live promotion পাস। Certificate-verified IPv4/IPv6 HTTPS, quota/Agent Bridge dashboard assets, native TLS stream ও GPT buffered tool-only Messages response যাচাই হয়েছে। এরপর বাস্তব native request-এ পাওয়া readiness/parser mismatch ও advisor tool-model prefix leak scoped Bridge update দিয়ে সংশোধিত; ৪৬/৪৬ regression এবং দীর্ঘ request-সহ live recovery যাচাই হয়েছে। Existing runtime/data path, startup definitions, account/key permissions ও model mappings সংরক্ষিত।
 
 Runtime source `9f3317269994273d95cab3efea4bda5bac6a86e3`; application integration `d6d071ef0b79ff00fba6c0ca7f7a54ce948bf0bc`। পরের documentation commit packaged runtime identity বদলায় না। [Release note](nexa/docs/RELEASE-3.8.52-2026-11-06.md) ও [public release receipt](reports/native-release-2026-11-06.json)-এ exact artifact, validation, preservation ও limits আছে। নতুন package দিয়ে macOS reboot এবং পূর্ণ দশ দিনের audit এখনও অসম্পূর্ণ; native hosted-feature parity দাবি করা হচ্ছে না।
 

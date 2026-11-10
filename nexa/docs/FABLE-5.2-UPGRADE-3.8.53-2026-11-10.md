@@ -1,6 +1,6 @@
 # Fable 5.2 ও OmniRoute v3.8.53 — source প্রস্তুতি
 
-এই পরিবর্তনের scope হলো released v3.8.53-এর ওপর আগের Nexa overlay port করা এবং `claude-fable-5-2`-এর native routing ও metadata যোগ করা। ব্যবহারকারীর নির্দেশে production build, package acceptance, live promotion ও model generation অপেক্ষায় আছে। Source validation-এর ফল সংশ্লিষ্ট exact commit-এর CI receipt দিয়ে নির্ধারিত হবে।
+এই পরিবর্তনের scope হলো released v3.8.53-এর ওপর আগের Nexa overlay port করা এবং `claude-fable-5-2`-এর native routing ও metadata যোগ করা। ২০২৬-১১-১০-এর পরবর্তী মানব অনুমতিতে full production build, isolated package acceptance এবং controlled live promotion সম্পন্ন হয়েছে: `v3.8.53 / f5f57a83`। বর্তমান evidence [release receipt](../../reports/native-release-2026-11-10.json)-এ আছে।
 
 ## যাচাই করা release
 
@@ -46,3 +46,15 @@ Production build-এর পর actual package install/security smoke, isolated s
 ## Focused source checkpoint
 
 [`b0f271f`-এর focused CI](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42744642403)-তে ৬৭/৬৭ native/compatibility test, ১২/১২ interface test, socket guard এবং core typecheck পাস করেছে; কোনো test skip বা cancel হয়নি। এই checkpoint পূর্ণ regression, full-project compiler, production package বা live acceptance প্রতিস্থাপন করে না। Final source acceptance তার exact commit-এর পূর্ণ CI artifact-এ নির্ধারিত হয়।
+
+## ২০২৬-১১-১০: package ও live acceptance
+
+Runtime source `7f4efcc5db26a4095b4f35fb8c28aecdb3df9bb0`-এর [পূর্ণ CI](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42751361265)-এর সব ২৮টি required gate পাস। Local full dashboard/server/CLI build সম্পন্ন; ৬৯৭ Bridge ও ৪১ interface test পাস। Local full compiler heap সীমায় থেমেছিল; completed CI-তে `7314 ≤ 7314` এবং নতুন diagnostic identity `0` প্রমাণিত। Local compiler completion দাবি করা হচ্ছে না।
+
+Fresh install-এ bundled workspace directory discovery-এর কারণে `npm ci` lock mismatch পুনরুৎপাদিত হয়েছে। Publication manifest থেকে কেবল reviewed `workspaces` field বাদ দিয়ে sealed archive তৈরি হয়; compiled assets ও অন্য original members byte-for-byte সংরক্ষিত। ১২টি sealing test এবং actual clean-install/override regression পাস। Packaged encryption validation-এর bundled source alias resolver-এ ১৭টি test পাস। বন্ধ WAL database-এর snapshot-এ কোনো open handle ও nonempty journal না থাকার শর্তে immutable read ব্যবহৃত হয়; transient PID configuration backup থেকে বাদ থাকে। Snapshot-এর ৪টি safety test পাস এবং final consistent backup সংরক্ষিত।
+
+Isolated Fable 5.2 inference, schema, management authentication, model catalog, CORS এবং configuration preservation পাস। Installed root-এর ১০৩৬ dependency-এর version publication lock-এর সঙ্গে মিলেছে। Isolated ও live root এবং colocated dependency audit-এ finding `0`।
+
+Live `https://omni.local/api/health` IPv4/IPv6-এ certificate verification-সহ `200`; native `api.anthropic.com` ingress দিয়ে `claude-fable-5-2` streaming request-এ HTTP `200`, actual model `claude-fable-5-2`, `end_turn`, expected text ও `message_stop` পাওয়া গেছে। Dashboard-এ version `3.8.53`, Bridge `Running`/`8443`, certificate trusted এবং Claude Code `Active / DNS on` দেখা গেছে। Existing configuration, environment, account/key permissions, mappings, history, startup files ও native ingress অক্ষত; previous runtime ও rollback data snapshot private অবস্থায় রাখা হয়েছে।
+
+এই bounded acceptance সব model-এর live matrix, official desktop session operation, model-output parity, host malware clearance বা নতুন package-এ macOS restart-এর প্রমাণ নয়। Provider quota ও client-controlled capability-এর সীমা বহাল।

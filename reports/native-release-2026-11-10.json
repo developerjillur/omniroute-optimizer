@@ -1,0 +1,144 @@
+{
+  "atUtc": "2026-11-10T04:26:57.407281+00:00",
+  "status": "LIVE_UPDATE_VALIDATED",
+  "version": "3.8.53",
+  "buildSHA": "f5f57a83",
+  "runtimeSourceCommit": "7f4efcc5db26a4095b4f35fb8c28aecdb3df9bb0",
+  "runtimeOverlayTree": "823324052b483508be354b63c6e53075fb5a0092",
+  "applicationIntegrationCommit": "f5f57a8394cc18c5451f03b3dd63d065eebfb016",
+  "packagingSourceCommit": "c47d04ed161d31ec9b085b49cbc34499c8fa1ef0",
+  "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
+  "artifact": {
+    "file": "omniroute-3.8.53.tgz",
+    "sha256": "7db1740722a5d7ce9e04e4c7c3d74408eb8468796ffb4f9f28cc97632f7948f2",
+    "bytes": 155815906,
+    "compiledAssetsUnchangedAfterPublicationSealing": true
+  },
+  "sourceValidation": {
+    "run": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/42751361265",
+    "requiredGatesPassed": 28,
+    "fable52": 22,
+    "compatibility": 1363,
+    "stream": 396,
+    "node24Native": 278,
+    "completedTypeDiagnostics": 7314,
+    "approvedCeiling": 7314,
+    "addedDiagnosticIdentities": 0,
+    "localFullCompilerCompleted": false,
+    "localCompilerHeapFailuresRetained": true
+  },
+  "fullBuild": {
+    "completed": true,
+    "rssCapMiB": 8192,
+    "observedPeakRssMiB": 8178.83,
+    "minimumSystemHeadroomGiB": 16.587844848632812,
+    "resourceStop": null,
+    "localBridgeTests": 697,
+    "localInterfaceTests": 41
+  },
+  "publicationCorrections": {
+    "workspaceDiscoveryRemovedOnlyFromPublicationManifest": true,
+    "compiledAndOtherPackageMembersPreserved": true,
+    "sealUnitTests": 12,
+    "cleanInstallOverrideRegressionPassed": true,
+    "ordinaryEncryptedKeyLoaderTests": 17,
+    "closedDataSnapshotSafetyTests": 4,
+    "transientPidExcludedFromConfigurationBackup": true,
+    "immutableSnapshotRequiresNoOpenHandlesOrUncheckpointedJournal": true
+  },
+  "installedSecurity": {
+    "isolated-installed-audit-v1.json": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "isolated-dist-audit-v1.json": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "live-installed-audit-v1.json": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "live-dist-audit-v1.json": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    }
+  },
+  "isolatedAcceptance": {
+    "fable52InferencePassed": true,
+    "installedDependencyVersionsVerified": 1036,
+    "settingsAccountsKeysPermissionsMappingsAndHistoryPreserved": true,
+    "databaseIntegrity": "ok",
+    "corsFailClosed": true
+  },
+  "live": {
+    "httpsIPv4IPv6CertificateVerified200": true,
+    "coreHealth200": true,
+    "bridge": {
+      "ok": true,
+      "bridgeEnabled": true,
+      "backendTlsVerified": true,
+      "ingressTlsVerified": true,
+      "targetAgent": "claude-code",
+      "nativeIngressScoped": true,
+      "clientDnsVerified": true
+    },
+    "native": {
+      "httpStatus": 200,
+      "certificateVerified": true,
+      "model": "claude-fable-5-2",
+      "stopReason": "end_turn",
+      "messageStop": true,
+      "sentinelMatched": true,
+      "generationCalls": 1,
+      "manualRetries": 0
+    },
+    "installedRootDependenciesAudited": 1036,
+    "additionalColocatedDependenciesAudited": 7,
+    "existingPathsPreserved": true,
+    "existingAccountsKeysPermissionsMappingsAndHistoryPreserved": true,
+    "launchAgentHostsCertificatesIngressAndEnvironmentUnchanged": true,
+    "previousRuntimeAndFinalDataSnapshotRetainedPrivately": true,
+    "otherAppsOrSessionsStopped": false
+  },
+  "browserVerification": {
+    "version": "3.8.53",
+    "agentBridgeServer": "Running",
+    "port": 8443,
+    "certificate": "trusted",
+    "claudeCode": "Active",
+    "dns": "on"
+  },
+  "failedPromotionAttempts": {
+    "retained": 2,
+    "reason": "Read-only SQLite backup could not open a cleanly stopped WAL database without sidecars; stopped-data immutable snapshot now requires no open handles and no nonempty journal",
+    "newRuntimeInstalledDuringFailedAttempts": false,
+    "previousServiceRecovered": true
+  },
+  "limits": {
+    "osRestartTestedWithNewPackage": false,
+    "officialDesktopSessionOperated": false,
+    "allModelsLiveMatrixTested": false,
+    "modelOutputParityClaimed": false,
+    "providerQuotaBypassed": false,
+    "inheritedTypeBacklogCleared": false,
+    "hostMalwareAuditClaimed": false,
+    "privateRuntimeValuesPublished": false
+  }
+}

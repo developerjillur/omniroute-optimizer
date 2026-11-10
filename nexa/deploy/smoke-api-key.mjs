@@ -11,6 +11,18 @@ export async function loadPackagedEncryption(packageRoot) {
   const prefix = pathToFileURL(path.resolve(packageRoot) + path.sep).href;
   const hooks = registerHooks({
     resolve(specifier, context, nextResolve) {
+      if (context.parentURL?.startsWith(prefix) && specifier.startsWith("@omniroute/open-sse/")) {
+        const directory = path.resolve(packageRoot, "open-sse") + path.sep;
+        const candidate = path.resolve(directory, specifier.slice("@omniroute/open-sse/".length));
+        if (
+          !candidate.startsWith(directory) ||
+          !fs.statSync(candidate, { throwIfNoEntry: false })?.isFile()
+        )
+          throw Error(
+            "Packaged streaming source import escapes or is absent from the installed package"
+          );
+        return nextResolve(pathToFileURL(candidate).href, context);
+      }
       if (
         context.parentURL?.startsWith(prefix) &&
         specifier.startsWith(".") &&

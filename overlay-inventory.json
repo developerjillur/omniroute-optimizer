@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
-  "trackedNexaFiles": 519,
-  "totalNexaBytes": 2409344,
+  "trackedNexaFiles": 520,
+  "totalNexaBytes": 2420282,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -153,16 +153,16 @@
     {
       "path": "nexa/deploy/build-candidate.sh",
       "mode": "100644",
-      "gitBlobSha": "e56285b33955d952107030063301caedda92e627",
-      "bytes": 3039,
-      "sha256": "7878c92db14e03efd5ad44d20a82e9eb21801b2cdc503c72f12091a01a33c582"
+      "gitBlobSha": "35d0e5bba102d548f95fdd860dbac7f53e9420e1",
+      "bytes": 3082,
+      "sha256": "00a51bafbe35b9cf5190f9a958fb9bc9c13503d8471a722cf6eea56833209c52"
     },
     {
       "path": "nexa/deploy/build-candidate.test.mjs",
       "mode": "100644",
-      "gitBlobSha": "febe649cf8f77dd1a263edf34db908685c493173",
-      "bytes": 3107,
-      "sha256": "2effa8feb8f93414e01571ce0b741b70b0ca51e7742011b72be1c65cf15dd34f"
+      "gitBlobSha": "3f695646b2be4eeb6ac1ec232457e9da7f64e457",
+      "bytes": 3387,
+      "sha256": "0cacf1d27f13926e423b911efa5b907345dc6d59db4a5f72a8a8c673d8ffd733"
     },
     {
       "path": "nexa/deploy/check-upgrade-data.py",
@@ -419,16 +419,16 @@
     {
       "path": "nexa/deploy/smoke-api-key.mjs",
       "mode": "100644",
-      "gitBlobSha": "3908c69c9e41147b8ef8357e3b74eb41553036e0",
-      "bytes": 3624,
-      "sha256": "472c95502002e6026adfef92e47fda98dc630fb7fa95e0dedc5233e253c3bf77"
+      "gitBlobSha": "9a89d7c85b437a3b001cefad17e3f25a3fc1316a",
+      "bytes": 4245,
+      "sha256": "3ec28998b838130e2f36927a3baadcd109989e2bddd654cbe66eeb3e804bc625"
     },
     {
       "path": "nexa/deploy/smoke-api-key.test.mjs",
       "mode": "100644",
-      "gitBlobSha": "138cf929c8b38f1f9e14fe07abb29bdfc69f34bc",
-      "bytes": 3243,
-      "sha256": "d735b1025a433726ef3d16ab8350f89b21cf67a85551e510b9d9871590243ebc"
+      "gitBlobSha": "31dffe1f1869b8d9e4d0296464135d43502d45ae",
+      "bytes": 5108,
+      "sha256": "7e9e4b4abcfc1cb57b6fd8299fe622bb617dcc21edf38f16618dfbe9be95bf5a"
     },
     {
       "path": "nexa/deploy/smoke-model.mjs",
@@ -461,9 +461,16 @@
     {
       "path": "nexa/deploy/snapshot-local.py",
       "mode": "100644",
-      "gitBlobSha": "8a7e9bdee455067a75a3e1070a37c9e76a7cea01",
-      "bytes": 1826,
-      "sha256": "dfa15542742227f161bb9c77b21d5b3a5e7d3ef2fe759c763cbcf5cedff40cce"
+      "gitBlobSha": "d297a5bcbb9504f09a0551cf11c9160750a36514",
+      "bytes": 3207,
+      "sha256": "f7c8f42964b0b6c81803a9f607fe93d95e231b7986c42606e0fa2176bb0c6b83"
+    },
+    {
+      "path": "nexa/deploy/snapshot-local.test.py",
+      "mode": "100644",
+      "gitBlobSha": "ccb89dc90470220255472d12fd17acd2e8427462",
+      "bytes": 3798,
+      "sha256": "a3c0a61214ef9d027b3e5d11c14038a4d7937f1b9712cfe042fa2ddfd774122b"
     },
     {
       "path": "nexa/deploy/stop-owned-bridge.mjs",
@@ -566,9 +573,9 @@
     {
       "path": "nexa/docs/FABLE-5.2-UPGRADE-3.8.53-2026-11-10.md",
       "mode": "100644",
-      "gitBlobSha": "3abf3f4c69a6202810202565fdb994e3af64b83b",
-      "bytes": 8706,
-      "sha256": "b72cb4758058dd5809b3e0789ddc1ee98651d29d894e3c2b46387d846744f829"
+      "gitBlobSha": "f563dd59fb31b83b291657338b1e4f0d2640ea1d",
+      "bytes": 11656,
+      "sha256": "26febd91a691358527cd2bd999944c77bf82425895e453cca3b21384c9cd6242"
     },
     {
       "path": "nexa/docs/GOOGLE-VERIFICATION-ROUTING-2026-10-06.md",

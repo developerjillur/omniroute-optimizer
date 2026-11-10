@@ -30,6 +30,7 @@ jobs:
           PUBLICATION_TEST_ROOT: ${{ runner.temp }}/publication-regression
         run: |
           python3 nexa/deploy/seal-package.test.py
+          python3 nexa/deploy/snapshot-local.test.py
           python3 nexa/deploy/extract-publication.test.py
           node --test nexa/deploy/publication-lock.test.mjs nexa/deploy/installed-publication.test.mjs nexa/deploy/install-publication.test.mjs
           node nexa/tests/publication-install-integration.mjs

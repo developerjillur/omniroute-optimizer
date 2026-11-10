@@ -24,6 +24,10 @@ import {
 import { computeCostFromPricing } from "../../src/lib/usage/costCalculator.ts";
 import { getDefaultPricing } from "../../src/shared/constants/pricing.ts";
 import {
+  normalizeServiceTier,
+  mapUsageHistoryRow,
+} from "../../src/lib/usage/usageHistory/helpers.ts";
+import {
   getModelSpec,
   normalizeForcedToolChoiceForModel,
   normalizeThinkingForModel,
@@ -321,4 +325,18 @@ test("reported Claude speed overrides the requested estimate without altering Co
   assert.equal(resolveReportedServiceTier("claude", { usage: {} }), null);
   assert.equal(resolveReportedServiceTier("codex", { service_tier: "priority" }), "priority");
   assert.equal(resolveReportedServiceTier("unrelated", { usage: { speed: "fast" } }), null);
+});
+
+test("usage history preserves native Claude fast speed while retaining Codex priority aliases", () => {
+  for (const provider of ["claude", "cc", "anthropic"]) {
+    assert.equal(normalizeServiceTier("fast", provider), "fast");
+    assert.equal(mapUsageHistoryRow({ provider, service_tier: "fast" }).serviceTier, "fast");
+  }
+  assert.equal(normalizeServiceTier("fast", "codex"), "priority");
+  assert.equal(normalizeServiceTier("fast"), "priority");
+  assert.equal(
+    mapUsageHistoryRow({ provider: "codex", service_tier: "fast" }).serviceTier,
+    "priority"
+  );
+  assert.equal(normalizeServiceTier("standard", "claude"), "standard");
 });

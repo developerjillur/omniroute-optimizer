@@ -7,7 +7,7 @@
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
   "trackedNexaFiles": 517,
-  "totalNexaBytes": 2393949,
+  "totalNexaBytes": 2398925,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -1266,9 +1266,9 @@
     {
       "path": "nexa/new/tests/unit/claude-fable-5-2.test.ts",
       "mode": "100644",
-      "gitBlobSha": "aacb6c52636929aed3bbe993072e57dd8970bef8",
-      "bytes": 12523,
-      "sha256": "6a759ea27ae16779b139352a5fd2379d040ef81d291cc28e0a004ea123e877f1"
+      "gitBlobSha": "82ca29db79f61cdd6f8c14006bcfd54f4011abc2",
+      "bytes": 13277,
+      "sha256": "64cbe12c86e145404a713062a35dce350dcaf4965d1e4e6e3cfb09055533d1c7"
     },
     {
       "path": "nexa/new/tests/unit/claude-fallback-quota-classification.test.ts",
@@ -2701,9 +2701,9 @@
     {
       "path": "nexa/patches/src__lib__usage__usageHistory__helpers.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "96b872578061acc63e11ed945e2d863915487941",
-      "bytes": 991,
-      "sha256": "a5f38254e05ef8302d4e7a8f78070168d5f89e79898063d63d7d324493a58e8b"
+      "gitBlobSha": "3f838848912bd7d3d53d6c5caa6db98369b7549e",
+      "bytes": 2013,
+      "sha256": "393f619014125d9017bc246173c2ae29a42d4dd7b076f8ddbfed65ca387fd710"
     },
     {
       "path": "nexa/patches/src__lib__usage__usageStats.ts.patch",
@@ -2715,9 +2715,9 @@
     {
       "path": "nexa/patches/src__lib__usage__usageWriteRetry.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "6088d2ec24f633f3aad54416cfc3fc7033a80528",
-      "bytes": 1748,
-      "sha256": "4fa4ee9084b8dbf566347638ab211580a0f6d2455126f96edb91898675fb49ad"
+      "gitBlobSha": "72b79e4e0957936081d162c949173769ebdde91a",
+      "bytes": 2232,
+      "sha256": "065f0b223e404c3bc6ecf902099c0b42516313b9cebdd99d1b04677f9227ba3c"
     },
     {
       "path": "nexa/patches/src__mitm___internal__standaloneRouting.cjs.patch",
@@ -3352,9 +3352,9 @@
     {
       "path": "nexa/tests/fixtures/claude-fable-5-2-v3.8.53.patch",
       "mode": "100644",
-      "gitBlobSha": "a1b72422e3bd0b4eba2ad95875741efc443a8283",
-      "bytes": 28958,
-      "sha256": "71cd7128e18d18b83700e95229ba76dd4f7273dfdb1fb492c68f2d5c64ab6b2e"
+      "gitBlobSha": "0e417aaaf8b6e213505dc420f4624b3f57b88fe2",
+      "bytes": 31674,
+      "sha256": "1020cf045659ab0ef326aef1ae7e382ad984f2c5ad61c68c096bb4949666ca9c"
     },
     {
       "path": "nexa/tests/fixtures/claude-model-ids-delta-v3.8.52.patch",

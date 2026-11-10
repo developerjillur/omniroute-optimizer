@@ -1,5 +1,5 @@
 diff --git a/src/lib/usage/usageWriteRetry.ts b/src/lib/usage/usageWriteRetry.ts
-index d0298234e4556395ed3518a0baf9015f1baa97c1..a156d7409404ca1a64cb93f03cc147b09b2bcb7a 100644
+index d0298234e4556395ed3518a0baf9015f1baa97c1..5f761d9149d4bf5f0b5bd4065b947dbd41a9bd19 100644
 --- a/src/lib/usage/usageWriteRetry.ts
 +++ b/src/lib/usage/usageWriteRetry.ts
 @@ -1,3 +1,4 @@
@@ -7,6 +7,15 @@ index d0298234e4556395ed3518a0baf9015f1baa97c1..a156d7409404ca1a64cb93f03cc147b0
  /**
   * Deferred retry for usage writes blocked by a locked database.
   *
+@@ -125,7 +126,7 @@
+   return {
+     entry,
+     timestamp,
+-    serviceTier: normalizeServiceTier(entry.serviceTier ?? entry.service_tier),
++    serviceTier: normalizeServiceTier(entry.serviceTier ?? entry.service_tier, entry.provider),
+     // Ordinary terminal writes always resolve ownership from effective history.
+     // Historical snapshot restoration belongs to the authenticated JSON importer.
+     billingTeamId: resolveBillingTeamIdForApiKeyAt(entry.apiKeyId, timestamp),
 @@ -168,14 +169,15 @@
      accountIdentity,
    } = prepared;

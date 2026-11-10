@@ -711,3 +711,55 @@ index 049366bd5ce3b8a44e2f1cb6a9060b57c6fafdea..20f8d2045550cf0758e1e40ca4ed3dde
  };
  
  export const CLAUDE_FABLE_5_1_PRICING = {
+diff --git a/src/lib/usage/usageHistory/helpers.ts b/src/lib/usage/usageHistory/helpers.ts
+index 5fc8424c018ac4ad0edf2f93fa5a41c71b9e6ad2..01beb2f56be8f39eca038ef58683ea8f78da524d 100644
+--- a/src/lib/usage/usageHistory/helpers.ts
++++ b/src/lib/usage/usageHistory/helpers.ts
+@@ -21,8 +21,10 @@
+   return typeof value === "string" && value.trim().length > 0 ? value : null;
+ }
+ 
+-export function normalizeServiceTier(value: unknown): string {
++export function normalizeServiceTier(value: unknown, provider?: unknown): string {
+   const tier = typeof value === "string" ? value.trim().toLowerCase() : "";
++  const providerKey = typeof provider === "string" ? provider.trim().toLowerCase() : "";
++  if (tier === "fast" && ["claude", "cc", "anthropic"].includes(providerKey)) return "fast";
+   if (tier === "priority" || tier === "fast") return "priority";
+   if (tier === "flex") return "flex";
+   return "standard";
+@@ -38,7 +40,7 @@
+     apiKeyId: toStringOrNull(r.api_key_id),
+     apiKeyName: toStringOrNull(r.api_key_name),
+     billingTeamId: toStringOrNull(r.billing_team_id),
+-    serviceTier: normalizeServiceTier(r.service_tier),
++    serviceTier: normalizeServiceTier(r.service_tier, r.provider),
+     providerCredits: r.provider_credits ?? null,
+     providerCostUsd: r.provider_cost_usd ?? null,
+     tokens: {
+@@ -46,8 +48,11 @@
+       output: toNumberValue(r.tokens_output),
+       cacheRead: toNumberValue(r.tokens_cache_read),
+       cacheCreation: toNumberValue(r.tokens_cache_creation),
+-      ...getCacheCreationTtl({ cacheCreation: r.tokens_cache_creation,
+-        cacheCreation5m: r.tokens_cache_creation_5m, cacheCreation1h: r.tokens_cache_creation_1h }),
++      ...getCacheCreationTtl({
++        cacheCreation: r.tokens_cache_creation,
++        cacheCreation5m: r.tokens_cache_creation_5m,
++        cacheCreation1h: r.tokens_cache_creation_1h,
++      }),
+       reasoning: toNumberValue(r.tokens_reasoning),
+     },
+     status: toStringOrNull(r.status),
+diff --git a/src/lib/usage/usageWriteRetry.ts b/src/lib/usage/usageWriteRetry.ts
+index a156d7409404ca1a64cb93f03cc147b09b2bcb7a..5f761d9149d4bf5f0b5bd4065b947dbd41a9bd19 100644
+--- a/src/lib/usage/usageWriteRetry.ts
++++ b/src/lib/usage/usageWriteRetry.ts
+@@ -126,7 +126,7 @@
+   return {
+     entry,
+     timestamp,
+-    serviceTier: normalizeServiceTier(entry.serviceTier ?? entry.service_tier),
++    serviceTier: normalizeServiceTier(entry.serviceTier ?? entry.service_tier, entry.provider),
+     // Ordinary terminal writes always resolve ownership from effective history.
+     // Historical snapshot restoration belongs to the authenticated JSON importer.
+     billingTeamId: resolveBillingTeamIdForApiKeyAt(entry.apiKeyId, timestamp),

@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
-  "trackedNexaFiles": 508,
-  "totalNexaBytes": 2329768,
+  "trackedNexaFiles": 512,
+  "totalNexaBytes": 2342544,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -706,9 +706,9 @@
     {
       "path": "nexa/manifest.json",
       "mode": "100644",
-      "gitBlobSha": "be015f5de46f990d6d0be22a3e3fad767d485fa0",
-      "bytes": 92176,
-      "sha256": "c1df191889d7f21d428d9682965d39c331dea798b34a799f642381205f31bf23"
+      "gitBlobSha": "9dc8f472e031589657cbdf87baca12fd317d9531",
+      "bytes": 92425,
+      "sha256": "8f8461b86d13fa9bfa6ae01541005d737dd0544f81093e89761f6b7b9eec385d"
     },
     {
       "path": "nexa/new/bin/cli/utils/packageMigrations.mjs",
@@ -1250,11 +1250,18 @@
       "sha256": "71df02844827a2732badc982f2cfdd337016ea58cffbe45f9c1c1308905da872"
     },
     {
+      "path": "nexa/new/tests/unit/claude-fable-5-2-native.test.ts",
+      "mode": "100644",
+      "gitBlobSha": "9834dbce85be905cb15344e0766063dce57da00f",
+      "bytes": 4847,
+      "sha256": "2f3175a40906d3f98020d7e960ae47fd93f6b54c19b561cca67055eb9e6d5afa"
+    },
+    {
       "path": "nexa/new/tests/unit/claude-fable-5-2.test.ts",
       "mode": "100644",
-      "gitBlobSha": "3e1be23cd45a7fc4f4a815c3df9fb99d6313984f",
-      "bytes": 9649,
-      "sha256": "218131718056175e364a42be04c9885b1ab0a592525f7c229bdafa6a908ec7a8"
+      "gitBlobSha": "b14a16aee7db8b5052f1d6c2bef16b5a8d451a36",
+      "bytes": 9744,
+      "sha256": "5c052652662e3923c192db65e919d49f1ea5ba64dd16eb1b71ff15a791251212"
     },
     {
       "path": "nexa/new/tests/unit/claude-fallback-quota-classification.test.ts",
@@ -2190,9 +2197,9 @@
     {
       "path": "nexa/patches/package-lock.json.patch",
       "mode": "100644",
-      "gitBlobSha": "f6f63f4a6bb9596ae2dec3b42ac1cd96c6b97a65",
-      "bytes": 39245,
-      "sha256": "b7a7d1b362a8928e3ae2732c62af4970e0da1135b28889ee4b80b4771a7b83aa"
+      "gitBlobSha": "acf860dd27ec8e03b44d6b00d87edd5497399eb5",
+      "bytes": 36363,
+      "sha256": "783ce1cc367810b6baf46def5af5d222a62cf7bc9e984ae2051cf27bf8dfb9dd"
     },
     {
       "path": "nexa/patches/package.json.patch",
@@ -3252,6 +3259,13 @@
       "sha256": "d5770c3590dcb9136ce67bb92030486cac2b1e4e6a7bd376179f7174c40b531b"
     },
     {
+      "path": "nexa/security/dependency-targets-2026-11-10.json",
+      "mode": "100644",
+      "gitBlobSha": "199f189b29f6ec1c5ddebef6d353dabe8b4be866",
+      "bytes": 3238,
+      "sha256": "b1b69a683d1518980a2d459eca414cd20cbacee43f47f8d06d867927067dbd23"
+    },
+    {
       "path": "nexa/setup.mjs",
       "mode": "100644",
       "gitBlobSha": "147fd40156831322f2d54890a513b2e8f8d87b0e",
@@ -3518,11 +3532,18 @@
       "sha256": "710c7b19f01f9eb88bfebbb87e87e1946c88a30097bd4970d3b386db41912197"
     },
     {
+      "path": "nexa/tests/verify-fable52-red.mjs",
+      "mode": "100644",
+      "gitBlobSha": "6ac971005544ff0de8b898d28f7b2be5ef1d0c7f",
+      "bytes": 867,
+      "sha256": "2d7a15e36e1fa11c2df616944ded5a83eb831a8fa4f030e62e02f2d5e5061199"
+    },
+    {
       "path": "nexa/tests/verify-installed-dependency-security.mjs",
       "mode": "100644",
-      "gitBlobSha": "2e49c1bc37ec125bb575a05156052d389d2f80fe",
+      "gitBlobSha": "adb26804d3a6756bbe340900a3e1e7468bb60832",
       "bytes": 2895,
-      "sha256": "0f25290c153ac681b50ba2efb5a260a5bc4c3dfddbc0566b36b5ee28e416611b"
+      "sha256": "cd3b625712a5c4b3e9943523660fb0b5f40b9825372f7f8d2f643d9449ece430"
     },
     {
       "path": "nexa/tests/verify-native-incident-red.mjs",
@@ -3551,6 +3572,13 @@
       "gitBlobSha": "b9f39fe3a39f3e6509cff93493acc1cb67968c8a",
       "bytes": 6876,
       "sha256": "a060160204ecb66a690928d28c27d3e93bf0856a9357a2caa8807f2dad780965"
+    },
+    {
+      "path": "nexa/tests/write-release-validation.mjs",
+      "mode": "100644",
+      "gitBlobSha": "e518a0e34a87f4453e848e828345b7ed2c12ddc0",
+      "bytes": 6362,
+      "sha256": "bc554e65ff1e4ce4a7df903cca4b493612ba4f6ded490561c5109b8806173054"
     },
     {
       "path": "nexa/update.mjs",

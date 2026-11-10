@@ -6,7 +6,7 @@ on:
     branches: [main]
     paths:
       - .github/workflows/dependency-security.yml
-      - nexa/security/dependency-targets-2026-11-06.json
+      - nexa/security/dependency-targets-2026-11-10.json
       - nexa/tests/prepare-dependency-security.mjs
       - nexa/patches/package*.patch
 
@@ -36,7 +36,7 @@ jobs:
           baseline="$RUNNER_TEMP/dependency-baseline"
           git init "$application"
           git -C "$application" remote add upstream https://github.com/cheaper-inference/OmniRoute.git
-          git -C "$application" fetch --depth=1 upstream ad6f33f66bda34eba98645d3bfdabbde294bc843
+          git -C "$application" fetch --depth=1 upstream 191dce8d534ceb56c28a08e71381284a9a87838f
           git -C "$application" checkout --detach FETCH_HEAD
           git -C "$application" branch upstream-main HEAD
           mkdir "$baseline"
@@ -49,7 +49,7 @@ jobs:
           export npm_config_cache="$RUNNER_TEMP/dependency-npm-cache"
           node "$GITHUB_WORKSPACE/nexa/tests/prepare-dependency-security.mjs" \
             --application "$application" --baseline "$baseline" \
-            --targets "$GITHUB_WORKSPACE/nexa/security/dependency-targets-2026-11-06.json" \
+            --targets "$GITHUB_WORKSPACE/nexa/security/dependency-targets-2026-11-10.json" \
             --output "$RUNNER_TEMP/dependency-security-evidence"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()

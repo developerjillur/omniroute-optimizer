@@ -8,10 +8,8 @@ import {
   supportsXHighEffort,
 } from "../../open-sse/config/providerModels.ts";
 import { getUnsupportedParams } from "../../open-sse/config/providerRegistry.ts";
-import {
-  modelHasNativeContext1m,
-  modelRequiresPreservedThinkingPrefix,
-} from "../../open-sse/config/claudeCodeCompatibleIdentity.ts";
+import * as claudeIdentity from "../../open-sse/config/claudeCodeCompatibleIdentity.ts";
+const { modelHasNativeContext1m } = claudeIdentity;
 import { modelSupportsContext1mBeta } from "../../open-sse/config/context1m.ts";
 import { normalizeClaudeAdaptiveThinking } from "../../open-sse/services/claudeAdaptiveThinking.ts";
 import { getModelPricing } from "../../open-sse/services/providerCostData.ts";
@@ -62,10 +60,10 @@ test("Fable 5.2 is discoverable on verified Claude surfaces with exact native li
   }
   for (const id of [MODEL, `cc/${MODEL}`, `global.anthropic.${MODEL}`, "claude-fable-5.2"]) {
     assert.equal(modelHasNativeContext1m(id), true, id);
-    assert.equal(modelRequiresPreservedThinkingPrefix(id), true, id);
+    assert.equal(claudeIdentity.modelRequiresPreservedThinkingPrefix(id), true, id);
   }
   for (const id of ["claude-fable-5-1", "claude-fable-5-20", "gpt-6.1-sol"]) {
-    assert.equal(modelRequiresPreservedThinkingPrefix(id), false, id);
+    assert.equal(claudeIdentity.modelRequiresPreservedThinkingPrefix(id), false, id);
   }
   assert.equal(modelSupportsContext1mBeta(MODEL), false);
   assert.equal(supportsXHighEffort("claude", MODEL), true);
@@ -136,6 +134,7 @@ for (const effort of EFFORTS) {
       cache_control: { type: "ephemeral", ttl: "1h" },
     };
     const before = structuredClone(body);
+    let rewrites = 0;
     for (const provider of ["claude", "anthropic"]) {
       const result = buildClaudePassthroughBody({
         body,
@@ -146,13 +145,15 @@ for (const effort of EFFORTS) {
         targetFormat: "claude",
         preserveCacheControl: true,
         normalizeClaudeUpstreamMessages: () => {
-          throw new Error("native prefix normalization");
+          rewrites++;
         },
-        applyReasoningRuleDirective: () => {
-          throw new Error("native prefix rewrite");
+        applyReasoningRuleDirective: (value) => {
+          rewrites++;
+          return value;
         },
       });
       const { _disableToolPrefix, ...wire } = result;
+      assert.equal(rewrites, 0, "native signed prefix must bypass rewriting");
       assert.equal(_disableToolPrefix, true);
       assert.deepEqual(wire, before);
       assert.deepEqual(body, before);

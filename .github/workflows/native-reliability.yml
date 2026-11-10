@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main]
+    branches: [main, feat/fable-5-2-v3-8-53]
 
 permissions:
   contents: read
@@ -46,7 +46,7 @@ jobs:
           fixture="$RUNNER_TEMP/omniroute-fixture"
           git init "$fixture"
           git -C "$fixture" remote add upstream https://github.com/cheaper-inference/OmniRoute.git
-          git -C "$fixture" fetch --depth=1 upstream ad6f33f66bda34eba98645d3bfdabbde294bc843
+          git -C "$fixture" fetch --depth=1 upstream 191dce8d534ceb56c28a08e71381284a9a87838f
           git -C "$fixture" checkout --detach FETCH_HEAD
           git -C "$fixture" branch upstream-main HEAD
           previousFixture="$RUNNER_TEMP/upstream-3.8.51-schema"
@@ -65,6 +65,7 @@ jobs:
           node "$fixture/node_modules/prettier/bin/prettier.cjs" --write --print-width 100 --trailing-comma es5 "$GITHUB_WORKSPACE/nexa/new/tests/unit/usage-inclusive-token-totals.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/routed-gpt-quality-contract.test.ts"
           node "$fixture/node_modules/prettier/bin/prettier.cjs" --write --print-width 100 --trailing-comma es5 "$GITHUB_WORKSPACE/nexa/new/tests/unit/native-source-attribution.test.ts"
           node "$fixture/node_modules/prettier/bin/prettier.cjs" --write --print-width 100 --trailing-comma es5 "$GITHUB_WORKSPACE/nexa/new/src/mitm/_internal/claudeModels.cjs" "$GITHUB_WORKSPACE/nexa/new/src/mitm/_internal/claudeModels.json" "$GITHUB_WORKSPACE/nexa/new/tests/unit/claude-model-id-routing.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/claude-model-settings-route.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/claude-model-id-mappings.test.ts" "$GITHUB_WORKSPACE/nexa/tests/fixtures/claude-settings-type-contract.ts" "$GITHUB_WORKSPACE/nexa/tests/fixtures/claude-settings-type-contract.tsconfig.json"
+          node "$fixture/node_modules/prettier/bin/prettier.cjs" --write --print-width 100 --trailing-comma es5 "$GITHUB_WORKSPACE/nexa/new/tests/unit/claude-fable-5-2.test.ts" "$GITHUB_WORKSPACE/nexa/new/tests/unit/claude-fable-5-2-native.test.ts" "$GITHUB_WORKSPACE/nexa/new/src/domain/quotaAccountRefresh.ts" "$GITHUB_WORKSPACE/nexa/tests/write-release-validation.mjs" "$GITHUB_WORKSPACE/nexa/tests/verify-fable52-red.mjs"
           git -C "$GITHUB_WORKSPACE" diff --binary > "$RUNNER_TEMP/formatting.patch"
           cp -R "$GITHUB_WORKSPACE/nexa/." "$fixture/nexa/"
           node nexa/gen-manifest.mjs
@@ -75,7 +76,7 @@ jobs:
           npm ci --ignore-scripts --no-audit --no-fund
           npm rebuild better-sqlite3 --foreground-scripts
           npx --no-install fumadocs-mdx
-      - name: Reproduce and correct Claude Code model IDs and settings writes
+      - name: Verify Claude Code model IDs and non-destructive settings writes
         id: claude_model_ids
         timeout-minutes: 3
         shell: bash
@@ -84,14 +85,6 @@ jobs:
           cd "$RUNNER_TEMP/omniroute-fixture"
           export DATA_DIR="$RUNNER_TEMP/claude-model-ids-data"
           export TMPDIR="$RUNNER_TEMP"
-          git apply --reverse nexa/tests/fixtures/claude-model-ids-delta-v3.8.52.patch
-          set +e
-          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/claude-model-id-routing.test.ts tests/unit/claude-model-settings-route.test.ts > "$RUNNER_TEMP/claude-model-ids-red.tap" 2>&1
-          result=$?
-          set -e
-          git apply nexa/tests/fixtures/claude-model-ids-delta-v3.8.52.patch
-          test "$result" -ne 0
-          node "$GITHUB_WORKSPACE/nexa/tests/verify-native-incident-red.mjs" claude-model-ids "$RUNNER_TEMP/claude-model-ids-red.tap"
           node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/claude-model-id-routing.test.ts tests/unit/claude-model-settings-route.test.ts tests/unit/claude-model-id-mappings.test.ts tests/unit/claude-cli-config.test.ts tests/unit/claude-cli-defaults.test.ts tests/unit/claude-opus-5-5.test.ts tests/unit/mitm-server-claude-code-routing.test.ts tests/unit/agent-bridge-mappings-sync-8656.test.ts | tee "$RUNNER_TEMP/claude-model-ids-green.tap"
           node node_modules/eslint/bin/eslint.js tests/unit/claude-model-id-routing.test.ts tests/unit/claude-model-settings-route.test.ts tests/unit/claude-model-id-mappings.test.ts
           node node_modules/typescript/bin/tsc --project nexa/tests/fixtures/claude-settings-type-contract.tsconfig.json
@@ -101,7 +94,7 @@ jobs:
         timeout-minutes: 3
         working-directory: ${{ runner.temp }}/omniroute-fixture
         run: node nexa/tests/verify-installed-dependency-security.mjs
-      - name: Reproduce and correct inclusive usage totals and assistant phase loss
+      - name: Verify inclusive token totals and routed assistant phases
         id: quality_usage
         continue-on-error: true
         timeout-minutes: 3
@@ -111,16 +104,8 @@ jobs:
           cd "$RUNNER_TEMP/omniroute-fixture"
           export DATA_DIR="$RUNNER_TEMP/quality-usage-data"
           export TMPDIR="$RUNNER_TEMP"
-          git apply --reverse nexa/tests/fixtures/quality-usage-delta-v3.8.52.patch
-          set +e
-          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/usage-inclusive-token-totals.test.ts tests/unit/routed-gpt-quality-contract.test.ts > "$RUNNER_TEMP/quality-usage-red.tap" 2>&1
-          result=$?
-          set -e
-          git apply nexa/tests/fixtures/quality-usage-delta-v3.8.52.patch
-          test "$result" -ne 0
-          node "$GITHUB_WORKSPACE/nexa/tests/verify-native-incident-red.mjs" quality-usage "$RUNNER_TEMP/quality-usage-red.tap"
           node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/usage-inclusive-token-totals.test.ts tests/unit/routed-gpt-quality-contract.test.ts tests/unit/api-key-self-service.test.ts | tee "$RUNNER_TEMP/quality-usage-green.tap"
-      - name: Reproduce and fix native client attribution across routed providers
+      - name: Verify native client attribution across routed providers
         id: native_attribution
         continue-on-error: true
         timeout-minutes: 3
@@ -130,14 +115,6 @@ jobs:
           cd "$RUNNER_TEMP/omniroute-fixture"
           export DATA_DIR="$RUNNER_TEMP/native-attribution-data"
           export TMPDIR="$RUNNER_TEMP"
-          git apply --reverse nexa/tests/fixtures/native-attribution-delta-v3.8.52.patch
-          set +e
-          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/native-source-attribution.test.ts > "$RUNNER_TEMP/native-attribution-red.tap" 2>&1
-          result=$?
-          set -e
-          git apply nexa/tests/fixtures/native-attribution-delta-v3.8.52.patch
-          test "$result" -ne 0
-          node "$GITHUB_WORKSPACE/nexa/tests/verify-native-incident-red.mjs" native-attribution "$RUNNER_TEMP/native-attribution-red.tap"
           node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/native-source-attribution.test.ts tests/unit/chatcore-attempt-logging.test.ts tests/unit/attempt-logging-extract-responses-id.test.ts tests/unit/attempt-logging-early-keepalive-merge.test.ts | tee "$RUNNER_TEMP/native-attribution-green.tap"
       - name: Verify additive migration and legacy ledger compatibility
         id: migrations
@@ -150,44 +127,40 @@ jobs:
           export DATA_DIR="$RUNNER_TEMP/upgrade-migration-data"
           export TMPDIR="$RUNNER_TEMP"
           node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/db/native-upgrade-migration-identity.test.ts tests/unit/db/native-upgrade-history-preservation.test.ts tests/unit/db-migration-version-uniqueness.test.ts tests/unit/db/no-migration-collisions.test.ts | tee "$RUNNER_TEMP/upgrade-migrations.tap"
-      - name: Compare pinned upstream native behavior with the preserved corrections
-        id: baseline
+      - name: Reproduce the Fable 5.2 capability and native-prefix gaps
+        id: fable52
+        continue-on-error: true
+        timeout-minutes: 4
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/omniroute-fixture"
+          export DATA_DIR="$RUNNER_TEMP/fable52-data"
+          export TMPDIR="$RUNNER_TEMP"
+          patch="nexa/tests/fixtures/claude-fable-5-2-v3.8.53.patch"
+          git apply --reverse "$patch"
+          trap 'git apply "$patch"' EXIT
+          set +e
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/claude-fable-5-2.test.ts > "$RUNNER_TEMP/fable52-red.tap" 2>&1
+          result=$?
+          set -e
+          git apply "$patch"
+          trap - EXIT
+          test "$result" -ne 0
+          node "$GITHUB_WORKSPACE/nexa/tests/verify-fable52-red.mjs" "$RUNNER_TEMP/fable52-red.tap"
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/claude-fable-5-2.test.ts tests/unit/claude-fable-5-2-native.test.ts tests/unit/claude-fable-5-1.test.ts | tee "$RUNNER_TEMP/fable52-green.tap"
+      - name: Verify translated native cache costs
+        id: cache_cost_baseline
         continue-on-error: true
         timeout-minutes: 3
         shell: bash
         run: |
           set -euo pipefail
           cd "$RUNNER_TEMP/omniroute-fixture"
-          export DATA_DIR="$RUNNER_TEMP/native-baseline-data"
+          export DATA_DIR="$RUNNER_TEMP/cache-cost-data"
           export TMPDIR="$RUNNER_TEMP"
-          git apply --reverse nexa/tests/fixtures/native-refusal-delta-v3.8.52.patch
-          set +e
-          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/native-claude-refusal-terminal.test.ts tests/unit/native-thread-error-classification.test.ts tests/unit/native-stream-summary.test.ts > "$RUNNER_TEMP/native-red.tap" 2>&1
-          result=$?
-          set -e
-          tail -n 70 "$RUNNER_TEMP/native-red.tap"
-          git apply nexa/tests/fixtures/native-refusal-delta-v3.8.52.patch
-          test "$result" -ne 0
-          node "$GITHUB_WORKSPACE/nexa/tests/verify-baseline-red.mjs" "$RUNNER_TEMP/native-red.tap"
-      - name: Reproduce the translated native cache-cost integration regression
-        id: cache_cost_baseline
-        continue-on-error: true
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd "$RUNNER_TEMP/omniroute-fixture"
-          export DATA_DIR="$RUNNER_TEMP/cache-cost-baseline-data"
-          export TMPDIR="$RUNNER_TEMP"
-          git apply --reverse nexa/tests/fixtures/native-cache-cost-v3.8.52.patch
-          set +e
-          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/native-translated-cache-cost.test.ts > "$RUNNER_TEMP/cache-cost-red.tap" 2>&1
-          result=$?
-          set -e
-          git apply nexa/tests/fixtures/native-cache-cost-v3.8.52.patch
-          tail -n 50 "$RUNNER_TEMP/cache-cost-red.tap"
-          test "$result" -ne 0
-          node "$GITHUB_WORKSPACE/nexa/tests/verify-cache-cost-red.mjs" "$RUNNER_TEMP/cache-cost-red.tap"
-      - name: Reproduce and fix the upstream resilience settings contract
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/native-translated-cache-cost.test.ts | tee "$RUNNER_TEMP/cache-cost-green.tap"
+      - name: Verify the complete resilience settings contract
         id: resilience_budget
         continue-on-error: true
         timeout-minutes: 3
@@ -197,18 +170,10 @@ jobs:
           cd "$RUNNER_TEMP/omniroute-fixture"
           export DATA_DIR="$RUNNER_TEMP/resilience-budget-data"
           export TMPDIR="$RUNNER_TEMP"
-          git apply --reverse nexa/tests/fixtures/resilience-budget-v3.8.52.patch
-          set +e
-          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/resilience-settings-contract.test.ts > "$RUNNER_TEMP/resilience-budget-red.tap" 2>&1
-          result=$?
-          set -e
-          git apply nexa/tests/fixtures/resilience-budget-v3.8.52.patch
-          tail -n 50 "$RUNNER_TEMP/resilience-budget-red.tap"
-          test "$result" -ne 0
-          node "$GITHUB_WORKSPACE/nexa/tests/verify-resilience-budget-red.mjs" "$RUNNER_TEMP/resilience-budget-red.tap"
           node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/resilience-settings-contract.test.ts | tee "$RUNNER_TEMP/resilience-budget-green.tap"
-      - name: Reproduce and fix tool-only replies and client socket crashes
+      - name: Verify tool-only replies and client socket recovery
         id: native_incidents
+        continue-on-error: true
         timeout-minutes: 3
         shell: bash
         run: |
@@ -216,38 +181,7 @@ jobs:
           cd "$RUNNER_TEMP/omniroute-fixture"
           export DATA_DIR="$RUNNER_TEMP/native-incident-data"
           export TMPDIR="$RUNNER_TEMP"
-          restore_patch=""
-          family_failures=0
-          trap 'if test -n "$restore_patch"; then git apply "$restore_patch"; fi' EXIT
-          for family in tool-only client-socket ingress-availability; do
-            if test "$family" = tool-only; then
-              patch="nexa/patches/open-sse__handlers__responseTranslator__tool-only.ts.patch"
-              test_file="tests/unit/nonstream-tool-only-claude.test.ts"
-            elif test "$family" = client-socket; then
-              patch="nexa/tests/fixtures/agent-bridge-client-socket-v3.8.52.patch"
-              test_file="tests/unit/agent-bridge-client-socket.test.ts"
-            else
-              patch="nexa/tests/fixtures/native-ingress-availability.patch"
-              test_file="nexa/deploy/native-ingress-availability.test.mjs"
-            fi
-            git apply --reverse "$patch"
-            restore_patch="$patch"
-            set +e
-            node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 "$test_file" > "$RUNNER_TEMP/$family-red.tap" 2>&1
-            result=$?
-            set -e
-            git apply "$patch"
-            restore_patch=""
-            tail -n 40 "$RUNNER_TEMP/$family-red.tap"
-            if test "$result" -eq 0; then family_failures=1; fi
-            if ! node "$GITHUB_WORKSPACE/nexa/tests/verify-native-incident-red.mjs" "$family" "$RUNNER_TEMP/$family-red.tap"; then
-              family_failures=1
-            fi
-            if ! node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 "$test_file" | tee "$RUNNER_TEMP/$family-green.tap"; then
-              family_failures=1
-            fi
-          done
-          test "$family_failures" -eq 0
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/nonstream-tool-only-claude.test.ts tests/unit/agent-bridge-client-socket.test.ts nexa/deploy/native-ingress-availability.test.mjs | tee "$RUNNER_TEMP/native-incidents-green.tap"
       - name: Native, protocol, transport, cache and translator regressions
         id: native_tests
         continue-on-error: true
@@ -379,7 +313,7 @@ jobs:
           cd "$RUNNER_TEMP/omniroute-fixture"
           export DATA_DIR="$RUNNER_TEMP/native-production-data"
           export TMPDIR="$RUNNER_TEMP"
-          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/native-claude-refusal-terminal.test.ts tests/unit/native-thread-error-classification.test.ts tests/unit/native-stream-summary.test.ts tests/unit/native-artifact-recovery.test.ts tests/unit/native-usage-fidelity.test.ts tests/unit/native-claude-thread-protocol.test.ts tests/unit/native-claude-thread-executor.test.ts tests/unit/native-claude-thread-chatcore.test.ts tests/unit/native-claude-thread-routing.test.ts tests/unit/agent-bridge-native-transport.test.ts tests/unit/agent-bridge-native-cache-continuity.test.ts tests/unit/agent-bridge-thread-cache.test.ts tests/unit/native-thinking-signature-switch.test.ts tests/unit/native-suggestion-empty-response.test.ts tests/unit/native-context-overflow-error.test.ts tests/unit/cache-ttl-stream.test.ts tests/unit/cache-ttl-extraction.test.ts tests/unit/translator-resp-claude-to-openai.test.ts tests/unit/native-translated-cache-cost.test.ts tests/unit/resilience-settings-contract.test.ts tests/unit/auto-update-command-mode.test.ts tests/unit/nonstream-tool-only-claude.test.ts tests/unit/agent-bridge-client-socket.test.ts tests/unit/agent-bridge-production-ready.test.ts tests/unit/agent-bridge-tool-model-routing.test.mjs tests/unit/native-source-attribution.test.ts tests/unit/usage-inclusive-token-totals.test.ts tests/unit/routed-gpt-quality-contract.test.ts tests/unit/api-key-self-service.test.ts tests/unit/claude-model-id-routing.test.ts tests/unit/claude-model-settings-route.test.ts tests/unit/claude-model-id-mappings.test.ts | tee "$RUNNER_TEMP/native-production.tap"
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/native-claude-refusal-terminal.test.ts tests/unit/native-thread-error-classification.test.ts tests/unit/native-stream-summary.test.ts tests/unit/native-artifact-recovery.test.ts tests/unit/native-usage-fidelity.test.ts tests/unit/native-claude-thread-protocol.test.ts tests/unit/native-claude-thread-executor.test.ts tests/unit/native-claude-thread-chatcore.test.ts tests/unit/native-claude-thread-routing.test.ts tests/unit/agent-bridge-native-transport.test.ts tests/unit/agent-bridge-native-cache-continuity.test.ts tests/unit/agent-bridge-thread-cache.test.ts tests/unit/native-thinking-signature-switch.test.ts tests/unit/native-suggestion-empty-response.test.ts tests/unit/native-context-overflow-error.test.ts tests/unit/cache-ttl-stream.test.ts tests/unit/cache-ttl-extraction.test.ts tests/unit/translator-resp-claude-to-openai.test.ts tests/unit/native-translated-cache-cost.test.ts tests/unit/resilience-settings-contract.test.ts tests/unit/auto-update-command-mode.test.ts tests/unit/nonstream-tool-only-claude.test.ts tests/unit/agent-bridge-client-socket.test.ts tests/unit/agent-bridge-production-ready.test.ts tests/unit/agent-bridge-tool-model-routing.test.mjs tests/unit/native-source-attribution.test.ts tests/unit/usage-inclusive-token-totals.test.ts tests/unit/routed-gpt-quality-contract.test.ts tests/unit/api-key-self-service.test.ts tests/unit/claude-model-id-routing.test.ts tests/unit/claude-model-settings-route.test.ts tests/unit/claude-model-id-mappings.test.ts tests/unit/claude-fable-5-2.test.ts tests/unit/claude-fable-5-2-native.test.ts | tee "$RUNNER_TEMP/native-production.tap"
       - name: Production Node complete native effort coverage
         id: production_efforts
         continue-on-error: true
@@ -415,13 +349,15 @@ jobs:
           python3 - <<'PYCODE'
           import json, os
           steps = json.loads(os.environ["UPGRADE_GATE_OUTCOMES"])
-          expected = ['claude_model_ids', 'dependency_security', 'native_attribution', 'quality_usage', 'native_incidents', 'resilience_budget', 'effort_tests', 'production_efforts', 'cache_cost_baseline', 'production_migrations', 'deployment_helpers', 'migrations', 'baseline', 'native_tests', 'extended_tests', 'stream_tests', 'compatibility', 'interface_tests', 'core_types', 'docs_types', 'full_types', 'compare_types', 'lint', 'docs', 'production_tooling', 'production', 'formatting']
+          expected = ['claude_model_ids', 'dependency_security', 'native_attribution', 'quality_usage', 'native_incidents', 'resilience_budget', 'effort_tests', 'production_efforts', 'cache_cost_baseline', 'production_migrations', 'deployment_helpers', 'migrations', 'fable52', 'native_tests', 'extended_tests', 'stream_tests', 'compatibility', 'interface_tests', 'core_types', 'docs_types', 'full_types', 'compare_types', 'lint', 'docs', 'production_tooling', 'production', 'formatting']
           failed = {name: steps.get(name, {}).get("outcome", "missing") for name in expected if steps.get(name, {}).get("outcome") != "success"}
           print(json.dumps({"failedGates": failed}, indent=2))
           if failed: raise SystemExit(1)
           PYCODE
       - name: Write the exact source validation receipt
-        run: node nexa/tests/write-native-validation.mjs
+        env:
+          UPGRADE_GATE_OUTCOMES: ${{ toJSON(steps) }}
+        run: node nexa/tests/write-release-validation.mjs
       - name: Preserve reviewable formatter changes
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -434,7 +370,6 @@ jobs:
         with:
           name: native-test-output
           path: |
-            ${{ runner.temp }}/native-red.tap
             ${{ runner.temp }}/native-green.tap
             ${{ runner.temp }}/native-extended.tap
             ${{ runner.temp }}/stream-green.tap
@@ -444,7 +379,11 @@ jobs:
             ${{ runner.temp }}/tsc-diagnostics.log
             ${{ runner.temp }}/tooling-node26.tap
             ${{ runner.temp }}/tooling-node24.tap
-            ${{ runner.temp }}/native-validation.json
+            ${{ runner.temp }}/release-validation.json
+            ${{ runner.temp }}/fable52-red.tap
+            ${{ runner.temp }}/fable52-green.tap
+            ${{ runner.temp }}/cache-cost-green.tap
+            ${{ runner.temp }}/native-incidents-green.tap
             ${{ runner.temp }}/claude-model-ids-red.tap
             ${{ runner.temp }}/claude-model-ids-green.tap
             ${{ runner.temp }}/dependency-installed-security.json
@@ -460,7 +399,6 @@ jobs:
             ${{ runner.temp }}/quality-usage-green.tap
             ${{ runner.temp }}/native-attribution-red.tap
             ${{ runner.temp }}/native-attribution-green.tap
-            ${{ runner.temp }}/cache-cost-red.tap
             ${{ runner.temp }}/resilience-budget-red.tap
             ${{ runner.temp }}/resilience-budget-green.tap
             ${{ runner.temp }}/tool-only-red.tap

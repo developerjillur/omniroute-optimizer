@@ -8,7 +8,7 @@ assert.equal(process.env.GITHUB_ACTIONS, "true");
 assert.ok(process.env.RUNNER_TEMP);
 const root = process.cwd();
 const config = JSON.parse(
-  fs.readFileSync("nexa/security/dependency-targets-2026-11-06.json", "utf8")
+  fs.readFileSync("nexa/security/dependency-targets-2026-11-10.json", "utf8")
 );
 const declarations = JSON.parse(fs.readFileSync("package.json", "utf8"));
 const lockBytes = fs.readFileSync("package-lock.json");

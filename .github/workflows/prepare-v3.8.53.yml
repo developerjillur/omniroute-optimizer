@@ -2,8 +2,6 @@ name: Prepare v3.8.53 source
 
 on:
   workflow_dispatch:
-  push:
-    branches: [feat/fable-5-2-v3-8-53]
 
 permissions:
   contents: read

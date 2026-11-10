@@ -1,0 +1,39 @@
+diff --git a/tests/unit/agent-bridge-state-full-payload-8656.test.ts b/tests/unit/agent-bridge-state-full-payload-8656.test.ts
+index 885248f16ef8ba7038ed098b070b653c0e02cd50..ef2b9c511351c78a3ad3f99dc7705b8a612c388c 100644
+--- a/tests/unit/agent-bridge-state-full-payload-8656.test.ts
++++ b/tests/unit/agent-bridge-state-full-payload-8656.test.ts
+@@ -17,6 +17,7 @@
+ import fs from "fs";
+ import os from "os";
+ import path from "path";
++import { REGISTRY } from "../../open-sse/config/providerRegistry.ts";
+ 
+ const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-8656-"));
+ process.env.DATA_DIR = TEST_DATA_DIR;
+@@ -95,9 +96,23 @@
+   // Assert: mappings must be present so the UI can render the model mapping table
+   assert.ok(typeof body.mappings === "object", "body.mappings missing");
+   assert.ok(Array.isArray(body.mappings["claude-code"]), "mappings[claude-code] missing");
+-  assert.equal(body.mappings["claude-code"].length, 1);
+-  assert.equal(body.mappings["claude-code"][0].source, "claude-sonnet-4");
+-  assert.equal(body.mappings["claude-code"][0].target, "openai/gpt-4o");
++  const rows = (body.mappings as Record<string, Array<{ source: string; target: string }>>)[
++    "claude-code"
++  ];
++  const expected = new Map<string, string>(
++    (REGISTRY.claude?.models ?? []).map((model) => [model.id, `cc/${model.id}`] as const)
++  );
++  expected.set("claude-sonnet-4", "openai/gpt-4o");
++  assert.deepEqual(
++    new Map(rows.map((row) => [row.source, row.target])),
++    expected,
++    "state must preserve the owner mapping and include every read-only native default"
++  );
++  const stored = core
++    .getDbInstance()
++    .prepare("SELECT COUNT(*) AS n FROM agent_bridge_mappings WHERE agent_id = ?")
++    .get("claude-code") as { n: number };
++  assert.equal(stored.n, 1, "state reads must not persist inherited defaults");
+ });
+ 
+ test("GET /state: returns bypassPatterns array (#8656)", async () => {

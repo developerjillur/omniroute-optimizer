@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
-  "trackedNexaFiles": 517,
-  "totalNexaBytes": 2401823,
+  "trackedNexaFiles": 519,
+  "totalNexaBytes": 2405542,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -713,9 +713,9 @@
     {
       "path": "nexa/manifest.json",
       "mode": "100644",
-      "gitBlobSha": "b2f8f04eb84e7d990b27dd461513738658ec2008",
-      "bytes": 92691,
-      "sha256": "dbdc1e9e81c4a9c9dbf1201686e64b606ed5936db3f9f5c89ba2ec677a3585c4"
+      "gitBlobSha": "df923ad4896bc76fdea7e0a8c20be1abd338ffc9",
+      "bytes": 93253,
+      "sha256": "af1556ce008b56490953297bb2d19c8938ca53248fa720df8a0bba6f7ac144a0"
     },
     {
       "path": "nexa/new/bin/cli/utils/packageMigrations.mjs",
@@ -2902,6 +2902,13 @@
       "sha256": "d05a6928e9d40ea1d66c1c9b128943ca291b8f22de6425008c249b8423291074"
     },
     {
+      "path": "nexa/patches/tests__unit__agent-bridge-state-full-payload-8656.test.ts.patch",
+      "mode": "100644",
+      "gitBlobSha": "40ee26ca98e4c2b6402bdf06d4e207a9f3ac3386",
+      "bytes": 1940,
+      "sha256": "5201ab75605f5953e2f8dd215ca07f02f3ee86415450263dcc877224373771cf"
+    },
+    {
       "path": "nexa/patches/tests__unit__agy-family-not-connection-cooldown.test.ts.patch",
       "mode": "100644",
       "gitBlobSha": "cfcdce1ffb6fac1bf99f9638b4825ee7d6bdf63b",
@@ -3061,6 +3068,13 @@
       "gitBlobSha": "ae1ab7f70c5a9aceae5ce15d58fc6657496d6a86",
       "bytes": 4673,
       "sha256": "9d74d79a130193ec5e2e50c152b35bf9e4f6e6c27a8ecad646665a8b40709522"
+    },
+    {
+      "path": "nexa/patches/tests__unit__db-agent-bridge-mappings.test.ts.patch",
+      "mode": "100644",
+      "gitBlobSha": "8f415d827d32fd8aa3b8b632457d7841ada2aa66",
+      "bytes": 1217,
+      "sha256": "167ef06ce91b73c70103435937dd585dfedd3dea71cb46158c5920ce6ab46be8"
     },
     {
       "path": "nexa/patches/tests__unit__db-migration-version-uniqueness.test.ts.patch",

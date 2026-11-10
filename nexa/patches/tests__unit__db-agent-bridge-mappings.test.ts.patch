@@ -1,0 +1,28 @@
+diff --git a/tests/unit/db-agent-bridge-mappings.test.ts b/tests/unit/db-agent-bridge-mappings.test.ts
+index 83ec3baf1c9e0aea944d9055ebc99cc0e1cab639..c33e04276c8f84806c8abe7dc0fc1c5326477832 100644
+--- a/tests/unit/db-agent-bridge-mappings.test.ts
++++ b/tests/unit/db-agent-bridge-mappings.test.ts
+@@ -117,8 +117,22 @@
+ 
+ test("deleteMapping is a no-op when mapping does not exist", () => {
+   mod.setMappings("claude-code", [{ source: "claude-3", target: "anthropic/claude-opus-4" }]);
++  const before = mod.getMappingsForAgent("claude-code");
+   mod.deleteMapping("claude-code", "nonexistent-model");
+ 
+   const rows = mod.getMappingsForAgent("claude-code");
+-  assert.equal(rows.length, 1);
++  assert.deepEqual(
++    rows,
++    before,
++    "deleting an absent mapping must preserve explicit and inherited rows"
++  );
++  assert.equal(
++    rows.find((row) => row.source_model === "claude-3")?.target_model,
++    "anthropic/claude-opus-4"
++  );
++  const stored = core
++    .getDbInstance()
++    .prepare("SELECT COUNT(*) AS n FROM agent_bridge_mappings WHERE agent_id = ?")
++    .get("claude-code") as { n: number };
++  assert.equal(stored.n, 1, "reading inherited defaults must not persist extra mappings");
+ });

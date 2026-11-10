@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 356,
-    "patches": 213,
+    "total": 358,
+    "patches": 215,
     "new": 137,
     "tooling": 6,
     "upstreamCandidates": 27,
     "nexaSpecific": 109,
-    "needsReview": 220,
+    "needsReview": 222,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
   },
@@ -1403,6 +1403,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/tests__unit__agent-bridge-state-full-payload-8656.test.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "tests/unit/agent-bridge-state-full-payload-8656.test.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/tests__unit__agy-family-not-connection-cooldown.test.ts.patch",
       "layer": "patch",
       "class": "nexa-specific",
@@ -1575,6 +1583,14 @@
       "layer": "patch",
       "class": "upstream-candidate",
       "target": "tests/unit/csp-lan-ws-5083.test.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/tests__unit__db-agent-bridge-mappings.test.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "tests/unit/db-agent-bridge-mappings.test.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },

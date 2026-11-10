@@ -4,7 +4,11 @@ Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। Om
 
 ## v3.8.53 ও Fable 5.2 — build অপেক্ষায়
 
-নতুন released base `191dce8d534ceb56c28a08e71381284a9a87838f`-এ Nexa customization port এবং `claude-fable-5-2` support প্রস্তুত করা হচ্ছে। Imported model ও owner settings অক্ষত রেখে native context/effort, signed-prefix preservation, tool payload ও standard/fast cache pricing পরীক্ষা হচ্ছে। Source patch/lock preparation ও production dependency audit পাস। [Focused validation](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42744642403)-এ ৬৭/৬৭ native/compatibility, ১২/১২ interface, socket guard ও core typecheck পাস করেছে। পূর্ণ functional/type/lint/docs acceptance final commit-এর CI receipt দিয়ে নির্ধারিত হবে। [Upgrade note](nexa/docs/FABLE-5.2-UPGRADE-3.8.53-2026-11-10.md)-এ scope ও সীমা আছে।
+Released base `191dce8d534ceb56c28a08e71381284a9a87838f`-এ আগের Nexa customization port এবং `claude-fable-5-2` native routing/metadata source validation সম্পন্ন। Imported model, explicit mappings ও owner-selected defaults অক্ষত। Native signed prefix, selected effort, tool payload, refusal, Thread continuity, HTTP-attempt identity এবং standard/fast cache pricing সংরক্ষণ করা হয়েছে।
+
+[`10b61dd`-এর পূর্ণ source CI](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42745190221) পাস: Fable ২২/২২, compatibility ১৩৫০/১৩৫০, stream ৩৯৬/৩৯৬ এবং Node 24 native ২৭৮/২৭৮; migrations, core types, lint, docs ও production dependency audit-সহ সব required gate সফল। Full TypeScript `7314 ≤ 7314`; pristine upstream `7361`, নতুন diagnostic identity `0`। এটি inherited backlog শূন্য হওয়ার দাবি নয়।
+
+[Exact source receipt](reports/fable-5.2-v3.8.53-source-2026-11-10.json)-এ runtime versions, test counts/hashes, budget ও limits আছে। [Upgrade note](nexa/docs/FABLE-5.2-UPGRADE-3.8.53-2026-11-10.md)-এ compatibility scope আছে। Linux CI-তে macOS wildcard listener-এর একটি platform-specific test skip ছিল; actual package, macOS ও live model acceptance build-এর পরে প্রয়োজন।
 
 ব্যবহারকারীর নির্দেশে production build, package acceptance ও live promotion অপেক্ষায় আছে। নিচের চলমান v3.8.52 release record ঐতিহাসিক deployment evidence; নতুন source প্রস্তুতি live upgrade নয়।
 

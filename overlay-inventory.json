@@ -7,7 +7,7 @@
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
   "trackedNexaFiles": 519,
-  "totalNexaBytes": 2405542,
+  "totalNexaBytes": 2409344,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -405,16 +405,16 @@
     {
       "path": "nexa/deploy/seal-package.py",
       "mode": "100644",
-      "gitBlobSha": "dba21836517d7d297629c5eea473bae8ee174d26",
-      "bytes": 8544,
-      "sha256": "5c8012d50c69621ec56accfdf662171a052e11cc3428179c81d2fed6f0775442"
+      "gitBlobSha": "38734b821a7b295987ae59ad77e4a00bba003813",
+      "bytes": 10116,
+      "sha256": "e5bc47e473696a8017b5d607afcbd6fef938984a05e52b4395362d16947e27ea"
     },
     {
       "path": "nexa/deploy/seal-package.test.py",
       "mode": "100644",
-      "gitBlobSha": "e0720e2cf92d5f45f605434830ccd9ed14b2756c",
-      "bytes": 5998,
-      "sha256": "93b3014e3569b916933337831222be6ff4e51dbf9e583cd6ab5f33142bc7fa21"
+      "gitBlobSha": "0cebc72a437189e9c8fbd9c20416ffd0ef2941ec",
+      "bytes": 7747,
+      "sha256": "e7fc691b6bcdc2b1d72439c82be7e7b60bee0e23cf2b231076fe078bc846eb22"
     },
     {
       "path": "nexa/deploy/smoke-api-key.mjs",
@@ -3513,9 +3513,9 @@
     {
       "path": "nexa/tests/publication-install-integration.mjs",
       "mode": "100644",
-      "gitBlobSha": "003f10bca89fb06cdf521e92313eab8f1d36a9f0",
-      "bytes": 6478,
-      "sha256": "9a1684885a9421efc162433134894acd726d7ebcea3fc58d929eaac59d3f3a3d"
+      "gitBlobSha": "ea9bc3fd3888f35f79cde45e91df79bb5195089f",
+      "bytes": 6959,
+      "sha256": "12c87c54e16d2153a11da1a2fb3e02ba707404205b7c5734b4a9ef6ad6965515"
     },
     {
       "path": "nexa/tests/resilience-budget-red.test.mjs",

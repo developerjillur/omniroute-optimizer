@@ -59,6 +59,34 @@ class PublicationLockTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "reviewed effective edges"):
             self.run_seal()
 
+    def test_published_workspace_discovery_is_removed_without_changing_runtime_or_source(self):
+        self.metadata["workspaces"] = ["open-sse"]
+        self.source.write_text(json.dumps(self.data))
+        publication = json.loads(json.dumps(self.data))
+        publication["packages"][""].pop("workspaces")
+        self.lock.write_text(json.dumps(publication))
+        self.make_archive({"package/open-sse/package.json": b'{"name":"local-workspace","version":"1.0.0"}'})
+        original_manifest = json.loads(json.dumps(self.metadata))
+        result = self.run_seal()
+        self.assertTrue(result["compiledAssetsUnchanged"])
+        self.assertEqual(result["metadataChanges"], [{"member": "package/package.json",
+                         "field": "workspaces", "before": ["open-sse"], "after": None}])
+        with tarfile.open(self.output, "r:gz") as stream:
+            published = json.load(stream.extractfile("package/package.json"))
+            self.assertNotIn("workspaces", published)
+            self.assertEqual(published, {k: v for k, v in self.metadata.items() if k != "workspaces"})
+            self.assertEqual(stream.extractfile("package/dist/server.js").read(),
+                             b"preserved compiled application")
+            self.assertIsNotNone(stream.extractfile("package/open-sse/package.json"))
+        self.assertEqual(self.metadata, original_manifest)
+        self.assertEqual(json.loads(self.source.read_text())["packages"][""], original_manifest)
+
+    def test_unreviewed_workspace_declaration_is_rejected(self):
+        self.metadata["workspaces"] = ["unexpected"]
+        self.make_archive()
+        with self.assertRaisesRegex(ValueError, "workspace declarations differ"):
+            self.run_seal()
+
     def test_only_a_recorded_effective_override_may_change_a_dependency_edge(self):
         self.metadata["overrides"] = {"editor": {"dompurify": "3.4.17"}}
         self.data["packages"]["node_modules/editor"] = {

@@ -57,6 +57,18 @@ def seal(archive, source_lock, publication_lock, output, effective_edges=None):
     require(lock.get("lockfileVersion") == 3, "Publication requires lockfile version 3")
     with tarfile.open(archive, "r:gz") as stream:
         metadata = json.load(stream.extractfile("package/package.json"))
+    published_metadata = copy.deepcopy(metadata)
+    metadata_changes = []
+    if "workspaces" in metadata:
+        require(metadata["workspaces"] == source["packages"][""].get("workspaces"),
+                "Published workspace declarations differ from the validated source")
+        # npm ci still discovers bundled workspace directories when this field
+        # remains present, even with --workspaces=false. The published graph
+        # contains registry dependencies; local sources remain ordinary files.
+        published_metadata.pop("workspaces")
+        metadata_changes.append({"member": "package/package.json", "field": "workspaces",
+                                 "before": metadata["workspaces"], "after": None})
+    published_metadata_bytes = (json.dumps(published_metadata, indent=2) + "\n").encode()
     require(lock.get("name") == metadata["name"] and
             lock.get("version") == metadata["version"], "Publication identity mismatch")
     for field in ("dependencies", "optionalDependencies"):
@@ -122,6 +134,11 @@ def seal(archive, source_lock, publication_lock, output, effective_edges=None):
                     for member in original:
                         if member.name == "package/package.json":
                             stamp = member.mtime
+                            if metadata_changes:
+                                replacement = copy.copy(member)
+                                replacement.size = len(published_metadata_bytes)
+                                target.addfile(replacement, io.BytesIO(published_metadata_bytes))
+                                continue
                         target.addfile(copy.copy(member), original.extractfile(member)
                                        if member.isfile() else None)
                     member = tarfile.TarInfo("package/npm-shrinkwrap.json")
@@ -129,16 +146,21 @@ def seal(archive, source_lock, publication_lock, output, effective_edges=None):
                     target.addfile(member, io.BytesIO(lock_bytes))
     after = inventory(output)
     require(set(after) == set(before) | {"package/npm-shrinkwrap.json"}, "Unexpected archive change")
-    require(all(after[name] == entry for name, entry in before.items()),
+    require(all(after[name] == entry for name, entry in before.items()
+                if not (metadata_changes and name == "package/package.json")),
             "A compiled or original package member changed")
+    if metadata_changes:
+        expected = dict(before["package/package.json"], size=len(published_metadata_bytes),
+                        sha256=hashlib.sha256(published_metadata_bytes).hexdigest())
+        require(after["package/package.json"] == expected, "Unexpected publication manifest change")
     return {
         "status": "SEALED_PACKAGE_CREATED_NOT_ACCEPTED",
         "originalArchive": str(archive), "originalSHA256": sha(archive),
         "archive": str(output), "sha256": sha(output), "bytes": output.stat().st_size,
         "sourceLockSHA256": sha(source_lock), "publicationLockSHA256": sha(publication_lock),
-        "originalMembersPreserved": len(before), "compiledAssetsUnchanged": True,
+        "originalMembersPreserved": len(before) - bool(metadata_changes), "compiledAssetsUnchanged": True,
         "addedMembers": ["package/npm-shrinkwrap.json"],
-        "metadataChanges": [],
+        "metadataChanges": metadata_changes,
         "effectiveSourceOverrideEdges": len(changes),
         "effectiveEdgesSHA256": sha(effective_edges) if effective_edges else None,
         "actualGlobalInstallAuditRequired": True, "livePromotionPerformed": False,

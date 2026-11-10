@@ -1,0 +1,25 @@
+{
+  "status": "PUBLICATION_WORKSPACE_FIX_VALIDATED",
+  "runtimeSourceCommit": "7f4efcc5db26a4095b4f35fb8c28aecdb3df9bb0",
+  "runtimeOverlayTree": "823324052b483508be354b63c6e53075fb5a0092",
+  "sourceValidationRun": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/42751361265",
+  "requiredSourceGatesPassed": 28,
+  "sourceValidationReceiptSHA256": "2a21e4042425789c52f95f2a1ad256ad3879ff16543e38300096c761c1986d88",
+  "issue": "Bundled workspace directories remained discoverable in a standalone publication and npm ci rejected the pruned workspace lock",
+  "redReproduction": {
+    "assertion": "npm ci reports Missing publication-fixture-workspace@1.0.0 from lock file",
+    "receiptSHA256": "77de2cdfd9b40efd956b006dad9ccf49e66f3f770c040eedf504d45dfcee764d"
+  },
+  "green": {
+    "sealUnitTests": 12,
+    "actualCleanInstallPassed": true,
+    "dependencyOverrideHonored": "is-number@7.0.0 replaces baseline nested 6.0.0",
+    "workspaceSourcesRetainedAsFiles": true,
+    "workspaceLinksInstalled": false,
+    "lifecycleScriptsEnabled": true,
+    "receiptSHA256": "9609b0bd2d1434016a4892445a7096dc4ad55d2197989a4a78a684060cb59628"
+  },
+  "change": "Remove only the reviewed source workspaces declaration from the publication manifest; preserve every other original member and compiled asset byte for byte",
+  "applicationArtifactAcceptance": false,
+  "liveDeployment": false
+}

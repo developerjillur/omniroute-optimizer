@@ -49,6 +49,9 @@ jobs:
           node nexa/apply.mjs
           npm ci --ignore-scripts --no-audit --no-fund
           npm rebuild better-sqlite3 --foreground-scripts
+      - name: Verify the fixture socket guard
+        id: network_guard
+        run: node --test nexa/tests/isolated-network.test.mjs
       - name: Parse the applied source
         id: syntax
         working-directory: ${{ runner.temp }}/focused-application
@@ -82,7 +85,7 @@ jobs:
           import json, os, re
           from pathlib import Path
           steps = json.loads(os.environ['FOCUSED_OUTCOMES'])
-          failed = {name: steps.get(name, {}).get('outcome', 'missing') for name in ['syntax','native','interface','core'] if steps.get(name, {}).get('outcome') != 'success'}
+          failed = {name: steps.get(name, {}).get('outcome', 'missing') for name in ['network_guard','syntax','native','interface','core'] if steps.get(name, {}).get('outcome') != 'success'}
           tap = Path(os.environ['RUNNER_TEMP']) / 'focused-native.tap'
           counts = {}
           if tap.is_file():

@@ -172,7 +172,7 @@ describe("visible cost refresh", () => {
       <ApiKeyUsageLimitCard payload={value} loading={false} locale="en" onSave={vi.fn()} />
     );
     await mount(view(payload));
-    const daily = container.querySelectorAll("input")[0];
+    const daily = container.querySelector<HTMLInputElement>('input[type="number"]')!;
     const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
     await act(async () => {
       setter.call(daily, "17");

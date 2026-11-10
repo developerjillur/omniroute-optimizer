@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
-  "trackedNexaFiles": 516,
-  "totalNexaBytes": 2391015,
+  "trackedNexaFiles": 517,
+  "totalNexaBytes": 2393949,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -1259,9 +1259,9 @@
     {
       "path": "nexa/new/tests/unit/claude-fable-5-2-native.test.ts",
       "mode": "100644",
-      "gitBlobSha": "4f580968be2adf495acd750032a390eaa4dd95d9",
-      "bytes": 6241,
-      "sha256": "bc0aec24af54e77dfd0e4e293944aaae153e43157758a0204ae01c2a6fbf764e"
+      "gitBlobSha": "20b3dbea33651c0b37ff6879ecc14556ebab4a55",
+      "bytes": 6471,
+      "sha256": "a85c8dd99424195fb7c5c0bbbfdf9e591970424075be70fb251ea659b814c09f"
     },
     {
       "path": "nexa/new/tests/unit/claude-fable-5-2.test.ts",
@@ -1581,9 +1581,9 @@
     {
       "path": "nexa/new/tests/unit/nexa-google-quota-token-refresh.test.ts",
       "mode": "100644",
-      "gitBlobSha": "7d86db1dc81722a2d5fc3d4111881cca5944182a",
-      "bytes": 3468,
-      "sha256": "95d323e613534ae3dbd29405a72c52c0c776e54c51d99db45d2c3345bd2adc1c"
+      "gitBlobSha": "3fc6fcbdb1a9e9630805ea994c5fad813524d294",
+      "bytes": 3679,
+      "sha256": "4b98ca4b3801f57add3c723229a5032b1c795abf8a1f1ce674f2065cd90523a0"
     },
     {
       "path": "nexa/new/tests/unit/nexa-model-test-connection.test.ts",
@@ -1658,9 +1658,9 @@
     {
       "path": "nexa/new/tests/unit/ui/cost-live-refresh.test.tsx",
       "mode": "100644",
-      "gitBlobSha": "2168c5763a0a654acb016bc8a74b2fcc49b33d33",
-      "bytes": 6641,
-      "sha256": "2ecc6e19f3f3c42b18ba5a9c8b6e22eb3e0cc2e857f00fb9d6370796b9ceeed6"
+      "gitBlobSha": "921918feb51406723cad3c24e199fdf30a55c0f0",
+      "bytes": 6669,
+      "sha256": "4d9d94c34e8a6b47d3f4ba870a30bce6e0de45218ad5117634e42fdb8b836f44"
     },
     {
       "path": "nexa/new/tests/unit/ui/native-cache-panel.test.ts",
@@ -3457,9 +3457,16 @@
     {
       "path": "nexa/tests/isolated-network.mjs",
       "mode": "100644",
-      "gitBlobSha": "93e539f109b9354f523afbc2a6703a35133fd546",
-      "bytes": 639,
-      "sha256": "c8ff7fd5b0ba5cd2bd49ac324d3d02ca051a83be96c0b32274fb5c867ffa7291"
+      "gitBlobSha": "7d9fa813eb18732dd9ff7724ca8cd7f3703a641f",
+      "bytes": 2025,
+      "sha256": "4d505891c4963a9a312825e3d51aaac1eed1a0c7179be199c9ade5375664ea61"
+    },
+    {
+      "path": "nexa/tests/isolated-network.test.mjs",
+      "mode": "100644",
+      "gitBlobSha": "94777448acebb731cd3c5957ec0ce6c87568ed38",
+      "bytes": 1079,
+      "sha256": "4e5161a201afb85c97fdf8794020acfbafd54aac2f8e2a8efaecd897ebec18b5"
     },
     {
       "path": "nexa/tests/overlay-base-version.test.mjs",

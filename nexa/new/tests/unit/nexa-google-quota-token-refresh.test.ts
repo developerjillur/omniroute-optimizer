@@ -12,6 +12,9 @@ const providers = await import("../../src/lib/db/providers.ts");
 const { getQuotaUsageWithRefreshedToken } = await import("../../src/domain/quotaAccountRefresh.ts");
 const { googleVerificationData, hasGoogleVerificationBlock, GOOGLE_VERIFICATION_MESSAGE } =
   await import("../../src/lib/providers/googleAccountHealth.ts");
+// Initialize the transport before installing a mock: its first import replaces
+// global fetch. Socket guards remain installed beneath either fetch function.
+await import("../../open-sse/utils/proxyFetch.ts");
 const originalFetch = globalThis.fetch;
 
 test.after(() => {

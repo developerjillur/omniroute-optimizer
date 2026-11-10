@@ -132,11 +132,15 @@ test("production Fable 5.2 native dispatch preserves signed history, tools, effo
   let rows: Array<{ service_tier: string }> = [];
   for (let attempt = 0; attempt < 100 && rows.length < 6; attempt++) {
     rows = getDbInstance()
-      .prepare("SELECT service_tier FROM call_logs WHERE model=?")
+      .prepare("SELECT service_tier FROM usage_history WHERE model=?")
       .all(model) as typeof rows;
     if (rows.length < 6) await new Promise((resolve) => setTimeout(resolve, 10));
   }
   assert.equal(rows.length, 6);
+  const callCount = getDbInstance()
+    .prepare("SELECT COUNT(*) AS n FROM call_logs WHERE model=?")
+    .get(model) as { n: number };
+  assert.equal(callCount.n, 6, "each native dispatch must produce one logical call log");
   assert.equal(rows.filter((row) => row.service_tier === "fast").length, 5);
   assert.equal(
     rows.filter((row) => row.service_tier === "standard").length,

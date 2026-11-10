@@ -1,8 +1,8 @@
 diff --git a/open-sse/services/genericQuotaFetcher.ts b/open-sse/services/genericQuotaFetcher.ts
-index 253a49b17d715b3d75a9bd920d23dad759e48de9..bb2cafe2f3c09601a7eeb0228ab81b2c541cbbae 100644
+index 460355b40061d4ff66cefa2819195e4450a0d1e0..242385dda75418a71f41dee29244f3e24adfe83e 100644
 --- a/open-sse/services/genericQuotaFetcher.ts
 +++ b/open-sse/services/genericQuotaFetcher.ts
-@@ -28,7 +28,12 @@
+@@ -29,7 +29,12 @@ import {
    type QuotaFetcher,
    type QuotaInfo,
  } from "./quotaPreflight.ts";
@@ -16,7 +16,7 @@ index 253a49b17d715b3d75a9bd920d23dad759e48de9..bb2cafe2f3c09601a7eeb0228ab81b2c
  import { boundedMap } from "../../src/lib/quota/boundedMap.ts";
  
  type UsageFetcher = (
-@@ -311,14 +316,11 @@
+@@ -312,14 +317,11 @@ export function convertUsageToQuotaInfo(
        ? getAntigravityQuotaFamily(context.requestedModel)
        : null;
    const providerScopedWindows =
@@ -35,7 +35,7 @@ index 253a49b17d715b3d75a9bd920d23dad759e48de9..bb2cafe2f3c09601a7eeb0228ab81b2c
          )
        : windows;
    if (Object.keys(providerScopedWindows).length === 0) return null;
-@@ -349,9 +351,14 @@
+@@ -360,9 +362,14 @@ function isAntigravityProvider(provider: string | null | undefined): boolean {
    return provider === "antigravity" || provider === "agy";
  }
  
@@ -52,7 +52,7 @@ index 253a49b17d715b3d75a9bd920d23dad759e48de9..bb2cafe2f3c09601a7eeb0228ab81b2c
  }
  
  const TIME_WINDOW_KEYS = new Set([
-@@ -407,7 +414,7 @@
+@@ -418,7 +425,7 @@ function normalizeQuotaWindows(
  
    // Antigravity-style weekly buckets: pick worst only inside requested family.
    const weeklyWindows = Object.entries(windows).filter(([key]) => {

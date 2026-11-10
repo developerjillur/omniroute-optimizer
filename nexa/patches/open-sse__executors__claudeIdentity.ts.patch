@@ -1,5 +1,5 @@
 diff --git a/open-sse/executors/claudeIdentity.ts b/open-sse/executors/claudeIdentity.ts
-index 61fb974fc379d9c3a32ab0d33e582de26693ffaa..959556a4a320426e94d2e6edd666511998b6238b 100644
+index 5b2d2cfbe2a53b2b4cc0169edd7f8fe71cc98c89..1be959e42ce92c152b1d48cfea1044ad0b5b1158 100644
 --- a/open-sse/executors/claudeIdentity.ts
 +++ b/open-sse/executors/claudeIdentity.ts
 @@ -9,6 +9,7 @@
@@ -10,7 +10,7 @@ index 61fb974fc379d9c3a32ab0d33e582de26693ffaa..959556a4a320426e94d2e6edd6665119
  
  import {
    isClaudeOAuthSummarizedThinkingUnredacted,
-@@ -308,7 +309,7 @@
+@@ -317,7 +318,7 @@ export function parseUpstreamMetadataUserId(
   */
  const HEAVY_AGENT_BETA_MODEL_PREFIXES = ["claude-opus", "claude-sonnet"];
  /**
@@ -19,7 +19,7 @@ index 61fb974fc379d9c3a32ab0d33e582de26693ffaa..959556a4a320426e94d2e6edd6665119
   * Sonnet trips long-context credit gates under OAuth full-agent traffic.
   * Opus 5 is excluded because its 1M context window is native.
   */
-@@ -318,6 +319,7 @@
+@@ -327,6 +328,7 @@ const MID_CONVERSATION_SYSTEM_MODEL_PREFIXES = [
    "claude-opus",
    "claude-fable",
    "claude-sonnet-5-5",
@@ -27,7 +27,7 @@ index 61fb974fc379d9c3a32ab0d33e582de26693ffaa..959556a4a320426e94d2e6edd6665119
    "claude-haiku-5-5",
  ];
  
-@@ -332,7 +334,10 @@
+@@ -341,7 +343,10 @@ function isHeavyAgentModel(model: unknown): boolean {
  }
  
  function isContext1mModel(model: unknown): boolean {
@@ -38,7 +38,7 @@ index 61fb974fc379d9c3a32ab0d33e582de26693ffaa..959556a4a320426e94d2e6edd6665119
      matchesModelPrefix(model, CONTEXT_1M_BETA_MODEL_PREFIXES) &&
      !matchesModelPrefix(model, CONTEXT_1M_NATIVE_MODEL_PREFIXES)
    );
-@@ -409,7 +414,12 @@
+@@ -418,7 +423,12 @@ export function selectBetaFlags(
    const effectiveModel = model ?? (typeof b.model === "string" ? b.model : "");
    const isHeavyAgent = isFullAgent && isHeavyAgentModel(effectiveModel);
    const isOpusAgent = shouldUseMidConversationSystem(b, effectiveModel);

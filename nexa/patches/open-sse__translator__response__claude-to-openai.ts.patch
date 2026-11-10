@@ -1,5 +1,5 @@
 diff --git a/open-sse/translator/response/claude-to-openai.ts b/open-sse/translator/response/claude-to-openai.ts
-index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..fdbd3998d248fc70ef15dffc385ebe3082042347 100644
+index 72ebfb5d12584fd84e24433e391f1ffcf8214db1..d9b9d64ab6011651d75c445380e3927a0184d6cc 100644
 --- a/open-sse/translator/response/claude-to-openai.ts
 +++ b/open-sse/translator/response/claude-to-openai.ts
 @@ -1,6 +1,14 @@
@@ -18,7 +18,7 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..fdbd3998d248fc70ef15dffc385ebe30
  import { storeClaudeThinkingBlocks } from "../../services/claudeThinkingStore.ts";
  
  type OpenAIUsage = {
-@@ -8,10 +16,12 @@
+@@ -8,10 +16,12 @@ type OpenAIUsage = {
    completion_tokens: number;
    total_tokens: number;
    reasoning_tokens?: number;
@@ -32,7 +32,7 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..fdbd3998d248fc70ef15dffc385ebe30
      cache_creation_in_prompt?: boolean;
    };
    completion_tokens_details?: {
-@@ -79,40 +89,11 @@
+@@ -88,40 +98,11 @@ export function claudeToOpenAIResponse(chunk, state) {
        // shouldParseTextualReasoningTags) so it strips <think> markup out of
        // delta.content and re-emits it as delta.reasoning_content.
        state.thinkState = initThinkState(true, state.provider, state.model);
@@ -78,7 +78,7 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..fdbd3998d248fc70ef15dffc385ebe30
        results.push(createChunk(state, { role: "assistant" }));
        break;
      }
-@@ -174,7 +155,11 @@
+@@ -183,7 +164,11 @@ export function claudeToOpenAIResponse(chunk, state) {
          };
          if (state.thinkState) applyThinkTag(state.thinkState, textDelta);
          if (textDelta.reasoning_content) {
@@ -91,7 +91,7 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..fdbd3998d248fc70ef15dffc385ebe30
          }
          if (textDelta.content) {
            results.push(createChunk(state, { content: textDelta.content }));
-@@ -201,7 +186,7 @@
+@@ -210,7 +195,7 @@ export function claudeToOpenAIResponse(chunk, state) {
                    function: { arguments: delta.partial_json },
                  },
                ],
@@ -100,7 +100,7 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..fdbd3998d248fc70ef15dffc385ebe30
            );
          }
        }
-@@ -216,7 +201,9 @@
+@@ -225,7 +210,9 @@ export function claudeToOpenAIResponse(chunk, state) {
        if (state.thinkState?.active) {
          const flushed = flushThinkBuffer(state.thinkState);
          if (flushed.reasoningDelta) {
@@ -111,7 +111,7 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..fdbd3998d248fc70ef15dffc385ebe30
          }
          if (flushed.contentDelta) {
            results.push(createChunk(state, { content: flushed.contentDelta }));
-@@ -240,76 +227,18 @@
+@@ -249,76 +236,18 @@ export function claudeToOpenAIResponse(chunk, state) {
      }
  
      case "message_delta": {
@@ -199,23 +199,22 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..fdbd3998d248fc70ef15dffc385ebe30
          }
        }
  
-@@ -358,10 +287,11 @@
+@@ -367,10 +296,11 @@ export function claudeToOpenAIResponse(chunk, state) {
            const inputTokens = state.usage.input_tokens || 0;
            const outputTokens = state.usage.output_tokens || 0;
            const cachedTokens = state.usage.cache_read_input_tokens || 0;
 -          const cacheCreationTokens = state.usage.cache_creation_input_tokens || 0;
--
--          // prompt_tokens = input_tokens (input + cache_read, per #2215 —
--          // cache_creation is exposed separately in prompt_tokens_details below).
 +          const cacheCreationTokens =
 +            state.usage.cache_creation_input_tokens || 0;
-+
+ 
+-          // prompt_tokens = input_tokens (input + cache_read, per #2215 —
+-          // cache_creation is exposed separately in prompt_tokens_details below).
 +          // Internal input_tokens is the inclusive input count; cache details
 +          // identify its read/write portions without adding them a second time.
            // completion_tokens = output_tokens
            // total_tokens = prompt_tokens + completion_tokens
            const promptTokens = inputTokens;
-@@ -369,6 +299,8 @@
+@@ -378,6 +308,8 @@ export function claudeToOpenAIResponse(chunk, state) {
            const totalTokens = promptTokens + completionTokens;
  
            finalChunk.usage = {
@@ -224,7 +223,7 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..fdbd3998d248fc70ef15dffc385ebe30
              prompt_tokens: promptTokens,
              completion_tokens: completionTokens,
              total_tokens: totalTokens,
-@@ -386,11 +318,12 @@
+@@ -395,11 +327,12 @@ export function claudeToOpenAIResponse(chunk, state) {
            if (cachedTokens > 0 || cacheCreationTokens > 0) {
              finalChunk.usage.prompt_tokens_details = {};
              if (cachedTokens > 0) {
@@ -239,7 +238,7 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..fdbd3998d248fc70ef15dffc385ebe30
              }
            }
          }
-@@ -405,16 +338,22 @@
+@@ -414,16 +347,22 @@ export function claudeToOpenAIResponse(chunk, state) {
        flushThinkingContinuity(state);
        if (!state.finishReasonSent) {
          const finishReason =
@@ -265,7 +264,7 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..fdbd3998d248fc70ef15dffc385ebe30
                    ...(typeof state.usage.reasoning_tokens === "number"
                      ? {
                          reasoning_tokens: state.usage.reasoning_tokens,
-@@ -426,11 +365,13 @@
+@@ -435,11 +374,13 @@ export function claudeToOpenAIResponse(chunk, state) {
                    ...(cachedTokens > 0 || cacheCreationTokens > 0
                      ? {
                          prompt_tokens_details: {
@@ -281,7 +280,7 @@ index 67f31393b2c6abd5a44d2ab58b013f6fc82be4bf..fdbd3998d248fc70ef15dffc385ebe30
                                }
                              : {}),
                          },
-@@ -469,12 +410,13 @@
+@@ -478,12 +419,13 @@ function convertStopReason(reason) {
        return "stop";
      case "max_tokens":
        return "length";

@@ -1,8 +1,8 @@
 diff --git a/open-sse/services/modelFamilyFallback.ts b/open-sse/services/modelFamilyFallback.ts
-index 7e73cf3ffd6ec5160fecabeb6517dbe6ef692d83..9788e77da79d4618724d7f1cdc2598221de2dd59 100644
+index f234f72f67288946555e16073244644ea4c10a84..afc8dbf4e00544d989f202b80c8b5455f26cbd3f 100644
 --- a/open-sse/services/modelFamilyFallback.ts
 +++ b/open-sse/services/modelFamilyFallback.ts
-@@ -301,6 +301,9 @@
+@@ -304,6 +304,9 @@ export function getNextFamilyFallback(
  ): string | null {
    const resolved = resolveProviderFamilyCandidates(currentModel, providerHint);
    if (!resolved) return null;

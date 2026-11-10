@@ -1,5 +1,5 @@
 diff --git a/src/sse/handlers/chat.ts b/src/sse/handlers/chat.ts
-index 3d09c25fe6e6440a0b6156972a1c2d5aaf6f39ad..8d0f8275fc2ed6916f4232d3f7ba937edf156c66 100644
+index bcea3f95a40d47ff1347c36df5fb449f4ca0bac4..554b96114891d8fdc8fc8d3efaa549fc6898b3fc 100644
 --- a/src/sse/handlers/chat.ts
 +++ b/src/sse/handlers/chat.ts
 @@ -1,5 +1,15 @@
@@ -18,7 +18,7 @@ index 3d09c25fe6e6440a0b6156972a1c2d5aaf6f39ad..8d0f8275fc2ed6916f4232d3f7ba937e
  import { randomUUID } from "crypto";
  import { resolveChatRequestBody } from "./requestBody";
  import { getComboCredentialAvailability } from "./comboCredentialAvailability.ts";
-@@ -1694,6 +1704,31 @@
+@@ -1640,6 +1650,31 @@ async function handleSingleModelChat(
    });
    const modelPolicyRejection = await resolvedModelGate([`${provider}/${model}`]);
    if (modelPolicyRejection) return modelPolicyRejection;
@@ -50,12 +50,10 @@ index 3d09c25fe6e6440a0b6156972a1c2d5aaf6f39ad..8d0f8275fc2ed6916f4232d3f7ba937e
    const forceLiveComboTest = runtimeOptions.forceLiveComboTest === true;
    const budgetRejection = rejectIfMeteredBudgetExceeded(apiKeyInfo?.id, provider, modelStr);
    if (budgetRejection) return budgetRejection;
-@@ -1714,6 +1749,39 @@
-       effectiveAllowedConnections ?? [],
-       quotaScope.connectionIds
+@@ -1662,6 +1697,39 @@ async function handleSingleModelChat(
      );
-+  }
-+
+   }
+ 
 +  if (nativeThreadContinuation) {
 +    // Only the owning Anthropic account has this server-side Thread. Other
 +    // providers need the client's full transcript, system and tools after a model
@@ -87,10 +85,12 @@ index 3d09c25fe6e6440a0b6156972a1c2d5aaf6f39ad..8d0f8275fc2ed6916f4232d3f7ba937e
 +      return response;
 +    }
 +    effectiveAllowedConnections = [nativeThreadOwner];
-   }
- 
++  }
++
    const bypassReason = forceLiveComboTest
-@@ -1811,6 +1879,13 @@
+     ? "combo live test"
+     : hasForcedConnection
+@@ -1761,6 +1829,13 @@ async function handleSingleModelChat(
    const occupancySessionKey =
      runtimeOptions.sessionAffinityKey ?? runtimeOptions.sessionId ?? `request:${randomUUID()}`;
    let initialPreselectedCredentials = runtimeOptions.preselectedCredentials;
@@ -104,11 +104,10 @@ index 3d09c25fe6e6440a0b6156972a1c2d5aaf6f39ad..8d0f8275fc2ed6916f4232d3f7ba937e
    // ANTIGRAVITY_ACCOUNT_LEASE_ENABLED (#10011 re-land): off ⇒ every `agy.*` branch is inert
    // and selection/dispatch behave exactly as before. `attempted` survives a loop restart.
    const agy = agyLease.startAntigravityLeaseRequest(provider, runtimeOptions.correlationId);
-@@ -1892,6 +1967,23 @@
-         credentials = await selectCredentials(excludedConnectionIds);
-       }
-       preselectedCredentials = null;
-+
+@@ -1864,6 +1939,23 @@ async function handleSingleModelChat(
+       const museUnavailable = museOwner && muse.museOwnerUnavailable(museOwner, credentials);
+       if (museUnavailable) return museUnavailable;
+ 
 +      if (
 +        nativeThreadContinuation &&
 +        (!credentials || credentials.connectionId !== nativeThreadOwner)
@@ -125,11 +124,12 @@ index 3d09c25fe6e6440a0b6156972a1c2d5aaf6f39ad..8d0f8275fc2ed6916f4232d3f7ba937e
 +        );
 +        return response;
 +      }
- 
++
        if (credentials && "leaseUnavailable" in credentials && credentials.leaseUnavailable) {
          excludedConnectionIds.add(agyLease.trackAntigravityLeaseBusy(agy, credentials));
-@@ -2287,6 +2379,18 @@
-         return successResponse;
+         if (!hasForcedConnection) continue;
+@@ -2306,6 +2398,18 @@ async function handleSingleModelChat(
+         return muse.museFailureResponse(museOwner, result);
        }
  
 +      if (

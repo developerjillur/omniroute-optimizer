@@ -1,17 +1,57 @@
 diff --git a/public/openapi.yaml b/public/openapi.yaml
-index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b144dff41db 100644
+index 1d47b6a1772050050b417dcf946c00d0d9db35ec..2d8b614a9d0df5d5e5f3468392aff7f19bae2527 100644
 --- a/public/openapi.yaml
 +++ b/public/openapi.yaml
-@@ -1,7 +1,7 @@
- openapi: 3.1.0
- info:
-   title: OmniRoute API
--  version: 3.8.35
-+  version: 3.8.44
-   description: |
-     OmniRoute is a local-first AI API proxy router. It provides an OpenAI-compatible
-     endpoint that routes requests to multiple AI providers with load balancing,
-@@ -2838,6 +2838,7 @@
+@@ -19,8 +19,8 @@
+     name: MIT
+ 
+ servers:
+-  - url: ./
+-    description: This deployment
++  - url: http://localhost:20128
++    description: Local development
+ 
+ tags:
+   - name: Playground
+@@ -1733,7 +1733,7 @@
+             `POST /api/v1/chat/completions`), including `X-OmniRoute-Request-Id`
+             and `X-OmniRoute-Version`.
+         "401":
+-          $ref: "#/components/responses/Unauthorized"
++          $ref: "#/components/responses/AnthropicUnauthorized"
+ 
+   /api/v1/messages/count_tokens:
+     post:
+@@ -1750,6 +1750,8 @@
+       responses:
+         "200":
+           description: Token count
++        "401":
++          $ref: "#/components/responses/AnthropicUnauthorized"
+ 
+   /api/v1/responses:
+     post:
+@@ -4855,11 +4857,18 @@
+                 name: { type: string }
+                 scope: { type: string, enum: [read, write, admin] }
+                 expiresInDays: { type: integer, minimum: 1, maximum: 3650 }
++                totp:
++                  type: string
++                  description: >
++                    Required while dashboard two-factor authentication is enabled — a
++                    6-digit TOTP code or a single-use recovery code.
+       responses:
+         "200":
+           description: Token minted (token returned once)
+         "401":
+-          description: Invalid password
++          description: >
++            Invalid password, or two-factor authentication is enabled and `totp` is
++            missing or wrong (body carries `mfaRequired: true`)
+         "429":
+           description: Too many failed attempts
+ 
+@@ -4942,6 +4951,7 @@
  
    /api/cli-tools/runtime/{toolId}:
      get:
@@ -19,7 +59,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [CLI Tools]
        summary: Get runtime status for a CLI tool
        parameters:
-@@ -3110,6 +3111,7 @@
+@@ -5236,6 +5246,7 @@
  
    /api/services/9router/install:
      post:
@@ -27,7 +67,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Embedded Services]
        summary: Install 9Router from npm
        description: >-
-@@ -3148,6 +3150,7 @@
+@@ -5274,6 +5285,7 @@
  
    /api/services/9router/start:
      post:
@@ -35,7 +75,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Embedded Services]
        summary: Start 9Router
        description: >-
-@@ -3167,6 +3170,7 @@
+@@ -5293,6 +5305,7 @@
  
    /api/services/9router/stop:
      post:
@@ -43,7 +83,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Embedded Services]
        summary: Stop 9Router
        description: >-
-@@ -3184,6 +3188,7 @@
+@@ -5310,6 +5323,7 @@
  
    /api/services/9router/restart:
      post:
@@ -51,7 +91,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Embedded Services]
        summary: Restart 9Router
        description: >-
-@@ -3199,6 +3204,7 @@
+@@ -5325,6 +5339,7 @@
  
    /api/services/9router/update:
      post:
@@ -59,7 +99,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Embedded Services]
        summary: Update 9Router to a newer npm version
        description: >-
-@@ -3235,6 +3241,7 @@
+@@ -5361,6 +5376,7 @@
  
    /api/services/9router/rotate-key:
      post:
@@ -67,7 +107,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Embedded Services]
        summary: Rotate the 9Router API key
        description: >-
-@@ -3258,6 +3265,7 @@
+@@ -5384,6 +5400,7 @@
  
    /api/services/9router/status:
      get:
@@ -75,7 +115,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Embedded Services]
        summary: Get 9Router status
        description: >-
-@@ -3275,6 +3283,7 @@
+@@ -5401,6 +5418,7 @@
  
    /api/services/9router/auto-start:
      post:
@@ -83,7 +123,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Embedded Services]
        summary: Toggle 9Router auto-start
        description: >-
-@@ -3305,6 +3314,7 @@
+@@ -5458,6 +5476,7 @@
  
    /api/services/cliproxy/install:
      post:
@@ -91,7 +131,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Embedded Services]
        summary: Install CLIProxyAPI from npm
        description: >-
-@@ -3339,6 +3349,7 @@
+@@ -5492,6 +5511,7 @@
  
    /api/services/cliproxy/start:
      post:
@@ -99,7 +139,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Embedded Services]
        summary: Start CLIProxyAPI
        description: >-
-@@ -3358,6 +3369,7 @@
+@@ -5511,6 +5531,7 @@
  
    /api/services/cliproxy/stop:
      post:
@@ -107,7 +147,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Embedded Services]
        summary: Stop CLIProxyAPI
        description: >-
-@@ -3373,6 +3385,7 @@
+@@ -5526,6 +5547,7 @@
  
    /api/services/cliproxy/restart:
      post:
@@ -115,7 +155,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Embedded Services]
        summary: Restart CLIProxyAPI
        description: >-
-@@ -3388,6 +3401,7 @@
+@@ -5541,6 +5563,7 @@
  
    /api/services/cliproxy/update:
      post:
@@ -123,7 +163,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Embedded Services]
        summary: Update CLIProxyAPI to a newer npm version
        description: >-
-@@ -3420,6 +3434,7 @@
+@@ -5573,6 +5596,7 @@
  
    /api/services/cliproxy/status:
      get:
@@ -131,7 +171,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Embedded Services]
        summary: Get CLIProxyAPI status
        description: >-
-@@ -3436,6 +3451,7 @@
+@@ -5589,6 +5613,7 @@
  
    /api/services/cliproxy/auto-start:
      post:
@@ -139,301 +179,127 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Embedded Services]
        summary: Toggle CLIProxyAPI auto-start
        description: >-
-@@ -3464,8 +3480,293 @@
-         "400":
-           description: Invalid request body
+@@ -5646,6 +5671,7 @@
  
-+  /api/services/mux/install:
-+    post:
+   /api/services/mux/install:
+     post:
 +      x-loopback-only: true
-+      tags: [Embedded Services]
-+      summary: Install Mux from npm
-+      description: >-
-+        Installs the `mux` npm package (coder/mux — local agent-orchestration
-+        daemon) under DATA_DIR/services/mux/. **LOCAL_ONLY** — loopback only.
-+      requestBody:
-+        required: false
-+        content:
-+          application/json:
-+            schema:
-+              type: object
-+              properties:
-+                version:
-+                  type: string
-+                  default: latest
-+      responses:
-+        "200":
-+          description: Install succeeded
-+          content:
-+            application/json:
-+              schema:
-+                type: object
-+                properties:
-+                  ok:
-+                    type: boolean
-+                  installedVersion:
-+                    type: string
-+        "400":
-+          description: Invalid request body
-+        "500":
-+          description: npm install failed
-+
-+  /api/services/mux/start:
-+    post:
+       tags: [Embedded Services]
+       summary: Install Mux from npm
+       description: >-
+@@ -5680,6 +5706,7 @@
+ 
+   /api/services/mux/start:
+     post:
 +      x-loopback-only: true
-+      tags: [Embedded Services]
-+      summary: Start Mux
-+      description: >-
-+        Spawns `mux server --host 127.0.0.1 --port <port>`. Idempotent if
-+        already running. **LOCAL_ONLY** — loopback only.
-+      responses:
-+        "200":
-+          description: Service started
-+          content:
-+            application/json:
-+              schema:
-+                $ref: "#/components/schemas/ServiceStatus"
-+        "409":
-+          description: Mux is not installed
-+        "503":
-+          description: Start failed
-+
-+  /api/services/mux/stop:
-+    post:
+       tags: [Embedded Services]
+       summary: Start Mux
+       description: >-
+@@ -5699,6 +5726,7 @@
+ 
+   /api/services/mux/stop:
+     post:
 +      x-loopback-only: true
-+      tags: [Embedded Services]
-+      summary: Stop Mux
-+      description: >-
-+        Gracefully stops Mux. Idempotent.
-+        **LOCAL_ONLY** — loopback only.
-+      responses:
-+        "200":
-+          description: Service stopped
-+          content:
-+            application/json:
-+              schema:
-+                $ref: "#/components/schemas/ServiceStatus"
-+
-+  /api/services/mux/restart:
-+    post:
+       tags: [Embedded Services]
+       summary: Stop Mux
+       description: >-
+@@ -5714,6 +5742,7 @@
+ 
+   /api/services/mux/restart:
+     post:
 +      x-loopback-only: true
-+      tags: [Embedded Services]
-+      summary: Restart Mux
-+      description: >-
-+        stop() then start() under the operation lock.
-+        **LOCAL_ONLY** — loopback only.
-+      responses:
-+        "200":
-+          description: Service restarted
-+          content:
-+            application/json:
-+              schema:
-+                $ref: "#/components/schemas/ServiceStatus"
-+
-+  /api/services/mux/update:
-+    post:
+       tags: [Embedded Services]
+       summary: Restart Mux
+       description: >-
+@@ -5729,6 +5758,7 @@
+ 
+   /api/services/mux/update:
+     post:
 +      x-loopback-only: true
-+      tags: [Embedded Services]
-+      summary: Update Mux to a newer npm version
-+      description: >-
-+        Stops, installs newer version, restarts.
-+        **LOCAL_ONLY** — loopback only.
-+      requestBody:
-+        required: false
-+        content:
-+          application/json:
-+            schema:
-+              type: object
-+              properties:
-+                version:
-+                  type: string
-+                  default: latest
-+      responses:
-+        "200":
-+          description: Update succeeded
-+          content:
-+            application/json:
-+              schema:
-+                type: object
-+                properties:
-+                  ok:
-+                    type: boolean
-+                  installedVersion:
-+                    type: string
-+        "500":
-+          description: Update failed
-+
-+  /api/services/mux/status:
-+    get:
+       tags: [Embedded Services]
+       summary: Update Mux to a newer npm version
+       description: >-
+@@ -5761,6 +5791,7 @@
+ 
+   /api/services/mux/status:
+     get:
 +      x-loopback-only: true
-+      tags: [Embedded Services]
-+      summary: Get Mux status
-+      description: >-
-+        Returns live supervisor state and DB metadata.
-+        **LOCAL_ONLY** — loopback only.
-+      responses:
-+        "200":
-+          description: Status response
-+          content:
-+            application/json:
-+              schema:
-+                $ref: "#/components/schemas/ServiceStatus"
-+
-+  /api/services/mux/auto-start:
-+    post:
+       tags: [Embedded Services]
+       summary: Get Mux status
+       description: >-
+@@ -5776,6 +5807,7 @@
+ 
+   /api/services/mux/auto-start:
+     post:
 +      x-loopback-only: true
-+      tags: [Embedded Services]
-+      summary: Toggle Mux auto-start
-+      description: >-
-+        When enabled, Mux starts automatically on the next OmniRoute boot.
-+        **LOCAL_ONLY** — loopback only.
-+      requestBody:
-+        required: true
-+        content:
-+          application/json:
-+            schema:
-+              type: object
-+              required: [enabled]
-+              properties:
-+                enabled:
-+                  type: boolean
-+      responses:
-+        "200":
-+          description: Auto-start flag updated
-+          content:
-+            application/json:
-+              schema:
-+                type: object
-+                properties:
-+                  autoStart:
-+                    type: boolean
-+        "400":
-+          description: Invalid request body
-+
-+  /api/services/bifrost/install:
-+    post:
+       tags: [Embedded Services]
+       summary: Toggle Mux auto-start
+       description: >-
+@@ -6030,6 +6062,7 @@
+ 
+   /api/services/bifrost/install:
+     post:
 +      x-loopback-only: true
-+      tags: [Embedded Services]
-+      summary: Install Bifrost
-+      description: >-
-+        Installs the `@maximhq/bifrost` npm package under DATA_DIR/services/bifrost/.
-+        The package downloads the Go binary on first run. Accepts an optional `version`
-+        field (semver or `latest`). **LOCAL_ONLY** — loopback only.
-+      requestBody:
-+        required: false
-+        content:
-+          application/json:
-+            schema:
-+              type: object
-+              properties:
-+                version:
-+                  type: string
-+                  default: latest
-+      responses:
-+        "200":
-+          description: Installation result
-+          content:
-+            application/json:
-+              schema:
-+                type: object
-+                properties:
-+                  ok:
-+                    type: boolean
-+                  installedVersion:
-+                    type: string
-+                  installPath:
-+                    type: string
-+                  durationMs:
-+                    type: number
-+
-+  /api/services/bifrost/start:
-+    post:
+       tags: [Embedded Services]
+       summary: Install Bifrost
+       description: >-
+@@ -6065,6 +6098,7 @@
+ 
+   /api/services/bifrost/start:
+     post:
 +      x-loopback-only: true
-+      tags: [Embedded Services]
-+      summary: Start Bifrost
-+      description: Starts the supervised Bifrost process. **LOCAL_ONLY** — loopback only.
-+      responses:
-+        "200":
-+          description: Service status after start
-+        "409":
-+          description: Bifrost is not installed
-+
-+  /api/services/bifrost/stop:
-+    post:
+       tags: [Embedded Services]
+       summary: Start Bifrost
+       description: Starts the supervised Bifrost process. **LOCAL_ONLY** — loopback only.
+@@ -6076,6 +6110,7 @@
+ 
+   /api/services/bifrost/stop:
+     post:
 +      x-loopback-only: true
-+      tags: [Embedded Services]
-+      summary: Stop Bifrost
-+      description: Stops the supervised Bifrost process. **LOCAL_ONLY** — loopback only.
-+      responses:
-+        "200":
-+          description: Service status after stop
-+
-+  /api/services/bifrost/restart:
-+    post:
+       tags: [Embedded Services]
+       summary: Stop Bifrost
+       description: Stops the supervised Bifrost process. **LOCAL_ONLY** — loopback only.
+@@ -6085,6 +6120,7 @@
+ 
+   /api/services/bifrost/restart:
+     post:
 +      x-loopback-only: true
-+      tags: [Embedded Services]
-+      summary: Restart Bifrost
-+      description: Restarts the supervised Bifrost process. **LOCAL_ONLY** — loopback only.
-+      responses:
-+        "200":
-+          description: Service status after restart
-+        "409":
-+          description: Bifrost is not installed
-+
-+  /api/services/bifrost/update:
-+    post:
+       tags: [Embedded Services]
+       summary: Restart Bifrost
+       description: Restarts the supervised Bifrost process. **LOCAL_ONLY** — loopback only.
+@@ -6096,6 +6132,7 @@
+ 
+   /api/services/bifrost/update:
+     post:
 +      x-loopback-only: true
-+      tags: [Embedded Services]
-+      summary: Update Bifrost
-+      description: >-
-+        Updates Bifrost to the latest npm version. Stops the running process,
-+        installs the new version, and restarts if it was previously running.
-+        **LOCAL_ONLY** — loopback only.
-+      responses:
-+        "200":
-+          description: Update result
-+
-+  /api/services/bifrost/status:
-+    get:
+       tags: [Embedded Services]
+       summary: Update Bifrost
+       description: >-
+@@ -6108,6 +6145,7 @@
+ 
+   /api/services/bifrost/status:
+     get:
 +      x-loopback-only: true
-+      tags: [Embedded Services]
-+      summary: Get Bifrost status
-+      description: Returns live and DB status for the supervised Bifrost service. **LOCAL_ONLY** — loopback only.
-+      responses:
-+        "200":
-+          description: Bifrost service status
-+
-+  /api/services/bifrost/auto-start:
-+    post:
+       tags: [Embedded Services]
+       summary: Get Bifrost status
+       description: Returns live and DB status for the supervised Bifrost service. **LOCAL_ONLY** — loopback only.
+@@ -6117,6 +6155,7 @@
+ 
+   /api/services/bifrost/auto-start:
+     post:
 +      x-loopback-only: true
-+      tags: [Embedded Services]
-+      summary: Toggle Bifrost auto-start
-+      description: >-
-+        When enabled, Bifrost starts automatically on the next OmniRoute boot.
-+        **LOCAL_ONLY** — loopback only.
-+      requestBody:
-+        required: true
-+        content:
-+          application/json:
-+            schema:
-+              type: object
-+              required: [enabled]
-+              properties:
-+                enabled:
-+                  type: boolean
-+      responses:
-+        "204":
-+          description: Auto-start flag updated
-+        "400":
-+          description: Invalid request body
-+
+       tags: [Embedded Services]
+       summary: Toggle Bifrost auto-start
+       description: >-
+@@ -6912,6 +6951,7 @@
+ 
    /api/services/{name}/logs:
      get:
 +      x-loopback-only: true
        tags: [Embedded Services]
        summary: Stream service logs via SSE
        description: >-
-@@ -3536,6 +3837,7 @@
+@@ -6982,6 +7022,7 @@
  
    /api/oauth/cursor/auto-import:
      get:
@@ -441,7 +307,149 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [OAuth]
        summary: Auto-import Cursor OAuth credentials
        description: Automatically detects and imports Cursor credentials from local config.
-@@ -4413,6 +4715,7 @@
+@@ -7202,13 +7243,140 @@
+                   minLength: 1
+       responses:
+         "200":
+-          description: JWT token returned
++          description: >
++            Session cookie set. When two-factor authentication is enabled the body is
++            `{ success: false, mfaRequired: true }` instead and only a short-lived
++            MFA-pending cookie is set; finish with `POST /api/auth/mfa/verify`.
+         "400":
+           description: Invalid login request
+         "401":
+           description: Invalid password
+         "403":
+           description: Password setup required
++        "429":
++          description: Too many failed attempts
++
++  /api/auth/mfa/verify:
++    post:
++      tags: [System]
++      summary: Complete a two-factor sign-in
++      description: >
++        Login step 2 (public). Trades the MFA-pending cookie set by `/api/auth/login`
++        plus a TOTP or recovery code for the dashboard session cookie. Shares the
++        login brute-force lockout; a TOTP step and a recovery code are each accepted once.
++      requestBody:
++        required: true
++        content:
++          application/json:
++            schema:
++              type: object
++              required: [code]
++              properties:
++                code: { type: string, minLength: 1, maxLength: 64 }
++      responses:
++        "200":
++          description: Session cookie set (`method` is `totp` or `backup_code`)
++        "400":
++          description: Invalid request body
++        "401":
++          description: Invalid code, or the pending sign-in expired (`mfaExpired`)
++        "429":
++          description: Too many failed attempts
++
++  /api/auth/mfa/status:
++    get:
++      tags: [System]
++      summary: Two-factor authentication status
++      responses:
++        "200":
++          description: "`enabled`, `backupCodesRemaining`, `enabledAt`, `recoverySwitchSet`"
++        "401":
++          description: Authentication required
++
++  /api/auth/mfa/setup:
++    post:
++      tags: [System]
++      summary: Start two-factor enrollment
++      description: >
++        Re-authenticates with the current password and returns a candidate TOTP secret,
++        its `otpauth://` URI and a QR code (PNG data URI). Nothing is persisted.
++      requestBody:
++        required: true
++        content:
++          application/json:
++            schema:
++              type: object
++              required: [password]
++              properties:
++                password: { type: string, minLength: 1 }
++      responses:
++        "200":
++          description: Enrollment secret, otpauth URI and QR code
++        "401":
++          description: Invalid password
++        "409":
++          description: Two-factor authentication is already enabled
++        "429":
++          description: Too many failed attempts
++
++  /api/auth/mfa/enable:
++    post:
++      tags: [System]
++      summary: Finish two-factor enrollment
++      description: >
++        Persists the secret (encrypted at rest) once the current password and a code
++        generated from it both verify. Returns ten single-use recovery codes, shown once.
++      requestBody:
++        required: true
++        content:
++          application/json:
++            schema:
++              type: object
++              required: [password, secret, code]
++              properties:
++                password: { type: string, minLength: 1 }
++                secret: { type: string, description: Base32 secret from /api/auth/mfa/setup }
++                code: { type: string }
++      responses:
++        "200":
++          description: Enabled; `backupCodes` returned once
++        "401":
++          description: Invalid password or code
++        "409":
++          description: Two-factor authentication is already enabled
++        "429":
++          description: Too many failed attempts
++
++  /api/auth/mfa/disable:
++    post:
++      tags: [System]
++      summary: Turn two-factor authentication off
++      description: |
++        Requires the current password and a live TOTP or recovery code. While
++        `OMNIROUTE_DISABLE_MFA=true` is set, a request from the host itself (loopback
++        peer and loopback `Host`) may omit `code` to remove a factor that can no longer
++        be verified; the session and password are still required.
++      requestBody:
++        required: true
++        content:
++          application/json:
++            schema:
++              type: object
++              required: [password]
++              properties:
++                password: { type: string, minLength: 1 }
++                code:
++                  type: string
++                  description: Required unless the host recovery switch applies.
++      responses:
++        "200":
++          description: Disabled; secret and recovery codes removed
++        "400":
++          description: Invalid body, or `code` missing outside the host recovery switch
++        "401":
++          description: Invalid password or code
++        "409":
++          description: Two-factor authentication is not enabled
+         "429":
+           description: Too many failed attempts
+ 
+@@ -8631,6 +8799,7 @@
  
    /api/tools/agent-bridge/agents:
      get:
@@ -449,7 +457,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [AgentBridge]
        summary: List all 9 IDE agents with current state
        description: >-
-@@ -4432,6 +4735,7 @@
+@@ -8650,6 +8819,7 @@
  
    /api/tools/agent-bridge/state:
      get:
@@ -457,7 +465,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [AgentBridge]
        summary: Get global AgentBridge server state
        description: Returns running status, port, cert info, and intercepted request count.
-@@ -4445,6 +4749,7 @@
+@@ -8663,6 +8833,7 @@
  
    /api/tools/agent-bridge/server:
      post:
@@ -465,7 +473,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [AgentBridge]
        summary: Control AgentBridge MITM server
        description: Start, stop, restart, trust-cert, or regenerate-cert. SPAWN_CAPABLE.
-@@ -4464,6 +4769,7 @@
+@@ -8682,6 +8853,7 @@
  
    /api/tools/agent-bridge/agents/{agentId}/dns:
      post:
@@ -473,7 +481,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [AgentBridge]
        summary: Enable or disable DNS for one agent
        description: Adds or removes /etc/hosts entries for the agent's host list. SPAWN_CAPABLE.
-@@ -4487,6 +4793,7 @@
+@@ -8705,6 +8877,7 @@
  
    /api/tools/agent-bridge/agents/{agentId}/mappings:
      get:
@@ -481,7 +489,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [AgentBridge]
        summary: Get model mappings for one agent
        parameters:
-@@ -4505,6 +4812,7 @@
+@@ -8723,6 +8896,7 @@
                  items:
                    $ref: "#/components/schemas/AgentBridgeMappingRow"
      put:
@@ -489,7 +497,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [AgentBridge]
        summary: Update model mappings for one agent
        parameters:
-@@ -4525,6 +4833,7 @@
+@@ -8743,6 +8917,7 @@
  
    /api/tools/agent-bridge/bypass:
      get:
@@ -497,7 +505,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [AgentBridge]
        summary: List bypass patterns (hosts never decrypted)
        responses:
-@@ -4537,6 +4846,7 @@
+@@ -8755,6 +8930,7 @@
                  items:
                    $ref: "#/components/schemas/AgentBridgeBypassRow"
      put:
@@ -505,7 +513,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [AgentBridge]
        summary: Update user bypass patterns
        requestBody:
-@@ -4551,6 +4861,7 @@
+@@ -8769,6 +8945,7 @@
  
    /api/tools/agent-bridge/cert:
      post:
@@ -513,7 +521,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [AgentBridge]
        summary: Download or regenerate the AgentBridge CA certificate
        requestBody:
-@@ -4570,6 +4881,7 @@
+@@ -8788,6 +8965,7 @@
  
    /api/tools/agent-bridge/upstream-ca:
      get:
@@ -521,7 +529,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [AgentBridge]
        summary: Get configured upstream CA cert path
        responses:
-@@ -4584,6 +4896,7 @@
+@@ -8802,6 +8980,7 @@
                      type: string
                      nullable: true
      post:
@@ -529,7 +537,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [AgentBridge]
        summary: Set upstream CA cert path for corporate TLS environments
        requestBody:
-@@ -4602,6 +4915,7 @@
+@@ -8820,6 +8999,7 @@
  
    /api/tools/traffic-inspector/requests:
      get:
@@ -537,7 +545,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: List intercepted requests (filterable)
        parameters:
-@@ -4642,6 +4956,7 @@
+@@ -8860,6 +9040,7 @@
                  items:
                    $ref: "#/components/schemas/InterceptedRequest"
      delete:
@@ -545,7 +553,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: Clear the in-memory traffic buffer
        responses:
-@@ -4650,6 +4965,7 @@
+@@ -8868,6 +9049,7 @@
  
    /api/tools/traffic-inspector/requests/{id}:
      get:
@@ -553,7 +561,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: Get a single intercepted request by ID
        parameters:
-@@ -4671,6 +4987,7 @@
+@@ -8889,6 +9071,7 @@
  
    /api/tools/traffic-inspector/requests/{id}/replay:
      post:
@@ -561,7 +569,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: Replay a captured request through OmniRoute router
        description: Re-executes the original request body against /v1/chat/completions. Consumes quota.
-@@ -4689,6 +5006,7 @@
+@@ -8907,6 +9090,7 @@
  
    /api/tools/traffic-inspector/requests/{id}/annotation:
      put:
@@ -569,7 +577,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: Save or update annotation on a request
        parameters:
-@@ -4710,6 +5028,7 @@
+@@ -8928,6 +9112,7 @@
  
    /api/tools/traffic-inspector/ws:
      get:
@@ -577,7 +585,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: Live WebSocket stream of intercepted requests
        description: >-
-@@ -4724,6 +5043,7 @@
+@@ -8942,6 +9127,7 @@
  
    /api/tools/traffic-inspector/export.har:
      get:
@@ -585,7 +593,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: Export current filtered request list as HAR 1.2
        parameters:
-@@ -4748,6 +5068,7 @@
+@@ -8966,6 +9152,7 @@
  
    /api/tools/traffic-inspector/hosts:
      get:
@@ -593,7 +601,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: List custom capture hosts
        responses:
-@@ -4760,6 +5081,7 @@
+@@ -8978,6 +9165,7 @@
                  items:
                    $ref: "#/components/schemas/InspectorCustomHost"
      post:
@@ -601,7 +609,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: Add a custom capture host (edits /etc/hosts)
        requestBody:
-@@ -4776,6 +5098,7 @@
+@@ -8994,6 +9182,7 @@
  
    /api/tools/traffic-inspector/hosts/{host}:
      delete:
@@ -609,7 +617,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: Remove a custom capture host
        parameters:
-@@ -4788,6 +5111,7 @@
+@@ -9006,6 +9195,7 @@
          "204":
            description: Host removed
      patch:
@@ -617,7 +625,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: Toggle enabled state of a custom host
        parameters:
-@@ -4812,6 +5136,7 @@
+@@ -9030,6 +9220,7 @@
  
    /api/tools/traffic-inspector/capture-modes:
      get:
@@ -625,7 +633,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: Get state of all 4 capture modes
        responses:
-@@ -4824,6 +5149,7 @@
+@@ -9042,6 +9233,7 @@
  
    /api/tools/traffic-inspector/capture-modes/http-proxy:
      post:
@@ -633,7 +641,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: Start or stop the HTTP_PROXY listener (port 8080)
        description: SPAWN_CAPABLE — spawns a net.Server listener.
-@@ -4841,6 +5167,7 @@
+@@ -9059,6 +9251,7 @@
  
    /api/tools/traffic-inspector/capture-modes/system-proxy:
      post:
@@ -641,7 +649,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: Apply or revert system-wide proxy settings
        description: SPAWN_CAPABLE — executes networksetup/gsettings/netsh. Requires admin.
-@@ -4858,6 +5185,7 @@
+@@ -9076,6 +9269,7 @@
  
    /api/tools/traffic-inspector/sessions:
      get:
@@ -649,7 +657,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: List all saved recording sessions
        responses:
-@@ -4870,6 +5198,7 @@
+@@ -9088,6 +9282,7 @@
                  items:
                    $ref: "#/components/schemas/InspectorSession"
      post:
@@ -657,7 +665,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: Start a new recording session
        requestBody:
-@@ -4888,6 +5217,7 @@
+@@ -9106,6 +9301,7 @@
  
    /api/tools/traffic-inspector/sessions/{id}:
      get:
@@ -665,7 +673,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: Get session snapshot (all captured requests)
        parameters:
-@@ -4903,6 +5233,7 @@
+@@ -9121,6 +9317,7 @@
          "404":
            description: Session not found
      patch:
@@ -673,7 +681,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: Stop or rename a recording session
        parameters:
-@@ -4922,6 +5253,7 @@
+@@ -9140,6 +9337,7 @@
          "200":
            description: Session updated
      delete:
@@ -681,7 +689,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: Delete a recording session
        parameters:
-@@ -4937,6 +5269,7 @@
+@@ -9155,6 +9353,7 @@
  
    /api/tools/traffic-inspector/sessions/{id}/export.har:
      get:
@@ -689,7 +697,7 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: Export a recorded session as HAR 1.2
        parameters:
-@@ -4959,6 +5292,7 @@
+@@ -9177,6 +9376,7 @@
  
    /api/tools/traffic-inspector/internal/ingest:
      post:
@@ -697,232 +705,185 @@ index 6029977242e30dc836c5722f5f39db6bd49bece6..76b4493516c581f7b3436a5417045b14
        tags: [Traffic Inspector]
        summary: Internal ingest endpoint for server.cjs passthrough path
        description: >-
-@@ -5270,6 +5604,214 @@
-           $ref: "#/components/responses/InternalError"
-         "503":
-           description: Generator module not available
-+  /api/v1/ocr:
-+    post:
-+      tags:
-+        - Images
-+      summary: Document OCR
+@@ -11837,10 +12037,70 @@
+     get:
+       tags:
+         - Logs
+-      summary: "GET logs › console"
+-      responses:
+-        "200":
+-          description: OK
++      summary: Read retained application console history
 +      description: >-
-+        Mistral OCR–compatible document OCR endpoint. Accepts a JSON body
-+        referencing a document/image and returns extracted text. Success
-+        responses carry the `X-OmniRoute-*` cost-telemetry headers.
-+      security:
-+        - BearerAuth: []
-+      requestBody:
-+        required: true
-+        content:
-+          application/json:
-+            schema:
-+              type: object
-+              properties:
-+                model:
-+                  type: string
-+                document:
++        Requires management access. Reads the active file and retained OmniRoute
++        timestamped rotations, returning the newest page in display order. The
++        default range is all retained history, not only the last hour. Reads are
++        bounded to 64 files, 4096 directory entries and 8 MiB per request; individual
++        lines above 256 KiB are skipped. A cursor continues older pages and is bound
++        to the original filters and file identity. Deleted or replaced history
++        requires a fresh request. Retention settings are unchanged.
++      parameters:
++        - in: query
++          name: range
++          schema:
++            type: string
++            enum: [1h, 24h, 7d, all]
++            default: all
++        - in: query
++          name: level
++          schema:
++            type: string
++            enum: [all, trace, debug, info, warn, error, fatal]
++            default: all
++        - in: query
++          name: component
++          schema:
++            type: string
++            maxLength: 128
++        - in: query
++          name: limit
++          description: Positive integer; values above 2000 are clamped.
++          schema:
++            type: integer
++            minimum: 1
++            default: 500
++        - in: query
++          name: cursor
++          description: Opaque value returned by X-Console-Next-Cursor.
++          schema:
++            type: string
++            maxLength: 1800
++      responses:
++        "200":
++          description: Console entries in display order; an empty page can still have a cursor.
++          headers:
++            X-Console-Next-Cursor:
++              description: Opaque cursor for older retained history, when available.
++              schema:
++                type: string
++            X-Console-Truncated:
++              description: Whether a scan, directory, file or line bound was reached.
++              schema:
++                type: string
++                enum: ["true", "false"]
++          content:
++            application/json:
++              schema:
++                type: array
++                items:
 +                  type: object
-+      responses:
-+        "200":
-+          description: OCR result with extracted text.
++                  additionalProperties: true
 +        "400":
-+          $ref: "#/components/responses/BadRequest"
-+        "401":
-+          $ref: "#/components/responses/Unauthorized"
-+        "500":
-+          $ref: "#/components/responses/InternalError"
-+  /api/v1/audio/translations:
-+    post:
-+      tags:
-+        - Audio
-+      summary: Translate audio to English
-+      description: >-
-+        OpenAI Whisper–compatible audio translation (multipart/form-data).
-+        Unlike `/api/v1/audio/transcriptions`, output is always English
-+        regardless of the source language. Success responses carry the
-+        `X-OmniRoute-*` cost-telemetry headers.
-+      security:
-+        - BearerAuth: []
-+      requestBody:
-+        required: true
-+        content:
-+          multipart/form-data:
-+            schema:
-+              type: object
-+              required:
-+                - file
-+              properties:
-+                file:
-+                  type: string
-+                  format: binary
-+                model:
-+                  type: string
-+      responses:
-+        "200":
-+          description: English translation of the audio.
-+        "400":
-+          $ref: "#/components/responses/BadRequest"
-+        "401":
-+          $ref: "#/components/responses/Unauthorized"
-+        "500":
-+          $ref: "#/components/responses/InternalError"
-+  /api/v1/providers/suggested-models:
++          description: Invalid query or cursor/filter mismatch.
++        "410":
++          description: Retained history changed; refresh without a cursor.
+   /api/logs/detail:
+     get:
+       tags:
+@@ -14328,6 +14588,71 @@
+       responses:
+         "200":
+           description: OK
++  /api/system/metrics:
 +    get:
 +      tags:
-+        - Providers
-+      summary: Suggested media models
++        - System
++      summary: Host and OmniRoute process CPU and memory
 +      description: >-
-+        Read-only server-side proxy to the public HuggingFace Hub models search
-+        API, used by the dashboard to suggest models for a media provider kind
-+        without exposing an HF token client-side. Never accepts or returns
-+        credentials.
-+      parameters:
-+        - name: type
-+          in: query
-+          schema:
-+            type: string
-+          description: Media kind to search for (e.g. `image`, `audio`, `video`).
++        Management-tier (dashboard session or management API key) snapshot behind the home-page
++        system metrics cards. CPU percentages are deltas since the previous call that was at least
++        400 ms earlier, so the first call after process start (and any call inside the 400 ms
++        window) returns the last computed value, which is `0` before the first delta. Host values
++        come from `os.cpus()` / `os.totalmem()` / `os.freemem()` and describe the host, not a
++        container limit; the process CPU percentage is normalised by the host core count. Sent
++        with `Cache-Control: no-store, no-cache, must-revalidate`.
 +      responses:
 +        "200":
-+          description: List of suggested HuggingFace Hub models.
-+        "500":
-+          $ref: "#/components/responses/InternalError"
-+  /api/v1/provider-plugin-manifest:
-+    get:
-+      tags:
-+        - Providers
-+      summary: Provider plugin manifest
-+      description: Returns the manifest describing installed provider plugins.
-+      responses:
-+        "200":
-+          description: Provider plugin manifest.
-+        "500":
-+          $ref: "#/components/responses/InternalError"
-+  /api/keys/{id}/devices:
-+    get:
-+      tags:
-+        - API Keys
-+      summary: List devices for an API key
-+      description: >-
-+        Lists the distinct devices (masked IP + User-Agent fingerprints)
-+        tracked for an API key by the in-memory device tracker. IPs are masked
-+        before storage; the route never sees the raw client IP.
-+      x-internal: true
-+      parameters:
-+        - name: id
-+          in: path
-+          required: true
-+          schema:
-+            type: string
-+      responses:
-+        "200":
-+          description: Distinct devices seen for the API key.
++          description: Host and process metrics
++          content:
++            application/json:
++              schema:
++                type: object
++                required: [host, process]
++                properties:
++                  host:
++                    type: object
++                    required: [cpuPercent, memory, cpuCount, platform]
++                    properties:
++                      cpuPercent:
++                        type: number
++                        minimum: 0
++                        maximum: 100
++                        description: Host CPU busy share since the previous sample, 0-100.
++                      memory:
++                        type: object
++                        required: [totalBytes, usedBytes, freeBytes, usedPercent]
++                        properties:
++                          totalBytes: { type: integer }
++                          usedBytes: { type: integer }
++                          freeBytes: { type: integer }
++                          usedPercent: { type: number, minimum: 0, maximum: 100 }
++                      cpuCount: { type: integer, minimum: 0 }
++                      platform:
++                        type: string
++                        description: Node.js `process.platform`.
++                  process:
++                    type: object
++                    required: [cpuPercent, memory, uptimeSeconds, pid]
++                    properties:
++                      cpuPercent:
++                        type: number
++                        minimum: 0
++                        maximum: 100
++                        description: OmniRoute process CPU share of the whole host, 0-100.
++                      memory:
++                        type: object
++                        required: [rssBytes, heapUsedBytes, heapTotalBytes]
++                        properties:
++                          rssBytes: { type: integer }
++                          heapUsedBytes: { type: integer }
++                          heapTotalBytes: { type: integer }
++                      uptimeSeconds: { type: integer }
++                      pid: { type: integer }
 +        "401":
 +          $ref: "#/components/responses/ManagementAuthenticationRequired"
-+        "404":
-+          $ref: "#/components/responses/NotFound"
-+  /api/settings/purge-usage-history:
-+    post:
-+      tags:
-+        - Settings
-+      summary: Purge usage history
-+      description: Dashboard-only. Purges stored usage-history records.
-+      x-internal: true
-+      responses:
-+        "200":
-+          description: Usage history purged.
-+        "401":
-+          $ref: "#/components/responses/Unauthorized"
-+  /api/oauth/codex/import-token:
-+    post:
-+      tags:
-+        - OAuth
-+      summary: Import a Codex connection from a bare access token
++        "403":
++          $ref: "#/components/responses/ManagementInvalidToken"
+   /api/system/version:
+     get:
+       tags:
+@@ -16053,6 +16378,34 @@
+               error:
+                 type: string
+                 example: Unauthorized
++    AnthropicUnauthorized:
 +      description: >-
-+        Dashboard-only. Creates a Codex (ChatGPT/OpenAI) connection from a raw
-+        access token with no refresh token (authType `access_token`).
-+      x-internal: true
-+      responses:
-+        "200":
-+          description: Connection imported.
-+        "400":
-+          $ref: "#/components/responses/BadRequest"
-+        "401":
-+          $ref: "#/components/responses/Unauthorized"
-+  /api/cli-tools/crush-settings:
-+    get:
-+      tags:
-+        - CLI Tools
-+      summary: Read Crush CLI OmniRoute config
-+      description: Local-only. Reads the OmniRoute provider block in Crush's config.
-+      x-internal: true
-+      responses:
-+        "200":
-+          description: Current Crush config state.
-+    post:
-+      tags:
-+        - CLI Tools
-+      summary: Write Crush CLI OmniRoute config
-+      description: Local-only. Registers OmniRoute as an `openai-compat` provider in Crush's config.
-+      x-internal: true
-+      responses:
-+        "200":
-+          description: Crush config updated.
-+    delete:
-+      tags:
-+        - CLI Tools
-+      summary: Remove OmniRoute from Crush CLI config
-+      description: Local-only. Removes the OmniRoute provider block from Crush's config.
-+      x-internal: true
-+      responses:
-+        "200":
-+          description: Crush config entry removed.
-+  /api/cli-tools/codewhale-settings:
-+    get:
-+      tags:
-+        - CLI Tools
-+      summary: Read CodeWhale CLI OmniRoute config
-+      description: >-
-+        Local-only. Reads the OmniRoute config block from
-+        `~/.codewhale/config.toml` (with `~/.deepseek/config.toml` legacy
-+        fallback).
-+      x-internal: true
-+      responses:
-+        "200":
-+          description: Current CodeWhale config state.
-+    post:
-+      tags:
-+        - CLI Tools
-+      summary: Write CodeWhale CLI OmniRoute config
-+      description: Local-only. Writes the OmniRoute config block in CodeWhale TOML format.
-+      x-internal: true
-+      responses:
-+        "200":
-+          description: CodeWhale config updated.
-+    delete:
-+      tags:
-+        - CLI Tools
-+      summary: Remove OmniRoute from CodeWhale CLI config
-+      description: Local-only. Removes the OmniRoute config block from CodeWhale's config.
-+      x-internal: true
-+      responses:
-+        "200":
-+          description: CodeWhale config entry removed.
- 
- components:
-   securitySchemes:
-@@ -6677,10 +7219,13 @@
-             - least-used
-             - cost-optimized
-             - reset-aware
-+            - reset-window
-+            - headroom
-             - strict-random
-             - auto
-             - lkgp
-             - context-optimized
-+            - fusion
-           default: priority
-         nodes:
-           type: array
++        Missing or invalid API key on the Anthropic Messages endpoints, returned in
++        Anthropic's error envelope so Anthropic clients (Claude Code, Anthropic SDKs)
++        show the message. The correlation id is on the `x-request-id` header.
++      content:
++        application/json:
++          schema:
++            type: object
++            required: [type, error]
++            properties:
++              type:
++                type: string
++                enum: [error]
++              error:
++                type: object
++                required: [type, message]
++                properties:
++                  type:
++                    type: string
++                    enum: [authentication_error]
++                  message:
++                    type: string
++          example:
++            type: error
++            error:
++              type: authentication_error
++              message: Invalid API key
+     ManagementAuthenticationRequired:
+       description: Authentication required for management routes
+       content:

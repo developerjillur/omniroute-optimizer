@@ -2,10 +2,11 @@ diff --git a/src/mitm/manager.ts b/src/mitm/manager.ts
 index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222db8715a4e 100644
 --- a/src/mitm/manager.ts
 +++ b/src/mitm/manager.ts
-@@ -3,10 +3,20 @@
+@@ -2,11 +2,21 @@ import { spawn, type ChildProcess } from "child_process";
+ import path from "path";
  import fs from "fs";
  import { resolveMitmDataDir } from "./dataDir.ts";
- import {
++import {
 +  getBridgeProcessState,
 +  releaseExitedBridgeChild,
 +  waitForBridgeReady,
@@ -14,7 +15,7 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
 +  removeOwnedBridgePid,
 +} from "./processLifecycle.ts";
 +import { readBridgeRuntimeStatus, writeBridgeIntent, readBridgeIntent } from "./runtimeState.ts";
-+import {
+ import {
    removeDNSEntry,
    removeDNSEntries,
    checkDNSEntryForAgent,
@@ -23,7 +24,7 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
  } from "./dns/dnsConfig.ts";
  import { provisionDnsEntries } from "./dns/provision.ts";
  import { generateCert } from "./cert/generate.ts";
-@@ -77,8 +87,7 @@
+@@ -77,8 +87,7 @@ export function interpretMitmStartupError(stderr: string, port: number): string
  }
  
  // Store server process
@@ -33,7 +34,7 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
  
  /**
   * Test-only seam: install a fake server process (and pid) so stopMitm() can be
-@@ -87,17 +96,16 @@
+@@ -87,17 +96,16 @@ let serverPid: number | null = null;
   * ordering (#1809). No-op in production code paths.
   */
  export function __setServerProcessForTest(proc: ChildProcess | null, pid: number | null): void {
@@ -55,7 +56,7 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
  
  /**
   * Attempt to acquire the single-flight "MITM server is starting" lock.
-@@ -108,14 +116,14 @@
+@@ -108,14 +116,14 @@ let mitmStarting = false;
   * (DNS/cert/spawn).
   */
  export function tryAcquireMitmStartLock(): boolean {
@@ -73,7 +74,7 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
  }
  
  // Set when getMitmStatus() finds a stale PID file (server died without clean
-@@ -129,7 +137,6 @@
+@@ -129,7 +137,6 @@ const _intentionallyStopped = new WeakSet<ChildProcess>();
  
  // Guards installCleanupHandlers() so the parent-process signal handlers are
  // registered at most once. (Gap 7.)
@@ -81,7 +82,7 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
  
  // Module-scoped password cache (not exposed on globalThis).
  // Cleared automatically when the MITM proxy is stopped.
-@@ -298,8 +305,8 @@
+@@ -298,8 +305,8 @@ export async function repairMitm(sudoPassword: string): Promise<{ repaired: stri
   * Idempotent; never blocks process exit. (Gap 7.)
   */
  export function installCleanupHandlers(): void {
@@ -92,7 +93,7 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
    const onSignal = (signal: string) => {
      void handleExitCleanup(signal);
    };
-@@ -337,12 +344,20 @@
+@@ -337,14 +344,22 @@ export async function handleExitCleanup(
    };
  
    try {
@@ -105,18 +106,20 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
      }
    } catch {
      // ignore
-+  }
-+
+   }
+ 
 +  if (
 +    process.env.MITM_AUTO_RECOVER === "true" &&
 +    readBridgeIntent(path.join(resolveMitmDataDir(), "mitm"))
 +  ) {
 +    log.info({ signal }, "Preserving enabled Bridge DNS for recovery after the service restarts.");
 +    return;
-   }
- 
++  }
++
    const sudoPassword = deps.getCachedPassword();
-@@ -390,23 +405,32 @@
+   if (!sudoPassword) {
+     _orphanedStateDetected = true;
+@@ -390,23 +405,32 @@ export async function getMitmStatus(agentId?: string): Promise<{
    dnsConfigured: boolean;
    certExists: boolean;
    orphanedStateDetected: boolean;
@@ -153,7 +156,7 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
            _orphanedStateDetected = true;
            log.warn("Stale MITM PID file found — system state may be orphaned (offer Repair).");
          }
-@@ -449,8 +473,9 @@
+@@ -449,8 +473,9 @@ export async function getMitmStatus(agentId?: string): Promise<{
        flagged: _orphanedStateDetected,
        running,
        dnsConfigured,
@@ -164,7 +167,7 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
    };
  }
  
-@@ -470,17 +495,9 @@
+@@ -470,17 +495,9 @@ export async function handleMitmChildExit(
    _depsOverride?: Partial<UnexpectedExitDeps>
  ): Promise<void> {
    log.info({ exitCode: code }, "MITM server exited");
@@ -185,7 +188,7 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
  
    const reverted = await revertHostsAfterUnexpectedExit(
      {
-@@ -505,18 +522,23 @@
+@@ -505,18 +522,23 @@ export async function startMitm(
    sudoPassword: string,
    options: { port?: number } = {}
  ): Promise<{ running: true; pid: number | null; certTrusted: boolean }> {
@@ -211,7 +214,7 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
      return await startMitmInternal(apiKey, sudoPassword, options);
    } finally {
      releaseMitmStartLock();
-@@ -656,7 +678,7 @@
+@@ -656,7 +678,7 @@ async function startMitmInternal(
      options.port > 0 &&
      options.port <= 65535
        ? options.port
@@ -220,7 +223,7 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
    // D4 — resolve the inspector ingest token so the spawned proxy can post
    // captured AgentBridge traffic to the local-only ingest endpoint. The token
    // is shared with the OmniRoute process: getIngestTokenForBootstrap() returns
-@@ -674,7 +696,7 @@
+@@ -674,7 +696,7 @@ async function startMitmInternal(
      }
    }
  
@@ -229,7 +232,7 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
      windowsHide: true,
      env: {
        ...process.env,
-@@ -691,17 +713,8 @@
+@@ -691,17 +713,8 @@ async function startMitmInternal(
      stdio: ["ignore", "pipe", "pipe"],
    });
  
@@ -249,7 +252,7 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
  
    // Buffer recent stderr so a startup failure can be reported with its real
    // cause (capped to avoid unbounded growth on a chatty/looping process). (#3606)
-@@ -724,40 +737,16 @@
+@@ -724,40 +737,16 @@ async function startMitmInternal(
    proc.on("exit", (code) => {
      void handleMitmChildExit(proc, code, { startConfirmed });
    });
@@ -296,7 +299,7 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
      // Step 3 above already wrote the /etc/hosts entries. Leaving them behind
      // points every AgentBridge target hostname at 127.0.0.1:<port>, where the
      // service that actually owns the port answers with a TLS alert — so the
-@@ -776,32 +765,38 @@
+@@ -776,32 +765,38 @@ async function startMitmInternal(
    }
    startConfirmed = true;
  
@@ -345,7 +348,7 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
      return;
    }
  
-@@ -809,11 +804,15 @@
+@@ -809,11 +804,15 @@ async function killMitmServerProcessOnStop(): Promise<void> {
    try {
      if (fs.existsSync(PID_FILE)) {
        const savedPid = parseInt(fs.readFileSync(PID_FILE, "utf-8").trim(), 10);
@@ -363,7 +366,7 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
            process.kill(savedPid, "SIGKILL");
          }
        }
-@@ -821,8 +820,8 @@
+@@ -821,8 +820,8 @@ async function killMitmServerProcessOnStop(): Promise<void> {
    } catch {
      // Ignore
    }
@@ -374,7 +377,7 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
  }
  
  /**
-@@ -846,34 +845,56 @@
+@@ -846,34 +845,56 @@ export async function stopMitm(
      removeDNSEntry?: (sudoPassword: string) => Promise<void>;
      removeDNSEntries?: (hosts: string[], sudoPassword: string) => Promise<void>;
      collectManagedHosts?: () => string[];
@@ -387,30 +390,6 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
 -    removeDNSEntries: _depsOverride?.removeDNSEntries ?? removeDNSEntries,
 -    collectManagedHosts: _depsOverride?.collectManagedHosts ?? collectManagedHosts,
 -  };
--
--  // 1. Remove DNS entries FIRST — see function doc + module doc above (#1809).
--  await runPrivilegedMitmStep(
--    sudoPassword,
--    "Skipping DNS teardown — no sudo password available (#7938)",
--    () => removeStopDnsEntries(deps, sudoPassword)
--  );
--
--  // 2. Kill server process (in-memory or from PID file)
--  await killMitmServerProcessOnStop();
--
--  // 3. Clean up
--  clearCachedPassword(); // Clear password from memory when proxy stops
--  try {
--    fs.unlinkSync(PID_FILE);
--  } catch (error) {
--    // Ignore
--  }
--
--  return {
--    running: false,
--    pid: null,
--  };
--}
 +  if (lifecycle.starting) throw new Error("MITM server is already starting");
 +  if (lifecycle.stopping) throw new Error("MITM server is already stopping");
 +  lifecycle.stopping = true;
@@ -428,7 +407,13 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
 +    if (!canRunPrivileged(sudoPassword) && hasManagedDnsEntries()) {
 +      throw new Error("Missing sudoPassword: remove Agent Bridge DNS entries before stopping.");
 +    }
-+
+ 
+-  // 1. Remove DNS entries FIRST — see function doc + module doc above (#1809).
+-  await runPrivilegedMitmStep(
+-    sudoPassword,
+-    "Skipping DNS teardown — no sudo password available (#7938)",
+-    () => removeStopDnsEntries(deps, sudoPassword)
+-  );
 +    // 1. Remove DNS entries FIRST — see function doc + module doc above (#1809).
 +    await runPrivilegedMitmStep(
 +      sudoPassword,
@@ -438,12 +423,25 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
 +    if (hasManagedDnsEntries()) {
 +      throw new Error("Agent Bridge DNS entries remain after cleanup; listener kept running.");
 +    }
-+
+ 
+-  // 2. Kill server process (in-memory or from PID file)
+-  await killMitmServerProcessOnStop();
 +    writeBridgeIntent(path.join(resolveMitmDataDir(), "mitm"), false);
-+
+ 
+-  // 3. Clean up
+-  clearCachedPassword(); // Clear password from memory when proxy stops
+-  try {
+-    fs.unlinkSync(PID_FILE);
+-  } catch (error) {
+-    // Ignore
+-  }
 +    // 2. Kill server process (in-memory or from PID file)
 +    await killMitmServerProcessOnStop();
-+
+ 
+-  return {
+-    running: false,
+-    pid: null,
+-  };
 +    // 3. Clean up
 +    clearCachedPassword(); // Clear password from memory when proxy stops
 +    try {
@@ -459,4 +457,4 @@ index 1ba0058fda6cd935ea81ba17ba4a997742f8774b..ef0c48aba4f7f0ac16faf89b26ed222d
 +  } finally {
 +    lifecycle.stopping = false;
 +  }
-+}
+ }

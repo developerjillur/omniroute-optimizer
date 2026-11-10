@@ -1,6 +1,6 @@
 {
-  "upstreamBase": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
-  "version": "3.8.52",
+  "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
+  "version": "3.8.53",
   "patches": [
     {
       "patch": "bin__cli__utils__pid.mjs.patch",
@@ -13,15 +13,15 @@
       "patch": "open-sse__handlers__responseTranslator.ts.patch",
       "target": "open-sse/handlers/responseTranslator.ts",
       "patchSha256": "da08bb879b2f2e27493e0e4ce800818707d6fa710d52da3d7616db99d49a8f50",
-      "upstreamBlob": "dd61cd2bdeee0d7e6d6909fde64bef9a12c47ef8",
-      "reason": "Behavior incorporated upstream or relocated to the new owning helper; covered by retained regressions."
+      "upstreamBlob": "7373a72306482f830bbe61df8468c953e8d93737",
+      "reason": "Buffered refusal/length mapping is supplied by normalizeOpenAICompatibleFinishReasonString in the released response translator; retained regressions remain required."
     },
     {
       "patch": "src__lib__usage__usageHistory.ts.patch",
       "target": "src/lib/usage/usageHistory.ts",
       "patchSha256": "5f0f174ead14b2810435b1486bbc42a4522645fad85dfa8638dba9c71eb44dbd",
-      "upstreamBlob": "314671a4ca00b659561b5161475ee78cbe5b4b4a",
-      "reason": "Behavior incorporated upstream or relocated to the new owning helper; covered by retained regressions."
+      "upstreamBlob": "aa97284ff14f981807ac5119547dbe67cc4a5391",
+      "reason": "The legacy module delegates row projection and actual writes to usageHistory/helpers and usageWriteRetry, which retain the native TTL corrections; retained regressions remain required."
     },
     {
       "patch": "tests__unit__cli-serve-port-in-use-preflight.test.mjs.patch",
@@ -43,6 +43,27 @@
       "patchSha256": "ec1f934bd6c7f19c7a7d121d170aed37c7b01439dafd45e22738ec8d5e7fbb13",
       "upstreamBlob": "e3e3e2a726fba680a5b0129275d4e7650fa3cdcb",
       "reason": "Behavior incorporated upstream or relocated to the new owning helper; covered by retained regressions."
+    },
+    {
+      "patch": "config__quality__eslint-suppressions.json.patch",
+      "target": "config/quality/eslint-suppressions.json",
+      "patchSha256": "dfd702faf71918ef724f982d26ce5aec5f23706d91d90ccf37b322e0142be85f",
+      "upstreamBlob": "2a6b62c064f308d080c9192fb84414fe43066c38",
+      "reason": "The exact released source incorporates this correction or advances the client identity to 0.165.0; the preserved patch is superseded on this base only. All source regressions remain required."
+    },
+    {
+      "patch": "src__shared__constants__codexClient.ts.patch",
+      "target": "src/shared/constants/codexClient.ts",
+      "patchSha256": "3b1e1ce6d4504b90966b7c20be1c5cbbcdc767a6ac617af09eb34127470b6c42",
+      "upstreamBlob": "072e8245e3513585e1a595024e276e01f93bf3f6",
+      "reason": "The exact released source incorporates this correction or advances the client identity to 0.165.0; the preserved patch is superseded on this base only. All source regressions remain required."
+    },
+    {
+      "patch": "tests__unit__executor-codex.test.ts.patch",
+      "target": "tests/unit/executor-codex.test.ts",
+      "patchSha256": "ebedebf9196fa92153663fad3c2ce731e93e9a3c77a2e7fc12af595fb8b00f00",
+      "upstreamBlob": "06934819c32c1d6b1515b2a0d0ff435f7bbbc7a2",
+      "reason": "The exact released source incorporates this correction or advances the client identity to 0.165.0; the preserved patch is superseded on this base only. All source regressions remain required."
     }
   ]
 }

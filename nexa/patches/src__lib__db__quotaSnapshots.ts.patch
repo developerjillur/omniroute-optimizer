@@ -1,5 +1,5 @@
 diff --git a/src/lib/db/quotaSnapshots.ts b/src/lib/db/quotaSnapshots.ts
-index 24c9a7e45b9834ca98662bab3e948f6d333653e1..18faed47b249ee81f00a807e00f29c34391bf001 100644
+index 70237d6745ec8f64a5285a1fbaceea8f93bbf29f..599cc195205ba5ce8eabe268a78bd7505a6accc5 100644
 --- a/src/lib/db/quotaSnapshots.ts
 +++ b/src/lib/db/quotaSnapshots.ts
 @@ -1,4 +1,5 @@
@@ -8,7 +8,7 @@ index 24c9a7e45b9834ca98662bab3e948f6d333653e1..18faed47b249ee81f00a807e00f29c34
  import type { QuotaSnapshotRow, ProviderUtilizationPoint } from "@/shared/types/utilization";
  import {
    hasCodexScopeCooldown,
-@@ -25,6 +26,16 @@
+@@ -25,6 +26,16 @@ export function saveQuotaSnapshot(snapshot: Omit<QuotaSnapshotRow, "id" | "creat
    const now = new Date().toISOString();
  
    try {

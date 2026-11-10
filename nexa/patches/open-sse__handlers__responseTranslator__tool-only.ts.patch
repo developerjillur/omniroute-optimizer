@@ -1,7 +1,8 @@
 diff --git a/open-sse/handlers/responseTranslator.ts b/open-sse/handlers/responseTranslator.ts
+index 7373a72306482f830bbe61df8468c953e8d93737..af26967854b765201d1a79cee0ddd85b4039cd75 100644
 --- a/open-sse/handlers/responseTranslator.ts
 +++ b/open-sse/handlers/responseTranslator.ts
-@@ -804,7 +804,7 @@
+@@ -857,7 +857,7 @@ function convertOpenAINonStreamingToClaude(
      });
    }
  
@@ -10,7 +11,7 @@ diff --git a/open-sse/handlers/responseTranslator.ts b/open-sse/handlers/respons
    const hasToolCalls = Array.isArray(messageObj.tool_calls) && messageObj.tool_calls.length > 0;
  
    if (typeof messageObj.refusal === "string" && messageObj.refusal) {
-@@ -816,8 +816,8 @@
+@@ -869,8 +869,8 @@ function convertOpenAINonStreamingToClaude(
    } else if (messageObj.content !== undefined && messageObj.content !== null) {
      hasTextOrReasoning = true;
      const resolvedText = toString(messageObj.content);
@@ -21,7 +22,7 @@ diff --git a/open-sse/handlers/responseTranslator.ts b/open-sse/handlers/respons
        content.push({
          type: "text",
          text: resolvedText === "" ? "(empty response)" : resolvedText,
-@@ -833,7 +833,7 @@
+@@ -886,7 +886,7 @@ function convertOpenAINonStreamingToClaude(
        type: "text",
        text: reasoningText,
      });

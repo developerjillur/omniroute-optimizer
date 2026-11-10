@@ -1,8 +1,8 @@
 diff --git a/src/lib/db/migrationRunner/constants.ts b/src/lib/db/migrationRunner/constants.ts
-index fd7f4defd1dc15a8e0d30c41a03720accf1cdf9f..5031c51920510e2ce80596d431f88dfe5f89868f 100644
+index 0b316146eb2fca02e616798fb96eb073df10929a..3df4de0f10af833bde2bf60ffc0b1d07c320f641 100644
 --- a/src/lib/db/migrationRunner/constants.ts
 +++ b/src/lib/db/migrationRunner/constants.ts
-@@ -226,6 +226,8 @@
+@@ -265,6 +265,8 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
  ] as const;
  
  export const LEGACY_VERSION_SLOT_MIGRATIONS = [

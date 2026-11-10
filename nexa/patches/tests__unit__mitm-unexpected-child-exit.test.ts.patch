@@ -1,5 +1,5 @@
 diff --git a/tests/unit/mitm-unexpected-child-exit.test.ts b/tests/unit/mitm-unexpected-child-exit.test.ts
-index 1a39a0a9..b857adcf 100644
+index 1a39a0a9fd1d0dc637fbb918d9a87f098d34baa6..b857adcf15af9c80f7b97ce8e15cad73e3dd5aa9 100644
 --- a/tests/unit/mitm-unexpected-child-exit.test.ts
 +++ b/tests/unit/mitm-unexpected-child-exit.test.ts
 @@ -12,14 +12,14 @@

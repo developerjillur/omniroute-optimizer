@@ -1,7 +1,8 @@
 diff --git a/open-sse/translator/request/openai-responses/toResponses.ts b/open-sse/translator/request/openai-responses/toResponses.ts
+index 96cad3e706136da8583eaee25cecfc93fe4a609a..b86df3e4641dd233f0f0e14cfd52f6af2b3e1487 100644
 --- a/open-sse/translator/request/openai-responses/toResponses.ts
 +++ b/open-sse/translator/request/openai-responses/toResponses.ts
-@@ -313,6 +313,10 @@
+@@ -326,6 +326,10 @@ export function openaiToOpenAIResponsesRequest(
          input.push({
            type: "message",
            role: "assistant",

@@ -1,5 +1,5 @@
 diff --git a/open-sse/handlers/chatCore/upstreamBody.ts b/open-sse/handlers/chatCore/upstreamBody.ts
-index 7e50e26a20d3f1cef624f856a998e79326b7e3d0..d85301c11847caedc4a76fa0ac1db59803967471 100644
+index 8e8a4fb7fb9adccd5a35463f1bfc4fc350370520..75bf43bfb1fe3784434d58b11eaed2d32660edd2 100644
 --- a/open-sse/handlers/chatCore/upstreamBody.ts
 +++ b/open-sse/handlers/chatCore/upstreamBody.ts
 @@ -9,6 +9,12 @@
@@ -15,11 +15,23 @@ index 7e50e26a20d3f1cef624f856a998e79326b7e3d0..d85301c11847caedc4a76fa0ac1db598
  import { OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME } from "../../services/webSearchFallback.ts";
  import { OMNIROUTE_WEB_FETCH_FALLBACK_TOOL_NAME } from "../../services/webFetchInterception.ts";
  import { CLAUDE_OAUTH_TOOL_PREFIX } from "../../translator/request/openai-to-claude.ts";
-@@ -461,7 +467,15 @@
+@@ -497,28 +503,37 @@
      }
    }
    bodyToSend = defaultImageDetail(bodyToSend, isOpencodeClient);
--  bodyToSend = truncateToolList(bodyToSend, provider, bypassDefaultToolLimit ?? false, log);
+-  // Relevance selection runs before the provider cap so the cap keeps the useful tools.
+-  const disclosure = applyToolDisclosure(bodyToSend, opts.toolDisclosure, {
+-    rawBody: opts.rawBody,
+-    toolNamePrefix: CLAUDE_OAUTH_TOOL_PREFIX,
+-    isPinnedTool: isFallbackTool,
+-    onError: (error) =>
+-      log?.warn?.("TOOL_DISCLOSURE", `Selection failed, sending all tools: ${String(error)}`),
+-  });
+-  if (disclosure.stats) {
+-    bodyToSend = disclosure.body;
+-    log?.debug?.(
+-      "TOOL_DISCLOSURE",
+-      `Kept ${disclosure.stats.after}/${disclosure.stats.before} tools by relevance`
 +  const clientHeaders = opts.clientRawRequest?.headers;
 +  const preserveNativeTools =
 +    provider === "claude" &&
@@ -27,12 +39,41 @@ index 7e50e26a20d3f1cef624f856a998e79326b7e3d0..d85301c11847caedc4a76fa0ac1db598
 +    clientHeaders !== null &&
 +    typeof clientHeaders === "object" &&
 +    isClaudeCodeOriginatedHeaders(clientHeaders as Record<string, unknown>);
-+  if (!preserveNativeTools)
-+    bodyToSend = truncateToolList(bodyToSend, provider, bypassDefaultToolLimit ?? false, log);
++  if (!preserveNativeTools) {
++    // Relevance selection runs before the provider cap so the cap keeps the useful tools.
++    const disclosure = applyToolDisclosure(bodyToSend, opts.toolDisclosure, {
++      rawBody: opts.rawBody,
++      toolNamePrefix: CLAUDE_OAUTH_TOOL_PREFIX,
++      isPinnedTool: isFallbackTool,
++      onError: (error) =>
++        log?.warn?.("TOOL_DISCLOSURE", `Selection failed, sending all tools: ${String(error)}`),
++    });
++    if (disclosure.stats) {
++      bodyToSend = disclosure.body;
++      log?.debug?.(
++        "TOOL_DISCLOSURE",
++        `Kept ${disclosure.stats.after}/${disclosure.stats.before} tools by relevance`
++      );
++    }
++    bodyToSend = truncateToolList(
++      bodyToSend,
++      provider,
++      bypassDefaultToolLimit ?? false,
++      targetFormat,
++      log
+     );
+   }
+-  bodyToSend = truncateToolList(
+-    bodyToSend,
+-    provider,
+-    bypassDefaultToolLimit ?? false,
+-    targetFormat,
+-    log
+-  );
    const connectionCacheOverride = resolveConnectionCacheOverride(credentials?.providerSpecificData);
    bodyToSend = await injectPromptCacheKey(
      bodyToSend,
-@@ -470,5 +484,14 @@
+@@ -527,5 +542,14 @@
      connectionCacheOverride
    );
  

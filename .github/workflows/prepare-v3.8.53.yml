@@ -1,0 +1,79 @@
+name: Prepare v3.8.53 source
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/fable-5-2-v3-8-53]
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      NODE_OPTIONS: --max-old-space-size=2048
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24.15.0"
+      - name: Prepare only the released source and reviewed corrections
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="$RUNNER_TEMP/port-application"
+          git init "$fixture"
+          git -C "$fixture" remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+          git -C "$fixture" fetch --depth=1 upstream 191dce8d534ceb56c28a08e71381284a9a87838f
+          git -C "$fixture" checkout --detach FETCH_HEAD
+          git -C "$fixture" branch upstream-main HEAD
+          cp -R "$GITHUB_WORKSPACE/nexa" "$fixture/nexa"
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, os, shutil, subprocess
+          root = Path(os.environ['RUNNER_TEMP']) / 'port-application'
+          manifest = json.loads((root / 'nexa/manifest.json').read_text())
+          assert manifest['upstreamBase']['sha'] == '191dce8d534ceb56c28a08e71381284a9a87838f'
+          for item in manifest['items']:
+              if item['layer'] == 'patch' and item['target'] != 'package-lock.json':
+                  subprocess.run(['git', 'apply', '--check', str(root / 'nexa' / item['file'])], cwd=root, check=True)
+                  subprocess.run(['git', 'apply', str(root / 'nexa' / item['file'])], cwd=root, check=True)
+              elif item['layer'] == 'new':
+                  target = root / item['target']
+                  assert not target.exists(), 'Review an upstream collision: ' + item['target']
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copy2(root / 'nexa' / item['file'], target)
+          assert json.loads((root / 'package.json').read_text())['version'] == '3.8.53'
+          PY
+      - name: Resolve the publication source lock without running application lifecycles
+        working-directory: ${{ runner.temp }}/port-application
+        run: npm install --package-lock-only --ignore-scripts --legacy-peer-deps --no-audit --no-fund
+      - name: Preserve the new lock patch and regenerated manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/port-application"
+          mkdir -p "$RUNNER_TEMP/port-output"
+          git diff --binary --full-index upstream-main -- package-lock.json > "$RUNNER_TEMP/port-output/package-lock.json.patch"
+          cp "$RUNNER_TEMP/port-output/package-lock.json.patch" nexa/patches/package-lock.json.patch
+          node nexa/gen-manifest.mjs
+          cp nexa/manifest.json "$RUNNER_TEMP/port-output/manifest.json"
+          cp package-lock.json "$RUNNER_TEMP/port-output/package-lock.json"
+          node -e 'console.log(JSON.stringify({status:"SOURCE_LOCK_CANDIDATE_NOT_ACCEPTED",release:"3.8.53",productionBuildExecuted:false,liveChanged:false}))' > "$RUNNER_TEMP/port-output/preparation.json"
+      - name: Audit production dependencies in the resolved lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/port-application"
+          npm audit --omit=dev --json > "$RUNNER_TEMP/port-output/production-audit.json"
+      - name: Preserve source preparation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: v3.8.53-source-preparation
+          path: ${{ runner.temp }}/port-output

@@ -1,7 +1,8 @@
 diff --git a/open-sse/services/usage/antigravity.ts b/open-sse/services/usage/antigravity.ts
+index 887ddfb9df43a4cfc7518ecda7bc86c83cb179ff..a3fdc8c281a7018f91f16df55e430eb93b5d2810 100644
 --- a/open-sse/services/usage/antigravity.ts
 +++ b/open-sse/services/usage/antigravity.ts
-@@ -49,6 +49,7 @@
+@@ -49,6 +49,7 @@ import {
    type AntigravityQuotaGroup,
  } from "./antigravityWeeklyQuota.ts";
  import { getAntigravityQuotaFamily } from "../antigravityQuotaFamily.ts";
@@ -9,7 +10,7 @@ diff --git a/open-sse/services/usage/antigravity.ts b/open-sse/services/usage/an
  
  type JsonRecord = Record<string, unknown>;
  type SubscriptionCacheEntry = {
-@@ -138,7 +139,7 @@
+@@ -138,7 +139,7 @@ function getAntigravityLocalUsageUnits(
      const row = db
        .prepare(
          `SELECT COALESCE(SUM(
@@ -18,7 +19,7 @@ diff --git a/open-sse/services/usage/antigravity.ts b/open-sse/services/usage/an
           ), 0) AS tokens
           FROM usage_history
           WHERE provider = ?
-@@ -186,7 +187,7 @@
+@@ -186,7 +187,7 @@ function buildAntigravityUsageCacheKey(
    projectId: string | null | undefined,
    clientProfile: AntigravityClientProfile
  ): string {
@@ -27,7 +28,7 @@ diff --git a/open-sse/services/usage/antigravity.ts b/open-sse/services/usage/an
  }
  
  async function fetchAntigravityAvailableModelsCached(
-@@ -793,7 +794,7 @@
+@@ -809,7 +810,7 @@ async function getAntigravitySubscriptionInfoCached(
    options: AntigravityUsageOptions = {}
  ): Promise<unknown> {
    const profile = getAntigravityClientProfile({ providerSpecificData });

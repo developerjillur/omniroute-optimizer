@@ -7,7 +7,7 @@ index c9a52343f77f1cee2125f276975482315fd9a515..800ccf6ef792efa3730e9e4fe40518eb
  /**
   * Prompt-cache health — turns the raw cache columns of `call_logs` into a
   * summary an operator can act on.
-@@ -227,6 +228,11 @@
+@@ -227,6 +228,11 @@ type CacheHealthDbRow = {
    tokens_cache_read: number | null;
    tokens_cache_creation: number | null;
    timestamp: string | null;
@@ -19,7 +19,7 @@ index c9a52343f77f1cee2125f276975482315fd9a515..800ccf6ef792efa3730e9e4fe40518eb
  };
  
  export interface CacheHealthResponse extends CacheHealthSummary {
-@@ -234,6 +240,7 @@
+@@ -234,6 +240,7 @@ export interface CacheHealthResponse extends CacheHealthSummary {
    since: string;
    /** True when the window held more calls than `MAX_ROWS` and only the newest were summarized. */
    truncated: boolean;
@@ -27,7 +27,7 @@ index c9a52343f77f1cee2125f276975482315fd9a515..800ccf6ef792efa3730e9e4fe40518eb
  }
  
  /**
-@@ -260,10 +267,25 @@
+@@ -260,10 +267,25 @@ export function buildCacheHealthResponse(opts: {
    }
    params.push(MAX_ROWS + 1);
  
@@ -55,12 +55,11 @@ index c9a52343f77f1cee2125f276975482315fd9a515..800ccf6ef792efa3730e9e4fe40518eb
          WHERE timestamp >= ?
            AND status = 200
            AND (tokens_cache_read IS NOT NULL OR tokens_cache_creation IS NOT NULL)
-@@ -286,5 +308,17 @@
+@@ -286,5 +308,17 @@ export function buildCacheHealthResponse(opts: {
      }))
    );
  
 -  return { ...summary, timeRange: opts.range, since, truncated };
--}
 +  const native = summarizeNativeCacheHealth(
 +    rows.slice(0, MAX_ROWS).map((r) => ({
 +      model: r.model || r.requested_model || "unknown",
@@ -74,4 +73,4 @@ index c9a52343f77f1cee2125f276975482315fd9a515..800ccf6ef792efa3730e9e4fe40518eb
 +    }))
 +  );
 +  return { ...summary, timeRange: opts.range, since, truncated, native };
-+}
+ }

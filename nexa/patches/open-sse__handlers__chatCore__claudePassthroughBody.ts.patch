@@ -1,8 +1,13 @@
 diff --git a/open-sse/handlers/chatCore/claudePassthroughBody.ts b/open-sse/handlers/chatCore/claudePassthroughBody.ts
-index d1c043f97c4c18d29723e6bcb6f4b3173493f66e..87c9ed171c136faba089fcf3159b5e6436d2eb48 100644
+index 987d76abcb76c3fbe6702d4a9a46f99bd9d5e470..b3cd82f91c57b89986840c2ffcf87046c303419a 100644
 --- a/open-sse/handlers/chatCore/claudePassthroughBody.ts
 +++ b/open-sse/handlers/chatCore/claudePassthroughBody.ts
-@@ -11,6 +11,7 @@
+@@ -1,3 +1,4 @@
++import { modelRequiresPreservedThinkingPrefix } from "../../config/claudeCodeCompatibleIdentity.ts";
+ /**
+  * chatCore pure Claude → Claude passthrough request body (chatCore god-file decomposition, slice 2).
+  *
+@@ -11,6 +12,7 @@
   * open-sse → src import edge.
   */
  
@@ -10,13 +15,18 @@ index d1c043f97c4c18d29723e6bcb6f4b3173493f66e..87c9ed171c136faba089fcf3159b5e64
  import { shouldUseMidConversationSystem } from "../../executors/claudeIdentity.ts";
  import { ensureCacheControlOnLastUserMessage } from "../../services/claudeCodeConstraints.ts";
  import { hoistDeferredToolsForTarget } from "../../translator/helpers/claudeDeferredTools.ts";
-@@ -54,6 +55,11 @@
+@@ -58,6 +60,16 @@
    applyReasoningRuleDirective: (bodyInput: unknown, targetFormat?: "claude") => unknown;
    log?: LoggerLike;
  }): Record<string, unknown> {
-+  const nativeThreadPassthrough = isClaudeCodeSemanticPassthrough && provider === "claude" && isNativeClaudeThreadRequest(body);
-+  if (nativeThreadPassthrough) {
-+    // Sparse Thread directives belong to the current turn; do not hoist/rewrite stored context.
++  const nativeThreadPassthrough =
++    isClaudeCodeSemanticPassthrough && provider === "claude" && isNativeClaudeThreadRequest(body);
++  const immutableNativePrefix =
++    isClaudeCodeSemanticPassthrough &&
++    (provider === "claude" || provider === "anthropic") &&
++    modelRequiresPreservedThinkingPrefix(effectiveModel);
++  if (nativeThreadPassthrough || immutableNativePrefix) {
++    // Native Thread directives and Fable 5.2 thinking bind the original system, tools and history.
 +    return { ...structuredClone(body), _disableToolPrefix: true };
 +  }
    // applyReasoningRuleDirective returns unknown; the hoist helper requires a record.

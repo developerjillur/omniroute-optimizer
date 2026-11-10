@@ -1,8 +1,8 @@
 diff --git a/src/app/api/cli-tools/hermes-agent-settings/route.ts b/src/app/api/cli-tools/hermes-agent-settings/route.ts
-index daf2fb0c3f83dd519c738ca62d4597c1dea2d628..9ca7b453821c3769a11e157e5879eb45fd226fd8 100644
+index 25ed9bbc7f04bf86e78a025a7d55cb4561c2c322..d997656b49eb9265793af3516e547770ad9fb04a 100644
 --- a/src/app/api/cli-tools/hermes-agent-settings/route.ts
 +++ b/src/app/api/cli-tools/hermes-agent-settings/route.ts
-@@ -31,6 +31,9 @@
+@@ -31,6 +31,9 @@ const hermesAgentSettingsSchema = z.object({
        z.object({
          role: z.enum(hermesRoleIds),
          model: z.string(),

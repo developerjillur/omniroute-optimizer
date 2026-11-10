@@ -1,8 +1,8 @@
 diff --git a/src/lib/resilience/settings/normalize.ts b/src/lib/resilience/settings/normalize.ts
-index 01dfce6643b0f2a7167ccdf62e69861ee23ff0f8..ff3126ffd4fb5c946cee70e2917bda1f45467505 100644
+index 5ed4180ccc25ce7307917fde781ecfdc1c9a61d8..b85201790b549096b0db59415258f5381a7e97f6 100644
 --- a/src/lib/resilience/settings/normalize.ts
 +++ b/src/lib/resilience/settings/normalize.ts
-@@ -342,7 +342,17 @@
+@@ -343,7 +343,17 @@ export function normalizeQuotaPreflightSettings(
      fallback.providerWindowDefaults
    );
    const enabled = typeof record.enabled === "boolean" ? record.enabled : fallback.enabled;

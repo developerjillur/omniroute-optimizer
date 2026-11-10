@@ -1,8 +1,8 @@
 diff --git a/src/sse/services/tokenRefresh.ts b/src/sse/services/tokenRefresh.ts
-index f7d6c59b8c47572202fcb4d9f76fd528c2d0d14f..286a67e1f8723a6f80b4609c5728bf21ecdf981d 100755
+index 02ace05185377fb2fe0bec1f637848f950bdc193..a3834b7ad6ea853491474f193f67775dfc47c12b 100755
 --- a/src/sse/services/tokenRefresh.ts
 +++ b/src/sse/services/tokenRefresh.ts
-@@ -172,6 +172,7 @@
+@@ -182,6 +182,7 @@ export async function updateProviderCredentials(connectionId: string, newCredent
  
      if (newCredentials.accessToken) {
        updates.accessToken = newCredentials.accessToken;

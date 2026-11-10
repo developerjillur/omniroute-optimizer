@@ -2,7 +2,7 @@ diff --git a/tests/unit/call-log-file-rotation.test.ts b/tests/unit/call-log-fil
 index 786f8bfcf9f1694e8aa3a96269b86c9357b8d494..f35f393620f8ae10be0e995616b9627e9af1eae1 100644
 --- a/tests/unit/call-log-file-rotation.test.ts
 +++ b/tests/unit/call-log-file-rotation.test.ts
-@@ -582,7 +582,8 @@
+@@ -582,7 +582,8 @@ test("overflow cleanup frees an empty artifact reference instead of stalling", (
  
  test("orphan cleanup scans at most 100 candidates, resumes, and protects fresh files", () => {
    assert.ok(CALL_LOGS_DIR);
@@ -12,7 +12,7 @@ index 786f8bfcf9f1694e8aa3a96269b86c9357b8d494..f35f393620f8ae10be0e995616b9627e
    fs.mkdirSync(dayDir, { recursive: true });
    const old = new Date(Date.now() - 10 * 60_000);
    for (let i = 0; i < 205; i++) {
-@@ -590,16 +591,25 @@
+@@ -590,16 +591,25 @@ test("orphan cleanup scans at most 100 candidates, resumes, and protects fresh f
      fs.writeFileSync(file, "{}");
      fs.utimesSync(file, old, old);
    }

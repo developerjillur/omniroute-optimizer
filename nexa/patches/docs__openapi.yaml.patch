@@ -1,8 +1,8 @@
 diff --git a/docs/openapi.yaml b/docs/openapi.yaml
-index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a347d24b4 100644
+index f769fbeb20176240b1173f1f129cd00bb710660a..2d8b614a9d0df5d5e5f3468392aff7f19bae2527 100644
 --- a/docs/openapi.yaml
 +++ b/docs/openapi.yaml
-@@ -4621,6 +4621,7 @@
+@@ -4951,6 +4951,7 @@
  
    /api/cli-tools/runtime/{toolId}:
      get:
@@ -10,7 +10,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [CLI Tools]
        summary: Get runtime status for a CLI tool
        parameters:
-@@ -4915,6 +4916,7 @@
+@@ -5245,6 +5246,7 @@
  
    /api/services/9router/install:
      post:
@@ -18,7 +18,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Install 9Router from npm
        description: >-
-@@ -4953,6 +4955,7 @@
+@@ -5283,6 +5285,7 @@
  
    /api/services/9router/start:
      post:
@@ -26,7 +26,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Start 9Router
        description: >-
-@@ -4972,6 +4975,7 @@
+@@ -5302,6 +5305,7 @@
  
    /api/services/9router/stop:
      post:
@@ -34,7 +34,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Stop 9Router
        description: >-
-@@ -4989,6 +4993,7 @@
+@@ -5319,6 +5323,7 @@
  
    /api/services/9router/restart:
      post:
@@ -42,7 +42,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Restart 9Router
        description: >-
-@@ -5004,6 +5009,7 @@
+@@ -5334,6 +5339,7 @@
  
    /api/services/9router/update:
      post:
@@ -50,7 +50,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Update 9Router to a newer npm version
        description: >-
-@@ -5040,6 +5046,7 @@
+@@ -5370,6 +5376,7 @@
  
    /api/services/9router/rotate-key:
      post:
@@ -58,7 +58,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Rotate the 9Router API key
        description: >-
-@@ -5063,6 +5070,7 @@
+@@ -5393,6 +5400,7 @@
  
    /api/services/9router/status:
      get:
@@ -66,7 +66,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Get 9Router status
        description: >-
-@@ -5080,6 +5088,7 @@
+@@ -5410,6 +5418,7 @@
  
    /api/services/9router/auto-start:
      post:
@@ -74,7 +74,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Toggle 9Router auto-start
        description: >-
-@@ -5137,6 +5146,7 @@
+@@ -5467,6 +5476,7 @@
  
    /api/services/cliproxy/install:
      post:
@@ -82,7 +82,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Install CLIProxyAPI from npm
        description: >-
-@@ -5171,6 +5181,7 @@
+@@ -5501,6 +5511,7 @@
  
    /api/services/cliproxy/start:
      post:
@@ -90,7 +90,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Start CLIProxyAPI
        description: >-
-@@ -5190,6 +5201,7 @@
+@@ -5520,6 +5531,7 @@
  
    /api/services/cliproxy/stop:
      post:
@@ -98,7 +98,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Stop CLIProxyAPI
        description: >-
-@@ -5205,6 +5217,7 @@
+@@ -5535,6 +5547,7 @@
  
    /api/services/cliproxy/restart:
      post:
@@ -106,7 +106,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Restart CLIProxyAPI
        description: >-
-@@ -5220,6 +5233,7 @@
+@@ -5550,6 +5563,7 @@
  
    /api/services/cliproxy/update:
      post:
@@ -114,7 +114,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Update CLIProxyAPI to a newer npm version
        description: >-
-@@ -5252,6 +5266,7 @@
+@@ -5582,6 +5596,7 @@
  
    /api/services/cliproxy/status:
      get:
@@ -122,7 +122,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Get CLIProxyAPI status
        description: >-
-@@ -5268,6 +5283,7 @@
+@@ -5598,6 +5613,7 @@
  
    /api/services/cliproxy/auto-start:
      post:
@@ -130,7 +130,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Toggle CLIProxyAPI auto-start
        description: >-
-@@ -5325,6 +5341,7 @@
+@@ -5655,6 +5671,7 @@
  
    /api/services/mux/install:
      post:
@@ -138,7 +138,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Install Mux from npm
        description: >-
-@@ -5359,6 +5376,7 @@
+@@ -5689,6 +5706,7 @@
  
    /api/services/mux/start:
      post:
@@ -146,7 +146,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Start Mux
        description: >-
-@@ -5378,6 +5396,7 @@
+@@ -5708,6 +5726,7 @@
  
    /api/services/mux/stop:
      post:
@@ -154,7 +154,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Stop Mux
        description: >-
-@@ -5393,6 +5412,7 @@
+@@ -5723,6 +5742,7 @@
  
    /api/services/mux/restart:
      post:
@@ -162,7 +162,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Restart Mux
        description: >-
-@@ -5408,6 +5428,7 @@
+@@ -5738,6 +5758,7 @@
  
    /api/services/mux/update:
      post:
@@ -170,7 +170,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Update Mux to a newer npm version
        description: >-
-@@ -5440,6 +5461,7 @@
+@@ -5770,6 +5791,7 @@
  
    /api/services/mux/status:
      get:
@@ -178,7 +178,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Get Mux status
        description: >-
-@@ -5455,6 +5477,7 @@
+@@ -5785,6 +5807,7 @@
  
    /api/services/mux/auto-start:
      post:
@@ -186,7 +186,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Toggle Mux auto-start
        description: >-
-@@ -5709,6 +5732,7 @@
+@@ -6039,6 +6062,7 @@
  
    /api/services/bifrost/install:
      post:
@@ -194,7 +194,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Install Bifrost
        description: >-
-@@ -5744,6 +5768,7 @@
+@@ -6074,6 +6098,7 @@
  
    /api/services/bifrost/start:
      post:
@@ -202,7 +202,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Start Bifrost
        description: Starts the supervised Bifrost process. **LOCAL_ONLY** — loopback only.
-@@ -5755,6 +5780,7 @@
+@@ -6085,6 +6110,7 @@
  
    /api/services/bifrost/stop:
      post:
@@ -210,7 +210,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Stop Bifrost
        description: Stops the supervised Bifrost process. **LOCAL_ONLY** — loopback only.
-@@ -5764,6 +5790,7 @@
+@@ -6094,6 +6120,7 @@
  
    /api/services/bifrost/restart:
      post:
@@ -218,7 +218,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Restart Bifrost
        description: Restarts the supervised Bifrost process. **LOCAL_ONLY** — loopback only.
-@@ -5775,6 +5802,7 @@
+@@ -6105,6 +6132,7 @@
  
    /api/services/bifrost/update:
      post:
@@ -226,7 +226,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Update Bifrost
        description: >-
-@@ -5787,6 +5815,7 @@
+@@ -6117,6 +6145,7 @@
  
    /api/services/bifrost/status:
      get:
@@ -234,7 +234,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Get Bifrost status
        description: Returns live and DB status for the supervised Bifrost service. **LOCAL_ONLY** — loopback only.
-@@ -5796,6 +5825,7 @@
+@@ -6126,6 +6155,7 @@
  
    /api/services/bifrost/auto-start:
      post:
@@ -242,7 +242,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Toggle Bifrost auto-start
        description: >-
-@@ -6411,6 +6441,7 @@
+@@ -6921,6 +6951,7 @@
  
    /api/services/{name}/logs:
      get:
@@ -250,7 +250,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Embedded Services]
        summary: Stream service logs via SSE
        description: >-
-@@ -6481,6 +6512,7 @@
+@@ -6991,6 +7022,7 @@
  
    /api/oauth/cursor/auto-import:
      get:
@@ -258,7 +258,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [OAuth]
        summary: Auto-import Cursor OAuth credentials
        description: Automatically detects and imports Cursor credentials from local config.
-@@ -8075,6 +8107,7 @@
+@@ -8767,6 +8799,7 @@
  
    /api/tools/agent-bridge/agents:
      get:
@@ -266,7 +266,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [AgentBridge]
        summary: List all 9 IDE agents with current state
        description: >-
-@@ -8094,6 +8127,7 @@
+@@ -8786,6 +8819,7 @@
  
    /api/tools/agent-bridge/state:
      get:
@@ -274,7 +274,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [AgentBridge]
        summary: Get global AgentBridge server state
        description: Returns running status, port, cert info, and intercepted request count.
-@@ -8107,6 +8141,7 @@
+@@ -8799,6 +8833,7 @@
  
    /api/tools/agent-bridge/server:
      post:
@@ -282,7 +282,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [AgentBridge]
        summary: Control AgentBridge MITM server
        description: Start, stop, restart, trust-cert, or regenerate-cert. SPAWN_CAPABLE.
-@@ -8126,6 +8161,7 @@
+@@ -8818,6 +8853,7 @@
  
    /api/tools/agent-bridge/agents/{agentId}/dns:
      post:
@@ -290,7 +290,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [AgentBridge]
        summary: Enable or disable DNS for one agent
        description: Adds or removes /etc/hosts entries for the agent's host list. SPAWN_CAPABLE.
-@@ -8149,6 +8185,7 @@
+@@ -8841,6 +8877,7 @@
  
    /api/tools/agent-bridge/agents/{agentId}/mappings:
      get:
@@ -298,7 +298,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [AgentBridge]
        summary: Get model mappings for one agent
        parameters:
-@@ -8167,6 +8204,7 @@
+@@ -8859,6 +8896,7 @@
                  items:
                    $ref: "#/components/schemas/AgentBridgeMappingRow"
      put:
@@ -306,7 +306,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [AgentBridge]
        summary: Update model mappings for one agent
        parameters:
-@@ -8187,6 +8225,7 @@
+@@ -8879,6 +8917,7 @@
  
    /api/tools/agent-bridge/bypass:
      get:
@@ -314,7 +314,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [AgentBridge]
        summary: List bypass patterns (hosts never decrypted)
        responses:
-@@ -8199,6 +8238,7 @@
+@@ -8891,6 +8930,7 @@
                  items:
                    $ref: "#/components/schemas/AgentBridgeBypassRow"
      put:
@@ -322,7 +322,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [AgentBridge]
        summary: Update user bypass patterns
        requestBody:
-@@ -8213,6 +8253,7 @@
+@@ -8905,6 +8945,7 @@
  
    /api/tools/agent-bridge/cert:
      post:
@@ -330,7 +330,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [AgentBridge]
        summary: Download or regenerate the AgentBridge CA certificate
        requestBody:
-@@ -8232,6 +8273,7 @@
+@@ -8924,6 +8965,7 @@
  
    /api/tools/agent-bridge/upstream-ca:
      get:
@@ -338,7 +338,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [AgentBridge]
        summary: Get configured upstream CA cert path
        responses:
-@@ -8246,6 +8288,7 @@
+@@ -8938,6 +8980,7 @@
                      type: string
                      nullable: true
      post:
@@ -346,7 +346,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [AgentBridge]
        summary: Set upstream CA cert path for corporate TLS environments
        requestBody:
-@@ -8264,6 +8307,7 @@
+@@ -8956,6 +8999,7 @@
  
    /api/tools/traffic-inspector/requests:
      get:
@@ -354,7 +354,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Traffic Inspector]
        summary: List intercepted requests (filterable)
        parameters:
-@@ -8304,6 +8348,7 @@
+@@ -8996,6 +9040,7 @@
                  items:
                    $ref: "#/components/schemas/InterceptedRequest"
      delete:
@@ -362,7 +362,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Traffic Inspector]
        summary: Clear the in-memory traffic buffer
        responses:
-@@ -8312,6 +8357,7 @@
+@@ -9004,6 +9049,7 @@
  
    /api/tools/traffic-inspector/requests/{id}:
      get:
@@ -370,7 +370,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Traffic Inspector]
        summary: Get a single intercepted request by ID
        parameters:
-@@ -8333,6 +8379,7 @@
+@@ -9025,6 +9071,7 @@
  
    /api/tools/traffic-inspector/requests/{id}/replay:
      post:
@@ -378,7 +378,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Traffic Inspector]
        summary: Replay a captured request through OmniRoute router
        description: Re-executes the original request body against /v1/chat/completions. Consumes quota.
-@@ -8351,6 +8398,7 @@
+@@ -9043,6 +9090,7 @@
  
    /api/tools/traffic-inspector/requests/{id}/annotation:
      put:
@@ -386,7 +386,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Traffic Inspector]
        summary: Save or update annotation on a request
        parameters:
-@@ -8372,6 +8420,7 @@
+@@ -9064,6 +9112,7 @@
  
    /api/tools/traffic-inspector/ws:
      get:
@@ -394,7 +394,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Traffic Inspector]
        summary: Live WebSocket stream of intercepted requests
        description: >-
-@@ -8386,6 +8435,7 @@
+@@ -9078,6 +9127,7 @@
  
    /api/tools/traffic-inspector/export.har:
      get:
@@ -402,7 +402,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Traffic Inspector]
        summary: Export current filtered request list as HAR 1.2
        parameters:
-@@ -8410,6 +8460,7 @@
+@@ -9102,6 +9152,7 @@
  
    /api/tools/traffic-inspector/hosts:
      get:
@@ -410,7 +410,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Traffic Inspector]
        summary: List custom capture hosts
        responses:
-@@ -8422,6 +8473,7 @@
+@@ -9114,6 +9165,7 @@
                  items:
                    $ref: "#/components/schemas/InspectorCustomHost"
      post:
@@ -418,7 +418,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Traffic Inspector]
        summary: Add a custom capture host (edits /etc/hosts)
        requestBody:
-@@ -8438,6 +8490,7 @@
+@@ -9130,6 +9182,7 @@
  
    /api/tools/traffic-inspector/hosts/{host}:
      delete:
@@ -426,7 +426,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Traffic Inspector]
        summary: Remove a custom capture host
        parameters:
-@@ -8450,6 +8503,7 @@
+@@ -9142,6 +9195,7 @@
          "204":
            description: Host removed
      patch:
@@ -434,7 +434,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Traffic Inspector]
        summary: Toggle enabled state of a custom host
        parameters:
-@@ -8474,6 +8528,7 @@
+@@ -9166,6 +9220,7 @@
  
    /api/tools/traffic-inspector/capture-modes:
      get:
@@ -442,7 +442,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Traffic Inspector]
        summary: Get state of all 4 capture modes
        responses:
-@@ -8486,6 +8541,7 @@
+@@ -9178,6 +9233,7 @@
  
    /api/tools/traffic-inspector/capture-modes/http-proxy:
      post:
@@ -450,7 +450,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Traffic Inspector]
        summary: Start or stop the HTTP_PROXY listener (port 8080)
        description: SPAWN_CAPABLE — spawns a net.Server listener.
-@@ -8503,6 +8559,7 @@
+@@ -9195,6 +9251,7 @@
  
    /api/tools/traffic-inspector/capture-modes/system-proxy:
      post:
@@ -458,7 +458,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Traffic Inspector]
        summary: Apply or revert system-wide proxy settings
        description: SPAWN_CAPABLE — executes networksetup/gsettings/netsh. Requires admin.
-@@ -8520,6 +8577,7 @@
+@@ -9212,6 +9269,7 @@
  
    /api/tools/traffic-inspector/sessions:
      get:
@@ -466,7 +466,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Traffic Inspector]
        summary: List all saved recording sessions
        responses:
-@@ -8532,6 +8590,7 @@
+@@ -9224,6 +9282,7 @@
                  items:
                    $ref: "#/components/schemas/InspectorSession"
      post:
@@ -474,7 +474,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Traffic Inspector]
        summary: Start a new recording session
        requestBody:
-@@ -8550,6 +8609,7 @@
+@@ -9242,6 +9301,7 @@
  
    /api/tools/traffic-inspector/sessions/{id}:
      get:
@@ -482,7 +482,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Traffic Inspector]
        summary: Get session snapshot (all captured requests)
        parameters:
-@@ -8565,6 +8625,7 @@
+@@ -9257,6 +9317,7 @@
          "404":
            description: Session not found
      patch:
@@ -490,7 +490,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Traffic Inspector]
        summary: Stop or rename a recording session
        parameters:
-@@ -8584,6 +8645,7 @@
+@@ -9276,6 +9337,7 @@
          "200":
            description: Session updated
      delete:
@@ -498,7 +498,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Traffic Inspector]
        summary: Delete a recording session
        parameters:
-@@ -8599,6 +8661,7 @@
+@@ -9291,6 +9353,7 @@
  
    /api/tools/traffic-inspector/sessions/{id}/export.har:
      get:
@@ -506,7 +506,7 @@ index e3b4049929d1ef7271bfc6d5c7d4f5d3e60eaf1e..d6ad4bab304209406df2c3d2c5c0d18a
        tags: [Traffic Inspector]
        summary: Export a recorded session as HAR 1.2
        parameters:
-@@ -8621,6 +8684,7 @@
+@@ -9313,6 +9376,7 @@
  
    /api/tools/traffic-inspector/internal/ingest:
      post:

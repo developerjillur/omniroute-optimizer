@@ -1,8 +1,8 @@
 diff --git a/tsconfig.json b/tsconfig.json
-index 58a407464fab72c5b58216433786c5fed812b842..1a5ba1c376f3871ae8f7a0355b1bad669f5f26a6 100644
+index 5e69dff69800ddda9783083f395e1a0de70c0aba..13d1adfbc75a72b1496364e8174b144bd39792b1 100644
 --- a/tsconfig.json
 +++ b/tsconfig.json
-@@ -44,6 +44,7 @@
+@@ -46,6 +46,7 @@
      ".build/next/dev/dev/types/**/*.ts"
    ],
    "exclude": [

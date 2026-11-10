@@ -1,5 +1,5 @@
 diff --git a/src/lib/usage/usageHistory/helpers.ts b/src/lib/usage/usageHistory/helpers.ts
-index 627c850c4109de4a60acbddd57cefd17aa63292f..f55507b64042be0f7aafb0b64f2e4b6bba08753c 100644
+index 4ce571fb407ec42f6063ede2194639e900c98e78..5fc8424c018ac4ad0edf2f93fa5a41c71b9e6ad2 100644
 --- a/src/lib/usage/usageHistory/helpers.ts
 +++ b/src/lib/usage/usageHistory/helpers.ts
 @@ -1,3 +1,4 @@
@@ -7,7 +7,7 @@ index 627c850c4109de4a60acbddd57cefd17aa63292f..f55507b64042be0f7aafb0b64f2e4b6b
  /**
   * Pure, stateless helpers extracted from usageHistory.ts.
   * No DB access, no module-level state — safe to import anywhere.
-@@ -44,6 +45,8 @@
+@@ -45,6 +46,8 @@ export function mapUsageHistoryRow(row: unknown) {
        output: toNumberValue(r.tokens_output),
        cacheRead: toNumberValue(r.tokens_cache_read),
        cacheCreation: toNumberValue(r.tokens_cache_creation),

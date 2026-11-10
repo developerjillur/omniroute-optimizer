@@ -1,13 +1,14 @@
 diff --git a/open-sse/handlers/chatCore/passthroughHelpers.ts b/open-sse/handlers/chatCore/passthroughHelpers.ts
-index fba4493979cc9ab84ba13b042d09f7f80ff38b4e..8049d15689c24f981d566681217075207170ec41 100644
+index 14e701afc219a1ac745800a5b28ead37e5eb6fdb..61c784748f70ff855a864cafe1d78b9b5d9167c8 100644
 --- a/open-sse/handlers/chatCore/passthroughHelpers.ts
 +++ b/open-sse/handlers/chatCore/passthroughHelpers.ts
-@@ -1,3 +1,4 @@
+@@ -1,3 +1,5 @@
++import { modelRequiresPreservedThinkingPrefix } from "../../config/claudeCodeCompatibleIdentity.ts";
 +import { stripRejectedThinkingSuffix } from "../../utils/anthropicThinkingReplay.ts";
  import { FORMATS } from "../../translator/formats.ts";
  import { isVerifiedNativeCodexRequest } from "../../config/codexIdentity.ts";
  import { isClaudeCodeCompatibleProvider } from "../../services/claudeCodeCompatible.ts";
-@@ -267,8 +268,10 @@
+@@ -408,8 +410,10 @@
  
  /**
   * Build a one-shot recovery body after Anthropic has explicitly rejected a
@@ -20,9 +21,9 @@ index fba4493979cc9ab84ba13b042d09f7f80ff38b4e..8049d15689c24f981d56668121707520
   * more `user[tool_result]` turns, every paired assistant `tool_use` turn in that
   * still-open cycle keeps its thinking blocks. A trailing unresolved assistant
   * `tool_use` turn is protected as well. The one exception inside that cycle is a
-@@ -276,11 +279,16 @@
-  * it): it is swapped back to the #5312 `redacted_thinking` placeholder and
-  * forgotten, so a rejected restored signature is still recoverable.
+@@ -417,11 +421,16 @@
+  * it): it is dropped and forgotten, so a rejected restored signature is still
+  * recoverable. Manual thinking is disabled if that leaves the final tool turn bare.
   *
 - * This helper is intentionally NOT used eagerly. Normal same-model requests must
 + * This recovery helper is not used eagerly. Normal same-model requests must
@@ -39,12 +40,21 @@ index fba4493979cc9ab84ba13b042d09f7f80ff38b4e..8049d15689c24f981d56668121707520
    if (!body || typeof body !== "object" || Array.isArray(body)) return body;
  
    const record = body as Record<string, unknown>;
-@@ -368,7 +376,7 @@
-     return { result: first, retried: false, recoveryBody: null };
-   }
- 
--  const recoveryBody = stripHistoricalThinkingForSignatureRecovery(args.body);
-+  const recoveryBody = stripHistoricalThinkingForSignatureRecovery(args.body, failure.message);
-   if (recoveryBody === args.body) {
-     return { result: first, retried: false, recoveryBody: null };
-   }
+@@ -511,9 +520,16 @@
+     status: failure.status,
+     message: failure.message,
+   };
++  const immutableFablePrefix =
++    modelRequiresPreservedThinkingPrefix(args.model) &&
++    failure.status === 400 &&
++    (isAnthropicThinkingSignatureError(errorArgs) ||
++      isAnthropicThinkingModifiedError(errorArgs) ||
++      /prefix_binding_mismatch|prefix_mismatch_behavior/i.test(String(failure.message || "")));
++  if (immutableFablePrefix) return { result: first, retried: false, recoveryBody: null };
+   let recoveryBody: unknown;
+   if (isAnthropicThinkingSignatureError(errorArgs)) {
+-    recoveryBody = stripHistoricalThinkingForSignatureRecovery(args.body);
++    recoveryBody = stripHistoricalThinkingForSignatureRecovery(args.body, failure.message);
+   } else if (isAnthropicThinkingModifiedError(errorArgs)) {
+     recoveryBody = stripLatestAssistantThinkingForModifiedRecovery(args.body);
+   } else {

@@ -1,8 +1,8 @@
 diff --git a/src/lib/skills/serverOwnedToolLoop.ts b/src/lib/skills/serverOwnedToolLoop.ts
-index a25523ff907ce70a99f81e04f02a07510b25edac..bfe375e52bc4380ace885dbb5e25a725eee5bccd 100644
+index 9ac177c31e2aeac2d43d8208119f58edbe71129c..2fb6d281f4adcf63dc4a0e16644928175ad83b0e 100644
 --- a/src/lib/skills/serverOwnedToolLoop.ts
 +++ b/src/lib/skills/serverOwnedToolLoop.ts
-@@ -31,6 +31,7 @@
+@@ -31,6 +31,7 @@ import {
    MAX_RESULT_BYTES_TOTAL,
  } from "./followUpTranscript.ts";
  import { createErrorResult } from "@omniroute/open-sse/utils/error.ts";
@@ -10,7 +10,7 @@ index a25523ff907ce70a99f81e04f02a07510b25edac..bfe375e52bc4380ace885dbb5e25a725
  
  // ─── Constants ────────────────────────────────────────────────────────────────
  
-@@ -48,11 +49,18 @@
+@@ -48,11 +49,18 @@ export function aggregateProviderLegUsage(
    let cached_tokens: number | undefined;
    let cache_read_input_tokens: number | undefined;
    let cache_creation_input_tokens: number | undefined;
@@ -29,7 +29,7 @@ index a25523ff907ce70a99f81e04f02a07510b25edac..bfe375e52bc4380ace885dbb5e25a725
      prompt_tokens += u.prompt_tokens;
      completion_tokens += u.completion_tokens;
      if (u.cached_tokens !== undefined) {
-@@ -80,6 +88,8 @@
+@@ -80,6 +88,8 @@ export function aggregateProviderLegUsage(
      ...(cached_tokens !== undefined ? { cached_tokens } : {}),
      ...(cache_read_input_tokens !== undefined ? { cache_read_input_tokens } : {}),
      ...(cache_creation_input_tokens !== undefined ? { cache_creation_input_tokens } : {}),

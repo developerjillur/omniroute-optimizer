@@ -1,28 +1,28 @@
 diff --git a/src/app/api/usage/analytics/route.ts b/src/app/api/usage/analytics/route.ts
-index 238b2571e44f3ac30f7a0919123a54d76e235528..a77e2aef13cef36aaa25e15d8b64113820423a4d 100644
+index 29309258e304d7833787c23e119b64d48e2e9455..9ed492bba93d2c0f2fd5400cf430096a9dddf225 100644
 --- a/src/app/api/usage/analytics/route.ts
 +++ b/src/app/api/usage/analytics/route.ts
-@@ -373,7 +373,9 @@
-   const provider = toStringValue(row.provider);
-   const model = toStringValue(row.model);
+@@ -378,7 +378,9 @@
+   const provider = toStringValue(r.provider);
+   const model = toStringValue(r.model);
    if (!provider || !model) return 0;
--  const serviceTier = normalizeServiceTier(row.serviceTier ?? row.service_tier);
-+  const serviceTier = toStringValue(row.serviceTier ?? row.service_tier, "standard")
+-  const serviceTier = normalizeServiceTier(r.serviceTier ?? r.service_tier);
++  const serviceTier = toStringValue(r.serviceTier ?? r.service_tier, "standard")
 +    .trim()
 +    .toLowerCase();
-   const isAggregated = toNumber(row.isAggregated ?? row.is_aggregated) > 0;
-   const storedCost = toNumber(row.storedCost ?? row.stored_cost);
+   const isAggregated = toNumber(r.isAggregated ?? r.is_aggregated) > 0;
+   const storedCost = toNumber(r.storedCost ?? r.stored_cost);
  
-@@ -410,6 +412,8 @@
-         output: toNumber(row.costCompletionTokens ?? row.completionTokens),
-         cacheRead: toNumber(row.costCacheReadTokens ?? row.cacheReadTokens),
-         cacheCreation: toNumber(row.costCacheCreationTokens ?? row.cacheCreationTokens),
-+        cacheCreation5m: toNumber(row.costCacheCreation5mTokens ?? row.cacheCreation5mTokens),
-+        cacheCreation1h: toNumber(row.costCacheCreation1hTokens ?? row.cacheCreation1hTokens),
-         reasoning: toNumber(row.costReasoningTokens ?? row.reasoningTokens),
+@@ -415,6 +417,8 @@
+         output: toNumber(r.costCompletionTokens ?? r.completionTokens),
+         cacheRead: toNumber(r.costCacheReadTokens ?? r.cacheReadTokens),
+         cacheCreation: toNumber(r.costCacheCreationTokens ?? r.cacheCreationTokens),
++        cacheCreation5m: toNumber(r.costCacheCreation5mTokens ?? r.cacheCreation5mTokens),
++        cacheCreation1h: toNumber(r.costCacheCreation1hTokens ?? r.cacheCreation1hTokens),
+         reasoning: toNumber(r.costReasoningTokens ?? r.reasoningTokens),
        },
        {
-@@ -417,6 +421,7 @@
+@@ -422,6 +426,7 @@
          model,
          serviceTier,
          flatRateAsZero,

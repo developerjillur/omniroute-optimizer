@@ -2,7 +2,7 @@ diff --git a/tests/unit/proxyfetch-direct-response-start-flat-retry-budget-13703
 index a761e26da6b2ef867bafd199b0cd0ae655d115d7..02af4eab240365f59c29cb229a001b028410adf4 100644
 --- a/tests/unit/proxyfetch-direct-response-start-flat-retry-budget-13703.test.ts
 +++ b/tests/unit/proxyfetch-direct-response-start-flat-retry-budget-13703.test.ts
-@@ -33,7 +33,10 @@
+@@ -33,7 +33,10 @@ test("#13703 fresh-socket GET retry gets the remaining caller budget", async ()
    const attemptStarts: number[] = [];
    const attemptAbortedAfter: number[] = [];
  
@@ -14,7 +14,7 @@ index a761e26da6b2ef867bafd199b0cd0ae655d115d7..02af4eab240365f59c29cb229a001b02
      const start = Date.now();
      attemptStarts.push(start);
      return new Promise<Response>((_, reject) => {
-@@ -44,10 +47,10 @@
+@@ -44,10 +47,10 @@ test("#13703 fresh-socket GET retry gets the remaining caller budget", async ()
            reject(
              init.signal!.reason instanceof Error
                ? init.signal!.reason
@@ -27,7 +27,7 @@ index a761e26da6b2ef867bafd199b0cd0ae655d115d7..02af4eab240365f59c29cb229a001b02
        );
      });
    };
-@@ -68,14 +71,18 @@
+@@ -68,14 +71,18 @@ test("#13703 fresh-socket GET retry gets the remaining caller budget", async ()
      clearTimeout(callerDeadlineTimer);
    }
  
@@ -48,7 +48,7 @@ index a761e26da6b2ef867bafd199b0cd0ae655d115d7..02af4eab240365f59c29cb229a001b02
    );
  
    assert.ok(
-@@ -84,6 +91,6 @@
+@@ -84,6 +91,6 @@ test("#13703 fresh-socket GET retry gets the remaining caller budget", async ()
        `budget (~${LARGER_CALLER_DEADLINE_MS - FLAT_TIMEOUT_MS}ms available), not the ` +
        `identical flat ${FLAT_TIMEOUT_MS}ms window. Got ${secondAttemptDuration}ms — ` +
        `proves the retry reuses the same flat budget as the pooled attempt instead of ` +

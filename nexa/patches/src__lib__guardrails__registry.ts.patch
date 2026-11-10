@@ -2,7 +2,7 @@ diff --git a/src/lib/guardrails/registry.ts b/src/lib/guardrails/registry.ts
 index ff2990cd65ae1853f18881b5b1bb95b015a34fa8..4d6ee2d63a79ca1a87d4f8e95867ae465bcb2bc5 100644
 --- a/src/lib/guardrails/registry.ts
 +++ b/src/lib/guardrails/registry.ts
-@@ -96,19 +96,34 @@
+@@ -96,19 +96,34 @@ export function resolveDisabledGuardrails({
      bodyRecord?.metadata && typeof bodyRecord.metadata === "object"
        ? (bodyRecord.metadata as Record<string, unknown>)
        : null;

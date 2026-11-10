@@ -8,7 +8,7 @@ index 62106f6c444137b695241e382976464845231afb..25755fa18b5f73c56febbbe000bbf080
  import type { getDbInstance } from "../../db/core";
  import { resolveProviderId } from "@/shared/constants/providers";
  import type { UsageEntry } from "../usageHistory";
-@@ -12,7 +14,7 @@
+@@ -12,7 +14,7 @@ export function backfillDuplicateUsageEntry(
  ): boolean {
    const existing = db
      .prepare(
@@ -17,7 +17,7 @@ index 62106f6c444137b695241e382976464845231afb..25755fa18b5f73c56febbbe000bbf080
         WHERE timestamp = ?
           AND COALESCE(provider, '')     = COALESCE(?, '')
           AND COALESCE(model, '')        = COALESCE(?, '')
-@@ -30,7 +32,7 @@
+@@ -30,7 +32,7 @@ export function backfillDuplicateUsageEntry(
        entry.apiKeyId || null,
        tokensInput,
        tokensOutput
@@ -26,7 +26,7 @@ index 62106f6c444137b695241e382976464845231afb..25755fa18b5f73c56febbbe000bbf080
  
    if (!existing) return false;
    // Back-fill endpoint if the original row missed it.
-@@ -47,5 +49,12 @@
+@@ -47,5 +49,12 @@ export function backfillDuplicateUsageEntry(
        existing.id
      );
    }

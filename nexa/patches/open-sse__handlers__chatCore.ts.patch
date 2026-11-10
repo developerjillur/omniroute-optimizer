@@ -1,16 +1,16 @@
 diff --git a/open-sse/handlers/chatCore.ts b/open-sse/handlers/chatCore.ts
-index ec1087e3138bee36a4f6221d2ddba79827b9c1be..f8a67f501bb85d63f443f77138f419cfe2e418a1 100644
+index 3d4d5f8a693cd9f087ec3ea4c677c2c3f27be8e2..3d6369d17852fac0f7ca9839619914bdf0976130 100644
 --- a/open-sse/handlers/chatCore.ts
 +++ b/open-sse/handlers/chatCore.ts
-@@ -92,6 +92,7 @@
- };
- import { resolveMemoryOwnerId, runMemoryExtractionGate } from "./chatCore/memoryExtraction.ts";
+@@ -99,6 +99,7 @@ import {
+   runMemoryExtractionGate,
+ } from "./chatCore/memoryExtraction.ts";
  import { checkResourcePressureGuard } from "../utils/resourcePressure.ts";
 +import { nativeHostedSearchFallbackError } from "../utils/nativeHostedSearch.ts";
  import { normalizeHeaders } from "../utils/headers.ts";
  import { resolveChatCoreRequestFormat } from "./chatCore/requestFormat.ts";
  import { resolveChatCoreTargetFormat } from "./chatCore/targetFormat.ts";
-@@ -778,6 +779,9 @@
+@@ -809,6 +810,9 @@ async function handleChatCoreInner({
        interceptSearchOverride,
      });
    if (webSearchFallbackPlan.enabled) {

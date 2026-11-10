@@ -1,8 +1,8 @@
 diff --git a/open-sse/utils/earlyStreamKeepalive.ts b/open-sse/utils/earlyStreamKeepalive.ts
-index 893b752cf336258afaa3fe891af09b1364009e6b..df201e2798f4636a4d3c401544c43f5dafec2daa 100644
+index ac83438dcb826d77123af6d19fcc60e4ad712088..25f4b88f7ae1b959579794b5079c5ffab816df39 100644
 --- a/open-sse/utils/earlyStreamKeepalive.ts
 +++ b/open-sse/utils/earlyStreamKeepalive.ts
-@@ -759,13 +759,25 @@
+@@ -776,18 +776,26 @@
      },
    });
  
@@ -15,6 +15,7 @@ index 893b752cf336258afaa3fe891af09b1364009e6b..df201e2798f4636a4d3c401544c43f5d
 +  keepaliveHeaders.set("Content-Type", "text/event-stream; charset=utf-8");
 +  keepaliveHeaders.set("Cache-Control", "no-cache, no-transform");
 +  keepaliveHeaders.set("Connection", "keep-alive");
++  keepaliveHeaders.set("X-Accel-Buffering", "no");
 +  keepaliveHeaders.delete("content-length");
 +  keepaliveHeaders.delete("content-encoding");
 +  keepaliveHeaders.delete("transfer-encoding");
@@ -29,6 +30,11 @@ index 893b752cf336258afaa3fe891af09b1364009e6b..df201e2798f4636a4d3c401544c43f5d
 -      "Content-Type": "text/event-stream; charset=utf-8",
 -      "Cache-Control": "no-cache, no-transform",
 -      Connection: "keep-alive",
+-      // This early-keepalive response IS the response the client receives while
+-      // the real turn is still prefilling — the worst possible stream for a
+-      // buffering reverse proxy to sit on. Same no-buffering instruction the
+-      // central header path already sets.
+-      "X-Accel-Buffering": "no",
 -      ...extraHeaders,
 -    },
 +    headers: keepaliveHeaders,

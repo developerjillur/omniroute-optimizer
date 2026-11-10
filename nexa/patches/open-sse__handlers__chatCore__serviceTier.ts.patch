@@ -1,0 +1,73 @@
+diff --git a/open-sse/handlers/chatCore/serviceTier.ts b/open-sse/handlers/chatCore/serviceTier.ts
+index e79fb4a8bfe0d267940d569a9f6b11da0c2b41ad..66707260ee18d14a03595e4e3e0384d447d47807 100644
+--- a/open-sse/handlers/chatCore/serviceTier.ts
++++ b/open-sse/handlers/chatCore/serviceTier.ts
+@@ -16,11 +16,15 @@
+ } from "@/lib/providers/requestDefaults";
+ 
+ /** The effective service tier carried through a request: "standard" or a normalized Codex tier. */
+-export type EffectiveServiceTier = "standard" | CodexServiceTier;
++export type EffectiveServiceTier = "standard" | "fast" | CodexServiceTier;
++
++function isNativeClaudeProvider(provider: string | null | undefined): boolean {
++  return provider === "claude" || provider === "cc" || provider === "anthropic";
++}
+ 
+ /**
+- * Resolve the effective service tier for the *outbound* request. Non-Codex providers are always
+- * "standard". For Codex, a valid client `service_tier` wins; otherwise the per-connection request
++ * Resolve the effective service tier for the *outbound* request. Native Claude providers use the explicit speed request; other non-Codex providers
++ * use "standard". For Codex, a valid client `service_tier` wins; otherwise the per-connection request
+  * default applies, falling back to "standard".
+  */
+ export function resolveEffectiveServiceTier(
+@@ -28,6 +32,13 @@
+   providerSpecificData: unknown,
+   requestBody?: unknown
+ ): EffectiveServiceTier {
++  if (isNativeClaudeProvider(provider)) {
++    const body =
++      requestBody && typeof requestBody === "object" && !Array.isArray(requestBody)
++        ? (requestBody as Record<string, unknown>)
++        : {};
++    return body.speed === "fast" ? "fast" : "standard";
++  }
+   if (provider !== "codex") return "standard";
+   const requestRecord =
+     requestBody && typeof requestBody === "object" && !Array.isArray(requestBody)
+@@ -42,8 +53,8 @@
+ }
+ 
+ /**
+- * Resolve the service tier *reported by the upstream* response. Non-Codex providers and missing
+- * payloads return null (caller keeps the prior value). For Codex, reads a top-level `service_tier`
++ * Resolve the service tier *reported by the upstream* response. Native Claude providers use response usage.speed, including message_start envelopes.
++ * Other non-Codex providers and missing payloads return null (caller keeps the prior value). For Codex, reads a top-level `service_tier`
+  * and otherwise descends through nested `response` envelopes up to `maxDepth` levels.
+  */
+ export function resolveReportedServiceTier(
+@@ -53,7 +64,7 @@
+ ): EffectiveServiceTier | null {
+   if (
+     maxDepth <= 0 ||
+-    provider !== "codex" ||
++    (provider !== "codex" && !isNativeClaudeProvider(provider)) ||
+     !payload ||
+     typeof payload !== "object" ||
+     Array.isArray(payload)
+@@ -61,6 +72,15 @@
+     return null;
+   }
+   const record = payload as Record<string, unknown>;
++  if (isNativeClaudeProvider(provider)) {
++    const usage = record.usage;
++    const speed =
++      usage && typeof usage === "object" && !Array.isArray(usage)
++        ? (usage as Record<string, unknown>).speed
++        : undefined;
++    if (speed === "fast" || speed === "standard") return speed;
++    return resolveReportedServiceTier(provider, record.message ?? record.response, maxDepth - 1);
++  }
+   const rawServiceTier = record.service_tier;
+   if (typeof rawServiceTier === "string" && rawServiceTier.trim().length > 0) {
+     const normalizedServiceTier = normalizeCodexServiceTier(rawServiceTier);

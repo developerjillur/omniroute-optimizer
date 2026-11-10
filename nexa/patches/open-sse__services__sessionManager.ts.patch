@@ -10,7 +10,7 @@ index a8c385caaece25cc690ede68d6b7781b406773ff..ed2548e360a2e9056ad7faf885d1fed8
  
  interface SessionEntry {
    createdAt: number;
-@@ -105,6 +106,8 @@
+@@ -105,6 +106,8 @@ export function generateSessionId(
    options: SessionFingerprintOptions = {}
  ): string | null {
    if (!body || typeof body !== "object") return null;
@@ -19,7 +19,7 @@ index a8c385caaece25cc690ede68d6b7781b406773ff..ed2548e360a2e9056ad7faf885d1fed8
    const parts: string[] = [];
  
    // Model contributes to fingerprint
-@@ -340,7 +343,10 @@
+@@ -340,7 +343,10 @@ export function extractExternalSessionId(
      h.get("x-omniroute-session") ?? // OmniRoute-specific form
      h.get("session-id") ?? // Bare session-id
      null;

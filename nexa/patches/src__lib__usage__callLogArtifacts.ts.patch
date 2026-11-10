@@ -1,8 +1,8 @@
 diff --git a/src/lib/usage/callLogArtifacts.ts b/src/lib/usage/callLogArtifacts.ts
-index 5abeb919b59a5a4d8125eb82e2a5f5786e9a7fa0..95895ff7a4525d09062050b4d48c3072f6458633 100644
+index facd115b33bd42c77dfff1274b1db3571d91ff57..58adbdb1f97cc65aa01e8134e10e64b7865f291c 100644
 --- a/src/lib/usage/callLogArtifacts.ts
 +++ b/src/lib/usage/callLogArtifacts.ts
-@@ -109,6 +109,8 @@
+@@ -109,6 +109,8 @@ export type CallLogArtifact = {
        out: number;
        cacheRead: number | null;
        cacheWrite: number | null;

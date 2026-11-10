@@ -1,0 +1,662 @@
+diff --git a/open-sse/config/claudeCodeCompatibleIdentity.ts b/open-sse/config/claudeCodeCompatibleIdentity.ts
+index 0158a2f8090f18b120ef4f81f37940807f9fb7bd..6c90e86dc70d00f7a31dbb31f2ce022fa04276c7 100644
+--- a/open-sse/config/claudeCodeCompatibleIdentity.ts
++++ b/open-sse/config/claudeCodeCompatibleIdentity.ts
+@@ -16,20 +16,29 @@
+ export const CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = CLAUDE_CODE_SDK_PACKAGE_VERSION;
+ export const CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = CLAUDE_CODE_RUNTIME_VERSION;
+ const CONTEXT_1M_NATIVE_MODELS = [
++  "claude-fable-5-2",
+   "claude-fable-5-1",
+   "claude-opus-5-5",
+   "claude-opus-5",
+   "claude-haiku-5-5",
+ ];
+ 
+-export function modelHasNativeContext1m(model: string | null | undefined): boolean {
+-  const normalizedModel = String(model || "")
++function normalizeClaudeContextModel(model: string | null | undefined): string {
++  return String(model || "")
+     .trim()
+     .toLowerCase()
+     .replace(/^.*?(?=claude-)/, "")
+     .replace(/(\d)\.(\d)/g, "$1-$2")
+     .replace(/-\d{8}$/, "");
++}
+ 
++/** Fable 5.2 validates the complete prefix bound to preserved thinking on every account. */
++export function modelRequiresPreservedThinkingPrefix(model: string | null | undefined): boolean {
++  return /^claude-fable-5-2(?:$|[-:@\[])/.test(normalizeClaudeContextModel(model));
++}
++
++export function modelHasNativeContext1m(model: string | null | undefined): boolean {
++  const normalizedModel = normalizeClaudeContextModel(model);
+   return CONTEXT_1M_NATIVE_MODELS.some(
+     (supported) =>
+       normalizedModel === supported ||
+diff --git a/open-sse/config/providers/registry/anthropic/index.ts b/open-sse/config/providers/registry/anthropic/index.ts
+index 4959c0f32637d9c0147ff1904cdffa533b417e9a..847ee99a8eacba433c458d87e8c81eaaa370751a 100644
+--- a/open-sse/config/providers/registry/anthropic/index.ts
++++ b/open-sse/config/providers/registry/anthropic/index.ts
+@@ -16,6 +16,17 @@
+     "Anthropic-Beta": ANTHROPIC_BETA_API_KEY,
+   },
+   models: [
++    {
++      id: "claude-fable-5-2",
++      name: "Claude Fable 5.2",
++      contextLength: 1000000,
++      maxOutputTokens: 128000,
++      supportsReasoning: true,
++      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
++      supportsXHighEffort: true,
++      supportsVision: true,
++      unsupportedParams: ["temperature", "top_p", "top_k"],
++    },
+     {
+       id: "claude-fable-5-1",
+       name: "Claude Fable 5.1",
+diff --git a/open-sse/config/providers/registry/bedrock/index.ts b/open-sse/config/providers/registry/bedrock/index.ts
+index 1443f45662b0e221978fa87d1e7fa01d4044b8b4..196a830a1ea600374c6e15bdcd81ab58c13a0176 100644
+--- a/open-sse/config/providers/registry/bedrock/index.ts
++++ b/open-sse/config/providers/registry/bedrock/index.ts
+@@ -9,6 +9,17 @@
+   authHeader: "bearer",
+   defaultContextLength: 200000,
+   models: [
++    {
++      id: "anthropic.claude-fable-5-2",
++      name: "Claude Fable 5.2 (Bedrock)",
++      toolCalling: true,
++      supportsReasoning: true,
++      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
++      supportsXHighEffort: true,
++      supportsVision: true,
++      contextLength: 1000000,
++      maxOutputTokens: 128000,
++    },
+     {
+       id: "anthropic.claude-fable-5-1",
+       name: "Claude Fable 5.1 (Bedrock)",
+diff --git a/open-sse/config/providers/registry/claude/web/index.ts b/open-sse/config/providers/registry/claude/web/index.ts
+index 6876810fcad91798067c9764706930a5fd6b6a4d..0461cb5e5b0701be3ad050d52cb7ab5e0ba11c37 100644
+--- a/open-sse/config/providers/registry/claude/web/index.ts
++++ b/open-sse/config/providers/registry/claude/web/index.ts
+@@ -9,6 +9,17 @@
+   authType: "apikey",
+   authHeader: "cookie",
+   models: [
++    {
++      id: "claude-fable-5-2",
++      name: "Claude Fable 5.2 (web)",
++      toolCalling: false,
++      supportsReasoning: true,
++      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
++      supportsXHighEffort: true,
++      supportsVision: true,
++      contextLength: 1000000,
++      maxOutputTokens: 128000,
++    },
+     {
+       id: "claude-fable-5-1",
+       name: "Claude Fable 5.1 (web)",
+diff --git a/open-sse/config/providers/registry/vertex/index.ts b/open-sse/config/providers/registry/vertex/index.ts
+index d3a7b68de9411a5b50d7fa72375b924cc1f7026f..4062435d1e3b8ccd0583d96f682c8c7bf1ddc4b4 100644
+--- a/open-sse/config/providers/registry/vertex/index.ts
++++ b/open-sse/config/providers/registry/vertex/index.ts
+@@ -48,6 +48,7 @@
+     },
+     { id: "zai-org/glm-5-maas", name: "GLM 5 (Vertex MaaS)", targetFormat: "openai" },
+     ...VERTEX_XAI_MODELS,
++    { id: "claude-fable-5-2", name: "Claude Fable 5.2 (Vertex)", targetFormat: "claude" },
+     { id: "claude-fable-5-1", name: "Claude Fable 5.1 (Vertex)", targetFormat: "claude" },
+     { id: "claude-fable-5", name: "Claude Fable 5 (Vertex)", targetFormat: "claude" },
+     { id: "claude-opus-5-5", name: "Claude Opus 5.5 (Vertex)", targetFormat: "claude" },
+diff --git a/open-sse/config/providers/registry/vertex/partner/index.ts b/open-sse/config/providers/registry/vertex/partner/index.ts
+index b7d942103a65c231e7dd733126670ad7ddd39a11..bfc3f50a83c0d46417501b17de42f87ea33bb2b7 100644
+--- a/open-sse/config/providers/registry/vertex/partner/index.ts
++++ b/open-sse/config/providers/registry/vertex/partner/index.ts
+@@ -19,6 +19,7 @@
+     },
+     { id: "zai-org/glm-5-maas", name: "GLM 5", targetFormat: "openai" },
+     ...VERTEX_XAI_MODELS,
++    { id: "claude-fable-5-2", name: "Claude Fable 5.2", targetFormat: "claude" },
+     { id: "claude-fable-5-1", name: "Claude Fable 5.1", targetFormat: "claude" },
+     { id: "claude-fable-5", name: "Claude Fable 5", targetFormat: "claude" },
+     { id: "claude-opus-5-5", name: "Claude Opus 5.5", targetFormat: "claude" },
+diff --git a/open-sse/handlers/chatCore/claudePassthroughBody.ts b/open-sse/handlers/chatCore/claudePassthroughBody.ts
+index bbe257e0395606bd089d398a7bb210ac8492d079..b3cd82f91c57b89986840c2ffcf87046c303419a 100644
+--- a/open-sse/handlers/chatCore/claudePassthroughBody.ts
++++ b/open-sse/handlers/chatCore/claudePassthroughBody.ts
+@@ -1,3 +1,4 @@
++import { modelRequiresPreservedThinkingPrefix } from "../../config/claudeCodeCompatibleIdentity.ts";
+ /**
+  * chatCore pure Claude → Claude passthrough request body (chatCore god-file decomposition, slice 2).
+  *
+@@ -59,9 +60,14 @@
+   applyReasoningRuleDirective: (bodyInput: unknown, targetFormat?: "claude") => unknown;
+   log?: LoggerLike;
+ }): Record<string, unknown> {
+-  const nativeThreadPassthrough = isClaudeCodeSemanticPassthrough && provider === "claude" && isNativeClaudeThreadRequest(body);
+-  if (nativeThreadPassthrough) {
+-    // Sparse Thread directives belong to the current turn; do not hoist/rewrite stored context.
++  const nativeThreadPassthrough =
++    isClaudeCodeSemanticPassthrough && provider === "claude" && isNativeClaudeThreadRequest(body);
++  const immutableNativePrefix =
++    isClaudeCodeSemanticPassthrough &&
++    (provider === "claude" || provider === "anthropic") &&
++    modelRequiresPreservedThinkingPrefix(effectiveModel);
++  if (nativeThreadPassthrough || immutableNativePrefix) {
++    // Native Thread directives and Fable 5.2 thinking bind the original system, tools and history.
+     return { ...structuredClone(body), _disableToolPrefix: true };
+   }
+   // applyReasoningRuleDirective returns unknown; the hoist helper requires a record.
+diff --git a/open-sse/handlers/chatCore/passthroughHelpers.ts b/open-sse/handlers/chatCore/passthroughHelpers.ts
+index 77cd83b42064ec002ef4d6a03b54c9655f8caef9..61c784748f70ff855a864cafe1d78b9b5d9167c8 100644
+--- a/open-sse/handlers/chatCore/passthroughHelpers.ts
++++ b/open-sse/handlers/chatCore/passthroughHelpers.ts
+@@ -1,3 +1,4 @@
++import { modelRequiresPreservedThinkingPrefix } from "../../config/claudeCodeCompatibleIdentity.ts";
+ import { stripRejectedThinkingSuffix } from "../../utils/anthropicThinkingReplay.ts";
+ import { FORMATS } from "../../translator/formats.ts";
+ import { isVerifiedNativeCodexRequest } from "../../config/codexIdentity.ts";
+@@ -519,6 +520,13 @@
+     status: failure.status,
+     message: failure.message,
+   };
++  const immutableFablePrefix =
++    modelRequiresPreservedThinkingPrefix(args.model) &&
++    failure.status === 400 &&
++    (isAnthropicThinkingSignatureError(errorArgs) ||
++      isAnthropicThinkingModifiedError(errorArgs) ||
++      /prefix_binding_mismatch|prefix_mismatch_behavior/i.test(String(failure.message || "")));
++  if (immutableFablePrefix) return { result: first, retried: false, recoveryBody: null };
+   let recoveryBody: unknown;
+   if (isAnthropicThinkingSignatureError(errorArgs)) {
+     recoveryBody = stripHistoricalThinkingForSignatureRecovery(args.body, failure.message);
+diff --git a/open-sse/handlers/chatCore/serviceTier.ts b/open-sse/handlers/chatCore/serviceTier.ts
+index e79fb4a8bfe0d267940d569a9f6b11da0c2b41ad..66707260ee18d14a03595e4e3e0384d447d47807 100644
+--- a/open-sse/handlers/chatCore/serviceTier.ts
++++ b/open-sse/handlers/chatCore/serviceTier.ts
+@@ -16,11 +16,15 @@
+ } from "@/lib/providers/requestDefaults";
+ 
+ /** The effective service tier carried through a request: "standard" or a normalized Codex tier. */
+-export type EffectiveServiceTier = "standard" | CodexServiceTier;
++export type EffectiveServiceTier = "standard" | "fast" | CodexServiceTier;
++
++function isNativeClaudeProvider(provider: string | null | undefined): boolean {
++  return provider === "claude" || provider === "cc" || provider === "anthropic";
++}
+ 
+ /**
+- * Resolve the effective service tier for the *outbound* request. Non-Codex providers are always
+- * "standard". For Codex, a valid client `service_tier` wins; otherwise the per-connection request
++ * Resolve the effective service tier for the *outbound* request. Native Claude providers use the explicit speed request; other non-Codex providers
++ * use "standard". For Codex, a valid client `service_tier` wins; otherwise the per-connection request
+  * default applies, falling back to "standard".
+  */
+ export function resolveEffectiveServiceTier(
+@@ -28,6 +32,13 @@
+   providerSpecificData: unknown,
+   requestBody?: unknown
+ ): EffectiveServiceTier {
++  if (isNativeClaudeProvider(provider)) {
++    const body =
++      requestBody && typeof requestBody === "object" && !Array.isArray(requestBody)
++        ? (requestBody as Record<string, unknown>)
++        : {};
++    return body.speed === "fast" ? "fast" : "standard";
++  }
+   if (provider !== "codex") return "standard";
+   const requestRecord =
+     requestBody && typeof requestBody === "object" && !Array.isArray(requestBody)
+@@ -42,8 +53,8 @@
+ }
+ 
+ /**
+- * Resolve the service tier *reported by the upstream* response. Non-Codex providers and missing
+- * payloads return null (caller keeps the prior value). For Codex, reads a top-level `service_tier`
++ * Resolve the service tier *reported by the upstream* response. Native Claude providers use response usage.speed, including message_start envelopes.
++ * Other non-Codex providers and missing payloads return null (caller keeps the prior value). For Codex, reads a top-level `service_tier`
+  * and otherwise descends through nested `response` envelopes up to `maxDepth` levels.
+  */
+ export function resolveReportedServiceTier(
+@@ -53,7 +64,7 @@
+ ): EffectiveServiceTier | null {
+   if (
+     maxDepth <= 0 ||
+-    provider !== "codex" ||
++    (provider !== "codex" && !isNativeClaudeProvider(provider)) ||
+     !payload ||
+     typeof payload !== "object" ||
+     Array.isArray(payload)
+@@ -61,6 +72,15 @@
+     return null;
+   }
+   const record = payload as Record<string, unknown>;
++  if (isNativeClaudeProvider(provider)) {
++    const usage = record.usage;
++    const speed =
++      usage && typeof usage === "object" && !Array.isArray(usage)
++        ? (usage as Record<string, unknown>).speed
++        : undefined;
++    if (speed === "fast" || speed === "standard") return speed;
++    return resolveReportedServiceTier(provider, record.message ?? record.response, maxDepth - 1);
++  }
+   const rawServiceTier = record.service_tier;
+   if (typeof rawServiceTier === "string" && rawServiceTier.trim().length > 0) {
+     const normalizedServiceTier = normalizeCodexServiceTier(rawServiceTier);
+diff --git a/open-sse/services/providerCostData.ts b/open-sse/services/providerCostData.ts
+index c3243522cd8813327d9de6ed2a2e075cb0de0c07..273f444afc9da7f5c7ca210ee2fe97085927fc25 100644
+--- a/open-sse/services/providerCostData.ts
++++ b/open-sse/services/providerCostData.ts
+@@ -15,6 +15,7 @@
+ export const KNOWN_MODEL_PRICING: Record<string, ModelPricing> = {
+   "gpt-4o": { inputCostPer1M: 2.5, outputCostPer1M: 10.0, isFree: false },
+   "gpt-4o-mini": { inputCostPer1M: 0.15, outputCostPer1M: 0.6, isFree: false },
++  "claude-fable-5-2": { inputCostPer1M: 8.0, outputCostPer1M: 40.0, isFree: false },
+   "claude-fable-5-1": { inputCostPer1M: 10.0, outputCostPer1M: 50.0, isFree: false },
+   "claude-fable-5": { inputCostPer1M: 15.0, outputCostPer1M: 75.0, isFree: false },
+   "claude-opus-5-5": { inputCostPer1M: 4.0, outputCostPer1M: 20.0, isFree: false },
+diff --git a/src/lib/usage/costCalculator.ts b/src/lib/usage/costCalculator.ts
+index a53bd0a8a8de8084550aee98c95cb1f6cdcde97c..28231fb71dc00fe52f35e0d1aad122ce5fe53149 100644
+--- a/src/lib/usage/costCalculator.ts
++++ b/src/lib/usage/costCalculator.ts
+@@ -199,6 +199,17 @@
+   return 1;
+ }
+ 
++/** Anthropic fast-mode cache multipliers stack on top of the doubled Fable 5.2 rates. */
++export function getClaudeFastCostMultiplier(
++  provider: string | null | undefined,
++  model: string | null | undefined,
++  serviceTier: string | null | undefined
++): number {
++  if (!["claude", "cc", "anthropic"].includes(normalizeServiceTier(provider))) return 1;
++  if (normalizeServiceTier(serviceTier) !== "fast") return 1;
++  return normalizeModelName(String(model || "")).toLowerCase() === "claude-fable-5-2" ? 2 : 1;
++}
++
+ /**
+  * Long-context pricing tier: a row may carry `long_context: { threshold, inclusive?, ...rates }`
+  * (e.g. OpenAI bills prompts above 272K input tokens at 2x input / 1.5x output for the whole
+@@ -252,20 +263,37 @@
+   // never a cost basis: pricing them would bill the request a second time.
+   if (isCreditMeteredProvider(options.provider)) return 0;
+   const inputTokens = tokens.input ?? tokens.prompt_tokens ?? tokens.input_tokens ?? 0;
+-  const rates = applyLongContextTier(pricing, inputTokens, Number.isFinite(Number(pricing.long_context_threshold)) ? options.longContext : undefined);
+-  const legacyLongContext = !pricing.long_context &&
++  const rates = applyLongContextTier(
++    pricing,
++    inputTokens,
++    Number.isFinite(Number(pricing.long_context_threshold)) ? options.longContext : undefined
++  );
++  const legacyLongContext =
++    !pricing.long_context &&
+     (options.longContext ?? inputTokens > toNumber(pricing.long_context_threshold, Infinity));
+-  const inputMultiplier = legacyLongContext ? toNumber(pricing.long_context_input_multiplier, 1) : 1;
+-  const outputMultiplier = legacyLongContext ? toNumber(pricing.long_context_output_multiplier, 1) : 1;
++  const inputMultiplier = legacyLongContext
++    ? toNumber(pricing.long_context_input_multiplier, 1)
++    : 1;
++  const outputMultiplier = legacyLongContext
++    ? toNumber(pricing.long_context_output_multiplier, 1)
++    : 1;
+   const inputPrice = toNumber(rates.input, 0) * inputMultiplier;
+   const cachedPrice = toNumber(rates.cached, toNumber(rates.input, 0)) * inputMultiplier;
+   const outputPrice = toNumber(rates.output, 0) * outputMultiplier;
+   const reasoningPrice = toNumber(rates.reasoning, toNumber(rates.output, 0)) * outputMultiplier;
+-  const cacheCreationPrice = toNumber(rates.cache_creation, toNumber(rates.input, 0)) * inputMultiplier;
+-
+-  const nativeClaudePrice = ["claude", "cc", "anthropic"].includes(normalizeServiceTier(options.provider));
+-  const hourCacheCreationPrice = toNumber(rates.cache_creation_1h,
+-    nativeClaudePrice ? toNumber(rates.input, 0) * 2 : toNumber(rates.cache_creation, toNumber(rates.input, 0))) * inputMultiplier;
++  const cacheCreationPrice =
++    toNumber(rates.cache_creation, toNumber(rates.input, 0)) * inputMultiplier;
++
++  const nativeClaudePrice = ["claude", "cc", "anthropic"].includes(
++    normalizeServiceTier(options.provider)
++  );
++  const hourCacheCreationPrice =
++    toNumber(
++      rates.cache_creation_1h,
++      nativeClaudePrice
++        ? toNumber(rates.input, 0) * 2
++        : toNumber(rates.cache_creation, toNumber(rates.input, 0))
++    ) * inputMultiplier;
+ 
+   let cost = 0;
+   const promptDetails = tokens.prompt_tokens_details;
+@@ -325,7 +353,11 @@
+     cost += ((five + unknown) * cacheCreationPrice + hour * hourCacheCreationPrice) / 1_000_000;
+   }
+ 
+-  return cost * getCodexFastCostMultiplier(options.provider, options.model, options.serviceTier);
++  return (
++    cost *
++    getCodexFastCostMultiplier(options.provider, options.model, options.serviceTier) *
++    getClaudeFastCostMultiplier(options.provider, options.model, options.serviceTier)
++  );
+ }
+ 
+ /**
+diff --git a/src/mitm/_internal/claudeModels.json b/src/mitm/_internal/claudeModels.json
+index f9757d8ea424907ecc6a73756b2795ac529753cd..5ce699f6767fd9341ab8014f0a39c5701409537a 100644
+--- a/src/mitm/_internal/claudeModels.json
++++ b/src/mitm/_internal/claudeModels.json
+@@ -1,24 +1,25 @@
+ [
++  {
++    "id": "claude-fable-5-2",
++    "name": "Claude Fable 5.2",
++    "contextLength": 1000000,
++    "maxOutputTokens": 128000,
++    "supportsReasoning": true,
++    "supportedThinkingEfforts": ["low", "medium", "high", "xhigh", "max"],
++    "supportsXHighEffort": true,
++    "supportsVision": true,
++    "unsupportedParams": ["temperature", "top_p", "top_k"]
++  },
+   {
+     "id": "claude-fable-5-1",
+     "name": "Claude Fable 5.1",
+     "contextLength": 1000000,
+     "maxOutputTokens": 128000,
+     "supportsReasoning": true,
+-    "supportedThinkingEfforts": [
+-      "low",
+-      "medium",
+-      "high",
+-      "xhigh",
+-      "max"
+-    ],
++    "supportedThinkingEfforts": ["low", "medium", "high", "xhigh", "max"],
+     "supportsXHighEffort": true,
+     "supportsVision": true,
+-    "unsupportedParams": [
+-      "temperature",
+-      "top_p",
+-      "top_k"
+-    ]
++    "unsupportedParams": ["temperature", "top_p", "top_k"]
+   },
+   {
+     "id": "claude-fable-5",
+@@ -26,19 +27,9 @@
+     "contextLength": 1000000,
+     "maxOutputTokens": 128000,
+     "supportsReasoning": true,
+-    "supportedThinkingEfforts": [
+-      "low",
+-      "medium",
+-      "high",
+-      "xhigh",
+-      "max"
+-    ],
++    "supportedThinkingEfforts": ["low", "medium", "high", "xhigh", "max"],
+     "supportsXHighEffort": true,
+-    "unsupportedParams": [
+-      "temperature",
+-      "top_p",
+-      "top_k"
+-    ]
++    "unsupportedParams": ["temperature", "top_p", "top_k"]
+   },
+   {
+     "id": "claude-opus-5",
+@@ -46,19 +37,9 @@
+     "contextLength": 1000000,
+     "maxOutputTokens": 128000,
+     "supportsReasoning": true,
+-    "supportedThinkingEfforts": [
+-      "low",
+-      "medium",
+-      "high",
+-      "xhigh",
+-      "max"
+-    ],
++    "supportedThinkingEfforts": ["low", "medium", "high", "xhigh", "max"],
+     "supportsXHighEffort": true,
+-    "unsupportedParams": [
+-      "temperature",
+-      "top_p",
+-      "top_k"
+-    ]
++    "unsupportedParams": ["temperature", "top_p", "top_k"]
+   },
+   {
+     "id": "claude-opus-5-5",
+@@ -66,20 +47,10 @@
+     "contextLength": 1000000,
+     "maxOutputTokens": 128000,
+     "supportsReasoning": true,
+-    "supportedThinkingEfforts": [
+-      "low",
+-      "medium",
+-      "high",
+-      "xhigh",
+-      "max"
+-    ],
++    "supportedThinkingEfforts": ["low", "medium", "high", "xhigh", "max"],
+     "supportsXHighEffort": true,
+     "supportsVision": true,
+-    "unsupportedParams": [
+-      "temperature",
+-      "top_p",
+-      "top_k"
+-    ]
++    "unsupportedParams": ["temperature", "top_p", "top_k"]
+   },
+   {
+     "id": "claude-opus-4-8",
+@@ -87,19 +58,9 @@
+     "contextLength": 1000000,
+     "maxOutputTokens": 128000,
+     "supportsReasoning": true,
+-    "supportedThinkingEfforts": [
+-      "low",
+-      "medium",
+-      "high",
+-      "xhigh",
+-      "max"
+-    ],
++    "supportedThinkingEfforts": ["low", "medium", "high", "xhigh", "max"],
+     "supportsXHighEffort": true,
+-    "unsupportedParams": [
+-      "temperature",
+-      "top_p",
+-      "top_k"
+-    ]
++    "unsupportedParams": ["temperature", "top_p", "top_k"]
+   },
+   {
+     "id": "claude-opus-4-7",
+@@ -107,19 +68,9 @@
+     "contextLength": 1000000,
+     "maxOutputTokens": 128000,
+     "supportsReasoning": true,
+-    "supportedThinkingEfforts": [
+-      "low",
+-      "medium",
+-      "high",
+-      "xhigh",
+-      "max"
+-    ],
++    "supportedThinkingEfforts": ["low", "medium", "high", "xhigh", "max"],
+     "supportsXHighEffort": true,
+-    "unsupportedParams": [
+-      "temperature",
+-      "top_p",
+-      "top_k"
+-    ]
++    "unsupportedParams": ["temperature", "top_p", "top_k"]
+   },
+   {
+     "id": "claude-opus-4-6",
+@@ -128,12 +79,7 @@
+     "contextLength": 1000000,
+     "maxOutputTokens": 128000,
+     "supportsReasoning": true,
+-    "supportedThinkingEfforts": [
+-      "low",
+-      "medium",
+-      "high",
+-      "max"
+-    ]
++    "supportedThinkingEfforts": ["low", "medium", "high", "max"]
+   },
+   {
+     "id": "claude-opus-4-5-20251101",
+@@ -142,11 +88,7 @@
+     "contextLength": 200000,
+     "maxOutputTokens": 64000,
+     "supportsReasoning": true,
+-    "supportedThinkingEfforts": [
+-      "low",
+-      "medium",
+-      "high"
+-    ]
++    "supportedThinkingEfforts": ["low", "medium", "high"]
+   },
+   {
+     "id": "claude-sonnet-5",
+@@ -154,11 +96,7 @@
+     "contextLength": 1000000,
+     "maxOutputTokens": 128000,
+     "supportsXHighEffort": true,
+-    "unsupportedParams": [
+-      "temperature",
+-      "top_p",
+-      "top_k"
+-    ]
++    "unsupportedParams": ["temperature", "top_p", "top_k"]
+   },
+   {
+     "id": "claude-sonnet-5-5",
+@@ -166,17 +104,8 @@
+     "contextLength": 1000000,
+     "maxOutputTokens": 128000,
+     "supportsXHighEffort": true,
+-    "supportedThinkingEfforts": [
+-      "low",
+-      "medium",
+-      "high",
+-      "xhigh"
+-    ],
+-    "unsupportedParams": [
+-      "temperature",
+-      "top_p",
+-      "top_k"
+-    ]
++    "supportedThinkingEfforts": ["low", "medium", "high", "xhigh"],
++    "unsupportedParams": ["temperature", "top_p", "top_k"]
+   },
+   {
+     "id": "claude-sonnet-4-6",
+@@ -205,17 +134,7 @@
+     "contextLength": 1000000,
+     "maxOutputTokens": 128000,
+     "supportsXHighEffort": true,
+-    "supportedThinkingEfforts": [
+-      "low",
+-      "medium",
+-      "high",
+-      "xhigh",
+-      "max"
+-    ],
+-    "unsupportedParams": [
+-      "temperature",
+-      "top_p",
+-      "top_k"
+-    ]
++    "supportedThinkingEfforts": ["low", "medium", "high", "xhigh", "max"],
++    "unsupportedParams": ["temperature", "top_p", "top_k"]
+   }
+ ]
+diff --git a/src/shared/constants/modelSpecs.ts b/src/shared/constants/modelSpecs.ts
+index c6ec27848333cf865557588e0b78f64b1f11fe29..a7085e22be608581a2e609f89415850dafa7814f 100644
+--- a/src/shared/constants/modelSpecs.ts
++++ b/src/shared/constants/modelSpecs.ts
+@@ -530,6 +530,19 @@
+     aliases: BEDROCK_CLAUDE_ALIASES("claude-opus-4-7", "claude-opus-4.7"),
+   },
+ 
++  // Claude Fable 5.2: adaptive-only thinking and native one-million-token context.
++  "claude-fable-5-2": {
++    maxOutputTokens: 128000,
++    contextWindow: 1000000,
++    supportsThinking: true,
++    supportsTools: true,
++    supportsVision: true,
++    rejectsThinkingDisabled: true,
++    adaptiveThinkingOnly: true,
++    rejectsForcedToolChoice: true,
++    aliases: BEDROCK_CLAUDE_ALIASES("claude-fable-5-2"),
++  },
++
+   // ── Claude Fable 5.1 ────────────────────────────────────────────
+   "claude-fable-5-1": {
+     maxOutputTokens: 128000,
+diff --git a/src/shared/constants/pricing/frontier-labs.ts b/src/shared/constants/pricing/frontier-labs.ts
+index e5ea5e393b637c53f31f61dba1c51ef802dd89e4..99e990827905aa3e4008913f28d8d5f5142581bf 100644
+--- a/src/shared/constants/pricing/frontier-labs.ts
++++ b/src/shared/constants/pricing/frontier-labs.ts
+@@ -11,6 +11,7 @@
+   GPT_5_6_LUNA_PRICING,
+   GPT_5_6_SOL_PRICING,
+   GPT_5_6_TERRA_PRICING,
++  CLAUDE_FABLE_5_2_PRICING,
+   CLAUDE_FABLE_5_1_PRICING,
+   CLAUDE_FABLE_5_PRICING,
+   CLAUDE_OPUS_5_5_PRICING,
+@@ -244,6 +245,7 @@
+     // Common model IDs (without dates) used across providers
+     // Intentional duplicates of dot-notation variants (e.g. claude-opus-4.6)
+     // to cover hyphen-notation IDs (claude-opus-4-6) used by some clients
++    "claude-fable-5-2": CLAUDE_FABLE_5_2_PRICING,
+     "claude-fable-5-1": CLAUDE_FABLE_5_1_PRICING,
+     "claude-fable-5": CLAUDE_FABLE_5_PRICING,
+     "claude-opus-5-5": CLAUDE_OPUS_5_5_PRICING,
+diff --git a/src/shared/constants/pricing/oauth-subscriptions.ts b/src/shared/constants/pricing/oauth-subscriptions.ts
+index 7aa0558723f9711b15ad65a07cf16a72e2857284..b47eb8749fd63c2a6580f31db6cccaa9959d5d7f 100644
+--- a/src/shared/constants/pricing/oauth-subscriptions.ts
++++ b/src/shared/constants/pricing/oauth-subscriptions.ts
+@@ -5,6 +5,7 @@
+ import {
+   GPT_6_1_SOL_PRICING,
+   GPT_6_ASTRA_PRICING,
++  CLAUDE_FABLE_5_2_PRICING,
+   CLAUDE_FABLE_5_1_PRICING,
+   CLAUDE_HAIKU_5_PRICING,
+   CLAUDE_OPUS_5_5_PRICING,
+@@ -125,6 +126,7 @@
+ 
+ export const DEFAULT_PRICING_OAUTH = {
+   cc: {
++    "claude-fable-5-2": CLAUDE_FABLE_5_2_PRICING,
+     "claude-fable-5-1": CLAUDE_FABLE_5_1_PRICING,
+     "claude-fable-5": {
+       input: 10.0,
+diff --git a/src/shared/constants/pricing/shared-tiers.ts b/src/shared/constants/pricing/shared-tiers.ts
+index 049366bd5ce3b8a44e2f1cb6a9060b57c6fafdea..20f8d2045550cf0758e1e40ca4ed3ddea00d5264 100644
+--- a/src/shared/constants/pricing/shared-tiers.ts
++++ b/src/shared/constants/pricing/shared-tiers.ts
+@@ -112,6 +112,17 @@
+   cached: 7.5,
+   reasoning: 112.5,
+   cache_creation: 15.0,
++};
++
++// Anthropic published rates per million tokens; explicit TTL fields keep cache writes distinct.
++export const CLAUDE_FABLE_5_2_PRICING = {
++  input: 8.0,
++  output: 40.0,
++  cached: 0.2,
++  reasoning: 40.0,
++  cache_creation: 10.0,
++  cache_creation_5m: 10.0,
++  cache_creation_1h: 16.0,
+ };
+ 
+ export const CLAUDE_FABLE_5_1_PRICING = {

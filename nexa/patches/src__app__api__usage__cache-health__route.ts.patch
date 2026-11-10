@@ -8,7 +8,7 @@ index dda8baa2e046dc54260a0e59fb065cfebb1c374d..b35dd5bcb7721df94159d62b1044f6cb
  import { NextResponse } from "next/server";
  import { z } from "zod";
  
-@@ -23,7 +25,29 @@
+@@ -23,7 +25,29 @@ export async function GET(request: Request) {
        );
      }
  

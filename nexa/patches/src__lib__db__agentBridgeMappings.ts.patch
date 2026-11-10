@@ -1,4 +1,5 @@
 diff --git a/src/lib/db/agentBridgeMappings.ts b/src/lib/db/agentBridgeMappings.ts
+index 612648a205389f2cece9050a58ae76565ea27dc1..d6f898d98f7d046a62080396c37454294e025f8a 100644
 --- a/src/lib/db/agentBridgeMappings.ts
 +++ b/src/lib/db/agentBridgeMappings.ts
 @@ -6,6 +6,7 @@
@@ -6,10 +7,10 @@ diff --git a/src/lib/db/agentBridgeMappings.ts b/src/lib/db/agentBridgeMappings.
  import type { AgentBridgeMappingRow } from "./_rowTypes";
  import { setMitmAliasAll } from "./models/mitmAlias";
 +import { REGISTRY } from "@omniroute/open-sse/config/providerRegistry";
-
+ 
  /** Agents that have a registered alias key in standaloneRouting.cjs::AGENT_ROUTE_CONFIG. */
  const MITM_ALIAS_AGENTS = new Set(["antigravity", "claude-code", "kiro"]);
-@@ -17,7 +18,17 @@
+@@ -17,7 +18,17 @@ export function getMappingsForAgent(agentId: string): AgentBridgeMappingRow[] {
        "SELECT agent_id, source_model, target_model, updated_at FROM agent_bridge_mappings WHERE agent_id = ? ORDER BY source_model ASC"
      )
      .all(agentId) as AgentBridgeMappingRow[];
@@ -26,5 +27,5 @@ diff --git a/src/lib/db/agentBridgeMappings.ts b/src/lib/db/agentBridgeMappings.
 +    }));
 +  return [...rows, ...defaults].sort((a, b) => a.source_model.localeCompare(b.source_model));
  }
-
+ 
  export function setMappings(

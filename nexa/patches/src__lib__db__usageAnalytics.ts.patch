@@ -1,5 +1,5 @@
 diff --git a/src/lib/db/usageAnalytics.ts b/src/lib/db/usageAnalytics.ts
-index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c709a780fe6 100644
+index c3756ea78fa8fcf5fd5e80c8056ea532914cf3fe..f94e12e13797ab7923f7cd842efe2977e3066346 100644
 --- a/src/lib/db/usageAnalytics.ts
 +++ b/src/lib/db/usageAnalytics.ts
 @@ -10,6 +10,17 @@
@@ -20,7 +20,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
  import type { AnalyticsParams } from "./usageAnalytics/sources";
  
  export { buildUnifiedSource, buildPresetUnifiedSource } from "./usageAnalytics/sources";
-@@ -30,7 +41,9 @@
+@@ -30,7 +41,9 @@ const UNIFIED_COST_TOKEN_SUMS = `
          COALESCE(SUM(cost_tokens_output), 0) as costCompletionTokens,
          COALESCE(SUM(cost_tokens_cache_read), 0) as costCacheReadTokens,
          COALESCE(SUM(cost_tokens_cache_creation), 0) as costCacheCreationTokens,
@@ -31,7 +31,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
  
  /** The same split for queries that read usage_history directly. */
  function rawCostSums(table: string): string {
-@@ -43,11 +56,15 @@
+@@ -43,11 +56,15 @@ function rawCostSums(table: string): string {
          ${priceable("tokens_output")} as costCompletionTokens,
          ${priceable("tokens_cache_read")} as costCacheReadTokens,
          ${priceable("tokens_cache_creation")} as costCacheCreationTokens,
@@ -48,7 +48,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
    costPromptTokens: number;
    costCompletionTokens: number;
    costCacheReadTokens: number;
-@@ -152,6 +169,7 @@
+@@ -152,6 +169,7 @@ export function getDailyUsage(unifiedSource: string, params: AnalyticsParams): D
  // ---------------------------------------------------------------------------
  
  export interface DailyCostRow extends CostTokenFields {
@@ -56,7 +56,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
    date: string;
    provider: string;
    model: string;
-@@ -160,6 +178,8 @@
+@@ -160,6 +178,8 @@ export interface DailyCostRow extends CostTokenFields {
    completionTokens: number;
    cacheReadTokens: number;
    cacheCreationTokens: number;
@@ -65,7 +65,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
    reasoningTokens: number;
    storedCost: number;
    isAggregated: number;
-@@ -170,6 +190,7 @@
+@@ -170,6 +190,7 @@ export interface DailyCostRow extends CostTokenFields {
   */
  export function getDailyCostRows(unifiedSource: string, params: AnalyticsParams): DailyCostRow[] {
    const db = getDbInstance();
@@ -73,7 +73,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
    return db
      .prepare(
        `
-@@ -178,16 +199,19 @@
+@@ -178,16 +199,19 @@ export function getDailyCostRows(unifiedSource: string, params: AnalyticsParams)
          LOWER(provider) as provider,
          LOWER(model) as model,
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
@@ -95,7 +95,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
        ORDER BY date ASC
      `
      )
-@@ -229,6 +253,7 @@
+@@ -229,6 +253,7 @@ export function getHeatmapRows(heatmapConditions: string[], params: AnalyticsPar
  // ---------------------------------------------------------------------------
  
  export interface ModelUsageRow extends CostTokenFields {
@@ -103,7 +103,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
    model: string;
    provider: string;
    serviceTier: string;
-@@ -237,6 +262,8 @@
+@@ -237,6 +262,8 @@ export interface ModelUsageRow extends CostTokenFields {
    completionTokens: number;
    cacheReadTokens: number;
    cacheCreationTokens: number;
@@ -112,7 +112,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
    reasoningTokens: number;
    totalTokens: number;
    avgLatencyMs: number;
-@@ -251,6 +278,7 @@
+@@ -251,6 +278,7 @@ export interface ModelUsageRow extends CostTokenFields {
   */
  export function getModelUsageRows(unifiedSource: string, params: AnalyticsParams): ModelUsageRow[] {
    const db = getDbInstance();
@@ -120,7 +120,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
    return db
      .prepare(
        `
-@@ -258,11 +286,14 @@
+@@ -258,11 +286,14 @@ export function getModelUsageRows(unifiedSource: string, params: AnalyticsParams
          LOWER(model) as model,
          LOWER(provider) as provider,
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
@@ -135,7 +135,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
          COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
          COALESCE(SUM(tokens_input + tokens_output), 0) as totalTokens,
          COALESCE(AVG(latency_ms), 0) as avgLatencyMs,
-@@ -271,11 +302,11 @@
+@@ -271,11 +302,11 @@ export function getModelUsageRows(unifiedSource: string, params: AnalyticsParams
          COALESCE(SUM(stored_cost), 0.0) as storedCost,
          MAX(is_aggregated) as isAggregated,
          ${UNIFIED_COST_TOKEN_SUMS}
@@ -149,7 +149,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
        ORDER BY requests DESC
      `
      )
-@@ -285,6 +316,7 @@
+@@ -285,6 +316,7 @@ export function getModelUsageRows(unifiedSource: string, params: AnalyticsParams
  // ---------------------------------------------------------------------------
  
  export interface ProviderCostRow extends CostTokenFields {
@@ -157,7 +157,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
    provider: string;
    model: string;
    serviceTier: string;
-@@ -292,6 +324,8 @@
+@@ -292,6 +324,8 @@ export interface ProviderCostRow extends CostTokenFields {
    completionTokens: number;
    cacheReadTokens: number;
    cacheCreationTokens: number;
@@ -166,7 +166,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
    reasoningTokens: number;
    storedCost: number;
    isAggregated: number;
-@@ -305,6 +339,7 @@
+@@ -305,6 +339,7 @@ export function getProviderCostRows(
    params: AnalyticsParams
  ): ProviderCostRow[] {
    const db = getDbInstance();
@@ -174,7 +174,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
    return db
      .prepare(
        `
-@@ -312,16 +347,19 @@
+@@ -312,16 +347,19 @@ export function getProviderCostRows(
          LOWER(provider) as provider,
          LOWER(model) as model,
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
@@ -196,7 +196,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
      `
      )
      .all(params) as ProviderCostRow[];
-@@ -369,6 +407,7 @@
+@@ -369,6 +407,7 @@ export function getProviderUsageRows(
  // ---------------------------------------------------------------------------
  
  export interface AccountCostRow extends CostTokenFields {
@@ -204,7 +204,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
    accountKey: string;
    provider: string;
    model: string;
-@@ -377,6 +416,8 @@
+@@ -377,6 +416,8 @@ export interface AccountCostRow extends CostTokenFields {
    completionTokens: number;
    cacheReadTokens: number;
    cacheCreationTokens: number;
@@ -213,7 +213,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
    reasoningTokens: number;
    storedCost: number;
    isAggregated: number;
-@@ -408,6 +449,8 @@
+@@ -408,6 +449,8 @@ export function getAccountCostRows(whereClause: string, params: AnalyticsParams)
            usage_history.tokens_output,
            usage_history.tokens_cache_read,
            usage_history.tokens_cache_creation,
@@ -222,7 +222,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
            usage_history.tokens_reasoning,
            usage_history.provider_cost_usd
          FROM usage_history
-@@ -418,14 +461,17 @@
+@@ -418,14 +461,17 @@ export function getAccountCostRows(whereClause: string, params: AnalyticsParams)
          LOWER(account_events.provider) as provider,
          LOWER(account_events.model) as model,
          COALESCE(NULLIF(account_events.service_tier, ''), 'standard') as serviceTier,
@@ -241,7 +241,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
      `
      )
      .all(params) as AccountCostRow[];
-@@ -532,6 +578,7 @@
+@@ -532,6 +578,7 @@ export function getAccountUsageRows(
  // ---------------------------------------------------------------------------
  
  export interface ApiKeyUsageRow extends CostTokenFields {
@@ -249,7 +249,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
    apiKeyId: string | null;
    apiKeyGroupKey: string;
    provider: string;
-@@ -542,6 +589,8 @@
+@@ -542,6 +589,8 @@ export interface ApiKeyUsageRow extends CostTokenFields {
    completionTokens: number;
    cacheReadTokens: number;
    cacheCreationTokens: number;
@@ -258,7 +258,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
    reasoningTokens: number;
    totalTokens: number;
    storedCost: number;
-@@ -568,17 +617,20 @@
+@@ -568,17 +617,20 @@ export function getApiKeyUsageRows(
          LOWER(provider) as provider,
          LOWER(model) as model,
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
@@ -280,7 +280,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
      `
      )
      .all(params) as ApiKeyUsageRow[];
-@@ -642,6 +694,7 @@
+@@ -642,6 +694,7 @@ export function getApiKeyTotalsRows(
  // ---------------------------------------------------------------------------
  
  export interface ServiceTierUsageRow extends CostTokenFields {
@@ -288,7 +288,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
    serviceTier: string;
    provider: string;
    model: string;
-@@ -650,6 +703,8 @@
+@@ -650,6 +703,8 @@ export interface ServiceTierUsageRow extends CostTokenFields {
    completionTokens: number;
    cacheReadTokens: number;
    cacheCreationTokens: number;
@@ -297,7 +297,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
    reasoningTokens: number;
    totalTokens: number;
    storedCost: number;
-@@ -664,11 +719,13 @@
+@@ -664,11 +719,13 @@ export function getServiceTierUsageRows(
    params: AnalyticsParams
  ): ServiceTierUsageRow[] {
    const db = getDbInstance();
@@ -311,7 +311,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
          LOWER(provider) as provider,
          LOWER(model) as model,
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
-@@ -677,13 +734,15 @@
+@@ -677,13 +734,15 @@ export function getServiceTierUsageRows(
          COALESCE(SUM(tokens_output), 0) as completionTokens,
          COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
          COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
@@ -329,7 +329,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
      `
      )
      .all(params) as ServiceTierUsageRow[];
-@@ -770,6 +829,7 @@
+@@ -770,6 +829,7 @@ export function getWeeklyPatternRows(
  // ---------------------------------------------------------------------------
  
  export interface PresetCostModelRow extends CostTokenFields {
@@ -337,7 +337,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
    model: string;
    provider: string;
    serviceTier: string;
-@@ -777,6 +837,8 @@
+@@ -777,6 +837,8 @@ export interface PresetCostModelRow extends CostTokenFields {
    completionTokens: number;
    cacheReadTokens: number;
    cacheCreationTokens: number;
@@ -346,7 +346,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
    reasoningTokens: number;
    storedCost: number;
    isAggregated: number;
-@@ -791,6 +853,7 @@
+@@ -791,6 +853,7 @@ export function getPresetCostModelRows(
    params: AnalyticsParams
  ): PresetCostModelRow[] {
    const db = getDbInstance();
@@ -354,7 +354,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
    return db
      .prepare(
        `
-@@ -798,16 +861,19 @@
+@@ -798,16 +861,19 @@ export function getPresetCostModelRows(
          LOWER(model) as model,
          LOWER(provider) as provider,
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
@@ -376,7 +376,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
      `
      )
      .all(params) as PresetCostModelRow[];
-@@ -828,6 +894,8 @@
+@@ -828,6 +894,8 @@ export interface EndpointUsageRow {
    completionTokens: number;
    cacheReadTokens: number;
    cacheCreationTokens: number;
@@ -385,7 +385,7 @@ index d00273440a331a9038e4a847befc972455108cf1..ef5222ed16b3b0ccca97aa1b72da4c70
    reasoningTokens: number;
    totalTokens: number;
    avgLatencyMs: number;
-@@ -872,6 +940,8 @@
+@@ -872,6 +940,8 @@ export function getEndpointUsageRows(params: EndpointUsageParams = {}): Endpoint
          COALESCE(SUM(tokens_output), 0) as completionTokens,
          COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
          COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,

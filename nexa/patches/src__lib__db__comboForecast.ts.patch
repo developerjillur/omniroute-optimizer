@@ -1,14 +1,15 @@
 diff --git a/src/lib/db/comboForecast.ts b/src/lib/db/comboForecast.ts
-index 342e3e6e6889bc5e1246296d263abb4c5656e8f3..8866e0e65120c910fed8cb13a81f5ca2902057b6 100644
+index 42afc98c912809636ad95f410c28b5a21d7d6cf9..cd6d079628746183d539df4754ff45b57b4b4518 100644
 --- a/src/lib/db/comboForecast.ts
 +++ b/src/lib/db/comboForecast.ts
-@@ -1,4 +1,5 @@
+@@ -1,5 +1,6 @@
+ import { logicalCallSql } from "./logicalCallSql";
  import { getDbInstance } from "./core";
 +import { cacheTtlTokenSql } from "./usageAnalytics/cacheTtl";
  
  export type ComboForecastUsageRow = {
    comboName: string;
-@@ -14,6 +15,8 @@
+@@ -15,6 +16,8 @@ export type ComboForecastUsageRow = {
    outputTokens: number;
    cacheReadTokens: number;
    cacheCreationTokens: number;
@@ -17,7 +18,7 @@ index 342e3e6e6889bc5e1246296d263abb4c5656e8f3..8866e0e65120c910fed8cb13a81f5ca2
    reasoningTokens: number;
    totalTokens: number;
    avgLatencyMs: number;
-@@ -34,6 +37,8 @@
+@@ -35,6 +38,8 @@ type ComboForecastUsageSqlRow = {
    outputTokens: number | null;
    cacheReadTokens: number | null;
    cacheCreationTokens: number | null;
@@ -26,7 +27,7 @@ index 342e3e6e6889bc5e1246296d263abb4c5656e8f3..8866e0e65120c910fed8cb13a81f5ca2
    reasoningTokens: number | null;
    totalTokens: number | null;
    avgLatencyMs: number | null;
-@@ -83,6 +88,8 @@
+@@ -84,6 +89,8 @@ export function getComboForecastUsageRows(opts: {
           COALESCE(SUM(tokens_out), 0) as outputTokens,
           COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
           COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
@@ -35,7 +36,7 @@ index 342e3e6e6889bc5e1246296d263abb4c5656e8f3..8866e0e65120c910fed8cb13a81f5ca2
           COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
           COALESCE(SUM(tokens_in), 0) + COALESCE(SUM(tokens_out), 0) as totalTokens,
           COALESCE(AVG(duration), 0) as avgLatencyMs,
-@@ -111,6 +118,8 @@
+@@ -112,6 +119,8 @@ export function getComboForecastUsageRows(opts: {
      outputTokens: toNumber(row.outputTokens),
      cacheReadTokens: toNumber(row.cacheReadTokens),
      cacheCreationTokens: toNumber(row.cacheCreationTokens),

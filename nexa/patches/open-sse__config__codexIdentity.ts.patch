@@ -2,7 +2,7 @@ diff --git a/open-sse/config/codexIdentity.ts b/open-sse/config/codexIdentity.ts
 index ed69fec5c37e7d1c11e3b8e9d4fecc0e5504a29f..7045151d318c5c43d66ac6d59d1b1fb16fbd9427 100644
 --- a/open-sse/config/codexIdentity.ts
 +++ b/open-sse/config/codexIdentity.ts
-@@ -694,7 +694,11 @@
+@@ -694,7 +694,11 @@ export function isClaudeCodeOriginatedHeaders(
  
    // Claude Code identifies itself via the user-agent header
    const userAgent = getHeader("user-agent");

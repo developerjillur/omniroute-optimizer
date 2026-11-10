@@ -1,0 +1,12 @@
+diff --git a/open-sse/config/providers/registry/vertex/partner/index.ts b/open-sse/config/providers/registry/vertex/partner/index.ts
+index b7d942103a65c231e7dd733126670ad7ddd39a11..bfc3f50a83c0d46417501b17de42f87ea33bb2b7 100644
+--- a/open-sse/config/providers/registry/vertex/partner/index.ts
++++ b/open-sse/config/providers/registry/vertex/partner/index.ts
+@@ -19,6 +19,7 @@
+     },
+     { id: "zai-org/glm-5-maas", name: "GLM 5", targetFormat: "openai" },
+     ...VERTEX_XAI_MODELS,
++    { id: "claude-fable-5-2", name: "Claude Fable 5.2", targetFormat: "claude" },
+     { id: "claude-fable-5-1", name: "Claude Fable 5.1", targetFormat: "claude" },
+     { id: "claude-fable-5", name: "Claude Fable 5", targetFormat: "claude" },
+     { id: "claude-opus-5-5", name: "Claude Opus 5.5", targetFormat: "claude" },

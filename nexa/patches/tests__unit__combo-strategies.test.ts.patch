@@ -1,8 +1,8 @@
 diff --git a/tests/unit/combo-strategies.test.ts b/tests/unit/combo-strategies.test.ts
-index ef8e270f2c4cb94048dc0b1e144808eb6c0242ec..9789c413d854ecf72a1ecec209995b80a0667fb4 100644
+index 26fe33ac08ec0c2e11ca5a00376d1e54407c572f..9617b83254e569f0781724e93f8fb34c1c84f0a0 100644
 --- a/tests/unit/combo-strategies.test.ts
 +++ b/tests/unit/combo-strategies.test.ts
-@@ -432,10 +432,13 @@
+@@ -436,10 +436,13 @@ test("reset-aware strategy avoids accounts near 5h exhaustion", async (t) => {
  });
  
  test("Antigravity aliases share one family-scoped cache key", () => {

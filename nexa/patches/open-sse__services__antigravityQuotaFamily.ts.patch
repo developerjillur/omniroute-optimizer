@@ -1,18 +1,18 @@
 diff --git a/open-sse/services/antigravityQuotaFamily.ts b/open-sse/services/antigravityQuotaFamily.ts
-index 984645dd33a1ea96c6d7d7ffb0e921dafa51d862..87f9f7806a16a07594165d494faeb8851a80c12c 100644
+index 04fc19bc42d23086e5ef85140424a905ba97629c..523cc6f2a3ad6b4b3824a153c629873717cb9c7d 100644
 --- a/open-sse/services/antigravityQuotaFamily.ts
 +++ b/open-sse/services/antigravityQuotaFamily.ts
 @@ -1,6 +1,6 @@
  const ANTIGRAVITY_PROVIDER_ID = "antigravity";
  
--export type AntigravityQuotaFamily = "gemini" | "claude" | "other";
-+export type AntigravityQuotaFamily = "gemini-flash" | "gemini-pro" | "gemini" | "claude" | "other";
+-export type AntigravityQuotaFamily = "gemini" | "claude" | "argon" | "other";
++export type AntigravityQuotaFamily = "gemini-flash" | "gemini-pro" | "gemini" | "claude" | "argon" | "other";
  
  function normalizeModelId(model: string | null | undefined): string {
    return String(model || "")
-@@ -23,6 +23,11 @@
-   const bare = slashIndex >= 0 ? normalized.slice(slashIndex + 1) : normalized;
- 
+@@ -31,6 +31,11 @@
+     return "argon";
+   }
    if (bare.startsWith("gemini-") || bare.includes("/gemini-") || bare.includes("gemini")) {
 +    // Google enforces SEPARATE quota buckets per tier (Flash vs Pro). Keeping them
 +    // independent means exhausting the small Pro quota (e.g. gemini-2.5-pro 429s)
@@ -22,14 +22,21 @@ index 984645dd33a1ea96c6d7d7ffb0e921dafa51d862..87f9f7806a16a07594165d494faeb885
      return "gemini";
    }
    if (
-@@ -134,7 +139,9 @@
-   }
+@@ -125,6 +130,8 @@
  
-   const familyAggregates =
--    requestedFamily === "gemini"
-+    requestedFamily === "gemini" ||
-+    requestedFamily === "gemini-flash" ||
-+    requestedFamily === "gemini-pro"
-       ? ["gemini_session", "gemini_weekly"]
-       : requestedFamily === "claude"
-         ? ["claude_gpt_session", "claude_gpt_weekly"]
+ const FAMILY_AGGREGATE_WINDOWS: Record<AntigravityQuotaFamily, string[]> = {
+   gemini: ["gemini_session", "gemini_weekly"],
++  "gemini-flash": ["gemini_session", "gemini_weekly"],
++  "gemini-pro": ["gemini_session", "gemini_weekly"],
+   claude: ["claude_gpt_session", "claude_gpt_weekly"],
+   argon: ["gemini_4_argon_weekly", "argon_weekly"],
+   other: [],
+@@ -139,7 +146,7 @@
+     quotaNames.includes(key)
+   );
+   if (geminiAggregates.length > 0) return geminiAggregates;
+-  return quotaNames.filter((windowName) => getAntigravityQuotaFamily(windowName) === "gemini");
++  return quotaNames.filter((windowName) => getAntigravityQuotaFamily(windowName).startsWith("gemini"));
+ }
+ 
+ /**

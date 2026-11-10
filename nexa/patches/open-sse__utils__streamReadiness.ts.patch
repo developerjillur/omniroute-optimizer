@@ -1,8 +1,8 @@
 diff --git a/open-sse/utils/streamReadiness.ts b/open-sse/utils/streamReadiness.ts
-index 48e8666c46b2c332d552dad96b5890eec4a62eec..01f1d1f389542075f6c407b8d2256e03a4f64ca2 100644
+index 7a7ffa1ec9f88f32bf6c8aa8e0b09709b8d6a906..b7c97b00dd8d682122e33facea3964b0c9eae635 100644
 --- a/open-sse/utils/streamReadiness.ts
 +++ b/open-sse/utils/streamReadiness.ts
-@@ -420,6 +420,10 @@
+@@ -474,6 +474,10 @@
     * so #8649 can stand down without treating errors as model output.
     */
    sawError: () => boolean;
@@ -13,10 +13,10 @@ index 48e8666c46b2c332d552dad96b5890eec4a62eec..01f1d1f389542075f6c407b8d2256e03
  };
  
  /**
-@@ -451,9 +455,29 @@
-   let sse = false;
+@@ -506,9 +510,29 @@
    let error = false;
    let progress = 0;
+   let compaction = 0;
 +  let claudeStopReason: string | null = null;
 +  let claudeMessageStop = false;
  
@@ -43,7 +43,7 @@ index 48e8666c46b2c332d552dad96b5890eec4a62eec..01f1d1f389542075f6c407b8d2256e03
      if (!sse && SSE_FIELD_LINE.test(frame)) sse = true;
      if (!error && frameHasStructuredStreamError(frame)) error = true;
      if (!content && hasUsefulStreamContent(frame, { contentProbe })) content = true;
-@@ -501,6 +525,8 @@
+@@ -558,6 +582,8 @@
      sawNormalStopTerminal: () => normalStop,
      sawSseFrame: () => sse,
      sawError: () => error,

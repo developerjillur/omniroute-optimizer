@@ -1,16 +1,16 @@
 diff --git a/scripts/dev/run-standalone.mjs b/scripts/dev/run-standalone.mjs
-index 0a6a046822b00ee6b3af6eb30acc12655c325e5d..fa0008bb30314acd6e54f9728ebe77bf1deb917e 100644
+index 25b4f4e8cfc14c7d0b73c5e407bdf6aeda6bd7a4..d84bd0d43282d4eab14c77be69a0421848b177d3 100644
 --- a/scripts/dev/run-standalone.mjs
 +++ b/scripts/dev/run-standalone.mjs
-@@ -12,6 +12,7 @@
-   spawnWithForwardedSignals,
+@@ -13,6 +13,7 @@ import {
+   startSelfPinger,
  } from "../build/runtime-env.mjs";
  import { bootstrapEnv } from "../build/bootstrap-env.mjs";
 +import { evaluatePublicBindSafety } from "../build/startupGuard.mjs";
  
  const env = bootstrapEnv();
  const runtimePorts = resolveRuntimePorts(env);
-@@ -28,6 +29,17 @@
+@@ -29,6 +30,17 @@ const maxOldSpaceMb = resolveMaxOldSpaceMb(
  warnConflictingHeapLimits(childEnv, maxOldSpaceMb);
  childEnv.NODE_OPTIONS = buildStandaloneNodeOptions(childEnv, maxOldSpaceMb);
  

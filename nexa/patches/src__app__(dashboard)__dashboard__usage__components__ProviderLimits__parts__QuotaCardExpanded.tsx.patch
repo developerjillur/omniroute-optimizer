@@ -1,8 +1,8 @@
 diff --git a/src/app/(dashboard)/dashboard/usage/components/ProviderLimits/parts/QuotaCardExpanded.tsx b/src/app/(dashboard)/dashboard/usage/components/ProviderLimits/parts/QuotaCardExpanded.tsx
-index 6780a78c32f23e5c2e27630785b0055bb746e833..93d0dd288bf340c10faeceaee476790939c1c0b9 100644
+index a8b100dba02ab41e83434d883518a66f73fc0215..97446c1ce5f6c552fde9a378b1607b805484a24e 100644
 --- a/src/app/(dashboard)/dashboard/usage/components/ProviderLimits/parts/QuotaCardExpanded.tsx
 +++ b/src/app/(dashboard)/dashboard/usage/components/ProviderLimits/parts/QuotaCardExpanded.tsx
-@@ -30,6 +30,8 @@
+@@ -33,6 +33,8 @@ import KiloPassMeter from "./KiloPassMeter";
  import QuotaCardSpeed from "./QuotaCardSpeed";
  import { hasCodexPaidCredits, type CodexPaidCredits } from "@/lib/providers/codexPaidCredits";
  import AntigravityQuotaGroups, { resolveAntigravityQuotaGroups } from "../AntigravityQuotaGroups";
@@ -11,14 +11,14 @@ index 6780a78c32f23e5c2e27630785b0055bb746e833..93d0dd288bf340c10faeceaee4767909
  
  const CURRENCY_SYMBOLS: Record<string, string> = {
    USD: "$",
-@@ -482,6 +484,10 @@
-             : tr("showMoreQuotas", `Show ${hiddenCount} more`, { count: hiddenCount })}
-         </button>
+@@ -482,6 +484,10 @@ export default function QuotaCardExpanded({
+         </Button>
        )}
-+
+ 
 +      {/* nexa overlay: additive per-account catalog-model enumeration. Renders
 +          below the quota windows; returns null for non-Codex providers. */}
 +      {!loading && !error && providerId ? <QuotaModelList provider={providerId} /> : null}
- 
++
        <div className="min-w-0 space-y-1.5 pt-1.5 border-t border-border/40">
          <div className="flex min-w-0 items-center justify-between gap-2">
+           {refreshedLabel && (

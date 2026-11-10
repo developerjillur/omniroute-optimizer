@@ -7,7 +7,7 @@ index e2a1a244ed7b67c64ace0881a3feb01a0cc9974c..ba2ca608c8c06315d9bc9da819fc16fd
  /**
   * PM-02 — CI guard against migration version-number collisions.
   *
-@@ -31,9 +32,9 @@
+@@ -31,9 +32,9 @@ test("no two migration files share the same numeric prefix", () => {
  
    const byVersion = new Map<string, string[]>();
    for (const file of files) {

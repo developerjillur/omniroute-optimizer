@@ -1,0 +1,36 @@
+diff --git a/open-sse/config/claudeCodeCompatibleIdentity.ts b/open-sse/config/claudeCodeCompatibleIdentity.ts
+index 0158a2f8090f18b120ef4f81f37940807f9fb7bd..6c90e86dc70d00f7a31dbb31f2ce022fa04276c7 100644
+--- a/open-sse/config/claudeCodeCompatibleIdentity.ts
++++ b/open-sse/config/claudeCodeCompatibleIdentity.ts
+@@ -16,20 +16,29 @@
+ export const CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = CLAUDE_CODE_SDK_PACKAGE_VERSION;
+ export const CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = CLAUDE_CODE_RUNTIME_VERSION;
+ const CONTEXT_1M_NATIVE_MODELS = [
++  "claude-fable-5-2",
+   "claude-fable-5-1",
+   "claude-opus-5-5",
+   "claude-opus-5",
+   "claude-haiku-5-5",
+ ];
+ 
+-export function modelHasNativeContext1m(model: string | null | undefined): boolean {
+-  const normalizedModel = String(model || "")
++function normalizeClaudeContextModel(model: string | null | undefined): string {
++  return String(model || "")
+     .trim()
+     .toLowerCase()
+     .replace(/^.*?(?=claude-)/, "")
+     .replace(/(\d)\.(\d)/g, "$1-$2")
+     .replace(/-\d{8}$/, "");
++}
+ 
++/** Fable 5.2 validates the complete prefix bound to preserved thinking on every account. */
++export function modelRequiresPreservedThinkingPrefix(model: string | null | undefined): boolean {
++  return /^claude-fable-5-2(?:$|[-:@\[])/.test(normalizeClaudeContextModel(model));
++}
++
++export function modelHasNativeContext1m(model: string | null | undefined): boolean {
++  const normalizedModel = normalizeClaudeContextModel(model);
+   return CONTEXT_1M_NATIVE_MODELS.some(
+     (supported) =>
+       normalizedModel === supported ||

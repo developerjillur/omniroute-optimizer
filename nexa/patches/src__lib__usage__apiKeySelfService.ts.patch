@@ -1,7 +1,8 @@
 diff --git a/src/lib/usage/apiKeySelfService.ts b/src/lib/usage/apiKeySelfService.ts
+index 7bc2d440caed8af3639f82fa38a742b2c53bdfdb..ece651d1eaf560b05ed09367e2e38261daa18fd1 100644
 --- a/src/lib/usage/apiKeySelfService.ts
 +++ b/src/lib/usage/apiKeySelfService.ts
-@@ -172,8 +172,8 @@
+@@ -172,8 +172,8 @@ function aggregateTokens(db: DbLike, apiKeyId: string, periodStartAt: string): T
      cacheReadTokens,
      cacheCreationTokens,
      reasoningTokens,

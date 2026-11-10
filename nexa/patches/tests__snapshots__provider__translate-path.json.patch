@@ -1,38 +1,8 @@
 diff --git a/tests/snapshots/provider/translate-path.json b/tests/snapshots/provider/translate-path.json
-index ab0ad1d38e83e2a80fe87d5516d3961a82ec8007..92c15e5b05a59e398e4e31346b04be467e3b3224 100644
+index 0c0a1a571e1e50685c90444c9f00369b2f9aab3b..1da5ad9c9f7c16f624ff043c87b0530d19bf0685 100644
 --- a/tests/snapshots/provider/translate-path.json
 +++ b/tests/snapshots/provider/translate-path.json
-@@ -1467,23 +1467,23 @@
-         "Authorization": "Bearer <TOK>",
-         "Content-Type": "application/json",
-         "Openai-Beta": "responses_websockets=2026-02-06",
--        "User-Agent": "codex-cli/0.159.2 (<OS>; <ARCH>)",
--        "Version": "0.159.2"
-+        "User-Agent": "codex-cli/0.160.0 (<OS>; <ARCH>)",
-+        "Version": "0.160.0"
-       },
-       "nonStream": {
-         "Authorization": "Bearer <TOK>",
-         "Content-Type": "application/json",
-         "Openai-Beta": "responses_websockets=2026-02-06",
--        "User-Agent": "codex-cli/0.159.2 (<OS>; <ARCH>)",
--        "Version": "0.159.2"
-+        "User-Agent": "codex-cli/0.160.0 (<OS>; <ARCH>)",
-+        "Version": "0.160.0"
-       },
-       "oauth": {
-         "Accept": "text/event-stream",
-         "Authorization": "Bearer <TOK>",
-         "Content-Type": "application/json",
-         "Openai-Beta": "responses_websockets=2026-02-06",
--        "User-Agent": "codex-cli/0.159.2 (<OS>; <ARCH>)",
--        "Version": "0.159.2"
-+        "User-Agent": "codex-cli/0.160.0 (<OS>; <ARCH>)",
-+        "Version": "0.160.0"
-       }
-     },
-     "url": {
-@@ -2671,7 +2671,7 @@
+@@ -2715,7 +2715,7 @@
          "copilot-integration-id": "copilot-developer-cli",
          "editor-version": "copilot/1.0.91",
          "openai-intent": "conversation-agent",
@@ -41,7 +11,7 @@ index ab0ad1d38e83e2a80fe87d5516d3961a82ec8007..92c15e5b05a59e398e4e31346b04be46
          "x-client-machine-id": "<UUID>",
          "x-github-api-version": "2026-08-01",
          "x-interaction-type": "conversation-user"
-@@ -2685,7 +2685,7 @@
+@@ -2729,7 +2729,7 @@
          "copilot-integration-id": "copilot-developer-cli",
          "editor-version": "copilot/1.0.91",
          "openai-intent": "conversation-agent",
@@ -50,7 +20,7 @@ index ab0ad1d38e83e2a80fe87d5516d3961a82ec8007..92c15e5b05a59e398e4e31346b04be46
          "x-client-machine-id": "<UUID>",
          "x-github-api-version": "2026-08-01",
          "x-interaction-type": "conversation-user"
-@@ -2699,7 +2699,7 @@
+@@ -2743,7 +2743,7 @@
          "copilot-integration-id": "copilot-developer-cli",
          "editor-version": "copilot/1.0.91",
          "openai-intent": "conversation-agent",
@@ -59,7 +29,7 @@ index ab0ad1d38e83e2a80fe87d5516d3961a82ec8007..92c15e5b05a59e398e4e31346b04be46
          "x-client-machine-id": "<UUID>",
          "x-github-api-version": "2026-08-01",
          "x-interaction-type": "conversation-user"
-@@ -2745,7 +2745,7 @@
+@@ -2812,7 +2812,7 @@
          "copilot-integration-id": "copilot-developer-cli",
          "editor-version": "copilot/1.0.91",
          "openai-intent": "conversation-agent",
@@ -68,7 +38,7 @@ index ab0ad1d38e83e2a80fe87d5516d3961a82ec8007..92c15e5b05a59e398e4e31346b04be46
          "x-client-machine-id": "<UUID>",
          "x-github-api-version": "2026-08-01",
          "x-interaction-type": "conversation-user",
-@@ -2760,7 +2760,7 @@
+@@ -2827,7 +2827,7 @@
          "copilot-integration-id": "copilot-developer-cli",
          "editor-version": "copilot/1.0.91",
          "openai-intent": "conversation-agent",
@@ -77,7 +47,7 @@ index ab0ad1d38e83e2a80fe87d5516d3961a82ec8007..92c15e5b05a59e398e4e31346b04be46
          "x-client-machine-id": "<UUID>",
          "x-github-api-version": "2026-08-01",
          "x-interaction-type": "conversation-user",
-@@ -2775,7 +2775,7 @@
+@@ -2842,7 +2842,7 @@
          "copilot-integration-id": "copilot-developer-cli",
          "editor-version": "copilot/1.0.91",
          "openai-intent": "conversation-agent",

@@ -1,5 +1,5 @@
 diff --git a/src/app/(dashboard)/dashboard/tools/traffic-inspector/hooks/useSessionRecorder.ts b/src/app/(dashboard)/dashboard/tools/traffic-inspector/hooks/useSessionRecorder.ts
-index 4951367f3dc59b9e509646341f1cbe1c67969082..4a5ab1d241aa9884796524f09f7d56e7e54583c1 100644
+index 207ae2e7552ad08d76f526649c2b0c02fe081966..4a5ab1d241aa9884796524f09f7d56e7e54583c1 100644
 --- a/src/app/(dashboard)/dashboard/tools/traffic-inspector/hooks/useSessionRecorder.ts
 +++ b/src/app/(dashboard)/dashboard/tools/traffic-inspector/hooks/useSessionRecorder.ts
 @@ -3,7 +3,7 @@
@@ -11,7 +11,7 @@ index 4951367f3dc59b9e509646341f1cbe1c67969082..4a5ab1d241aa9884796524f09f7d56e7
  const SNAPSHOT_FLUSH_MS = 500;
  const SNAPSHOT_FLUSH_BATCH = 10;
  
-@@ -29,7 +29,7 @@
+@@ -29,7 +29,7 @@ export function useSessionRecorder() {
    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
    const startTimeRef = useRef<number>(0);
    const mountedRef = useRef(true);
@@ -20,7 +20,7 @@ index 4951367f3dc59b9e509646341f1cbe1c67969082..4a5ab1d241aa9884796524f09f7d56e7
    const recordingSessionRef = useRef<SessionInfo | null>(null);
    const pendingSnapshotsRef = useRef<string[]>([]);
    const flushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-@@ -99,7 +99,8 @@
+@@ -99,7 +99,8 @@ export function useSessionRecorder() {
        flushTimerRef.current = null;
      }
      if (recordingWsRef.current) {
@@ -30,7 +30,7 @@ index 4951367f3dc59b9e509646341f1cbe1c67969082..4a5ab1d241aa9884796524f09f7d56e7
        recordingWsRef.current.close();
        recordingWsRef.current = null;
      }
-@@ -126,9 +127,7 @@
+@@ -126,9 +127,7 @@ export function useSessionRecorder() {
          }, 1000);
  
          // Open a dedicated WS to capture traffic events during the recording window
@@ -41,7 +41,7 @@ index 4951367f3dc59b9e509646341f1cbe1c67969082..4a5ab1d241aa9884796524f09f7d56e7
          recordingWsRef.current = ws;
  
          ws.onmessage = (ev: MessageEvent) => {
-@@ -150,7 +149,7 @@
+@@ -150,7 +149,7 @@ export function useSessionRecorder() {
            }
          };
  
@@ -50,36 +50,7 @@ index 4951367f3dc59b9e509646341f1cbe1c67969082..4a5ab1d241aa9884796524f09f7d56e7
        } catch {
          // ignore
        }
-@@ -185,23 +184,27 @@
-     setSession(null);
-   }, [session, fetchSessions, stopRecordingWs, flushSnapshots]);
- 
--  const deleteSession = useCallback(async (id: string) => {
--    try {
--      await fetch(`/api/tools/traffic-inspector/sessions/${encodeURIComponent(id)}`, {
--        method: "DELETE",
--      });
--      await fetchSessions();
--    } catch {
--      // ignore
--    }
--  }, [fetchSessions]);
-+  const deleteSession = useCallback(
-+    async (id: string) => {
-+      try {
-+        await fetch(`/api/tools/traffic-inspector/sessions/${encodeURIComponent(id)}`, {
-+          method: "DELETE",
-+        });
-+        await fetchSessions();
-+      } catch {
-+        // ignore
-+      }
-+    },
-+    [fetchSessions]
-+  );
- 
-   useEffect(() => {
-     return () => {
+@@ -204,7 +203,8 @@ export function useSessionRecorder() {
        if (timerRef.current) clearInterval(timerRef.current);
        if (flushTimerRef.current) clearTimeout(flushTimerRef.current);
        if (recordingWsRef.current) {

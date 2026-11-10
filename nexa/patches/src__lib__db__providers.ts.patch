@@ -1,8 +1,8 @@
 diff --git a/src/lib/db/providers.ts b/src/lib/db/providers.ts
-index 25d91f494c582c2f7a8a6f7960d3906c252088b0..5135790fd9ef632ac26169c0b58955ee157630c3 100644
+index 527cb7f49af8f82e53b68955a50a1aacac21fcfd..978b92165e36b7f6a2639d56df8a10432793780a 100644
 --- a/src/lib/db/providers.ts
 +++ b/src/lib/db/providers.ts
-@@ -34,6 +34,7 @@
+@@ -36,6 +36,7 @@ import { isMicrosoftDesignerWebRetiredProviderId } from "@/shared/constants/desi
  import { reconcileCodexUsageHistory } from "./providers/usageIdentityReconciliation";
  import { isRuntimeRetiredProviderId } from "@/shared/constants/providerRetirement";
  import { applyCodexChildCooldownClearOnUpdate } from "./providers/codexAccountState";
@@ -10,7 +10,7 @@ index 25d91f494c582c2f7a8a6f7960d3906c252088b0..5135790fd9ef632ac26169c0b58955ee
  
  import {
    withNullableMaxConcurrent,
-@@ -975,7 +976,7 @@
+@@ -977,7 +978,7 @@ export async function updateProviderConnection(
    opts?: ProviderConnectionUpdateOpts
  ) {
    const db = getDbInstance() as unknown as DbLike;
@@ -19,17 +19,17 @@ index 25d91f494c582c2f7a8a6f7960d3906c252088b0..5135790fd9ef632ac26169c0b58955ee
    if (!existing) return null;
  
    // The incoming value only. A connection that already holds the password has
-@@ -983,6 +984,13 @@
-   // to prevent -- and re-checking the merged value would spend a bcrypt round
+@@ -986,6 +987,13 @@ export async function updateProviderConnection(
    // on every unrelated field edit.
    await assertApiKeyIsNotManagementPassword(data.apiKey);
-+
+ 
 +  if (data.preserveHealthOnTokenRefresh === true || isGoogleCloudAccount(toRecord(existing).provider)) {
 +    // Re-read after the async guard; another request may have recorded a block.
 +    existing = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
 +    if (!existing) return null;
 +    data = prepareTokenRefreshUpdate(toRecord(rowToCamel(existing)), data);
 +  }
- 
++
    const existingCamel = toRecord(rowToCamel(existing));
    const merged: JsonRecord = {
+     ...existingCamel,

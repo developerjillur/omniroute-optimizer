@@ -1,26 +1,22 @@
 diff --git a/open-sse/handlers/chatCore/streamingPipeline.ts b/open-sse/handlers/chatCore/streamingPipeline.ts
-index 65e95960f152738464fd9161fb6cd4c68bb761dd..5d7af44a0a60892d279474e885ecdebfb60588d1 100644
+index 31202a7d6caa6ae71054852fd56b6a37d133386e..dc58a518c3d02911abf850f2286011bae596421e 100644
 --- a/open-sse/handlers/chatCore/streamingPipeline.ts
 +++ b/open-sse/handlers/chatCore/streamingPipeline.ts
-@@ -83,6 +83,8 @@
-      * request's pre-handoff readiness gate, so slow-first-content reasoning
-      * models keep the same generous budget in both phases. */
-     contentStallTimeoutMs?: number;
+@@ -95,6 +95,8 @@
+     /** Total lifetime budget for this stream (see resolveStreamActiveTimeoutMs).
+      * Omitted falls back to STREAM_ACTIVE_TIMEOUT_MS; 0 leaves the watchdog off. */
+     activeTimeoutMs?: number;
 +    allowEmptyCompletion?: () => boolean;
 +    allowAnthropicThinkingProgress?: boolean;
    },
    deps: StreamingPipelineDeps = DEFAULT_DEPS
  ) {
-@@ -98,7 +100,11 @@
-     args.providerResponse,
-     args.transformStream,
+@@ -112,6 +114,8 @@
      args.streamController,
--    { contentStallTimeoutMs: args.contentStallTimeoutMs }
-+    {
-+      contentStallTimeoutMs: args.contentStallTimeoutMs,
+     {
+       contentStallTimeoutMs: args.contentStallTimeoutMs,
 +      allowEmptyCompletion: args.allowEmptyCompletion,
 +      allowAnthropicThinkingProgress: args.allowAnthropicThinkingProgress,
-+    }
+       activeTimeoutMs: args.activeTimeoutMs,
+     }
    );
-   if (typeof args.createPiiTransform === "function") {
-     piiStream = piiStream.pipeThrough((args.createPiiTransform as () => TransformStream)());

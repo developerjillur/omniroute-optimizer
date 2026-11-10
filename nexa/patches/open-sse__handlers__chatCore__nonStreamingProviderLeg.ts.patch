@@ -1,8 +1,8 @@
 diff --git a/open-sse/handlers/chatCore/nonStreamingProviderLeg.ts b/open-sse/handlers/chatCore/nonStreamingProviderLeg.ts
-index e61c476d5288a824e24db98da51f5353ac475b34..3726a8abbe9e16ad795c1f5ea7072fb767abd90b 100644
+index d260a026ba17feb19a9a18ad7a19c988c22f6573..0e1c69754507c898ce42f8e67f62b3e6a19d38aa 100644
 --- a/open-sse/handlers/chatCore/nonStreamingProviderLeg.ts
 +++ b/open-sse/handlers/chatCore/nonStreamingProviderLeg.ts
-@@ -22,6 +22,7 @@
+@@ -26,6 +26,7 @@ import { translateNonStreamingClientResponse } from "./nonStreamingClientTransla
  import { parseNonStreamingResponseBody, isJsonRecord } from "./nonStreamingResponseParse.ts";
  import { restoreNonStreamingToolNames } from "./passthroughToolNames.ts";
  import { extractUsageFromResponse } from "../usageExtractor.ts";
@@ -10,7 +10,7 @@ index e61c476d5288a824e24db98da51f5353ac475b34..3726a8abbe9e16ad795c1f5ea7072fb7
  import { sanitizeUsagePayloadForRequest } from "../../utils/usageTracking.ts";
  import { createErrorResult, formatProviderError } from "../../utils/error.ts";
  import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
-@@ -153,6 +154,7 @@
+@@ -162,6 +163,7 @@ function extractUsage(
    const pt = typeof r.prompt_tokens === "number" ? r.prompt_tokens : 0;
    const ct = typeof r.completion_tokens === "number" ? r.completion_tokens : 0;
    return {
@@ -18,7 +18,7 @@ index e61c476d5288a824e24db98da51f5353ac475b34..3726a8abbe9e16ad795c1f5ea7072fb7
      prompt_tokens: pt,
      completion_tokens: ct,
      total_tokens: typeof r.total_tokens === "number" ? r.total_tokens : pt + ct,
-@@ -242,6 +244,60 @@
+@@ -251,6 +253,60 @@ function parseRetryAfterMs(response: Response): number | null {
    return null;
  }
  
@@ -79,7 +79,7 @@ index e61c476d5288a824e24db98da51f5353ac475b34..3726a8abbe9e16ad795c1f5ea7072fb7
  function finishOk(
    input: ProviderLegInput,
    params: {
-@@ -264,6 +320,10 @@
+@@ -274,6 +330,10 @@ function finishOk(
      requestUrl?: string;
    }
  ): NonStreamingProviderLegResult {
@@ -90,11 +90,10 @@ index e61c476d5288a824e24db98da51f5353ac475b34..3726a8abbe9e16ad795c1f5ea7072fb7
    const failed = bufferedResponsesFailure(input, params, { legError, extractUsage, buildReceipt });
    if (failed) return failed;
    // F-02: restore + sanitize + translate is the only success tail.
-@@ -866,6 +926,17 @@
-   let responseBody = parsed.responseBody;
+@@ -917,6 +977,17 @@ export async function runNonStreamingProviderLeg(
    const responsePayloadFormat = parsed.responsePayloadFormat;
    const looksLikeSSE = parsed.looksLikeSSE;
-+
+ 
 +  const contextOverflow = bufferedContextOverflow(input, {
 +    responseBody,
 +    responsePayloadFormat,
@@ -105,6 +104,7 @@ index e61c476d5288a824e24db98da51f5353ac475b34..3726a8abbe9e16ad795c1f5ea7072fb7
 +    upstreamResponse: providerResponse,
 +  });
 +  if (contextOverflow) return contextOverflow;
- 
++
    // -- ClinePass envelope unwrap + retry --------------------------------------
    if (provider === "clinepass") {
+     let { body: unwrapped, error: envError } = unwrapClinepassEnvelope(responseBody, provider);

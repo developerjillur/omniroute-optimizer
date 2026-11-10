@@ -1,5 +1,5 @@
 diff --git a/open-sse/utils/usageTracking.ts b/open-sse/utils/usageTracking.ts
-index 47f65ed6eac99bc0b03e273697cb3406d6008a47..d5e4eed4b3f468b82ddbf00926ecb3d3e4e2ca16 100644
+index 729718115ddd8491cd2efbe94b6c0264f636d6f4..35691d9ff9270072b9f498b9514d3dd83f87b07e 100644
 --- a/open-sse/utils/usageTracking.ts
 +++ b/open-sse/utils/usageTracking.ts
 @@ -13,6 +13,8 @@
@@ -20,7 +20,7 @@ index 47f65ed6eac99bc0b03e273697cb3406d6008a47..d5e4eed4b3f468b82ddbf00926ecb3d3
    /** OpenRouter / Devin Desktop / codex-chatgpt-web alias for cache creation. */
    cache_write_tokens?: number;
    prompt_cache_hit_tokens?: number;
-@@ -67,7 +71,7 @@
+@@ -69,7 +73,7 @@
  }
  
  /** SSE/JSON chunk shapes this module inspects for embedded usage containers. */
@@ -29,7 +29,7 @@ index 47f65ed6eac99bc0b03e273697cb3406d6008a47..d5e4eed4b3f468b82ddbf00926ecb3d3
    type?: string;
    done?: boolean;
    prompt_eval_count?: number;
-@@ -75,7 +79,11 @@
+@@ -77,7 +81,11 @@
    usage?: UsageLike;
    usageMetadata?: UsageLike;
    message?: { usage?: UsageLike; [field: string]: unknown };
@@ -42,7 +42,7 @@ index 47f65ed6eac99bc0b03e273697cb3406d6008a47..d5e4eed4b3f468b82ddbf00926ecb3d3
    [field: string]: unknown;
  }
  
-@@ -451,6 +459,17 @@
+@@ -449,6 +457,17 @@
      return value.some((item) => hasRemoteContextReference(item, depth + 1));
    }
  
@@ -60,7 +60,7 @@ index 47f65ed6eac99bc0b03e273697cb3406d6008a47..d5e4eed4b3f468b82ddbf00926ecb3d3
    for (const [key, nested] of Object.entries(value)) {
      if (REMOTE_CONTEXT_REFERENCE_KEYS.has(key) && hasValue(nested)) {
        return true;
-@@ -640,8 +659,8 @@
+@@ -638,8 +657,8 @@
      return replaceUsage(payload.message, "usage", FORMATS.CLAUDE);
    }
    if (payload.type === "message_delta" && payload.usage) {
@@ -71,15 +71,15 @@ index 47f65ed6eac99bc0b03e273697cb3406d6008a47..d5e4eed4b3f468b82ddbf00926ecb3d3
      const delta = payload.usage;
      const deltaInput =
        tokenNumber(delta.input_tokens) +
-@@ -686,6 +705,7 @@
+@@ -684,6 +703,7 @@
    assignNumber("output_tokens", usage?.output_tokens);
    assignNumber("cache_read_input_tokens", usage?.cache_read_input_tokens);
    assignNumber("cache_creation_input_tokens", pickCacheCreationTokens(usage));
 +  Object.assign(normalized, getCacheCreationTtlFields(usage));
-   assignNumber(
-     "cached_tokens",
+   const reportedCachedTokens =
      usage?.cached_tokens ??
-@@ -728,7 +748,10 @@
+     usage?.prompt_tokens_details?.cached_tokens ??
+@@ -733,7 +753,10 @@
    const estimated =
      !!source && typeof source === "object" && (source as UsageLike).estimated === true;
    if (estimated && rebuilt && typeof rebuilt === "object") {
@@ -91,7 +91,7 @@ index 47f65ed6eac99bc0b03e273697cb3406d6008a47..d5e4eed4b3f468b82ddbf00926ecb3d3
    }
    return rebuilt;
  }
-@@ -833,44 +856,14 @@
+@@ -838,44 +861,14 @@
      return null;
    }
  
@@ -142,7 +142,7 @@ index 47f65ed6eac99bc0b03e273697cb3406d6008a47..d5e4eed4b3f468b82ddbf00926ecb3d3
    }
  
    // OpenAI Responses API format (response.completed or response.done)
-@@ -883,6 +876,7 @@
+@@ -888,6 +881,7 @@
      return normalizeUsage({
        provider_credits: usage.provider_credits,
        cost_in_usd_ticks: usage.cost_in_usd_ticks,
@@ -150,7 +150,7 @@ index 47f65ed6eac99bc0b03e273697cb3406d6008a47..d5e4eed4b3f468b82ddbf00926ecb3d3
        prompt_tokens: usage.input_tokens || usage.prompt_tokens || 0,
        completion_tokens: usage.output_tokens || usage.completion_tokens || 0,
        cached_tokens:
-@@ -904,6 +898,7 @@
+@@ -909,6 +903,7 @@
      (chunk.usage.prompt_tokens !== undefined || chunk.usage.input_tokens !== undefined)
    ) {
      const normalized = normalizeUsage({

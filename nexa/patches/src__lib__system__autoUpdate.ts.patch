@@ -2,7 +2,7 @@ diff --git a/src/lib/system/autoUpdate.ts b/src/lib/system/autoUpdate.ts
 index 7b59eb0c67b6a767447cdf75cfc7fe851d9309f5..a76b119fbc7f0af3f44fa3d1ab7596374c1a2e33 100644
 --- a/src/lib/system/autoUpdate.ts
 +++ b/src/lib/system/autoUpdate.ts
-@@ -61,9 +61,14 @@
+@@ -61,9 +61,14 @@ type ComposeCommand = "docker compose" | "docker-compose";
   * image container (no `.git`, not under `node_modules`). See `./dockerUpdateTrigger.ts`.
   */
  export type AutoUpdateMode =
@@ -20,7 +20,7 @@ index 7b59eb0c67b6a767447cdf75cfc7fe851d9309f5..a76b119fbc7f0af3f44fa3d1ab759637
  type SpawnLike = typeof spawn;
  
  export type AutoUpdateConfig = {
-@@ -81,6 +86,8 @@
+@@ -81,6 +86,8 @@ export type AutoUpdateConfig = {
    dockerTriggerFile: string | null;
    /** Host-side compose command shown to the operator in `docker-image` mode. */
    manualUpdateCommand: string | null;
@@ -29,7 +29,7 @@ index 7b59eb0c67b6a767447cdf75cfc7fe851d9309f5..a76b119fbc7f0af3f44fa3d1ab759637
  };
  
  export type AutoUpdateValidation = {
-@@ -98,7 +105,7 @@
+@@ -98,7 +105,7 @@ export type AutoUpdateLaunchResult = {
  };
  
  function normalizeMode(raw: string | undefined): AutoUpdateMode {
@@ -38,7 +38,7 @@ index 7b59eb0c67b6a767447cdf75cfc7fe851d9309f5..a76b119fbc7f0af3f44fa3d1ab759637
      return raw;
    }
    return "npm";
-@@ -267,6 +274,7 @@
+@@ -267,6 +274,7 @@ export function getAutoUpdateConfig(
      dockerTriggerFile,
      manualUpdateCommand:
        mode === "docker-image" ? buildDockerImageUpdateCommand(env.AUTO_UPDATE_SERVICE) : null,
@@ -46,7 +46,7 @@ index 7b59eb0c67b6a767447cdf75cfc7fe851d9309f5..a76b119fbc7f0af3f44fa3d1ab759637
    };
  }
  
-@@ -293,6 +301,24 @@
+@@ -293,6 +301,24 @@ export async function validateAutoUpdateRuntime(
    execFileImpl: ExecFileLike = execFileAsync,
    existsImpl: (targetPath: string) => Promise<boolean> = pathExists
  ): Promise<AutoUpdateValidation> {
@@ -71,12 +71,10 @@ index 7b59eb0c67b6a767447cdf75cfc7fe851d9309f5..a76b119fbc7f0af3f44fa3d1ab759637
    if (config.mode === "source") {
      const gitDir = path.join(PROJECT_ROOT, ".git");
      if (!(await existsImpl(gitDir))) {
-@@ -413,6 +439,15 @@
-   } catch {
-     throw new Error(`Git tag not found: ${targetTag}`);
+@@ -415,6 +441,15 @@ export async function ensureGitTagExists(
    }
-+}
-+
+ }
+ 
 +/**
 + * AUTO_UPDATE_MODE=command: hand the update to an operator-provided executable (e.g. a launchd or
 + * systemd job that rebuilds a customized fork). It receives the target version as its only argument
@@ -84,10 +82,12 @@ index 7b59eb0c67b6a767447cdf75cfc7fe851d9309f5..a76b119fbc7f0af3f44fa3d1ab759637
 + */
 +export function buildCommandUpdateScript(latest: string, command: string): string {
 +  return ["set -eu", `exec ${shellQuote(command)} ${shellQuote(latest)}`].join("\n");
- }
- 
++}
++
  export function buildNpmUpdateScript(latest: string): string {
-@@ -554,7 +589,9 @@
+   return [
+     "set -eu",
+@@ -554,7 +589,9 @@ export async function launchAutoUpdate({
          })
        : config.mode === "source"
          ? buildSourceUpdateScript(latest, config.gitRemote)

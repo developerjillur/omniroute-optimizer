@@ -2,11 +2,10 @@ diff --git a/CLAUDE.md b/CLAUDE.md
 index 5e7115287f59375a3b4ad55850b2ed82831f1ac0..bb3d562aff835c5351795e177036aa748f9b7ec9 100644
 --- a/CLAUDE.md
 +++ b/CLAUDE.md
-@@ -6,6 +6,51 @@
- assistant (architecture, conventions, testing, quality gates, git workflow, the 23 Hard Rules,
+@@ -7,6 +7,51 @@ assistant (architecture, conventions, testing, quality gates, git workflow, the
  PII learnings). Read it in full; do not re-add project rules here. Everything below applies ONLY
  to Claude Code — operational refinements of rules already defined in `AGENTS.md`.
-+
+ 
 +---
 +
 +## ⛔ STOP — read this before editing ANY file or building
@@ -51,6 +50,7 @@ index 5e7115287f59375a3b4ad55850b2ed82831f1ac0..bb3d562aff835c5351795e177036aa74
 +`.claude/skills/`.
 +
 +---
- 
++
  ## Worktree isolation — Claude Code specifics
  
+ The full mandatory worktree protocol (base-branch confirmation, `.claude/worktrees/` canonical

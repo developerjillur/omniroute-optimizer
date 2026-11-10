@@ -1,8 +1,8 @@
 diff --git a/src/i18n/messages/pt-BR.json b/src/i18n/messages/pt-BR.json
-index 07a33345892f259555bb0615e371f90c6e6c01e2..b47dbdcf7d2622cab1cbb947ab2a86da5eab727f 100644
+index 3b9be4710777e268f034a455ec8d8aefa4ff1c54..817c287fce55ded900d9725c12a8f7b799d1fa0b 100644
 --- a/src/i18n/messages/pt-BR.json
 +++ b/src/i18n/messages/pt-BR.json
-@@ -3177,6 +3177,10 @@
+@@ -3217,6 +3217,10 @@
      "other": "Outro",
      "preview": "Visualização",
      "refreshAll": "Atualizar tudo",

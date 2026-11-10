@@ -2,21 +2,21 @@ diff --git a/tests/unit/auto-update.test.ts b/tests/unit/auto-update.test.ts
 index 66c4cc9c91906e9e8692cc65585d493bb39dfaab..00249a44d8c7d7a67a0f53c9745bbec393bf11a6 100644
 --- a/tests/unit/auto-update.test.ts
 +++ b/tests/unit/auto-update.test.ts
-@@ -5,6 +5,13 @@
- import path from "node:path";
+@@ -6,6 +6,13 @@ import path from "node:path";
  
  const autoUpdate = await import("../../src/lib/system/autoUpdate.ts");
-+
+ 
 +const requiredConfigDefaults = {
 +  dataDir: "/tmp/omniroute-fixture-data",
 +  dockerTriggerFile: null,
 +  manualUpdateCommand: null,
 +  command: "",
 +};
- 
++
  test("auto update config normalizes env values and local source installs to source mode", () => {
    const config = autoUpdate.getAutoUpdateConfig({
-@@ -56,6 +63,7 @@
+     DATA_DIR: "/tmp/omniroute-data",
+@@ -56,6 +63,7 @@ test("detectComposeCommand prefers docker compose and falls back to docker-compo
  test("validateAutoUpdateRuntime covers source, docker preconditions and successful docker runtime", async () => {
    const sourceValidation = await autoUpdate.validateAutoUpdateRuntime(
      {
@@ -24,7 +24,7 @@ index 66c4cc9c91906e9e8692cc65585d493bb39dfaab..00249a44d8c7d7a67a0f53c9745bbec3
        mode: "source",
        repoDir: "/repo",
        composeFile: "/repo/docker-compose.yml",
-@@ -82,6 +90,7 @@
+@@ -82,6 +90,7 @@ test("validateAutoUpdateRuntime covers source, docker preconditions and successf
  
    const sourceMissingGitRepo = await autoUpdate.validateAutoUpdateRuntime(
      {
@@ -32,7 +32,7 @@ index 66c4cc9c91906e9e8692cc65585d493bb39dfaab..00249a44d8c7d7a67a0f53c9745bbec3
        mode: "source",
        repoDir: "/repo",
        composeFile: "/repo/docker-compose.yml",
-@@ -99,6 +108,7 @@
+@@ -99,6 +108,7 @@ test("validateAutoUpdateRuntime covers source, docker preconditions and successf
  
    const sourceMissingGit = await autoUpdate.validateAutoUpdateRuntime(
      {
@@ -40,7 +40,7 @@ index 66c4cc9c91906e9e8692cc65585d493bb39dfaab..00249a44d8c7d7a67a0f53c9745bbec3
        mode: "source",
        repoDir: "/repo",
        composeFile: "/repo/docker-compose.yml",
-@@ -118,6 +128,7 @@
+@@ -118,6 +128,7 @@ test("validateAutoUpdateRuntime covers source, docker preconditions and successf
  
    const missingRepo = await autoUpdate.validateAutoUpdateRuntime(
      {
@@ -48,7 +48,7 @@ index 66c4cc9c91906e9e8692cc65585d493bb39dfaab..00249a44d8c7d7a67a0f53c9745bbec3
        mode: "docker-compose",
        repoDir: "/repo",
        composeFile: "/repo/docker-compose.yml",
-@@ -135,6 +146,7 @@
+@@ -135,6 +146,7 @@ test("validateAutoUpdateRuntime covers source, docker preconditions and successf
  
    const missingComposeFile = await autoUpdate.validateAutoUpdateRuntime(
      {
@@ -56,7 +56,7 @@ index 66c4cc9c91906e9e8692cc65585d493bb39dfaab..00249a44d8c7d7a67a0f53c9745bbec3
        mode: "docker-compose",
        repoDir: "/repo",
        composeFile: "/repo/docker-compose.yml",
-@@ -152,6 +164,7 @@
+@@ -152,6 +164,7 @@ test("validateAutoUpdateRuntime covers source, docker preconditions and successf
  
    const missingGit = await autoUpdate.validateAutoUpdateRuntime(
      {
@@ -64,7 +64,7 @@ index 66c4cc9c91906e9e8692cc65585d493bb39dfaab..00249a44d8c7d7a67a0f53c9745bbec3
        mode: "docker-compose",
        repoDir: "/repo",
        composeFile: "/repo/docker-compose.yml",
-@@ -172,6 +185,7 @@
+@@ -172,6 +185,7 @@ test("validateAutoUpdateRuntime covers source, docker preconditions and successf
  
    const missingComposeCommand = await autoUpdate.validateAutoUpdateRuntime(
      {
@@ -72,7 +72,7 @@ index 66c4cc9c91906e9e8692cc65585d493bb39dfaab..00249a44d8c7d7a67a0f53c9745bbec3
        mode: "docker-compose",
        repoDir: "/repo",
        composeFile: "/repo/docker-compose.yml",
-@@ -192,6 +206,7 @@
+@@ -192,6 +206,7 @@ test("validateAutoUpdateRuntime covers source, docker preconditions and successf
  
    const supported = await autoUpdate.validateAutoUpdateRuntime(
      {
@@ -80,7 +80,7 @@ index 66c4cc9c91906e9e8692cc65585d493bb39dfaab..00249a44d8c7d7a67a0f53c9745bbec3
        mode: "docker-compose",
        repoDir: "/repo",
        composeFile: "/repo/docker-compose.yml",
-@@ -266,6 +281,7 @@
+@@ -266,6 +281,7 @@ test("auto update script builders generate npm, source, and docker-compose scrip
      latest: "3.6.0",
      composeCommand: "docker-compose",
      config: {

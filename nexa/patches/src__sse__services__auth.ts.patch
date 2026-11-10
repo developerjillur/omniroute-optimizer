@@ -1,5 +1,5 @@
 diff --git a/src/sse/services/auth.ts b/src/sse/services/auth.ts
-index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..4b6c43f7e2238c3253a8d5ccf3775124510e6f80 100644
+index 06fb65491e09c5b1bea3b50ae50cbe8ebec3c212..72023e7c11b43c22098dc8e74a11ef6349a360fd 100644
 --- a/src/sse/services/auth.ts
 +++ b/src/sse/services/auth.ts
 @@ -3,6 +3,18 @@
@@ -21,23 +21,23 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..4b6c43f7e2238c3253a8d5ccf3775124
  import { hydrateConnectionProviderSpecificData } from "./compatibleNodeBaseUrl.ts"; // #13452
  import { extractGoogApiKeyHeader } from "./googApiKeyAuth.ts";
  import { isCooldownRetrySkipRefusalsEnabled } from "./cooldownAwareRetry.ts";
-@@ -55,6 +67,7 @@
-   DEFAULT_QUOTA_THRESHOLD_PERCENT,
+@@ -58,6 +70,7 @@
+ import {
    getCachedClaudeQuotaScopeDecision as readClaudeScope,
    getQuotaCache,
 +  getQuotaWeightedRemainingPercent,
    getQuotaWindowStatus,
    hydrateCodexQuotaCacheForRequest,
    isQuotaExhaustedForRequest,
-@@ -62,6 +75,7 @@
-   resolveClaudeQuotaCooldownMs as resolveClaudeCooldown,
- } from "@/domain/quotaCache";
- import { defersQuotaCutoff, hasCodexCreditOptIn } from "@/lib/providers/quotaCutoffOptIns";
+@@ -78,6 +91,7 @@
+ } from "./quotaPreflightPolicy";
+ export { shouldApplyQuotaCutoff, resolveMinRemainingPercent } from "./quotaPreflightPolicy";
+ import { isCodexPaidCreditsEnabled } from "@/lib/providers/codexPaidCredits";
 +import { pickClaudeNewSession, isNativeClaudeSession } from "./claudeSessionSelection";
  import {
    getQuotaScopeLabelForProvider,
    isAntigravityQuotaProvider,
-@@ -962,6 +976,7 @@
+@@ -838,6 +852,7 @@
    } = {}
  ) {
    const providerSpecificData = await hydrateConnectionProviderSpecificData(connection);
@@ -45,33 +45,33 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..4b6c43f7e2238c3253a8d5ccf3775124
    const apiKeyHealth = providerSpecificData.apiKeyHealth as Record<string, KeyHealth> | undefined;
    if (apiKeyHealth) syncHealthFromDB(connection.id, apiKeyHealth);
    const releaseOAuthSession =
-@@ -1108,6 +1123,8 @@
+@@ -984,6 +999,8 @@
      // Fetched early so the session-affinity-pin override (#5903) can consult
      // the TTL before forcedConnectionId narrows the connection pool.
-     const settings = await getSettings();
+     const settings = await getCachedSettings();
 +    const cachedQuotaFilteringEnabled =
 +      resolveResilienceSettings(settings).quotaPreflight.cachedQuotaFilteringEnabled !== false;
      const sessionAffinityTtlMs = resolveSessionAffinityTtlMs(provider, options, settings);
  
      // Fix #922: Check for aliases (nvidia/nvidia_nim) to ensure credentials are found
-@@ -1134,6 +1151,7 @@
+@@ -1010,6 +1027,7 @@
      if (allowedConnections && allowedConnections.length > 0) {
        connections = connections.filter((conn) => allowedConnections.includes(conn.id));
      }
 +    connections = restrictModelTestConnections(connections);
-     let explicitProbeKind: "probe" | "suppressed" | "skip" = "skip";
-     if (forcedConnectionId && !connections.some((c) => c.id === forcedConnectionId)) {
-       const pinnedRaw = await getCachedProviderConnectionById(forcedConnectionId);
-@@ -1173,7 +1191,7 @@
- 
-     // #5903: an active session-affinity pin outranks a per-request reset-aware
-     // forcedConnectionId (see sessionAffinityPin leaf for the full rationale).
+     // The active, key-scoped pool before any pin narrows it: per-account catalogs (antigravity/agy)
+     // judge "does some account list the model" over the whole pool, not just the pinned account.
+     const inventoryPoolConnections = connections;
+@@ -1056,7 +1074,7 @@
+       affinityStore.driver === "redis" && options.sessionKey && sessionAffinityTtlMs > 0
+         ? await affinityStore.get(options.sessionKey, provider, sessionAffinityTtlMs)
+         : undefined;
 -    if (!options.lease) {
 +    if (!options.lease && !getModelTestConnectionId()) {
        forcedConnectionId =
          applySessionAffinityPin({
-           forcedConnectionId,
-@@ -1212,8 +1230,9 @@
+           affinityRecord,
+@@ -1088,8 +1106,9 @@
          excludedConnectionIds,
          connections,
          allowRateLimitedConnections,
@@ -82,7 +82,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..4b6c43f7e2238c3253a8d5ccf3775124
            const conn = connections.find((candidate) => candidate.id === connectionId);
            return isQuotaExhaustedForRequest(
              connectionId,
-@@ -1271,6 +1290,7 @@
+@@ -1147,6 +1166,7 @@
          allConnections = allConnections.filter((conn) => allowedConnections.includes(conn.id));
        }
        const blockedByKeyPolicyCount = connectionsBeforeKeyPolicy - allConnections.length;
@@ -90,15 +90,15 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..4b6c43f7e2238c3253a8d5ccf3775124
        // A scoped pool may contain an allowed but inactive account. Excluding
        // unrelated siblings does not turn that account's unavailability into a
        // permission failure. Preserve 403 for an explicitly forbidden pin.
-@@ -1398,6 +1418,7 @@
-       requestedModel
-     );
+@@ -1284,6 +1304,7 @@
+       advertisedModelsByConnection.delete(forcedConnectionId);
+     }
      // Filter out unavailable accounts and excluded connection
 +    const verificationBlockedIdentities = googleVerificationBlockedIdentities(connections);
      let availableConnections = connections.filter((c) => {
        if (excludedConnectionIds.has(c.id)) {
          connectionFilterStatus.set(c.id, "excluded");
-@@ -1420,6 +1441,13 @@
+@@ -1306,6 +1327,13 @@
          return false;
        }
        if (!allowSuppressedConnections && explicitProbeKind !== "probe") {
@@ -112,7 +112,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..4b6c43f7e2238c3253a8d5ccf3775124
          if (!allowRateLimitedConnections && isAccountUnavailable(c.rateLimitedUntil)) {
            connectionFilterStatus.set(c.id, "rateLimited");
            return false;
-@@ -1527,6 +1555,24 @@
+@@ -1413,6 +1441,24 @@
      });
  
      if (availableConnections.length === 0) {
@@ -137,7 +137,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..4b6c43f7e2238c3253a8d5ccf3775124
        const cooldownStates: CooldownInspectionState[] = connections.map((connection) => {
          const connectionCooldownMs = parseFutureDateMs(connection.rateLimitedUntil);
          const codexScopeCooldownMs =
-@@ -1666,7 +1712,7 @@
+@@ -1552,7 +1598,7 @@
        }
      }
  
@@ -146,7 +146,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..4b6c43f7e2238c3253a8d5ccf3775124
        policyEligibleConnections = peakHourEligibleConnections.filter((connection) => {
          const evaluation = evaluateQuotaLimitPolicy(provider, connection, requestedModel);
          quotaResults.set(connection.id, { blocked: evaluation.blocked, exhausted: false });
-@@ -1740,12 +1786,9 @@
+@@ -1626,12 +1672,9 @@
      const withQuota: typeof policyEligibleConnections = [];
      const exhaustedQuota: typeof policyEligibleConnections = [];
      for (const c of policyEligibleConnections) {
@@ -162,7 +162,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..4b6c43f7e2238c3253a8d5ccf3775124
        const existing = quotaResults.get(c.id);
        if (existing) existing.exhausted = exhausted;
        if (!exhausted) {
-@@ -1763,6 +1806,22 @@
+@@ -1649,6 +1692,22 @@
      }
  
      if (withQuota.length === 0 && exhaustedQuota.length > 0) {
@@ -185,7 +185,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..4b6c43f7e2238c3253a8d5ccf3775124
        const earliestResetAt = getEarliestFutureDate(
          exhaustedQuota.map((c) => {
            if (resolveProviderId(provider) === "claude") {
-@@ -1785,7 +1844,10 @@
+@@ -1708,7 +1767,10 @@
          allRateLimited: true,
          retryAfter,
          retryAfterHuman: formatRetryAfter(retryAfter),
@@ -197,25 +197,26 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..4b6c43f7e2238c3253a8d5ccf3775124
          lastErrorCode: 429,
        };
      }
-@@ -1829,6 +1891,7 @@
+@@ -1757,6 +1819,8 @@
      >;
      const providerOverride = providerStrategyOverrides[resolvedId] || {};
      const strategy = providerOverride.fallbackStrategy || settings.fallbackStrategy || "fill-first";
 +    const nativeClaudeSession = isNativeClaudeSession(provider, options.sessionKey);
- 
++
      let commitSelectionSideEffects: (() => Promise<void> | void) | undefined;
      let connection = leasePolicy.activeLease
-@@ -1842,7 +1905,8 @@
-             provider,
+       ? orderedConnections.find(
+@@ -1781,7 +1845,8 @@
              options.sessionKey,
              orderedConnections,
--            sessionAffinityTtlMs
-+            sessionAffinityTtlMs,
+             sessionAffinityTtlMs,
+-            affinityRecord
++            affinityRecord,
 +            !nativeClaudeSession
            )
          : null;
      const affinityConnection = connection
-@@ -1853,7 +1917,8 @@
+@@ -1792,7 +1857,8 @@
              provider,
              options.sessionKey,
              orderedConnections,
@@ -225,29 +226,27 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..4b6c43f7e2238c3253a8d5ccf3775124
            );
      if (affinityConnection) {
        connection = affinityConnection;
-@@ -2027,10 +2092,17 @@
+@@ -1973,13 +2039,17 @@
        }
      } else {
        // Default: fill-first (already sorted by priority in getProviderConnections)
 -      connection = orderedConnections[0];
--    }
--
--    if (options.reserveOAuthSession === true && connection?.authType === "oauth") {
 +      connection = nativeClaudeSession
 +        ? (pickClaudeNewSession(orderedConnections, getQuotaWeightedRemainingPercent) ??
 +          orderedConnections[0])
 +        : orderedConnections[0];
-+    }
-+
-+    if (
-+      options.reserveOAuthSession === true &&
-+      connection?.authType === "oauth" &&
+     }
+ 
+     if (
+       options.reserveOAuthSession === true &&
+       connection?.authType === "oauth" &&
+-      !selectedByApiKeyPreference
++      !selectedByApiKeyPreference &&
 +      !nativeClaudeSession
-+    ) {
+     ) {
        const selectedPriority = connection.priority || 999;
        const selectedAvailability = getOAuthSessionAvailability(connection.id, options.sessionKey);
-       const moreAvailablePeer = [...orderedConnections]
-@@ -2048,6 +2120,17 @@
+@@ -1998,6 +2068,17 @@
              getOAuthSessionAvailability(candidate.id, options.sessionKey) > selectedAvailability
          );
        if (moreAvailablePeer) connection = moreAvailablePeer;
@@ -265,7 +264,7 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..4b6c43f7e2238c3253a8d5ccf3775124
      }
  
      let exclusiveLease: ExclusiveConnectionLease | undefined;
-@@ -2155,6 +2238,18 @@
+@@ -2105,6 +2186,18 @@
    );
  
    const resilience = resolveResilienceSettings(await getCachedSettings());
@@ -281,10 +280,10 @@ index 20ce7679e4c7333f85590f9b3d5a36ad06627bc0..4b6c43f7e2238c3253a8d5ccf3775124
 +      }
 +    );
 +  }
-   const { defaultThresholdPercent, warnThresholdPercent, providerWindowDefaults } =
-     resilience.quotaPreflight;
-   const providerWindowMap = providerWindowDefaults[provider] || {};
-@@ -2603,6 +2698,14 @@
+   const { warnThresholdPercent } = resilience.quotaPreflight;
+   let pendingCredentialSelection: Awaited<ReturnType<typeof getProviderCredentials>> | undefined;
+ 
+@@ -2514,6 +2607,14 @@
      // Request-scoped refusal: nothing about it belongs on this account or this model.
      if (isOpencodeFreeTierRefusalForProvider(provider, status, errorText))
        return { shouldFallback: true, cooldownMs: 0 };

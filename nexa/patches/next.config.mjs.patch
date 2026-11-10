@@ -1,9 +1,9 @@
 diff --git a/next.config.mjs b/next.config.mjs
-index 92d9a24526959ae3cfc9d5f06ec3f371019b9063..50ef1e27dc42155960a388d8c25637b9a814dc54 100644
+index edbe7bb855bef118cbec95f9e592ab5bcdfcdd65..29b2d44934acf25c7c7dbdda84ad2ac73538a201 100644
 --- a/next.config.mjs
 +++ b/next.config.mjs
-@@ -19,10 +19,26 @@
- const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+@@ -21,10 +21,26 @@
+ const LOCALE_MESSAGES_JSON = /[\\/]src[\\/]i18n[\\/]messages[\\/][^\\/]+\.json$/;
  const distDir = process.env.NEXT_DIST_DIR || ".build/next";
  const projectRoot = dirname(fileURLToPath(import.meta.url));
 -const scriptSrc =
@@ -33,7 +33,7 @@ index 92d9a24526959ae3cfc9d5f06ec3f371019b9063..50ef1e27dc42155960a388d8c25637b9
  const contentSecurityPolicy = [
    "default-src 'self'",
    "base-uri 'self'",
-@@ -34,11 +50,7 @@
+@@ -36,11 +52,7 @@
    "font-src 'self' https://fonts.gstatic.com data:",
    "img-src 'self' data: blob: https:",
    "media-src 'self' data: blob:",
@@ -46,10 +46,10 @@ index 92d9a24526959ae3cfc9d5f06ec3f371019b9063..50ef1e27dc42155960a388d8c25637b9
    "worker-src 'self' blob:",
    "manifest-src 'self'",
  ].join("; ");
-@@ -200,6 +212,13 @@
-   // accept for image-bearing requests; tune via env if a deployment needs
-   // more.
-   experimental: {
+@@ -205,6 +217,13 @@
+     // macOS development only: avoid the EBADF spawn failures of Next's TypeScript
+     // CLI and static-path worker (see scripts/build/macosDevWorkaround.mjs).
+     ...macosDevExperimentalOverrides(),
 +    // Local builds opt into bounded worker fanout through the managed build runner.
 +    ...(process.env.NEXA_BUILD_WORKERS
 +      ? {
@@ -60,10 +60,10 @@ index 92d9a24526959ae3cfc9d5f06ec3f371019b9063..50ef1e27dc42155960a388d8c25637b9
      serverActions: {
        bodySizeLimit: process.env.OMNIROUTE_SERVER_ACTIONS_BODY_LIMIT || "50mb",
      },
-@@ -357,6 +376,11 @@
-     ignoreBuildErrors: true,
-   },
-   webpack(config, { dev, webpack }) {
+@@ -381,6 +400,11 @@
+     if (!dev && process.env.OMNIROUTE_WEBPACK_BUILD_CACHE !== "1") {
+       config.cache = false;
+     }
 +    if (!dev && process.env.NEXA_BUILD_WORKERS) {
 +      // Isolated builds do not reuse caches; bound concurrent module work too.
 +      config.parallelism = 1;

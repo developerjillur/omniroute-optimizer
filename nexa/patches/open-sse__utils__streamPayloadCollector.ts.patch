@@ -1,8 +1,8 @@
 diff --git a/open-sse/utils/streamPayloadCollector.ts b/open-sse/utils/streamPayloadCollector.ts
-index 2df3cf49b55a3b667787f438705c030809e92302..46701fb9d2d9481f771e56a71e634addafe7ca1c 100644
+index b23f0c035b0c54fc113b53b370b303b7fb6cfa27..bdf6b883a703469b70d63285ad45cab3fc1c22d4 100644
 --- a/open-sse/utils/streamPayloadCollector.ts
 +++ b/open-sse/utils/streamPayloadCollector.ts
-@@ -512,7 +512,8 @@
+@@ -515,7 +515,8 @@ function createClaudeReducer(fallbackModel?: string | null): SummaryReducer {
    let messageId = "";
    let model = fallbackModel || "claude";
    let role = "assistant";
@@ -12,7 +12,7 @@ index 2df3cf49b55a3b667787f438705c030809e92302..46701fb9d2d9481f771e56a71e634add
    let stopSequence: string | null = null;
    // Context Editing (`anthropic-beta: context-management-2025-06-27`) surfaces
    // `context_management.applied_edits[]` on the final `message_delta` snapshot. Preserve it
-@@ -539,6 +540,7 @@
+@@ -542,6 +543,7 @@ function createClaudeReducer(fallbackModel?: string | null): SummaryReducer {
          model = toString(message.model, model);
          role = toString(message.role, role);
          mergeUsage(usage, message.usage);
@@ -20,7 +20,7 @@ index 2df3cf49b55a3b667787f438705c030809e92302..46701fb9d2d9481f771e56a71e634add
          return;
        }
  
-@@ -580,6 +582,13 @@
+@@ -583,6 +585,13 @@ function createClaudeReducer(fallbackModel?: string | null): SummaryReducer {
          const deltaType = toString(delta.type);
          const existing = blocks.get(index);
  
@@ -34,7 +34,7 @@ index 2df3cf49b55a3b667787f438705c030809e92302..46701fb9d2d9481f771e56a71e634add
          if (deltaType === "input_json_delta") {
            const toolUse =
              existing && existing.type === "tool_use"
-@@ -622,7 +631,9 @@
+@@ -625,7 +634,9 @@ function createClaudeReducer(fallbackModel?: string | null): SummaryReducer {
  
        if (eventType === "message_delta") {
          const delta = asRecord(payload.delta);
@@ -45,7 +45,7 @@ index 2df3cf49b55a3b667787f438705c030809e92302..46701fb9d2d9481f771e56a71e634add
          stopSequence =
            typeof delta.stop_sequence === "string" ? String(delta.stop_sequence) : stopSequence;
          mergeUsage(usage, payload.usage);
-@@ -649,7 +660,7 @@
+@@ -652,7 +663,7 @@ function createClaudeReducer(fallbackModel?: string | null): SummaryReducer {
                : [];
            }
            if (block.type === "thinking") {
@@ -54,7 +54,7 @@ index 2df3cf49b55a3b667787f438705c030809e92302..46701fb9d2d9481f771e56a71e634add
                ? [
                    {
                      type: "thinking",
-@@ -681,6 +692,7 @@
+@@ -684,6 +695,7 @@ function createClaudeReducer(fallbackModel?: string | null): SummaryReducer {
          model,
          content,
          stop_reason: stopReason,

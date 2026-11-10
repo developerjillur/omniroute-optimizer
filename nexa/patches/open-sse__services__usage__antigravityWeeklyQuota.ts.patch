@@ -1,7 +1,8 @@
 diff --git a/open-sse/services/usage/antigravityWeeklyQuota.ts b/open-sse/services/usage/antigravityWeeklyQuota.ts
+index 07081b03a955edf2a56d20b2c044d8b1a462fff0..82492184be8712cb0771590f5d7384ab66564634 100644
 --- a/open-sse/services/usage/antigravityWeeklyQuota.ts
 +++ b/open-sse/services/usage/antigravityWeeklyQuota.ts
-@@ -10,6 +10,7 @@
+@@ -10,6 +10,7 @@ import { ANTIGRAVITY_RUNTIME_BASE_URLS } from "../../config/antigravityUpstream.
  import { toRecord, toNumber } from "./scalars.ts";
  import { type UsageQuota, parseResetTime } from "./quota.ts";
  import { getAntigravityContentHeaders } from "../antigravityHeaders.ts";
@@ -9,7 +10,7 @@ diff --git a/open-sse/services/usage/antigravityWeeklyQuota.ts b/open-sse/servic
  import type { AntigravityClientProfile } from "../antigravityClientProfile.ts";
  
  type JsonRecord = Record<string, unknown>;
-@@ -57,7 +58,7 @@
+@@ -58,7 +59,7 @@ function buildCacheKey(
    projectId: string | null | undefined,
    clientProfile: AntigravityClientProfile
  ): string {

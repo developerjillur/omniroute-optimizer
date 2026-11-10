@@ -1,7 +1,8 @@
 diff --git a/tests/unit/api-key-self-service.test.ts b/tests/unit/api-key-self-service.test.ts
+index 242c3b22b359ede43906516aee7512f4c5f7a924..af9024cd1337ccf6551291dac9eb07a5bcef9ff8 100644
 --- a/tests/unit/api-key-self-service.test.ts
 +++ b/tests/unit/api-key-self-service.test.ts
-@@ -127,7 +127,7 @@
+@@ -127,7 +127,7 @@ test("self-service status reports own cost and token usage with null budget fiel
    assert.equal(status.usage.cost.remainingUsd, null);
    assert.equal(status.usage.cost.usedPercent, null);
    assert.equal(status.usage.cost.period, "monthly");

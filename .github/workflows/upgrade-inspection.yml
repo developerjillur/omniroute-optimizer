@@ -2,8 +2,11 @@ name: Release overlay inspection
 
 on:
   workflow_dispatch:
-  push:
-    branches: [feat/fable-5-2-v3-8-53]
+    inputs:
+      target_commit:
+        description: Exact published release commit to inspect
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -25,14 +28,19 @@ jobs:
         run: node --test --test-reporter=tap nexa/tests/inspect-upgrade.test.mjs
       - name: Inspect every preserved correction against the released source
         shell: bash
+        env:
+          TARGET_COMMIT: ${{ inputs.target_commit }}
         run: |
           set -euo pipefail
+          [[ "$TARGET_COMMIT" =~ ^[a-f0-9]{40}$ ]]
+          source_commit=$(node -p 'JSON.parse(require("node:fs").readFileSync("nexa/manifest.json")).upstreamBase.sha')
+          [[ "$source_commit" =~ ^[a-f0-9]{40}$ ]]
           fixture="$RUNNER_TEMP/upgrade-inspection-application"
           git init "$fixture"
           git -C "$fixture" remote add upstream https://github.com/cheaper-inference/OmniRoute.git
-          git -C "$fixture" fetch --depth=1 upstream ad6f33f66bda34eba98645d3bfdabbde294bc843 191dce8d534ceb56c28a08e71381284a9a87838f
-          git -C "$fixture" checkout --detach 191dce8d534ceb56c28a08e71381284a9a87838f
-          node nexa/tests/inspect-upgrade.mjs "$fixture" "$GITHUB_WORKSPACE/nexa" ad6f33f66bda34eba98645d3bfdabbde294bc843 191dce8d534ceb56c28a08e71381284a9a87838f "$RUNNER_TEMP/upgrade-inspection"
+          git -C "$fixture" fetch --depth=1 upstream "$source_commit" "$TARGET_COMMIT"
+          git -C "$fixture" checkout --detach "$TARGET_COMMIT"
+          node nexa/tests/inspect-upgrade.mjs "$fixture" "$GITHUB_WORKSPACE/nexa" "$source_commit" "$TARGET_COMMIT" "$RUNNER_TEMP/upgrade-inspection"
       - name: Preserve reviewable source and conflicts
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

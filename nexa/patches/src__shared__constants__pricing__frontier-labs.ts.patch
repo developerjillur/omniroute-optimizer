@@ -1,8 +1,8 @@
 diff --git a/src/shared/constants/pricing/frontier-labs.ts b/src/shared/constants/pricing/frontier-labs.ts
-index e972fef65a41482a8adeb11cfa0a6bbba7b2e494..126507a4eda40c6f6f8f2cdf37918d86c0b869e5 100644
+index cf19166f186ee842c02fadb7439e4b95454817d0..99e990827905aa3e4008913f28d8d5f5142581bf 100644
 --- a/src/shared/constants/pricing/frontier-labs.ts
 +++ b/src/shared/constants/pricing/frontier-labs.ts
-@@ -3,8 +3,8 @@
+@@ -3,14 +3,15 @@
   * Pure data; merged by default-pricing.ts via spread (god-file decomposition; semantic split).
   */
  import {
@@ -12,7 +12,14 @@ index e972fef65a41482a8adeb11cfa0a6bbba7b2e494..126507a4eda40c6f6f8f2cdf37918d86
    GEMINI_3_7_FLASH_PROMO_PRICING,
    GEMINI_4_ARGON_PROMO_PRICING,
    GPT_5_5_PRICING,
-@@ -45,7 +45,7 @@
+   GPT_5_6_LUNA_PRICING,
+   GPT_5_6_SOL_PRICING,
+   GPT_5_6_TERRA_PRICING,
++  CLAUDE_FABLE_5_2_PRICING,
+   CLAUDE_FABLE_5_1_PRICING,
+   CLAUDE_FABLE_5_PRICING,
+   CLAUDE_OPUS_5_5_PRICING,
+@@ -46,7 +47,7 @@
        reasoning: 0.5,
        cache_creation: 0.125,
      }),
@@ -21,3 +28,11 @@ index e972fef65a41482a8adeb11cfa0a6bbba7b2e494..126507a4eda40c6f6f8f2cdf37918d86
      "gpt-5.6": withOpenAiLongContextTier(GPT_5_6_SOL_PRICING),
      "gpt-5.6-sol": withOpenAiLongContextTier(GPT_5_6_SOL_PRICING),
      "gpt-5.6-terra": withOpenAiLongContextTier(GPT_5_6_TERRA_PRICING),
+@@ -244,6 +245,7 @@
+     // Common model IDs (without dates) used across providers
+     // Intentional duplicates of dot-notation variants (e.g. claude-opus-4.6)
+     // to cover hyphen-notation IDs (claude-opus-4-6) used by some clients
++    "claude-fable-5-2": CLAUDE_FABLE_5_2_PRICING,
+     "claude-fable-5-1": CLAUDE_FABLE_5_1_PRICING,
+     "claude-fable-5": CLAUDE_FABLE_5_PRICING,
+     "claude-opus-5-5": CLAUDE_OPUS_5_5_PRICING,

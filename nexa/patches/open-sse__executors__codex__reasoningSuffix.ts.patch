@@ -2,7 +2,7 @@ diff --git a/open-sse/executors/codex/reasoningSuffix.ts b/open-sse/executors/co
 index ebb2c9f1e2c8872ff4f25c104d7f9d5629243624..c2497282628071f754fcb2e23abbfece3450a8d7 100644
 --- a/open-sse/executors/codex/reasoningSuffix.ts
 +++ b/open-sse/executors/codex/reasoningSuffix.ts
-@@ -10,6 +10,7 @@
+@@ -10,6 +10,7 @@ export const CODEX_EFFORT_ORDER = [
  export type CodexEffortLevel = (typeof CODEX_EFFORT_ORDER)[number];
  export const CODEX_MAX_ALIAS_MODELS = new Set([
    "gpt-6.1-sol",

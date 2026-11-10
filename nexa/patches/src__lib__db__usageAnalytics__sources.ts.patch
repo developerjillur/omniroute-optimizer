@@ -2,7 +2,7 @@ diff --git a/src/lib/db/usageAnalytics/sources.ts b/src/lib/db/usageAnalytics/so
 index d41e6327c8c197b1948cf613a2ea190c93947c04..d97f4087016263211ba81263c8f8eb1a0d405d83 100644
 --- a/src/lib/db/usageAnalytics/sources.ts
 +++ b/src/lib/db/usageAnalytics/sources.ts
-@@ -125,6 +125,8 @@
+@@ -125,6 +125,8 @@ export function buildUnifiedSource(opts: BuildUnifiedSourceOptions): UnifiedSour
            tokens_output,
            tokens_cache_read,
            tokens_cache_creation,
@@ -11,7 +11,7 @@ index d41e6327c8c197b1948cf613a2ea190c93947c04..d97f4087016263211ba81263c8f8eb1a
            tokens_reasoning,
            service_tier,
            success,
-@@ -147,6 +149,8 @@
+@@ -147,6 +149,8 @@ export function buildUnifiedSource(opts: BuildUnifiedSourceOptions): UnifiedSour
            total_output_tokens as tokens_output,
            0 as tokens_cache_read,
            0 as tokens_cache_creation,
@@ -20,7 +20,7 @@ index d41e6327c8c197b1948cf613a2ea190c93947c04..d97f4087016263211ba81263c8f8eb1a
            0 as tokens_reasoning,
            'standard' as service_tier,
            1 as success,
-@@ -164,7 +168,8 @@
+@@ -164,7 +168,8 @@ export function buildUnifiedSource(opts: BuildUnifiedSourceOptions): UnifiedSour
      : `(SELECT
            timestamp, provider, model,
            tokens_input, tokens_output,
@@ -30,7 +30,7 @@ index d41e6327c8c197b1948cf613a2ea190c93947c04..d97f4087016263211ba81263c8f8eb1a
            service_tier, success, latency_ms,
            connection_id, account_key, api_key_id, api_key_name,
            ${RAW_COST_COLUMNS},
-@@ -218,7 +223,7 @@
+@@ -218,7 +223,7 @@ export function buildPresetUnifiedSource(opts: BuildUnifiedSourceOptions): Unifi
      ? `(
          SELECT timestamp, provider, model, service_tier,
            tokens_input, tokens_output,
@@ -39,7 +39,7 @@ index d41e6327c8c197b1948cf613a2ea190c93947c04..d97f4087016263211ba81263c8f8eb1a
            ${RAW_COST_COLUMNS},
            0 as is_aggregated
          FROM usage_history
-@@ -232,6 +237,8 @@
+@@ -232,6 +237,8 @@ export function buildPresetUnifiedSource(opts: BuildUnifiedSourceOptions): Unifi
            total_output_tokens as tokens_output,
            0 as tokens_cache_read,
            0 as tokens_cache_creation,
@@ -48,7 +48,7 @@ index d41e6327c8c197b1948cf613a2ea190c93947c04..d97f4087016263211ba81263c8f8eb1a
            0 as tokens_reasoning,
            ${SUMMARY_COST_COLUMNS},
            1 as is_aggregated
-@@ -240,7 +247,7 @@
+@@ -240,7 +247,7 @@ export function buildPresetUnifiedSource(opts: BuildUnifiedSourceOptions): Unifi
        )`
      : `(SELECT timestamp, provider, model, service_tier,
            tokens_input, tokens_output,

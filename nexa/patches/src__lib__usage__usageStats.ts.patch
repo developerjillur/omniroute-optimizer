@@ -1,4 +1,5 @@
 diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
+index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..f92474a812e7878a149d537daa950ad970c20ede 100644
 --- a/src/lib/usage/usageStats.ts
 +++ b/src/lib/usage/usageStats.ts
 @@ -8,6 +8,7 @@
@@ -9,7 +10,7 @@ diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
  import { getApiKeys } from "../db/apiKeys";
  import { getPendingRequests } from "./usageHistory";
  import { getAccountDisplayName } from "@/lib/display/names";
-@@ -15,6 +16,7 @@
+@@ -15,6 +16,7 @@ import { calculateCost } from "./costCalculator";
  import { isFlatRateProvider } from "./flatRateProviders";
  import { getRawDataCutoffDate, isAggregationEnabled } from "./aggregateHistory";
  import { toNumber } from "@/shared/utils/numeric";
@@ -17,7 +18,7 @@ diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
  
  type JsonRecord = Record<string, unknown>;
  type UsageBucket = {
-@@ -102,8 +104,13 @@
+@@ -102,9 +104,14 @@ const RAW_COST_COLUMNS = `
          CASE WHEN provider_cost_usd IS NULL THEN COALESCE(tokens_output, 0) ELSE 0 END as cost_tokens_output,
          CASE WHEN provider_cost_usd IS NULL THEN COALESCE(tokens_cache_read, 0) ELSE 0 END as cost_tokens_cache_read,
          CASE WHEN provider_cost_usd IS NULL THEN COALESCE(tokens_cache_creation, 0) ELSE 0 END as cost_tokens_cache_creation,
@@ -25,13 +26,14 @@ diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
 +        CASE WHEN provider_cost_usd IS NULL THEN ${cacheTtlTokenSql().hour} ELSE 0 END as cost_tokens_cache_creation_1h,
          CASE WHEN provider_cost_usd IS NULL THEN COALESCE(tokens_reasoning, 0) ELSE 0 END as cost_tokens_reasoning,
          COALESCE(provider_cost_usd, 0.0) as stored_cost`;
-+
+ 
 +const pricingContextBucket = `CASE WHEN tokens_input > ${GPT_6_1_SOL_LONG_CONTEXT_THRESHOLD}
 +  AND LOWER(model) LIKE '%gpt-6.1-sol%' THEN 1 ELSE 0 END`;
- 
++
  function buildUsageSourceSql(aggregationEnabled: boolean) {
    if (!aggregationEnabled) {
-@@ -121,6 +128,7 @@
+     return `
+@@ -121,6 +128,7 @@ function buildUsageSourceSql(aggregationEnabled: boolean) {
          COALESCE(tokens_cache_creation, 0) as tokens_cache_creation,
          COALESCE(tokens_reasoning, 0) as tokens_reasoning,
          ${RAW_COST_COLUMNS},
@@ -39,7 +41,7 @@ diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
          COALESCE(service_tier, 'standard') as service_tier,
          1 as request_count
        FROM usage_history
-@@ -141,6 +149,7 @@
+@@ -141,6 +149,7 @@ function buildUsageSourceSql(aggregationEnabled: boolean) {
        COALESCE(tokens_cache_creation, 0) as tokens_cache_creation,
        COALESCE(tokens_reasoning, 0) as tokens_reasoning,
        ${RAW_COST_COLUMNS},
@@ -47,7 +49,7 @@ diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
        COALESCE(service_tier, 'standard') as service_tier,
        1 as request_count
      FROM usage_history
-@@ -164,7 +173,10 @@
+@@ -164,7 +173,10 @@ function buildUsageSourceSql(aggregationEnabled: boolean) {
        0 as cost_tokens_output,
        0 as cost_tokens_cache_read,
        0 as cost_tokens_cache_creation,
@@ -58,7 +60,7 @@ diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
        COALESCE(total_cost, 0.0) as stored_cost,
        'standard' as service_tier,
        COALESCE(total_requests, 0) as request_count
-@@ -184,6 +196,8 @@
+@@ -184,6 +196,8 @@ const AGGREGATE_FIELDS = `
    COALESCE(SUM(cost_tokens_output), 0) as cost_tokens_output,
    COALESCE(SUM(cost_tokens_cache_read), 0) as cost_tokens_cache_read,
    COALESCE(SUM(cost_tokens_cache_creation), 0) as cost_tokens_cache_creation,
@@ -67,7 +69,7 @@ diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
    COALESCE(SUM(cost_tokens_reasoning), 0) as cost_tokens_reasoning,
    COALESCE(SUM(stored_cost), 0.0) as stored_cost,
    MAX(timestamp) as last_used
-@@ -202,9 +216,11 @@
+@@ -202,9 +216,11 @@ async function calculateAggregateCost(row: JsonRecord): Promise<number> {
        output: toNumber(row.cost_tokens_output ?? row.tokens_output),
        cacheRead: toNumber(row.cost_tokens_cache_read ?? row.tokens_cache_read),
        cacheCreation: toNumber(row.cost_tokens_cache_creation ?? row.tokens_cache_creation),
@@ -80,7 +82,7 @@ diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
    );
    // daily_usage_summary stores API-equivalent value so the dedicated costs
    // view can preserve history. This legacy stats surface keeps billed-cost
-@@ -230,10 +246,11 @@
+@@ -230,10 +246,11 @@ function getApiKeyStatsKey(apiKeyId: string | null, apiKeyName: string | null):
  }
  
  /**
@@ -93,7 +95,7 @@ diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
   * Only reflects traffic that went THROUGH OmniRoute (not the provider's panel).
   */
  export function getMonthlyProviderTokensForConnection(
-@@ -249,10 +266,7 @@
+@@ -249,10 +266,7 @@ export function getMonthlyProviderTokensForConnection(
    const row = db
      .prepare(
        `SELECT COALESCE(SUM(tokens_input), 0)
@@ -105,7 +107,7 @@ diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
         FROM usage_history
         WHERE provider = ? AND connection_id = ? AND timestamp >= ?`
      )
-@@ -280,25 +294,30 @@
+@@ -280,25 +294,30 @@ export async function getConnectionSpendUsdSinceAdded(
    const db = getDbInstance();
    const rows = db
      .prepare(
@@ -138,7 +140,7 @@ diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
      reasoning?: number;
      requests?: number;
    }>;
-@@ -313,6 +332,8 @@
+@@ -313,6 +332,8 @@ export async function getConnectionSpendUsdSinceAdded(
        output: Number(row.output ?? 0),
        cacheRead: Number(row.cacheRead ?? 0),
        cacheCreation: Number(row.cacheCreation ?? 0),
@@ -147,7 +149,7 @@ diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
        reasoning: Number(row.reasoning ?? 0),
      };
      costUsd += Number(row.storedCost ?? 0);
-@@ -320,6 +341,7 @@
+@@ -320,6 +341,7 @@ export async function getConnectionSpendUsdSinceAdded(
        provider,
        model,
        flatRateAsZero: true,
@@ -155,7 +157,7 @@ diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
      });
    }
  
-@@ -413,9 +435,9 @@
+@@ -413,9 +435,9 @@ export async function getUsageStats() {
      .prepare(
        `
          WITH usage_source AS (${sourceSql})
@@ -167,7 +169,7 @@ diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
        `
      )
      .all(...sourceParams) as unknown[];
-@@ -469,10 +491,10 @@
+@@ -469,10 +491,10 @@ export async function getUsageStats() {
      .prepare(
        `
          WITH usage_source AS (${sourceSql})
@@ -180,7 +182,7 @@ diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
        `
      )
      .all(...sourceParams) as unknown[];
-@@ -522,11 +544,11 @@
+@@ -522,11 +544,11 @@ export async function getUsageStats() {
      .prepare(
        `
          WITH usage_source AS (${sourceSql})
@@ -194,7 +196,7 @@ diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
        `
      )
      .all(...sourceParams) as unknown[];
-@@ -580,11 +602,14 @@
+@@ -580,11 +602,14 @@ export async function getUsageStats() {
            provider,
            model,
            COALESCE(service_tier, 'standard') as service_tier,
@@ -209,7 +211,7 @@ diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
            COALESCE(SUM(tokens_reasoning), 0) as tokens_reasoning,
            COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_input ELSE 0 END), 0) as cost_tokens_input,
            COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_output ELSE 0 END), 0) as cost_tokens_output,
-@@ -594,7 +619,7 @@
+@@ -594,7 +619,7 @@ export async function getUsageStats() {
            COALESCE(SUM(provider_cost_usd), 0.0) as stored_cost
          FROM usage_history
          WHERE timestamp >= ? AND timestamp <= ?

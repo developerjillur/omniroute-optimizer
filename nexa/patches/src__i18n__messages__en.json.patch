@@ -1,8 +1,8 @@
 diff --git a/src/i18n/messages/en.json b/src/i18n/messages/en.json
-index db416c9521402409bb1572604a505a2b81894db4..eaf96b94fe37ae8e297cecd71967191fbc2442d5 100644
+index 11c7e6b09d417a15f798103377ca7c110e8ca4a1..138e7f565ba834f1966c42654f7d3a2b53fa28d9 100644
 --- a/src/i18n/messages/en.json
 +++ b/src/i18n/messages/en.json
-@@ -3219,6 +3219,10 @@
+@@ -3336,6 +3336,10 @@
      "hermesRoleMoaReferenceDesc": "Mixture-of-Agents reference model",
      "hermesRoleMoaAggregator": "MoA Aggregator",
      "hermesRoleMoaAggregatorDesc": "Mixture-of-Agents synthesis model",

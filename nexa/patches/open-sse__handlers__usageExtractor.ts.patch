@@ -1,5 +1,5 @@
 diff --git a/open-sse/handlers/usageExtractor.ts b/open-sse/handlers/usageExtractor.ts
-index d9f573220e082edad2ad0317bb898ce5da9725fa..1c64864974a7b1da8b4c5e8ec86a8bc4b6ca7720 100644
+index 5594e1b0e079e2e791afba894df014eaa00be3cb..334540e186b3e45ec17c502b5e71c18426f48cb8 100644
 --- a/open-sse/handlers/usageExtractor.ts
 +++ b/open-sse/handlers/usageExtractor.ts
 @@ -2,7 +2,9 @@
@@ -13,7 +13,7 @@ index d9f573220e082edad2ad0317bb898ce5da9725fa..1c64864974a7b1da8b4c5e8ec86a8bc4
  
  /**
   * True for an Anthropic Messages response body (`type: "message"`), whatever provider
-@@ -28,7 +30,22 @@
+@@ -28,7 +30,22 @@ function isReportedAmount(value: unknown): value is number {
    return typeof value === "number" && Number.isFinite(value) && value >= 0;
  }
  
@@ -37,7 +37,7 @@ index d9f573220e082edad2ad0317bb898ce5da9725fa..1c64864974a7b1da8b4c5e8ec86a8bc4
    if (!responseBody || typeof responseBody !== "object") return null;
    const providerId = typeof provider === "string" ? provider.toLowerCase() : "";
    const isClaudeProvider =
-@@ -53,6 +70,7 @@
+@@ -53,6 +70,7 @@ export function extractUsageFromResponse(responseBody, provider) {
        responseBody.usage.cache_write_tokens;
      const reportedCostUsd = pickReportedCostUsd(responseBody.usage);
      const openAiUsage = {
@@ -45,7 +45,7 @@ index d9f573220e082edad2ad0317bb898ce5da9725fa..1c64864974a7b1da8b4c5e8ec86a8bc4
        prompt_tokens: responseBody.usage.prompt_tokens || 0,
        completion_tokens: responseBody.usage.completion_tokens || 0,
        // DeepSeek native API uses flat prompt_cache_hit_tokens (NOT
-@@ -108,18 +126,19 @@
+@@ -108,18 +126,19 @@ export function extractUsageFromResponse(responseBody, provider) {
        responseBody.usage.output_tokens !== undefined) &&
      (isClaudeProvider || isAnthropicMessageUsage(responseBody, responseBody.usage))
    ) {
@@ -71,7 +71,7 @@ index d9f573220e082edad2ad0317bb898ce5da9725fa..1c64864974a7b1da8b4c5e8ec86a8bc4
      // Native Claude ids always carry both cache counters. Other Claude-format
      // providers may have no prompt cache at all (devin-cli-agentic reports only
      // input/output), so emit a counter only when it was reported: the dashboard then
-@@ -128,12 +147,13 @@
+@@ -128,12 +147,13 @@ export function extractUsageFromResponse(responseBody, provider) {
        isClaudeProvider || (value !== undefined && value !== null);
  
      return {
@@ -88,7 +88,7 @@ index d9f573220e082edad2ad0317bb898ce5da9725fa..1c64864974a7b1da8b4c5e8ec86a8bc4
          ? { cache_creation_input_tokens: cacheCreation }
          : {}),
        ...(typeof reasoningTokens === "number" ? { reasoning_tokens: reasoningTokens } : {}),
-@@ -154,6 +174,7 @@
+@@ -154,6 +174,7 @@ export function extractUsageFromResponse(responseBody, provider) {
        ...(isReportedAmount(responsesUsage.cost_in_usd_ticks)
          ? { cost_in_usd_ticks: responsesUsage.cost_in_usd_ticks }
          : {}),

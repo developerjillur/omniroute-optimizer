@@ -1,16 +1,16 @@
 diff --git a/open-sse/utils/streamHandler.ts b/open-sse/utils/streamHandler.ts
-index ef6323f30f21d5e4ca599847cfd6990367e35c4f..74fb132a06d0469085e543aa7f593c898d827dad 100644
+index 7df1b1d475105d931f544d3946929ecf888eccc0..42837faf888bd0b9b438afbbfef8abb7f983177d 100644
 --- a/open-sse/utils/streamHandler.ts
 +++ b/open-sse/utils/streamHandler.ts
-@@ -14,6 +14,7 @@
-   buildSyntheticResponsesFailureId,
-   SYNTHETIC_RESPONSES_SEQUENCE_NUMBER,
+@@ -17,6 +17,7 @@
+   withResponsesFailureContext,
+   type ResponsesStreamContext,
  } from "./responsesSequence.ts";
 +import { createAnthropicThinkingProgressWatcher } from "./anthropicStreamProgress.ts";
  
  // Stream handler with disconnect detection - shared for all providers
  
-@@ -608,10 +609,29 @@
+@@ -587,10 +588,29 @@
    clientResponseFormat?: string | null;
    contentWatcher: StreamContentWatcher;
    permitsEmptyTurn?: () => boolean;
@@ -41,7 +41,7 @@ index ef6323f30f21d5e4ca599847cfd6990367e35c4f..74fb132a06d0469085e543aa7f593c89
      if (input.clientResponseFormat === FORMATS.CLAUDE && input.contentWatcher.sawContent()) {
        // #7699 — upstream dropped after content reached the client on a Claude
        // stream. Keep the partial response: emit a clean max_tokens completion
-@@ -643,12 +663,12 @@
+@@ -622,12 +642,12 @@
      }
    }
  
@@ -58,16 +58,17 @@ index ef6323f30f21d5e4ca599847cfd6990367e35c4f..74fb132a06d0469085e543aa7f593c89
        return { kind: "error", reason: "Provider returned empty content" };
      }
    }
-@@ -659,13 +679,15 @@
- export function createDisconnectAwareStream(
-   transformStream,
+@@ -640,6 +660,7 @@
    streamController,
--  options: { highWaterMark?: number; permitsEmptyTurn?: () => boolean } = {}
-+  options: { highWaterMark?: number; permitsEmptyTurn?: () => boolean; allowEmptyCompletion?: () => boolean } = {}
- ) {
-   const reader = transformStream.readable.getReader();
-   const writer = transformStream.writable.getWriter();
+   options: {
+     highWaterMark?: number;
++    allowEmptyCompletion?: () => boolean;
+     permitsEmptyTurn?: () => boolean;
+     emptyTurnDiagnostics?: () => ReturnType<typeof getEmptyTurnDiagnostics>;
+   } = {}
+@@ -649,7 +670,9 @@
    const terminalDecoder = new TextDecoder();
+   const terminalWatcher = createClientTerminalWatcher(streamController.clientResponseFormat);
    const contentDecoder = new TextDecoder();
 -  const contentWatcher = createStreamContentWatcher();
 +  const contentWatcher = createStreamContentWatcher({
@@ -75,22 +76,20 @@ index ef6323f30f21d5e4ca599847cfd6990367e35c4f..74fb132a06d0469085e543aa7f593c89
 +  });
    const completedToolHandoffWatcher = createCompletedResponsesToolHandoffWatcher();
    const toolHandoffDecoder = new TextDecoder();
-   let terminalTail = "";
-@@ -693,10 +715,9 @@
-     terminalTail += terminalDecoder.decode(chunk, { stream: true });
-     // Scan before bounding retained state: a compaction terminal frame can
-     // exceed the tail budget because encrypted_content is carried inline.
--    clientTerminalSeen = hasClientTerminalSseMarker(
--      terminalTail,
--      streamController.clientResponseFormat
--    );
+   let clientTerminalSeen = false;
+@@ -673,7 +696,10 @@
+     }
+     if (clientTerminalSeen) return;
+ 
+-    clientTerminalSeen = terminalWatcher.note(terminalDecoder.decode(chunk, { stream: true }));
++    const decodedTerminal = terminalDecoder.decode(chunk, { stream: true });
 +    clientTerminalSeen = streamController.clientResponseFormat === FORMATS.CLAUDE
 +      ? contentWatcher.sawClaudeMessageStop?.() === true
-+      : hasClientTerminalSseMarker(terminalTail, streamController.clientResponseFormat);
-     if (terminalTail.length > 4096) {
-       terminalTail = terminalTail.slice(-4096);
++      : terminalWatcher.note(decodedTerminal);
+     if (clientTerminalSeen) {
+       streamController.markClientTerminalSeen?.();
      }
-@@ -737,6 +758,7 @@
+@@ -711,6 +737,7 @@
                clientResponseFormat: streamController.clientResponseFormat,
                contentWatcher,
                permitsEmptyTurn: options.permitsEmptyTurn,
@@ -98,7 +97,7 @@ index ef6323f30f21d5e4ca599847cfd6990367e35c4f..74fb132a06d0469085e543aa7f593c89
              });
  
              if (silentClose?.kind === "truncated") {
-@@ -885,6 +907,8 @@
+@@ -873,6 +900,8 @@
      stallTimeoutMs?: number;
      activeTimeoutMs?: number;
      contentStallTimeoutMs?: number;
@@ -107,15 +106,15 @@ index ef6323f30f21d5e4ca599847cfd6990367e35c4f..74fb132a06d0469085e543aa7f593c89
      highWaterMark?: number;
    } = {}
  ) {
-@@ -908,6 +932,7 @@
+@@ -896,6 +925,7 @@
        streamController,
        {
          highWaterMark: opts.highWaterMark,
 +        allowEmptyCompletion: opts.allowEmptyCompletion,
          permitsEmptyTurn: () => hasTrustedEmptyTurn(providerResponse),
+         emptyTurnDiagnostics: () => getEmptyTurnDiagnostics(providerResponse),
        }
-     );
-@@ -988,6 +1013,9 @@
+@@ -979,6 +1009,9 @@
    let contentStallTimer: ReturnType<typeof setTimeout> | null = null;
    let contentStallFired = false;
    const upstreamContentWatcher = createStreamContentWatcher();
@@ -125,20 +124,21 @@ index ef6323f30f21d5e4ca599847cfd6990367e35c4f..74fb132a06d0469085e543aa7f593c89
    const upstreamContentDecoder = new TextDecoder();
    // Stall diagnostics: what the upstream had sent when the content watchdog
    // trips. Counters live at this tap because it is the only point seeing raw
-@@ -1154,7 +1182,7 @@
-         upstreamContentWatcher.note(decoded);
-         if (upstreamContentWatcher.sawContent()) {
+@@ -1149,7 +1182,8 @@
            clearContentStall();
--        } else if (upstreamContentWatcher.reasoningProgress() > reasoningBefore) {
-+        } else if (upstreamContentWatcher.reasoningProgress() > reasoningBefore || thinkingProgress?.note(decoded)) {
+         } else if (
+           upstreamContentWatcher.reasoningProgress() > reasoningBefore ||
+-          upstreamContentWatcher.compactionProgress() > compactionBefore
++          upstreamContentWatcher.compactionProgress() > compactionBefore ||
++          thinkingProgress?.note(decoded)
+         ) {
            clearContentStall();
            armContentStall();
-         }
-@@ -1175,6 +1203,7 @@
+@@ -1171,6 +1205,7 @@
      wrappedController,
      {
        highWaterMark: opts.highWaterMark,
 +      allowEmptyCompletion: opts.allowEmptyCompletion,
        permitsEmptyTurn: () => hasTrustedEmptyTurn(providerResponse),
+       emptyTurnDiagnostics: () => getEmptyTurnDiagnostics(providerResponse),
      }
-   );

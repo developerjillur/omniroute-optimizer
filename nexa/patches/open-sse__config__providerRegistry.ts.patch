@@ -1,7 +1,8 @@
 diff --git a/open-sse/config/providerRegistry.ts b/open-sse/config/providerRegistry.ts
+index 20b46cf35bd29ff6a97a53566dd7b17b519e38f1..58d9809b28a443b6faf16da04b944c5748fd4f83 100644
 --- a/open-sse/config/providerRegistry.ts
 +++ b/open-sse/config/providerRegistry.ts
-@@ -10,6 +10,7 @@
+@@ -10,6 +10,7 @@ export {
  } from "./providers/registry/alibaba/index.ts";
  export { REGISTRY } from "./providers/index.ts";
  import { REGISTRY } from "./providers/index.ts";
@@ -9,8 +10,8 @@ diff --git a/open-sse/config/providerRegistry.ts b/open-sse/config/providerRegis
  // Imported from `privateHost` rather than `outboundUrlGuard`: this module is reachable from
  // `ProviderDetailPageClient.tsx`, so anything it pulls in has to survive a browser bundle
  // (#11122). `privateHost` is platform-free by contract; the guard module is not.
-@@ -309,8 +310,8 @@
-
+@@ -309,8 +310,8 @@ export function getProviderCategory(provider: string): "oauth" | "apikey" {
+ 
  /**
   * Derive the latest fable/opus/sonnet/haiku model IDs from the `claude` registry entry.
 - * Picks the first model whose ID matches each family pattern — registry order
@@ -20,7 +21,7 @@ diff --git a/open-sse/config/providerRegistry.ts b/open-sse/config/providerRegis
   */
  export function getClaudeCodeDefaultModels(): {
    fable: string;
-@@ -318,14 +319,7 @@
+@@ -318,14 +319,7 @@ export function getClaudeCodeDefaultModels(): {
    sonnet: string;
    haiku: string;
  } {
@@ -34,5 +35,5 @@ diff --git a/open-sse/config/providerRegistry.ts b/open-sse/config/providerRegis
 -  };
 +  return selectClaudeFamilyModels(REGISTRY.claude?.models ?? []);
  }
-
+ 
  /**

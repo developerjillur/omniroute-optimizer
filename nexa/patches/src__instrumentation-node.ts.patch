@@ -1,8 +1,8 @@
 diff --git a/src/instrumentation-node.ts b/src/instrumentation-node.ts
-index f4ec85671548fc1936f142aa6881829deaa1104b..bd73794bc998ac3c1e3f5a629d208d364cd0b5e5 100755
+index e42bf66247e06524523d157d89a7cf75a35db593..262a8e4a4ac295bc3c413d2abad1bd7b8ea5e954 100755
 --- a/src/instrumentation-node.ts
 +++ b/src/instrumentation-node.ts
-@@ -906,5 +906,10 @@
+@@ -934,5 +934,10 @@ export async function registerNodejs(): Promise<void> {
      ]);
    }
  

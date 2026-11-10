@@ -1,5 +1,5 @@
 diff --git a/src/lib/api/modelTestRunner.ts b/src/lib/api/modelTestRunner.ts
-index 86dda492436af939020449802a95857aeb320345..3f4404d157895b4717cc9520821519c3daadaa46 100644
+index 133e5615fcaa1c4b6deeb3b80f4213928308b5f4..018c952f598352a2d84fa24c7f4cde8846825103 100644
 --- a/src/lib/api/modelTestRunner.ts
 +++ b/src/lib/api/modelTestRunner.ts
 @@ -1,5 +1,6 @@
@@ -9,7 +9,7 @@ index 86dda492436af939020449802a95857aeb320345..3f4404d157895b4717cc9520821519c3
  import { POST as postChatCompletion } from "@/app/api/v1/chat/completions/route";
  import { POST as postAudioSpeech } from "@/app/api/v1/audio/speech/route";
  import { POST as postAudioTranscription } from "@/app/api/v1/audio/transcriptions/route";
-@@ -200,6 +201,7 @@
+@@ -206,6 +207,7 @@ export function buildInternalChatRequest(
        // #6240: a connection test must be clean — never let the operator's globally-enabled
        // Output Styles (e.g. "Ultra terse") leak a system prompt into a test-model call.
        "X-OmniRoute-Compression": "off",
@@ -17,7 +17,7 @@ index 86dda492436af939020449802a95857aeb320345..3f4404d157895b4717cc9520821519c3
        "X-Request-Id": `model-test-${randomUUID()}`,
        ...(connectionId ? { "X-OmniRoute-Connection": connectionId } : {}),
      },
-@@ -432,6 +434,7 @@
+@@ -438,6 +440,7 @@ export interface RunSingleModelTestOptions {
    streamChat?: boolean;
    /** A manual connection message; only supported for chat models. */
    prompt?: string;
@@ -25,7 +25,7 @@ index 86dda492436af939020449802a95857aeb320345..3f4404d157895b4717cc9520821519c3
  }
  
  export interface SingleModelTestResult {
-@@ -439,6 +442,7 @@
+@@ -445,6 +448,7 @@ export interface SingleModelTestResult {
    status: "ok" | "error" | "rate_limited" | "slow";
    latencyMs: number;
    responseText?: string;
@@ -33,7 +33,7 @@ index 86dda492436af939020449802a95857aeb320345..3f4404d157895b4717cc9520821519c3
    statusCode?: number;
    httpStatus: number;
    error?: string;
-@@ -548,7 +552,9 @@
+@@ -554,7 +558,9 @@ export async function runSingleModelTest(
      connectionId,
      timeoutMs = DEFAULT_MODEL_TEST_TIMEOUT_MS,
      streamChat = true,
@@ -43,7 +43,7 @@ index 86dda492436af939020449802a95857aeb320345..3f4404d157895b4717cc9520821519c3
  
    if (connectionId && (await isConnectionUnavailableToAuxiliaryActivity(connectionId))) {
      const fullModelId = modelId.includes("/") ? modelId : `${providerId}/${modelId}`;
-@@ -662,6 +668,16 @@
+@@ -668,6 +674,16 @@ export async function runSingleModelTest(
              maxTokens: !isEmbedding && streamChat ? STREAMING_CHAT_TEST_MAX_TOKENS : undefined,
            });
  
@@ -60,21 +60,21 @@ index 86dda492436af939020449802a95857aeb320345..3f4404d157895b4717cc9520821519c3
    if (options.prompt !== undefined && "messages" in testBody) {
      testBody.messages = [{ role: "user", content: options.prompt }];
    }
-@@ -675,6 +691,13 @@
-     timedOut = true;
+@@ -682,6 +698,13 @@ export async function runSingleModelTest(
      controller.abort(createModelTestTimeoutError(effectiveTimeoutMs));
    }, effectiveTimeoutMs);
-+
+ 
 +  const cancel = () => controller.abort(parentSignal?.reason);
 +  parentSignal?.addEventListener("abort", cancel, { once: true });
 +  const cleanupDeadline = () => {
 +    clearTimeout(timeoutHandle);
 +    parentSignal?.removeEventListener("abort", cancel);
 +  };
- 
++
    const runInner = async (signal: AbortSignal): Promise<Response> => {
      if (isEmbedding) {
-@@ -711,16 +734,26 @@
+       return handleValidatedEmbeddingRequestBody(
+@@ -717,16 +740,26 @@ export async function runSingleModelTest(
          // T-PROBE: wrap the scheduled fn, not the withRateLimit call — a
          // queued Bottleneck job executes from its own async resource and
          // would otherwise run outside the probe context below.
@@ -104,7 +104,7 @@ index 86dda492436af939020449802a95857aeb320345..3f4404d157895b4717cc9520821519c3
      if (timedOut) {
        return {
          modelId: fullModelStr,
-@@ -754,9 +787,23 @@
+@@ -760,9 +793,23 @@ export async function runSingleModelTest(
      };
    }
    let latencyMs = Date.now() - startTime;
@@ -130,7 +130,7 @@ index 86dda492436af939020449802a95857aeb320345..3f4404d157895b4717cc9520821519c3
      return {
        modelId: fullModelStr,
        status: "slow",
-@@ -777,8 +824,20 @@
+@@ -783,8 +830,20 @@ export async function runSingleModelTest(
      } catch {
        errorMsg = res.statusText || errorMsg;
      }
@@ -151,7 +151,7 @@ index 86dda492436af939020449802a95857aeb320345..3f4404d157895b4717cc9520821519c3
        status: "rate_limited",
        latencyMs,
        statusCode: res.status,
-@@ -787,7 +846,7 @@
+@@ -793,7 +852,7 @@ export async function runSingleModelTest(
        rateLimited: true,
        ...(retryAfter !== undefined ? { retryAfter } : {}),
      };
@@ -160,7 +160,7 @@ index 86dda492436af939020449802a95857aeb320345..3f4404d157895b4717cc9520821519c3
      return result;
    }
  
-@@ -801,21 +860,37 @@
+@@ -807,21 +866,37 @@ export async function runSingleModelTest(
        // error frame inside a 200 stream (Sentinel blocks, "account
        // deactivated") would run outside runAsProbe and could still reach
        // markAccountUnavailable (#9817).
@@ -200,7 +200,7 @@ index 86dda492436af939020449802a95857aeb320345..3f4404d157895b4717cc9520821519c3
      if (streamError) {
        const error = sanitizeErrorMessage(streamError.message) || "Upstream stream failed";
        const rateLimited = streamError.statusCode === 429 || isRateLimitMessage(error);
-@@ -871,11 +946,29 @@
+@@ -877,11 +952,29 @@ export async function runSingleModelTest(
          error: "Provider returned HTTP 200 but no text content.",
        };
      }
@@ -230,14 +230,13 @@ index 86dda492436af939020449802a95857aeb320345..3f4404d157895b4717cc9520821519c3
        responseText,
      };
    }
-@@ -887,8 +980,17 @@
+@@ -893,8 +986,17 @@ export async function runSingleModelTest(
    } catch {
      errorMsg = res.statusText;
    } finally {
 -    clearTimeout(timeoutHandle);
--  }
 +    cleanupDeadline();
-+  }
+   }
 +  if (parentSignal?.aborted)
 +    return {
 +      modelId: fullModelStr,
@@ -250,7 +249,7 @@ index 86dda492436af939020449802a95857aeb320345..3f4404d157895b4717cc9520821519c3
    // #9511: classify quota signals on the generic error branch so that
    // 401/402/403 "insufficient balance" / "quota exhausted" errors are
    // NOT auto-hidden by Test All.
-@@ -899,6 +1001,7 @@
+@@ -905,6 +1007,7 @@ export async function runSingleModelTest(
      latencyMs,
      statusCode: res.status,
      httpStatus: res.status,

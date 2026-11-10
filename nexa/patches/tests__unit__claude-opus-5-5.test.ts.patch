@@ -1,22 +1,20 @@
 diff --git a/tests/unit/claude-opus-5-5.test.ts b/tests/unit/claude-opus-5-5.test.ts
+index 44c0e1326e663a2b5c789128b22acf2a9f4daf98..29683769914261e57aec5d548c3bb58f977859a5 100644
 --- a/tests/unit/claude-opus-5-5.test.ts
 +++ b/tests/unit/claude-opus-5-5.test.ts
-@@ -63,17 +63,14 @@
+@@ -63,17 +63,14 @@ test("Claude Opus 5.5 is registered only on verified launch surfaces", () => {
    );
    assert.equal(
      getNextFamilyFallback(`claude/${MODEL_ID}`, new Set([`claude/${MODEL_ID}`])),
 -    "claude/claude-opus-5"
--  );
--});
--
++    null,
++    "An explicit native Claude model must not silently downgrade to another family version"
+   );
+ });
+ 
 -test("Claude Code CLI keeps Opus 5 as the cc/ Opus default until live catalogs refresh", () => {
 -  // Given a claude connection synced before the launch, whose live catalog lacks Opus 5.5 (#14612)
 -  // When the Claude Code CLI defaults are derived from the registry
-+    null,
-+    "An explicit native Claude model must not silently downgrade to another family version"
-+  );
-+});
-+
 +test("Claude Code CLI selects the newest registered Opus version independently of catalog order", () => {
    const { opus } = getClaudeCodeDefaultModels();
 -
@@ -24,5 +22,5 @@ diff --git a/tests/unit/claude-opus-5-5.test.ts b/tests/unit/claude-opus-5-5.tes
 -  assert.equal(opus, "claude-opus-5");
 +  assert.equal(opus, "claude-opus-5-5");
  });
-
+ 
  test("Claude Opus 5.5 has native 1M context and always-on adaptive thinking", () => {

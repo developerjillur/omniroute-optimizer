@@ -2,19 +2,19 @@ diff --git a/open-sse/config/providers/registry/codex/index.ts b/open-sse/config
 index f773df5d944d23c079db74c86d3e1dbfc023d10f..3d0d74a4c1606c3da6ab905a15a5388e483d0ea3 100644
 --- a/open-sse/config/providers/registry/codex/index.ts
 +++ b/open-sse/config/providers/registry/codex/index.ts
-@@ -5,6 +5,11 @@
-   getCodexDefaultHeaders,
+@@ -6,6 +6,11 @@ import {
    resolvePublicCred,
  } from "../../shared.ts";
-+
+ 
 +const GPT_6_1_SOL_CODEX_CAPABILITIES = {
 +  ...GPT_5_6_CODEX_CAPABILITIES,
 +  supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max", "ultra"],
 +} as const;
- 
++
  export const codexProvider: RegistryEntry = {
    id: "codex",
-@@ -28,6 +33,24 @@
+   alias: "cx",
+@@ -28,6 +33,24 @@ export const codexProvider: RegistryEntry = {
      tokenUrl: "https://auth.openai.com/oauth/token",
    },
    models: [

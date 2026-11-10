@@ -1,11 +1,11 @@
 diff --git a/.husky/pre-commit b/.husky/pre-commit
-index 2b9fff883e7b9fc57f4ae6a490eed8265f6cfd0a..1ad76d059d04e498b610795e3488a9b892830305 100755
+index f56d9044b5b660566e3bca72986afde5301e6727..d822798731235ecb5ddfb7808a15bf8a13591388 100755
 --- a/.husky/pre-commit
 +++ b/.husky/pre-commit
-@@ -16,3 +16,11 @@
- node scripts/check/check-docs-sync.mjs
- npm run check:any-budget:t11
+@@ -18,3 +18,11 @@
  node scripts/check/check-tracked-artifacts.mjs
+ # vendored kit must stay byte-identical to the pinned upstream commit; skips with a warning where the private clone is absent
+ npm run --silent check:ui-kit-snapshot
 +
 +# OVERLAY GUARD (nexa child-theme): fail the commit if ANY file outside nexa/
 +# drifts from pristine upstream. Golden rule #1 is 'never edit an upstream file

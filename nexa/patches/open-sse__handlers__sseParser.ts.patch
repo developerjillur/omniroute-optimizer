@@ -1,12 +1,12 @@
 diff --git a/open-sse/handlers/sseParser.ts b/open-sse/handlers/sseParser.ts
-index 3d9a88ca24040af3d97fc1c6bf125b3d896d14f5..9218947d20b04d94c30175cf621622b321451615 100644
+index 2a757e40e776eb93423bf93f090082b0dd29171b..de4e033cc2cd0f6ec30e3c3698664ff4373d8b05 100644
 --- a/open-sse/handlers/sseParser.ts
 +++ b/open-sse/handlers/sseParser.ts
-@@ -882,6 +882,7 @@
-     usage: picked.usage || null,
-     status: picked.status || statusFallback,
-     ...(picked.error != null ? { error: picked.error } : {}),
-+    ...(picked.incomplete_details != null ? { incomplete_details: picked.incomplete_details } : {}),
-     created_at: picked.created_at || Math.floor(Date.now() / 1000),
-     metadata: picked.metadata || {},
-   };
+@@ -1035,6 +1035,7 @@
+       }),
+       usage: picked.usage || null,
+       ...terminalStatus,
++      ...(picked.incomplete_details != null ? { incomplete_details: picked.incomplete_details } : {}),
+       ...(picked.error != null ? { error: picked.error } : {}),
+       created_at: picked.created_at || Math.floor(Date.now() / 1000),
+       metadata: picked.metadata || {},

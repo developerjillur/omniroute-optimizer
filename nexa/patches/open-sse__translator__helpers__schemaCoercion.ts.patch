@@ -1,8 +1,8 @@
 diff --git a/open-sse/translator/helpers/schemaCoercion.ts b/open-sse/translator/helpers/schemaCoercion.ts
-index 2c587eb5df91f27f8ead627673c362adabad1177..29d22d47a80493f8f060a823a65a5c9819051c1e 100644
+index bdbb77a7cbe6187705fbcbae3dcec9290e54c53e..df93ed98c1ef9215f60002ff0ef0555842be4c34 100644
 --- a/open-sse/translator/helpers/schemaCoercion.ts
 +++ b/open-sse/translator/helpers/schemaCoercion.ts
-@@ -45,6 +45,24 @@
+@@ -45,6 +45,24 @@ function hasUnsupportedRegexSyntax(pattern: unknown): boolean {
    );
  }
  
@@ -27,7 +27,7 @@ index 2c587eb5df91f27f8ead627673c362adabad1177..29d22d47a80493f8f060a823a65a5c98
  function isPlainObject(value: unknown): value is JsonRecord {
    return Boolean(value) && typeof value === "object" && !Array.isArray(value);
  }
-@@ -174,6 +192,7 @@
+@@ -174,6 +192,7 @@ const REGEX_STRIP_OBJECT_MAP_FIELDS = [
    "patternProperties",
    "definitions",
    "$defs",
@@ -35,7 +35,7 @@ index 2c587eb5df91f27f8ead627673c362adabad1177..29d22d47a80493f8f060a823a65a5c98
  ] as const;
  
  // Sub-schema lists (each entry is itself walked recursively).
-@@ -192,14 +211,14 @@
+@@ -192,14 +211,14 @@ function stripRegexFromObjectMap(
  }
  
  /**
@@ -52,7 +52,7 @@ index 2c587eb5df91f27f8ead627673c362adabad1177..29d22d47a80493f8f060a823a65a5c98
  }
  
  // Upper bound on a `pattern` we are willing to compile for validation. The
-@@ -242,7 +261,15 @@
+@@ -242,7 +261,15 @@ function stripRegexPatternsWhere(schema: unknown, shouldStrip: RegexPatternPredi
  
    const result: JsonRecord = { ...schema };
  
@@ -69,7 +69,7 @@ index 2c587eb5df91f27f8ead627673c362adabad1177..29d22d47a80493f8f060a823a65a5c98
      delete result.pattern;
    }
  
-@@ -266,8 +293,18 @@
+@@ -266,8 +293,18 @@ function stripRegexPatternsWhere(schema: unknown, shouldStrip: RegexPatternPredi
    if (result.additionalProperties && typeof result.additionalProperties === "object") {
      result.additionalProperties = stripRegexPatternsWhere(result.additionalProperties, shouldStrip);
    }

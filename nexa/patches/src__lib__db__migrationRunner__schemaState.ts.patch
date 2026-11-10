@@ -2,16 +2,15 @@ diff --git a/src/lib/db/migrationRunner/schemaState.ts b/src/lib/db/migrationRun
 index 4ab52c19ae61317d2f37fa8ac655f12a9624e75e..61c9e2c5f5ef9f825cb83d47e9b6d2108333b501 100644
 --- a/src/lib/db/migrationRunner/schemaState.ts
 +++ b/src/lib/db/migrationRunner/schemaState.ts
-@@ -252,9 +252,12 @@
+@@ -252,9 +252,12 @@ export function rehomeLegacyVersionSlotMigrations(
      const legacyVersion = `legacy-${legacy.version}-${legacy.name}`;
      const applyRepair = db.transaction(() => {
        const existingLegacyRow = db
 -        .prepare("SELECT version FROM _omniroute_migrations WHERE version = ?")
 -        .get(legacyVersion) as { version: string } | undefined;
--
 +        .prepare("SELECT version, name FROM _omniroute_migrations WHERE version = ?")
 +        .get(legacyVersion) as { version: string; name: string } | undefined;
-+
+ 
 +      if (existingLegacyRow && existingLegacyRow.name !== legacy.name) {
 +        throw new Error(`Legacy migration identity conflict at ${legacyVersion}`);
 +      }

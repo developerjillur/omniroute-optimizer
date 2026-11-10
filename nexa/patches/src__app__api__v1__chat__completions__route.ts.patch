@@ -1,8 +1,8 @@
 diff --git a/src/app/api/v1/chat/completions/route.ts b/src/app/api/v1/chat/completions/route.ts
-index ee8d9fbe4e30db1d26ce9d087b64cc99be1243dc..bf0eacfacb594085990aebc845a14f49a2f435c5 100644
+index de8b907d9f47257e1801ba0b3e19522739e4b178..170c34417ee7728bbfb764410422a29f7a78f745 100644
 --- a/src/app/api/v1/chat/completions/route.ts
 +++ b/src/app/api/v1/chat/completions/route.ts
-@@ -33,6 +33,11 @@
+@@ -32,6 +32,11 @@
    readCompressionRequestHeader,
    withCompressionHeaderEcho,
  } from "@/shared/utils/compressionHeaderEcho";
@@ -14,7 +14,7 @@ index ee8d9fbe4e30db1d26ce9d087b64cc99be1243dc..bf0eacfacb594085990aebc845a14f49
  import { resolveModelAliasWithSeedFallbackOnBody } from "@/lib/modelAliasResolver";
  import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
  import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
-@@ -301,6 +306,15 @@
+@@ -313,6 +318,15 @@
      // The parsed body is passed through UNTOUCHED — the actual stream/JSON framing
      // stays decided by chatCore/resolveStreamFlag (legacy streaming default and the
      // per-key `streamDefaultMode: "json"` opt-in are preserved).
@@ -30,28 +30,31 @@ index ee8d9fbe4e30db1d26ce9d087b64cc99be1243dc..bf0eacfacb594085990aebc845a14f49
      const parsedBodyIsRecord = isRecord(parsedBody);
      const acceptHeader = request.headers.get("accept") || "";
      const acceptForcesStream =
-@@ -339,15 +353,17 @@
+@@ -416,10 +430,10 @@
          extraHeaders: { "X-Correlation-Id": reqId },
          deadlineController: routeDeadlineController,
        });
--      return withCompressionHeaderEcho(streamedResponse, compressionRequestHeader);
+-      return withCompressionHeaderEcho(
+-        applyFallbackHeaders(streamedResponse),
+-        compressionRequestHeader
+-      );
 +      const streamedFinal = elicitReasoning
 +        ? await wrapReasoningResponse(request, streamedResponse, true)
 +        : streamedResponse;
-+      return withCompressionHeaderEcho(streamedFinal, compressionRequestHeader);
++      return withCompressionHeaderEcho(applyFallbackHeaders(streamedFinal), compressionRequestHeader);
      }
  
--    return finishAdmission(
--      withCompressionHeaderEcho(
--        await handleChat(request, null, parsedBody, callerCorrelationId ?? undefined),
--        compressionRequestHeader
--      )
--    );
-+    const completion = await handleChat(request, null, parsedBody, callerCorrelationId ?? undefined);
-+    const completionFinal = elicitReasoning
-+      ? await wrapReasoningResponse(request, completion, false)
-+      : completion;
-+    return finishAdmission(withCompressionHeaderEcho(completionFinal, compressionRequestHeader));
+     const handlerResponse = await handleChat(request, null, parsedBody, reqId);
+@@ -429,8 +443,11 @@
+       response: handlerResponse,
+       endpoint: "chat/completions",
+     });
++    const completionFinal = elicitReasoning && recoveryResponse.status === 200
++      ? await wrapReasoningResponse(request, recoveryResponse, false)
++      : recoveryResponse;
+     return finishAdmission(
+-      withCompressionHeaderEcho(applyFallbackHeaders(recoveryResponse), compressionRequestHeader)
++      withCompressionHeaderEcho(applyFallbackHeaders(completionFinal), compressionRequestHeader)
+     );
    } catch (error) {
      admission.lease?.release();
-     throw error;

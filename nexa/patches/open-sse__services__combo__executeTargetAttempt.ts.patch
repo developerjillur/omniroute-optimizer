@@ -1,8 +1,8 @@
 diff --git a/open-sse/services/combo/executeTargetAttempt.ts b/open-sse/services/combo/executeTargetAttempt.ts
-index 7087c4bf7cf73babdba26bb016f3d2b785478781..ab2a3c83b1fc11ce57227fc63ad3dafec206ef85 100644
+index 0a691ffe639ac9cb6ef80d50dc582b646a93e586..fc9bc1a48bb8a82f322ebf3b23a72a24436f2eb6 100644
 --- a/open-sse/services/combo/executeTargetAttempt.ts
 +++ b/open-sse/services/combo/executeTargetAttempt.ts
-@@ -27,6 +27,7 @@
+@@ -23,6 +23,7 @@ import { errorResponse, isContentPolicyRefusalComboStopEnabled } from "../../uti
  import { recordComboFailure, clearComboFailureTracking } from "./failureTracker.ts";
  import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
  import { recordComboRequest, getComboMetrics } from "../comboMetrics.ts";
@@ -10,7 +10,7 @@ index 7087c4bf7cf73babdba26bb016f3d2b785478781..ab2a3c83b1fc11ce57227fc63ad3dafe
  import {
    expandComboSystemPromptIfPresent,
    resolveTargetFingerprint,
-@@ -257,7 +258,8 @@
+@@ -253,7 +254,8 @@ export async function executeTargetAttempt(
        deps.config.zeroLatencyOptimizationsEnabled === true &&
        i > 0 &&
        deps.config.fallbackCompressionMode &&

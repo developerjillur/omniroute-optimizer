@@ -1,13 +1,16 @@
 diff --git a/src/lib/usage/callLogs.ts b/src/lib/usage/callLogs.ts
-index fd7c75920822ba150463218be6b588f5f01f0860..5eb46b17eb90ea47bed0a61b3ff8a3b42ac8c049 100644
+index ceb8bc2aee68090044165cab44290fdac31aa9e4..20259cf74b34247bc92fe9dd7c5dcf864a7db165 100644
 --- a/src/lib/usage/callLogs.ts
 +++ b/src/lib/usage/callLogs.ts
-@@ -1,3 +1,4 @@
+@@ -3,6 +3,7 @@
+   UPSTREAM_HTTP_ATTEMPT,
+   type UpstreamHttpSummary,
+ } from "@/shared/utils/upstreamHttp";
 +import { readRequestedEffort } from "./claudeUsageDetails";
  /**
   * Structured call log management.
   *
-@@ -100,6 +101,9 @@
+@@ -105,6 +106,9 @@
    tokens_out: number | null;
    tokens_cache_read: number | null;
    tokens_cache_creation: number | null;
@@ -17,7 +20,7 @@ index fd7c75920822ba150463218be6b588f5f01f0860..5eb46b17eb90ea47bed0a61b3ff8a3b4
    tokens_reasoning: number | null;
    tokens_compressed: number | null;
    reasoning_source?: string | null;
-@@ -226,6 +230,8 @@
+@@ -232,6 +236,8 @@
      tokensOut: number;
      tokensCacheRead: number | null;
      tokensCacheCreation: number | null;
@@ -26,7 +29,7 @@ index fd7c75920822ba150463218be6b588f5f01f0860..5eb46b17eb90ea47bed0a61b3ff8a3b4
      tokensReasoning: number | null;
      tokensCompressed: number | null;
      requestType: string | null;
-@@ -261,6 +267,8 @@
+@@ -267,6 +273,8 @@
          out: logEntry.tokensOut,
          cacheRead: logEntry.tokensCacheRead,
          cacheWrite: logEntry.tokensCacheCreation,
@@ -35,7 +38,7 @@ index fd7c75920822ba150463218be6b588f5f01f0860..5eb46b17eb90ea47bed0a61b3ff8a3b4
          reasoning: logEntry.tokensReasoning,
          compressed: logEntry.tokensCompressed,
        },
-@@ -398,6 +406,8 @@
+@@ -410,6 +418,8 @@
        out: toNumber(row.tokens_out),
        cacheRead: row.tokens_cache_read != null ? toNumber(row.tokens_cache_read) : null,
        cacheWrite: row.tokens_cache_creation != null ? toNumber(row.tokens_cache_creation) : null,
@@ -44,7 +47,7 @@ index fd7c75920822ba150463218be6b588f5f01f0860..5eb46b17eb90ea47bed0a61b3ff8a3b4
        reasoning: row.tokens_reasoning != null ? toNumber(row.tokens_reasoning) : null,
        compressed: row.tokens_compressed != null ? toNumber(row.tokens_compressed) : null,
      },
-@@ -581,24 +591,8 @@
+@@ -601,24 +611,8 @@
        ? 1
        : null;
    const reasoningDurationMs = reasoningObservation.source === "encrypted" ? streamDurationMs : null;
@@ -71,7 +74,7 @@ index fd7c75920822ba150463218be6b588f5f01f0860..5eb46b17eb90ea47bed0a61b3ff8a3b4
    const errorType = toStoredErrorType(
      classifyCallLogError(entry.status, entry.error, entry.provider)
    );
-@@ -643,6 +637,23 @@
+@@ -665,6 +659,23 @@
      tokensOut: toNumber(getLoggedOutputTokens(entry.tokens)),
      tokensCacheRead: getPromptCacheReadTokensOrNull(entry.tokens),
      tokensCacheCreation: getPromptCacheCreationTokensOrNull(entry.tokens),
@@ -95,7 +98,7 @@ index fd7c75920822ba150463218be6b588f5f01f0860..5eb46b17eb90ea47bed0a61b3ff8a3b4
      tokensReasoning,
      reasoningSource: reasoningObservation.source,
      reasoningChars: reasoningObservation.chars,
-@@ -741,6 +752,15 @@
+@@ -780,6 +791,15 @@
    // Optional column (migration 191) — only fixed identifiers are spliced in.
    const resilienceCol = hasResilienceColumn ? ", resilience_actions" : "";
    const resilienceParam = hasResilienceColumn ? ", @resilienceActions" : "";
@@ -111,21 +114,21 @@ index fd7c75920822ba150463218be6b588f5f01f0860..5eb46b17eb90ea47bed0a61b3ff8a3b4
    const insertStmt = db.prepare(
      `
        INSERT INTO call_logs (
-@@ -756,7 +776,7 @@
+@@ -795,7 +815,7 @@
          has_request_body, has_response_body, has_pipeline_details, request_summary,
-         correlation_id, model_pinned, session_tag, response_id, error_type,
+         correlation_id, model_pinned, session_tag, client_session_id, response_id, error_type,
          video_content_removed, has_content, usage_provenance,
--        added_wait_ms, added_wait_cause${resilienceCol}
-+        added_wait_ms, added_wait_cause${resilienceCol}${nativeUsageCol}
+-        added_wait_ms, added_wait_cause, queue_wait_ms${resilienceCol}
++        added_wait_ms, added_wait_cause, queue_wait_ms${resilienceCol}${nativeUsageCol}
        )
        VALUES (
          @id, @timestamp, @method, @path, @status, @model, @requestedModel, @provider,
-@@ -771,7 +791,7 @@
+@@ -810,7 +830,7 @@
          @hasRequestBody, @hasResponseBody, @hasPipelineDetails, @requestSummary,
-         @correlationId, @modelPinned, @sessionTag, @responseId, @errorType,
+         @correlationId, @modelPinned, @sessionTag, @clientSessionId, @responseId, @errorType,
          @videoContentRemoved, @hasContent, @usageProvenance,
--        @addedWaitMs, @addedWaitCause${resilienceParam}
-+        @addedWaitMs, @addedWaitCause${resilienceParam}${nativeUsageParam}
+-        @addedWaitMs, @addedWaitCause, @queueWaitMs${resilienceParam}
++        @addedWaitMs, @addedWaitCause, @queueWaitMs${resilienceParam}${nativeUsageParam}
        )
      `
    );

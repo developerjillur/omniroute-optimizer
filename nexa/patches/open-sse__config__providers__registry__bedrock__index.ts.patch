@@ -1,0 +1,22 @@
+diff --git a/open-sse/config/providers/registry/bedrock/index.ts b/open-sse/config/providers/registry/bedrock/index.ts
+index 1443f45662b0e221978fa87d1e7fa01d4044b8b4..196a830a1ea600374c6e15bdcd81ab58c13a0176 100644
+--- a/open-sse/config/providers/registry/bedrock/index.ts
++++ b/open-sse/config/providers/registry/bedrock/index.ts
+@@ -9,6 +9,17 @@
+   authHeader: "bearer",
+   defaultContextLength: 200000,
+   models: [
++    {
++      id: "anthropic.claude-fable-5-2",
++      name: "Claude Fable 5.2 (Bedrock)",
++      toolCalling: true,
++      supportsReasoning: true,
++      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
++      supportsXHighEffort: true,
++      supportsVision: true,
++      contextLength: 1000000,
++      maxOutputTokens: 128000,
++    },
+     {
+       id: "anthropic.claude-fable-5-1",
+       name: "Claude Fable 5.1 (Bedrock)",

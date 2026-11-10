@@ -44,7 +44,7 @@ index c74f78b262c64ea0a736adf3de0573980d6d1c05..278b93d3aa14508d48cca02e15d263d3
    // Bare `ws:` must be present as its own token (not just `ws://localhost`).
    assert.match(
      connectSrc,
-@@ -37,18 +49,36 @@
+@@ -37,13 +49,13 @@ test("#5083 connect-src permits the bare ws: scheme for non-loopback dashboards"
    );
  });
  
@@ -62,10 +62,10 @@ index c74f78b262c64ea0a736adf3de0573980d6d1c05..278b93d3aa14508d48cca02e15d263d3
    assert.ok(connectSrc.includes("'self'"), "connect-src must still include 'self'");
    assert.ok(
      connectSrc.includes("ws://localhost:*") && connectSrc.includes("ws://127.0.0.1:*"),
-     "explicit loopback ws origins must remain listed"
+@@ -51,6 +63,24 @@ test("#5083 connect-src still scopes 'self' and explicit loopback origins", () =
    );
-+});
-+
+ });
+ 
 +test("production connect-src permits explicit LAN origins without blanket schemes", async () => {
 +  const environment: Record<string, string | undefined> = process.env;
 +  const originalEnv = environment.NODE_ENV;
@@ -82,10 +82,12 @@ index c74f78b262c64ea0a736adf3de0573980d6d1c05..278b93d3aa14508d48cca02e15d263d3
 +    if (originalExtras === undefined) delete process.env.OMNIROUTE_CSP_CONNECT_SRC;
 +    else process.env.OMNIROUTE_CSP_CONNECT_SRC = originalExtras;
 +  }
- });
- 
++});
++
  test("#5083 fix does NOT introduce a global Next.js middleware", () => {
-@@ -59,7 +89,11 @@
+   // The project has no global middleware by design; the CSP fix must stay declarative.
+   let exists = true;
+@@ -59,7 +89,11 @@ test("#5083 fix does NOT introduce a global Next.js middleware", () => {
    } catch {
      exists = false;
    }

@@ -1,5 +1,5 @@
 diff --git a/src/sse/services/sessionAffinityPin.ts b/src/sse/services/sessionAffinityPin.ts
-index 262db8491fcaf9538643c9432e9e229e1a1c6099..a0532e436c01c3a500639b8fdb3d47f29fc8da30 100644
+index 5081bb52903a5d147e159b9e8ce314e1a62d8b77..6a606251f5814e8be47b3cbe30b10aa1e78b7cd6 100644
 --- a/src/sse/services/sessionAffinityPin.ts
 +++ b/src/sse/services/sessionAffinityPin.ts
 @@ -27,6 +27,7 @@
@@ -9,16 +9,16 @@ index 262db8491fcaf9538643c9432e9e229e1a1c6099..a0532e436c01c3a500639b8fdb3d47f2
 +import { isNativeClaudeSession } from "./claudeSessionSelection";
  import {
    getSessionAccountAffinity,
-   upsertSessionAccountAffinity,
-@@ -44,6 +45,7 @@
- import { isComboPerModelTimeoutAbort } from "@omniroute/open-sse/services/combo/comboAbortReasons.ts";
+   getSessionAffinityStore,
+@@ -45,6 +46,7 @@
+ } from "@omniroute/open-sse/services/accountFallback.ts";
  import * as log from "../utils/logger";
  import { readHeaderValue } from "./headerReader.ts";
 +import { getNativeClaudeSessionId } from "@omniroute/open-sse/services/nativeClaudeSession.ts";
  
  export { readHeaderValue } from "./headerReader.ts";
- 
-@@ -216,6 +218,9 @@
+ export {
+@@ -222,6 +224,9 @@
      normalizeSessionKey(record.prompt_cache_key, "prompt-cache");
    if (explicitKey) return explicitKey;
  
@@ -28,41 +28,58 @@ index 262db8491fcaf9538643c9432e9e229e1a1c6099..a0532e436c01c3a500639b8fdb3d47f2
    const inputText = getFirstInputText(body);
    if (!inputText) return null;
    return `input:sha256:${createHash("sha256").update(inputText).digest("hex")}`;
-@@ -273,7 +278,8 @@
-   provider: string,
+@@ -334,8 +339,11 @@
    sessionKey: string | null | undefined,
    connections: T[],
--  ttlMs = 0
-+  ttlMs = 0,
+   ttlMs = 0,
+-  affinityRecord?: SessionAccountAffinityRecord | null
++  affinityRecordOrCreate?: SessionAccountAffinityRecord | null | boolean,
 +  createIfMissing = true
  ): Promise<T | null> {
++  const affinityRecord = typeof affinityRecordOrCreate === "boolean" ? undefined : affinityRecordOrCreate;
++  const mayCreate = typeof affinityRecordOrCreate === "boolean" ? affinityRecordOrCreate : createIfMissing;
    if (!sessionKey || connections.length === 0 || ttlMs <= 0) return null;
  
-@@ -303,6 +309,7 @@
-     );
+   const store = getSessionAffinityStore();
+@@ -347,6 +355,7 @@
+         ? getSessionAccountAffinity(sessionKey, provider, ttlMs)
+         : liveAffinitySnapshot(affinityRecord);
+     const pinned = resolveSessionAffinityConnection(existing, connections, provider);
++    if (!pinned && !mayCreate) return null;
+     const connection = pinned ?? [...connections].sort(compareLruConnections)[0] ?? null;
+     if (!connection) return null;
+     if (pinned) {
+@@ -364,7 +373,7 @@
    }
- 
-+  if (!createIfMissing) return null;
-   const connection = [...connections].sort(compareLruConnections)[0] ?? null;
-   if (!connection) return null;
- 
-@@ -327,12 +334,14 @@
-   provider: string,
+   const existing =
+     affinityRecord === undefined ? await store.get(sessionKey, provider, ttlMs) : affinityRecord;
+-  const plan = planSessionAffinityConnection(provider, sessionKey, connections, ttlMs, existing);
++  const plan = planSessionAffinityConnection(provider, sessionKey, connections, ttlMs, existing, mayCreate);
+   if (!plan) return null;
+   await plan.commit(true, true);
+   return plan.connection;
+@@ -379,8 +388,11 @@
    sessionKey: string | null | undefined,
    connections: T[],
--  ttlMs = 0
-+  ttlMs = 0,
+   ttlMs = 0,
+-  affinityRecord?: SessionAccountAffinityRecord | null
++  affinityRecordOrCreate?: SessionAccountAffinityRecord | null | boolean,
 +  createIfMissing = true
  ) {
++  const affinityRecord = typeof affinityRecordOrCreate === "boolean" ? undefined : affinityRecordOrCreate;
++  const mayCreate = typeof affinityRecordOrCreate === "boolean" ? affinityRecordOrCreate : createIfMissing;
    if (!sessionKey || connections.length === 0 || ttlMs <= 0) return null;
-   const existing = getSessionAccountAffinity(sessionKey, provider, ttlMs);
-   const existingConnection =
-     existing && connections.find((candidate) => candidate.id === existing.connectionId);
-+  if (!existingConnection && !createIfMissing) return null;
+   const store = getSessionAffinityStore();
+   const observed =
+@@ -389,6 +401,7 @@
+       : affinityRecord;
+   const existing = affinityRecord === undefined ? observed : liveAffinitySnapshot(observed);
+   const existingConnection = resolveSessionAffinityConnection(existing, connections, provider);
++  if (!existingConnection && !mayCreate) return null;
    const connection = existingConnection ?? [...connections].sort(compareLruConnections)[0] ?? null;
    if (!connection) return null;
  
-@@ -441,7 +450,7 @@
+@@ -465,7 +478,7 @@
   * site with one call.
   */
  export function resolveSessionAffinityTtlMs(
@@ -71,7 +88,7 @@ index 262db8491fcaf9538643c9432e9e229e1a1c6099..a0532e436c01c3a500639b8fdb3d47f2
    options: AffinityPinOptions,
    settings: AffinityPinSettings
  ): number {
-@@ -449,6 +458,7 @@
+@@ -473,6 +486,7 @@
    if (Number.isFinite(override) && override > 0) return override;
    const configured = Number(settings.sessionAffinityTtlMs ?? settings.codexSessionAffinityTtlMs);
    if (Number.isFinite(configured) && configured > 0) return configured;

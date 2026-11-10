@@ -1,8 +1,8 @@
 diff --git a/src/lib/usage/aggregateHistory.ts b/src/lib/usage/aggregateHistory.ts
-index f5dabfb047ad6cb512a8775e12687b6d5615833e..9d93b93f1870e748b545d2fc23d9a2d400869337 100644
+index 953e1759257e69a49586f1268c6fbc037d211fdf..01f728ee75c8dd4ac3b2c176cfb7935501683f40 100644
 --- a/src/lib/usage/aggregateHistory.ts
 +++ b/src/lib/usage/aggregateHistory.ts
-@@ -165,6 +165,8 @@
+@@ -268,6 +268,8 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
            COALESCE(tokens_output, 0) as requestOutputTokens,
            COALESCE(tokens_cache_read, 0) as requestCacheReadTokens,
            COALESCE(tokens_cache_creation, 0) as requestCacheCreationTokens,
@@ -11,7 +11,7 @@ index f5dabfb047ad6cb512a8775e12687b6d5615833e..9d93b93f1870e748b545d2fc23d9a2d4
            COALESCE(tokens_reasoning, 0) as requestReasoningTokens,
            COALESCE(SUM(tokens_input), 0) as inputTokens,
            COALESCE(SUM(tokens_output), 0) as outputTokens,
-@@ -179,7 +181,8 @@
+@@ -282,7 +284,8 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
            AND model IS NOT NULL AND model != ''
          GROUP BY LOWER(provider), LOWER(model), DATE(timestamp), serviceTier,
            requestInputTokens, requestOutputTokens, requestCacheReadTokens,
@@ -21,7 +21,7 @@ index f5dabfb047ad6cb512a8775e12687b6d5615833e..9d93b93f1870e748b545d2fc23d9a2d4
        )
        .all(beforeDate) as Array<{
        provider: string;
-@@ -191,6 +194,8 @@
+@@ -294,6 +297,8 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
        requestOutputTokens: number;
        requestCacheReadTokens: number;
        requestCacheCreationTokens: number;
@@ -30,7 +30,7 @@ index f5dabfb047ad6cb512a8775e12687b6d5615833e..9d93b93f1870e748b545d2fc23d9a2d4
        requestReasoningTokens: number;
        inputTokens: number;
        outputTokens: number;
-@@ -224,6 +229,8 @@
+@@ -327,6 +332,8 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
                  output: row.requestOutputTokens,
                  cacheRead: row.requestCacheReadTokens,
                  cacheCreation: row.requestCacheCreationTokens,

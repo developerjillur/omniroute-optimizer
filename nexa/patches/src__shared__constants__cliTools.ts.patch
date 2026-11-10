@@ -1,7 +1,8 @@
 diff --git a/src/shared/constants/cliTools.ts b/src/shared/constants/cliTools.ts
+index 0f1b107d84792c2ffc1d0b45a97e953d8b0146b7..de9948d080e90ab2a89dd894d6a1b02e4bd0fed8 100644
 --- a/src/shared/constants/cliTools.ts
 +++ b/src/shared/constants/cliTools.ts
-@@ -37,15 +37,7 @@
+@@ -37,15 +37,7 @@ export const CLI_TOOLS: Record<string, CliCatalogEntry> = {
          name: "Default Model",
          alias: "model",
          envKey: "ANTHROPIC_MODEL",
@@ -18,7 +19,7 @@ diff --git a/src/shared/constants/cliTools.ts b/src/shared/constants/cliTools.ts
          isTopLevel: true,
        },
        {
-@@ -53,21 +45,21 @@
+@@ -53,21 +45,21 @@ export const CLI_TOOLS: Record<string, CliCatalogEntry> = {
          name: "Claude Opus",
          alias: "opus",
          envKey: "ANTHROPIC_DEFAULT_OPUS_MODEL",

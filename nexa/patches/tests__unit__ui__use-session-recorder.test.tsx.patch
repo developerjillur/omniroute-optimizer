@@ -11,7 +11,7 @@ index f39277a653eaadb7a241fd654b44220886763b2b..009e95490de2cb8734e68f66dfaa1bbf
   * POST to /api/tools/traffic-inspector/sessions/{id}/requests.
   */
  import { describe, it } from "vitest";
-@@ -20,26 +20,18 @@
+@@ -20,26 +20,18 @@ const HOOK_SRC = fs.readFileSync(
  );
  
  describe("useSessionRecorder R5-5 source assertions", () => {
@@ -45,7 +45,7 @@ index f39277a653eaadb7a241fd654b44220886763b2b..009e95490de2cb8734e68f66dfaa1bbf
    });
  
    it("buffers events and flushes in batches", () => {
-@@ -51,10 +43,7 @@
+@@ -51,10 +43,7 @@ describe("useSessionRecorder R5-5 source assertions", () => {
        HOOK_SRC.includes("SNAPSHOT_FLUSH_MS"),
        "should define SNAPSHOT_FLUSH_MS constant for debounce"
      );
@@ -57,7 +57,7 @@ index f39277a653eaadb7a241fd654b44220886763b2b..009e95490de2cb8734e68f66dfaa1bbf
    });
  
    it("stops WS and flushes on stop()", () => {
-@@ -78,10 +67,7 @@
+@@ -78,10 +67,7 @@ describe("useSessionRecorder R5-5 source assertions", () => {
    });
  
    it("only pushes 'new' event type to snapshots", () => {
@@ -69,7 +69,7 @@ index f39277a653eaadb7a241fd654b44220886763b2b..009e95490de2cb8734e68f66dfaa1bbf
    });
  });
  
-@@ -93,8 +79,12 @@
+@@ -93,8 +79,12 @@ describe("useSessionRecorder snapshot flush logic (unit)", () => {
      let immediateFlushCalled = false;
      let scheduleFlushCalled = false;
  

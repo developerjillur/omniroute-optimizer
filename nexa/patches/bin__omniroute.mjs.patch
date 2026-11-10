@@ -1,8 +1,8 @@
 diff --git a/bin/omniroute.mjs b/bin/omniroute.mjs
-index f046774de31433de9d38a541547531c5bb6f3d1f..49bbfce71a9f07d4fe12d56c69e74850303f9e4b 100755
+index 7f3c34670ffc501a979b9e38a801b0751fecf2d5..1ad5f92c72aabe2eacae4de55fc5b35524d7a051 100755
 --- a/bin/omniroute.mjs
 +++ b/bin/omniroute.mjs
-@@ -193,8 +193,19 @@
+@@ -201,8 +201,19 @@ function loadEnvFile() {
      }
    }
  
@@ -23,13 +23,13 @@ index f046774de31433de9d38a541547531c5bb6f3d1f..49bbfce71a9f07d4fe12d56c69e74850
    }
  
    for (const [key, { winner, loser }] of shadowed) {
-@@ -224,6 +235,9 @@
- }
+@@ -233,6 +244,9 @@ function loadEnvFile() {
  
  loadEnvFile();
-+
+ 
 +const { pinPackageMigrations } = await import("./cli/utils/packageMigrations.mjs");
 +pinPackageMigrations(ROOT);
- 
++
  // Next.js has no android branch in getCacheDirectory(): if ~/.cache (and tmp)
  // do not already exist it aborts the instrumentation hook, and every request
+ // then returns a silent HTTP 500 even though the CLI still looks "running".

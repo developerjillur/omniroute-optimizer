@@ -1,8 +1,8 @@
 diff --git a/scripts/build/bootstrap-env.mjs b/scripts/build/bootstrap-env.mjs
-index 4f012f7cf472c84e5d8e5bbfeef36eec77f95f9d..cc6d3f077a5e6b19dd8d3409475174b186341123 100644
+index 95c262829728475c569b4ab0a938ec8121b2b1b0..50e98e0ac47a378b15212269522ed8c04247096d 100644
 --- a/scripts/build/bootstrap-env.mjs
 +++ b/scripts/build/bootstrap-env.mjs
-@@ -190,7 +190,7 @@
+@@ -198,7 +198,7 @@ function parseEnvValue(raw) {
  }
  
  // ── Write a simple KEY=VALUE env file ───────────────────────────────────────

@@ -1,8 +1,8 @@
 diff --git a/open-sse/services/errorClassifier.ts b/open-sse/services/errorClassifier.ts
-index 581e850f2a5c8adc0cd595b43cf2fa61e14bd456..59436b966d7e869c18748b4c1db858f52aaf064c 100644
+index 3c6740cb116bfe787abb911c5ac079a1b1d516ab..60235167800fd25c8256922c7d0beea77b139ce2 100644
 --- a/open-sse/services/errorClassifier.ts
 +++ b/open-sse/services/errorClassifier.ts
-@@ -80,6 +80,8 @@
+@@ -82,6 +82,8 @@ export function isEmptyContentResponse(
      // to emit a tool_use block) is a legitimate terminal state, not a silent
      // failure. Only flag empty content when no such terminal stop_reason is present.
      const stopReason = typeof body.stop_reason === "string" ? body.stop_reason : "";
@@ -11,7 +11,7 @@ index 581e850f2a5c8adc0cd595b43cf2fa61e14bd456..59436b966d7e869c18748b4c1db858f5
      // #14160: same exemption for the Claude wire shape on trusted first-party APIs.
      if (
        (trustedEmptyStop && NORMAL_STOP_CLAUDE_STOP.has(stopReason)) ||
-@@ -370,6 +372,7 @@
+@@ -375,6 +377,7 @@ function responseBodyToString(responseBody: unknown): string {
  // not provider/model health. Keep every expression bounded to avoid ReDoS on
  // upstream-controlled error bodies.
  const RESOURCE_NOT_FOUND_PATTERNS = [

@@ -1,15 +1,15 @@
 {
   "_comment": "NexaLance OmniRoute child-theme overlay registry. layer: patch=surgical diff onto pristine upstream; new=net-new file copied in at build; tooling=overlay machinery. class: upstream-candidate=generic fix worth PRing to diegosouzapw/OmniRoute (Phase-2 shrinker); nexa-specific=stays in the overlay; needs-review=triage. Base stays byte-for-byte pristine; regenerate with `node nexa/gen-manifest.mjs`.",
   "upstreamBase": {
-    "sha": "ad6f33f66bda34eba98645d3bfdabbde294bc843",
-    "version": "3.8.52"
+    "sha": "191dce8d534ceb56c28a08e71381284a9a87838f",
+    "version": "3.8.53"
   },
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 347,
-    "patches": 206,
-    "new": 135,
+    "total": 354,
+    "patches": 212,
+    "new": 136,
     "tooling": 6,
     "upstreamCandidates": 28,
     "nexaSpecific": 99,
@@ -71,14 +71,6 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "bin/omniroute.mjs",
-      "conflictRisk": "on-overlap",
-      "upstreamPR": null
-    },
-    {
-      "file": "patches/config__quality__eslint-suppressions.json.patch",
-      "layer": "patch",
-      "class": "nexa-specific",
-      "target": "config/quality/eslint-suppressions.json",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -1211,14 +1203,6 @@
       "upstreamPR": null
     },
     {
-      "file": "patches/src__shared__constants__codexClient.ts.patch",
-      "layer": "patch",
-      "class": "upstream-candidate",
-      "target": "src/shared/constants/codexClient.ts",
-      "conflictRisk": "on-overlap",
-      "upstreamPR": null
-    },
-    {
       "file": "patches/src__shared__constants__pricing__frontier-labs.ts.patch",
       "layer": "patch",
       "class": "needs-review",
@@ -1543,14 +1527,6 @@
       "layer": "patch",
       "class": "upstream-candidate",
       "target": "tests/unit/executor-claude-identity.test.ts",
-      "conflictRisk": "on-overlap",
-      "upstreamPR": null
-    },
-    {
-      "file": "patches/tests__unit__executor-codex.test.ts.patch",
-      "layer": "patch",
-      "class": "nexa-specific",
-      "target": "tests/unit/executor-codex.test.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -2823,6 +2799,86 @@
       "layer": "tooling",
       "class": "nexa-specific",
       "conflictRisk": "none"
+    },
+    {
+      "file": "patches/open-sse__config__claudeCodeCompatibleIdentity.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "open-sse/config/claudeCodeCompatibleIdentity.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__config__providers__registry__anthropic__index.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "open-sse/config/providers/registry/anthropic/index.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__config__providers__registry__bedrock__index.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "open-sse/config/providers/registry/bedrock/index.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__config__providers__registry__claude__web__index.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "open-sse/config/providers/registry/claude/web/index.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__config__providers__registry__vertex__index.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "open-sse/config/providers/registry/vertex/index.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__config__providers__registry__vertex__partner__index.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "open-sse/config/providers/registry/vertex/partner/index.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__handlers__chatCore__serviceTier.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "open-sse/handlers/chatCore/serviceTier.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__services__providerCostData.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "open-sse/services/providerCostData.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/src__shared__constants__modelSpecs.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "src/shared/constants/modelSpecs.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/claude-fable-5-2.test.ts",
+      "layer": "new",
+      "class": "nexa-specific",
+      "target": "tests/unit/claude-fable-5-2.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
     }
   ]
 }

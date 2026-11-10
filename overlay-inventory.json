@@ -7,7 +7,7 @@
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
   "trackedNexaFiles": 517,
-  "totalNexaBytes": 2398925,
+  "totalNexaBytes": 2401823,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -566,9 +566,9 @@
     {
       "path": "nexa/docs/FABLE-5.2-UPGRADE-3.8.53-2026-11-10.md",
       "mode": "100644",
-      "gitBlobSha": "e86ff63ee1b76ba24413f11737ce97808ea519bc",
-      "bytes": 6776,
-      "sha256": "7454869d2a9467b4009cf5550e6ebe77aae2c5efb6775446f721e5e54b18eb05"
+      "gitBlobSha": "3abf3f4c69a6202810202565fdb994e3af64b83b",
+      "bytes": 8706,
+      "sha256": "b72cb4758058dd5809b3e0789ddc1ee98651d29d894e3c2b46387d846744f829"
     },
     {
       "path": "nexa/docs/GOOGLE-VERIFICATION-ROUTING-2026-10-06.md",
@@ -727,9 +727,9 @@
     {
       "path": "nexa/new/config/quality/tsc-error-baseline.json",
       "mode": "100644",
-      "gitBlobSha": "aa9bef7210466ada1c8b043de1f906464450b5b0",
-      "bytes": 1293,
-      "sha256": "0c693af92b3c510ab40d9ec437ed606f3f5e65e871f33fb1adc53171c1078020"
+      "gitBlobSha": "b6fa6b197632b664c5bafce647de1189b93bf6dc",
+      "bytes": 2261,
+      "sha256": "c0b02fa023fad1c98daffff9ae395d3cd8584bc902dfa3d7afea9ed793fedd5f"
     },
     {
       "path": "nexa/new/docker-compose.nexaconnect.yml",
@@ -3569,9 +3569,9 @@
     {
       "path": "nexa/tests/verify-fable52-red.mjs",
       "mode": "100644",
-      "gitBlobSha": "d2798df9433eb1e30ce7d9c014fe90061372019b",
+      "gitBlobSha": "71de04077ed2b89cf243a79e22c8efd522d91a13",
       "bytes": 876,
-      "sha256": "7864a06c068e4dd114445d2aeaf4e60cf3bc4506f3e319f1806d2c765f0620c0"
+      "sha256": "08ad7f9388ee41abbe50d3ee6aedae1043ac614e654169c58dd82ed8410840c2"
     },
     {
       "path": "nexa/tests/verify-installed-dependency-security.mjs",

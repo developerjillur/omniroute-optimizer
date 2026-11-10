@@ -4,7 +4,7 @@ Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। Om
 
 ## v3.8.53 ও Fable 5.2 — build অপেক্ষায়
 
-নতুন released base `191dce8d534ceb56c28a08e71381284a9a87838f`-এ Nexa customization port এবং `claude-fable-5-2` support প্রস্তুত করা হচ্ছে। Imported model ও owner settings অক্ষত রেখে native context/effort, signed-prefix preservation, tool payload ও standard/fast cache pricing পরীক্ষা হচ্ছে। প্রথম source patch/lock preparation ও production dependency audit পাস; পূর্ণ functional/type/lint/docs acceptance এখনও commit-specific CI-তে নির্ধারিত হবে। [Upgrade note](nexa/docs/FABLE-5.2-UPGRADE-3.8.53-2026-11-10.md)-এ scope ও সীমা আছে।
+নতুন released base `191dce8d534ceb56c28a08e71381284a9a87838f`-এ Nexa customization port এবং `claude-fable-5-2` support প্রস্তুত করা হচ্ছে। Imported model ও owner settings অক্ষত রেখে native context/effort, signed-prefix preservation, tool payload ও standard/fast cache pricing পরীক্ষা হচ্ছে। Source patch/lock preparation ও production dependency audit পাস। [Focused validation](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42744642403)-এ ৬৭/৬৭ native/compatibility, ১২/১২ interface, socket guard ও core typecheck পাস করেছে। পূর্ণ functional/type/lint/docs acceptance final commit-এর CI receipt দিয়ে নির্ধারিত হবে। [Upgrade note](nexa/docs/FABLE-5.2-UPGRADE-3.8.53-2026-11-10.md)-এ scope ও সীমা আছে।
 
 ব্যবহারকারীর নির্দেশে production build, package acceptance ও live promotion অপেক্ষায় আছে। নিচের চলমান v3.8.52 release record ঐতিহাসিক deployment evidence; নতুন source প্রস্তুতি live upgrade নয়।
 

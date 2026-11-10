@@ -29,12 +29,20 @@ Existing imported model, explicit mappings, owner-selected defaults ও `ANTHROP
 
 ## Usage ও pricing
 
-[Official pricing](https://platform.claude.com/docs/en/about-claude/pricing) অনুযায়ী standard USD/MTok: input `8`, output `40`, cache read `0.20`, 5m write `10`, 1h write `16`। [Fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode)-এ input/output দ্বিগুণ; caching multipliers তার ওপর প্রযোজ্য। Request-এর `speed` সংরক্ষণ করা হয় এবং provider-reported `usage.speed` accounting estimate সংশোধন করে। Exact provider cost পাওয়া গেলে সেটিকে আবার multiplier দিয়ে বাড়ানো হয় না। Subscription quota ও এই per-token estimate পৃথক।
+[Official pricing](https://platform.claude.com/docs/en/about-claude/pricing) অনুযায়ী standard USD/MTok: input `8`, output `40`, cache read `0.20`, 5m write `10`, 1h write `16`। [Fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode)-এ input/output দ্বিগুণ; caching multipliers তার ওপর প্রযোজ্য। Request-এর `speed` সংরক্ষণ করা হয় এবং provider-reported `usage.speed` accounting estimate সংশোধন করে। Native Claude-এর `fast` speed usage history-তেও অক্ষত থাকে; Codex-এর `priority` alias সেখানে বসানো হয় না। Exact provider cost পাওয়া গেলে সেটিকে আবার multiplier দিয়ে বাড়ানো হয় না। Subscription quota ও এই per-token estimate পৃথক।
 
 ## Validation ও release সীমা
 
+প্রথম executor dispatch-এ native signed prefix এবং HTTP-attempt selection একই request-এর সঙ্গে রাখতে হয়। Native response wrapper-এর কারণে আলাদা logical usage row তৈরি করা যাবে না। Refusal-এর empty-content exemption কেবল আসল Claude message-এর জন্য; অন্য format-এর spoofed stop reason exemption পাবে না।
+
+Synthetic tests-এর fetch mock বসানোর আগে transport initialization সম্পন্ন হয়। Global fetch বদলালেও নিচের socket guard শুধু isolated loopback test server-এ সংযোগ দেয়; fixtures-এ ব্যক্তিগত credentials বা generation ব্যবহার হয় না।
+
 নতুন feature delta-র focused RED-এ assertion failure লাগবে; missing module, syntax error, network error বা resource stop reproduction হিসেবে গ্রহণযোগ্য নয়। Green lane-এ native five-effort dispatch, prefix/signature, tools, cost/cache tests; আগের সব custom ও ported regressions; দুই Node runtime; additive migration; installed dependency graph/audit; manifest/pristine checks; lint; core/full typechecks ও docs gates প্রয়োজন।
 
-v3.8.52-এর historical RED/green proof [এই source run](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42403189143)-এ থাকে। পুরোনো release-এর delta নতুন upstream-এ জোর করে reverse করা হয় না; তার functional assertions নতুন applied source-এ বহাল। TypeScript backlog-এর পূর্বের numerical ceiling বাড়ানো হয়নি; নতুন diagnostic identity বা অসমাপ্ত compiler validation আটকে দেবে।
+v3.8.52-এর historical RED/green proof [এই source run](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42403189143)-এ থাকে। পুরোনো release-এর delta নতুন upstream-এ জোর করে reverse করা হয় না; তার functional assertions নতুন applied source-এ বহাল। Owner-approved পৃথক v3.8.53 TypeScript ceiling `7314`; initial pristine count `7361`, applied count `7314`, নতুন diagnostic identity `0`। পূর্বের v3.8.52-এর `6529` ও v3.8.51-এর `5830` record সম্পূর্ণ সংরক্ষিত। Final source-এ নতুন diagnostic identity, ceiling অতিক্রম বা অসমাপ্ত compiler validation আটকে দেবে। এই inherited backlog zero-type-error দাবি নয়।
 
 Production build-এর পর actual package install/security smoke, isolated settings preservation, live native/Bridge model matrix ও controlled promotion আলাদা acceptance। Provider rate limit, retention policy ও client capability provider/client নিয়ন্ত্রণ করে। এই source preparation permanent reliability, zero errors বা model-output parity-এর ঘোষণা নয়।
+
+## Focused source checkpoint
+
+[`b0f271f`-এর focused CI](https://github.com/developerjillur/omniroute-optimizer/actions/runs/42744642403)-তে ৬৭/৬৭ native/compatibility test, ১২/১২ interface test, socket guard এবং core typecheck পাস করেছে; কোনো test skip বা cancel হয়নি। এই checkpoint পূর্ণ regression, full-project compiler, production package বা live acceptance প্রতিস্থাপন করে না। Final source acceptance তার exact commit-এর পূর্ণ CI artifact-এ নির্ধারিত হয়।

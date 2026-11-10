@@ -4,7 +4,7 @@ import fs from "node:fs";
 const output = fs.readFileSync(process.argv[2], "utf8");
 const count = (field) =>
   Number([...output.matchAll(new RegExp(`^# ${field} (\\d+)$`, "gm"))].at(-1)?.[1]);
-assert.ok(count("tests") >= 14, "the complete focused baseline must execute");
+assert.ok(count("tests") >= 15, "the complete focused baseline must execute");
 assert.ok(count("fail") >= 1, "an assertion must reproduce the missing capability");
 assert.equal(count("skipped"), 0);
 assert.equal(count("cancelled"), 0);

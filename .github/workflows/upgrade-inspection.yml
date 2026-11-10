@@ -1,0 +1,42 @@
+name: Release overlay inspection
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/fable-5-2-v3-8-53]
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      NODE_OPTIONS: --max-old-space-size=256
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24.15.0"
+      - name: Verify non-destructive inspection
+        run: node --test --test-reporter=tap nexa/tests/inspect-upgrade.test.mjs
+      - name: Inspect every preserved correction against the released source
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="$RUNNER_TEMP/upgrade-inspection-application"
+          git init "$fixture"
+          git -C "$fixture" remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+          git -C "$fixture" fetch --depth=1 upstream ad6f33f66bda34eba98645d3bfdabbde294bc843 191dce8d534ceb56c28a08e71381284a9a87838f
+          git -C "$fixture" checkout --detach 191dce8d534ceb56c28a08e71381284a9a87838f
+          node nexa/tests/inspect-upgrade.mjs "$fixture" "$GITHUB_WORKSPACE/nexa" ad6f33f66bda34eba98645d3bfdabbde294bc843 191dce8d534ceb56c28a08e71381284a9a87838f "$RUNNER_TEMP/upgrade-inspection"
+      - name: Preserve reviewable source and conflicts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: upgrade-inspection
+          path: ${{ runner.temp }}/upgrade-inspection
+          include-hidden-files: true

@@ -1,7 +1,21 @@
 diff --git a/src/app/(dashboard)/dashboard/cli-code/components/CliProfileAutoSyncToggles.tsx b/src/app/(dashboard)/dashboard/cli-code/components/CliProfileAutoSyncToggles.tsx
 --- a/src/app/(dashboard)/dashboard/cli-code/components/CliProfileAutoSyncToggles.tsx
 +++ b/src/app/(dashboard)/dashboard/cli-code/components/CliProfileAutoSyncToggles.tsx
-@@ -64,6 +64,7 @@
+@@ -14,10 +14,11 @@
+ }
+ 
+ /**
+- * Toggle card for the opt-in "auto-sync CLI profiles after model discovery" feature.
++ * Terminal routing and opt-in profile regeneration controls.
+  * Reads/writes the OMNIROUTE_AUTO_SYNC_{CODEX,CLAUDE}_PROFILES feature flags via
+  * /api/settings/feature-flags. Both default off; enabling one makes a provider model
+- * sync regenerate that tool's profile files from the live catalog.
++ * sync regenerate that tool's profile files from the live catalog. Claude also controls
++ * the managed Terminal launcher; the native app and running sessions are unaffected.
+  */
+ export default function CliProfileAutoSyncToggles() {
+   const t = useTranslations("cliTools");
+@@ -64,6 +65,7 @@
            body: JSON.stringify({ key, value: next ? "true" : "false" }),
          });
          if (!res.ok) throw new Error(`HTTP ${res.status}`);

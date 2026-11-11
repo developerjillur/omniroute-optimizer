@@ -6,9 +6,11 @@ import os from "node:os";
 import path from "node:path";
 import net from "node:net";
 import http from "node:http";
+import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { EventEmitter, once } from "node:events";
 import { createRequire } from "node:module";
-import { launch, extractSettingsArguments, readSettings } from "../deploy/claude-terminal-launcher.mjs";
+import { launch, extractSettingsArguments, readSettings, readRoutingMode } from "../deploy/claude-terminal-launcher.mjs";
 import { startTerminalTunnel, bypassesProxy } from "../deploy/claude-terminal-tunnel.mjs";
 import { install, updateShell, shellBlock } from "../deploy/install-claude-terminal.mjs";
 
@@ -153,4 +155,29 @@ test("installer preserves shell bytes outside its block, leaves global settings 
   assert.equal(updateShell(shell,shellBlock(process.execPath,path.join(applied.target,"claude-terminal-launcher.mjs"))),shell);
   await fs.appendFile(path.join(applied.target,"claude-terminal-launcher.mjs"),"\n// owner edit\n");
   await assert.rejects(install({home}));
+});
+
+
+test("the next Terminal launch reads the changed DB flag without writing the store", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "terminal-mode-db-"));
+  const database = path.join(directory, "storage.sqlite");
+  const write = value => execFileSync("/usr/bin/python3", ["-c", `import sqlite3,sys
+c=sqlite3.connect(sys.argv[1])
+c.execute("CREATE TABLE IF NOT EXISTS key_value(namespace TEXT,key TEXT,value TEXT)")
+c.execute("DELETE FROM key_value")
+c.execute("INSERT INTO key_value VALUES('feature_flags','OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES',?)",(sys.argv[2],))
+c.commit()
+c.close()`, database, value]);
+  const hash = async () => createHash("sha256").update(await fs.readFile(database)).digest("hex");
+  write("false");
+  const before = await hash();
+  assert.equal(await readRoutingMode(database, {OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES:"true"}), "native");
+  assert.equal(await hash(), before);
+  write("true");
+  const on = await hash();
+  assert.equal(await readRoutingMode(database, {}), "gateway");
+  assert.equal(await hash(), on);
+  const missing = path.join(directory, "missing.sqlite");
+  await assert.rejects(readRoutingMode(missing, {}));
+  await assert.rejects(fs.stat(missing), {code:"ENOENT"});
 });

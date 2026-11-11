@@ -1,0 +1,16 @@
+diff --git a/src/shared/constants/featureFlagDefinitions.ts b/src/shared/constants/featureFlagDefinitions.ts
+--- a/src/shared/constants/featureFlagDefinitions.ts
++++ b/src/shared/constants/featureFlagDefinitions.ts
+@@ -1169,9 +1169,9 @@
+   },
+   {
+     key: "OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES",
+-    label: "Auto-Sync Claude Code Profiles",
+-    description:
+-      "After a provider model sync, automatically (re)write ~/.claude/profiles/'<name>'/settings.json Claude Code profiles from the live catalog. Never changes the active/default Claude config. Off by default.",
++    label: "Claude Terminal Routing and Profile Sync",
++    description:
++      "On: the managed Terminal launcher uses OmniRoute; Off: it uses native Claude login. Applies to new Terminal sessions only; native app and Bridge settings stay unchanged. Also enables profile regeneration after model sync. Requires launcher installation; default Off.",
+     descriptionI18nKey: "featureFlagOmnirouteAutoSyncClaudeProfilesDescription",
+     category: "cli",
+     defaultValue: "false",

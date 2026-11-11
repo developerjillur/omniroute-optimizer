@@ -86,6 +86,10 @@ jobs:
         continue-on-error: true
         working-directory: ${{ runner.temp }}/focused-application
         run: npm run typecheck:core
+      - name: Check Terminal source formatting
+        id: terminal_format
+        continue-on-error: true
+        run: node nexa/tests/format-claude-terminal.mjs "$RUNNER_TEMP/focused-application"
       - name: Preserve actual focused outcomes
         if: always()
         env:
@@ -95,7 +99,7 @@ jobs:
           import json, os, re
           from pathlib import Path
           steps = json.loads(os.environ['FOCUSED_OUTCOMES'])
-          failed = {name: steps.get(name, {}).get('outcome', 'missing') for name in ['terminal','network_guard','syntax','native','interface','core'] if steps.get(name, {}).get('outcome') != 'success'}
+          failed = {name: steps.get(name, {}).get('outcome', 'missing') for name in ['terminal_format','terminal','network_guard','syntax','native','interface','core'] if steps.get(name, {}).get('outcome') != 'success'}
           tap = Path(os.environ['RUNNER_TEMP']) / 'focused-native.tap'
           counts = {}
           if tap.is_file():
@@ -121,3 +125,8 @@ jobs:
             ${{ runner.temp }}/claude-terminal-settings.tap
             ${{ runner.temp }}/focused-native.tap
             ${{ runner.temp }}/focused-validation.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: terminal-formatted-source
+          path: ${{ runner.temp }}/terminal-formatted-source

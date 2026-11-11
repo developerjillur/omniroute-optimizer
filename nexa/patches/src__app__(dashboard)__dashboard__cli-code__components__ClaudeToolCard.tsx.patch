@@ -9,6 +9,15 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
  } from "@/shared/services/claudeCliConfig";
  import { cn } from "@/shared/utils/cn";
  import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
+@@ -26,7 +27,7 @@
+   selectedId || (apiKeys?.length > 0 ? apiKeys[0].id : "");
+ 
+ /**
+- * One-time form initialization from ~/.claude/settings.json, applied right
++ * One-time form initialization from the isolated Terminal profile, applied right
+  * after a status fetch resolves: mirror the env model mappings into the form
+  * and re-select the API key whose masked value matches the stored token.
+  */
 @@ -74,6 +75,7 @@
    const [claudeStatus, setClaudeStatus] = useState(null);
    const [checkingClaude, setCheckingClaude] = useState(false);

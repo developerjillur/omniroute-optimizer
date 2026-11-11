@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 362,
-    "patches": 218,
+    "total": 363,
+    "patches": 219,
     "new": 138,
     "tooling": 6,
     "upstreamCandidates": 27,
     "nexaSpecific": 109,
-    "needsReview": 226,
+    "needsReview": 227,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
   },
@@ -1287,6 +1287,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "src/shared/constants/cliTools.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/src__shared__constants__featureFlagDefinitions.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/shared/constants/featureFlagDefinitions.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },

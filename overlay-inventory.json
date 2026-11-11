@@ -7,7 +7,7 @@
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
   "trackedNexaFiles": 533,
-  "totalNexaBytes": 2506453,
+  "totalNexaBytes": 2508854,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -573,9 +573,9 @@
     {
       "path": "nexa/docs/CLAUDE-TERMINAL-PROFILES-2026-11-11.md",
       "mode": "100644",
-      "gitBlobSha": "fbaa436c2831f957c351d50d81a59b1745d96491",
-      "bytes": 5261,
-      "sha256": "f1652a4b7dfc6172b05ea86485d54264c8e2d3229baa6a9f0a4d221b34482108"
+      "gitBlobSha": "43d594b63fdb0530ce401b8a894f07ac403de1e7",
+      "bytes": 7662,
+      "sha256": "a4c642d14e3dd9c316027cf00580a2f0d5fe33075ae702462632a3deece5bc4b"
     },
     {
       "path": "nexa/docs/CODEX-IMAGE-GENERATION.md",

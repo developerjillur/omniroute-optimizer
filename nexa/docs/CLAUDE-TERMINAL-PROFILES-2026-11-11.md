@@ -58,9 +58,37 @@ Official contracts:
 
 ## যাচাইয়ের অবস্থা
 
-২০২৬-১১-১১: source candidate প্রস্তুত; focused baseline reproduction, candidate
-tests, compatibility/type checks এবং live acceptance এখনও বাকি। বর্তমান local
-resource window-তে warning pressure ও প্রায় ৮–১০ GiB physical headroom পাওয়া
-গেছে; render/app বন্ধ করা হয়নি। অনুমোদিত guard-এর threshold কমানো হয়নি।
-Source CI, নতুন full build, helper installation বা live rollout-কে এই নথি PASS
-বলে না। আগের live v3.8.53 build আলাদা receipt অনুযায়ী বহাল আছে।
+২০২৬-১১-১১: code commit `2d54a06759784b912c1bf3d9c657b59ea1f25cda`-এর
+source validation সম্পূর্ণ।
+
+- [পূর্ণ source CI](https://github.com/developerjillur/omniroute-optimizer/actions/runs/43002575950):
+  ২৮টি required gate সফল; patch applicability, pristine base, inventory, core types,
+  পূর্ণ lint ও required docs-all পাস।
+- [Focused CLI CI](https://github.com/developerjillur/omniroute-optimizer/actions/runs/43002575829):
+  Node 24.15.0 ও 26.7.0-এ আলাদাভাবে 12/12 Terminal helper test;
+  settings 23/23, focused native 67/67। Baseline-এ 6টি assertion failure দিয়ে
+  সমস্যা reproduce হয়েছে; environment failure বা resource stop-কে RED বলা হয়নি।
+- Compatibility 1366/1366, stream 396/396 এবং production Node native/transport
+  281/281 পাস। নতুন test skip করা হয়নি। Deployment helper suite-এর পূর্বনির্ধারিত
+  macOS-only wildcard listener case Linux CI-তে execute হয়নি।
+- পূর্ণ compiler শেষ হয়েছে: inherited diagnostic 7313, অনুমোদিত ceiling 7314;
+  pristine-এর তুলনায় নতুন diagnostic identity 0। এটি zero-type-error দাবি নয়।
+- Isolated source fixture-এর production dependency audit-এ vulnerability 0।
+  নতুন Mac-installed package-এর security/acceptance test এখনও বাকি।
+
+Shared `~/.claude/settings.json` byte-identical; official CLI-এর target ও metadata
+একই আছে। কোনো app/session বন্ধ, core configuration/data write বা generation
+call করা হয়নি। শেষ bounded read-only check-এ core এবং trusted `https://omni.local`
+health 200; এর আগে একটি 5-second health probe timeout হয়েছিল। Service restart
+করা হয়নি এবং timeout-এর কারণ প্রমাণিত বলা হচ্ছে না।
+
+**অবস্থা: SOURCE_VALIDATED_WAIT_RESOURCE।** Reviewed 8 GiB build profile-এর admission
+memory-pressure warning-এ ব্যর্থ; physical headroom প্রায় 8.43 GiB, প্রয়োজন অন্তত
+18 GiB ও 30-second quiet window। Internal usage মালিকের 400 GB সীমার ওপরে;
+NexaWork-এ build/backup space-ও সীমিত। Guard bypass, threshold কমানো, app বন্ধ বা
+ফাইল মুছে জায়গা তৈরি করা হয়নি।
+
+নতুন Terminal helper install, full package build, isolated installed-security/smoke,
+actual native OAuth ও On/Off routing acceptance এবং live promotion করা হয়নি।
+বর্তমান live v3.8.53 বহাল আছে; এই CLI সংশোধন live-এ পৌঁছায়নি। Build ও promotion-এর
+আগে নতুন resource admission এবং চলমান request-এর নিরাপদ drain দরকার।

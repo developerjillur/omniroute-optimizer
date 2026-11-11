@@ -2,6 +2,17 @@
 
 Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। OmniRoute-এর pristine upstream source অপরিবর্তিত রেখে custom পরিবর্তনগুলো `nexa/` folder-এ রাখা হয়েছে।
 
+## Live availability follow-up — ২০২৬-১১-১১
+
+Release-এর পর intermittent core/HTTPS timeout পাওয়া গেছে। Existing deferred DB
+health-check flag চালু করে প্রায় ৫ GB database-এর startup integrity scan মূল
+server thread থেকে packaged worker-এ সরানো হয়েছে; full check skip করা হয়নি।
+পরের পাঁচটি HTTPS/core/page check `200`, তবে আগের short-deadline windows পুরো
+পাস করেনি। Busy host-এ runtime tokenizer/statistics contention এখনও follow-up;
+এই incident-এর permanent recovery দাবি করা হচ্ছে না। Package, routes, accounts,
+shared settings ও root ingress অক্ষত। [Incident note](nexa/docs/LIVE-AVAILABILITY-2026-11-11.md)
+ও [receipt](reports/live-availability-2026-11-11.json)-এ evidence ও বাকি gates আছে।
+
 ## Claude Terminal routing ও Fable 5.2 — ২০২৬-১১-১১ live release
 
 বর্তমান local release **v3.8.53 / `1a615fd6`**। CLI Code-এর Fable field-এ

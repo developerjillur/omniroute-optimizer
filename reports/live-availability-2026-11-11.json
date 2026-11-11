@@ -1,0 +1,101 @@
+{
+  "recordedAtUtc": "2026-11-11T12:47:39.188656+00:00",
+  "status": "AVAILABLE_WITH_INTERMITTENT_LATENCY_NOT_FULLY_RESOLVED",
+  "packageVersion": "3.8.53",
+  "liveBuild": "1a615fd6",
+  "packageChanged": false,
+  "sourceBase": "b812a02ab9a8aac8d15a4b8bc690f7b389ca18e1",
+  "provenStartupCause": "Synchronous SQLite quick_check blocked the core main thread on an approximately 5 GB database during recovery startup.",
+  "runtimeEvidence": [
+    "Bounded CPU sample included local count_tokens tokenizer initialization and synchronous provider-metrics aggregation.",
+    "Host CPU load approximately 47 on 14 cores with two media renders; pressure normal, swap zero, physical headroom approximately 10.8 GiB."
+  ],
+  "runtimeSoleCauseProved": false,
+  "persistentChange": {
+    "key": "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED",
+    "namespace": "feature_flags",
+    "previousOverride": null,
+    "newOverride": "true",
+    "packagedChildWorkerObserved": true,
+    "integrityCheckSkipped": false,
+    "fullIntegrityVerdictCertified": false
+  },
+  "shortDeadlineWindows": [
+    {
+      "receipt": "availability-window-v1.json",
+      "checks": 24,
+      "timeouts": 7,
+      "deadlineSeconds": 4
+    },
+    {
+      "receipt": "availability-window-v2.json",
+      "checks": 10,
+      "timeouts": 4,
+      "deadlineSeconds": 3
+    }
+  ],
+  "laterCheck": {
+    "receipt": "recovery-check-v3.json",
+    "allFiveHttp200": true,
+    "checks": [
+      {
+        "at": "2026-11-11T12:45:28.938277+00:00",
+        "check": "health-v4",
+        "http": 200,
+        "seconds": 2.653638,
+        "exit": 0
+      },
+      {
+        "at": "2026-11-11T12:45:32.650539+00:00",
+        "check": "health-v6",
+        "http": 200,
+        "seconds": 3.693137,
+        "exit": 0
+      },
+      {
+        "at": "2026-11-11T12:45:36.309753+00:00",
+        "check": "homepage",
+        "http": 200,
+        "seconds": 3.639967,
+        "exit": 0
+      },
+      {
+        "at": "2026-11-11T12:45:36.395893+00:00",
+        "check": "cli-dashboard",
+        "http": 200,
+        "seconds": 0.066749,
+        "exit": 0
+      },
+      {
+        "at": "2026-11-11T12:45:36.599864+00:00",
+        "check": "core",
+        "http": 200,
+        "seconds": 0.188148,
+        "exit": 0
+      }
+    ],
+    "pageChecksFollowNormalLoginRedirect": true
+  },
+  "preservation": {
+    "allRecordedFileHashesUnchanged": true,
+    "otherKeyValueRowsUnchangedAtFlagTransaction": true,
+    "rootIngressJobsReloaded": false,
+    "hostsOrCertificatesChanged": false,
+    "userAppsSessionsOrRendersStopped": false,
+    "modelGenerationCalls": 0,
+    "existingFilesDeleted": false
+  },
+  "privateEvidenceDirectory": "/Volumes/NexaWork/Work/omniroute-live-unresponsive-2026-11-11",
+  "privateEvidenceHashes": {
+    "startup-core-sample-v1.txt": "9986ff31d1b504cc944c936879813097ab9c0acc949b89c911662f6feee6ae54",
+    "deferred-core-sample-v1.txt": "094a2376ab37e7d54d3b88bbebc41306279cf62a4e9086422e9bbe14aa83dd17",
+    "runtime-cpu-v1.json": "30d90af2b79b230f8d75179ea6b470e1de7e6869b9b6d5e575dd6f8427711e5a",
+    "recovery-check-v3.json": "d16f196df7a866ee8db9f7e5f38e11933f8414980916aac00477160c72481d48"
+  },
+  "limits": [
+    "Subsequent HTTP 200 checks do not establish sustained low latency or permanent recovery.",
+    "The initial runtime outage is not proved to have the same cause as the synchronous recovery startup scan.",
+    "No new full build, additional full-database scan, or new provider generation was started during competing media renders.",
+    "Quiet-window sustained availability and focused tokenizer/statistics regressions remain outstanding."
+  ]
+}

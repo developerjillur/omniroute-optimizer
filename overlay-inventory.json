@@ -7,7 +7,7 @@
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
   "trackedNexaFiles": 533,
-  "totalNexaBytes": 2508854,
+  "totalNexaBytes": 2508727,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -3604,9 +3604,9 @@
     {
       "path": "nexa/tests/publication-install-integration.mjs",
       "mode": "100644",
-      "gitBlobSha": "ea9bc3fd3888f35f79cde45e91df79bb5195089f",
-      "bytes": 6959,
-      "sha256": "12c87c54e16d2153a11da1a2fb3e02ba707404205b7c5734b4a9ef6ad6965515"
+      "gitBlobSha": "ed7aa1556137569d4e8b4a39a6e070ff515a89b7",
+      "bytes": 6832,
+      "sha256": "c4890bf39ec2a4abd90554053c4a24762e850e3a1c52f647b6fca1397e3cc051"
     },
     {
       "path": "nexa/tests/resilience-budget-red.test.mjs",

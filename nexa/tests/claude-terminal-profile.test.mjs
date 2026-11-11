@@ -38,6 +38,21 @@ const original = {
   },
 };
 
+function proxyRequest(proxyUrl, options) {
+  const proxy = new URL(proxyUrl);
+  return http.request(proxy.origin, {
+    ...options,
+    headers: {
+      ...options.headers,
+      "proxy-authorization":
+        "Basic " +
+        Buffer.from(
+          decodeURIComponent(proxy.username) + ":" + decodeURIComponent(proxy.password)
+        ).toString("base64"),
+    },
+  });
+}
+
 test("native Terminal mode isolates authentication and preserves global settings", () => {
   const before = JSON.stringify(original);
   const native = buildTerminalLaunchSettings("native", original, {});
@@ -188,7 +203,7 @@ test("CONNECT tunnel carries opaque bytes without TLS termination and avoids loo
     },
   });
   try {
-    const req = http.request(tunnel.url, { method: "CONNECT", path: "api.anthropic.com:443" });
+    const req = proxyRequest(tunnel.url, { method: "CONNECT", path: "api.anthropic.com:443" });
     const connected = once(req, "connect");
     req.end();
     const [res, socket] = await connected;
@@ -227,7 +242,7 @@ test("upstream proxy and original NO_PROXY policy stay effective", async () => {
     },
   });
   try {
-    const req = http.request(tunnel.url, { method: "CONNECT", path: "api.anthropic.com:443" });
+    const req = proxyRequest(tunnel.url, { method: "CONNECT", path: "api.anthropic.com:443" });
     const connected = once(req, "connect");
     req.end();
     const [res, socket] = await connected;
@@ -330,4 +345,27 @@ test("Off ignores saved gateway model mappings while On restores them", () => {
   assert.throws(() =>
     buildTerminalLaunchSettings("native", original, {}, { model: "cx/gpt-6.1-sol" })
   );
+});
+
+
+test("an unrelated local client cannot use the Terminal tunnel or inherited proxy credentials", async () => {
+  let connected = false;
+  const tunnel = await startTerminalTunnel({
+    resolveApi: async () => {
+      connected = true;
+      throw Error("must not resolve without authentication");
+    },
+  });
+  try {
+    const proxy = new URL(tunnel.url);
+    const req = http.request(proxy.origin, { method: "CONNECT", path: "api.anthropic.com:443" });
+    const response = once(req, "connect");
+    req.end();
+    const [res, socket] = await response;
+    assert.equal(res.statusCode, 407);
+    socket.destroy();
+    assert.equal(connected, false);
+  } finally {
+    tunnel.close();
+  }
 });

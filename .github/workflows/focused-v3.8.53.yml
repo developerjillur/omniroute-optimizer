@@ -86,6 +86,17 @@ jobs:
         continue-on-error: true
         working-directory: ${{ runner.temp }}/focused-application
         run: npm run typecheck:core
+      - name: Select the review runtime for Terminal helpers
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "26.7.0"
+      - name: Terminal helper regressions on the review runtime
+        id: terminal26
+        shell: bash
+        run: |
+          set -euo pipefail
+          export TMPDIR="$RUNNER_TEMP"
+          node --test --test-concurrency=1 --test-reporter=tap nexa/tests/claude-terminal-profile.test.mjs | tee "$RUNNER_TEMP/claude-terminal-tooling-node26.tap"
       - name: Check Terminal source formatting
         id: terminal_format
         continue-on-error: true
@@ -99,7 +110,7 @@ jobs:
           import json, os, re
           from pathlib import Path
           steps = json.loads(os.environ['FOCUSED_OUTCOMES'])
-          failed = {name: steps.get(name, {}).get('outcome', 'missing') for name in ['terminal_format','terminal','network_guard','syntax','native','interface','core'] if steps.get(name, {}).get('outcome') != 'success'}
+          failed = {name: steps.get(name, {}).get('outcome', 'missing') for name in ['terminal26','terminal_format','terminal','network_guard','syntax','native','interface','core'] if steps.get(name, {}).get('outcome') != 'success'}
           tap = Path(os.environ['RUNNER_TEMP']) / 'focused-native.tap'
           counts = {}
           if tap.is_file():
@@ -121,6 +132,7 @@ jobs:
           path: |
             ${{ runner.temp }}/claude-terminal-red.tap
             ${{ runner.temp }}/claude-terminal-red.json
+            ${{ runner.temp }}/claude-terminal-tooling-node26.tap
             ${{ runner.temp }}/claude-terminal-tooling.tap
             ${{ runner.temp }}/claude-terminal-settings.tap
             ${{ runner.temp }}/focused-native.tap

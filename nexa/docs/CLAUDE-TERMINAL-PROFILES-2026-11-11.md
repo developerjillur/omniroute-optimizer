@@ -29,7 +29,8 @@ Claude subscription ব্যবহার করবে; native app-এর Agent 
 - On/Off-এর existing DB flag নতুন Terminal launch-এ read-only পড়া হয়। Store পড়া
   না গেলে অন্য provider-এ চুপচাপ যাওয়া হয় না। চলমান session বদলায় না।
 - Off-এ শুধু ওই child-এর gateway credentials/provider overrides unset হয়।
-  Native API-এর জন্য loopback-only CONNECT tunnel TLS bytes অপরিবর্তিত রাখে;
+  Native API-এর জন্য প্রতি launch-এর নিজস্ব password-সহ loopback-only CONNECT
+  tunnel TLS bytes অপরিবর্তিত রাখে;
   configured DNS resolver-এর public answer ব্যবহার করে স্থানীয় hosts interception
   এড়ায়। HTTPS certificate verification বন্ধ বা TLS terminate করা হয় না। আগের
   upstream proxy/NO_PROXY policy tunnel-এর বাইরে হারিয়ে যায় না।

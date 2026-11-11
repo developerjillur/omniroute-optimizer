@@ -2,6 +2,7 @@ import http from "node:http";
 import https from "node:https";
 import net from "node:net";
 import dns from "node:dns/promises";
+import { randomBytes, timingSafeEqual } from "node:crypto";
 
 function publicIPv4(ip) {
   if (!net.isIPv4(ip)) return false;
@@ -57,6 +58,8 @@ export async function startTerminalTunnel({
   connect = (options) => net.connect(options),
   idleTimeout = 600000,
 } = {}) {
+  const password = randomBytes(24).toString("hex");
+  const authorization = Buffer.from("Basic " + Buffer.from("terminal:" + password).toString("base64"));
   const sockets = new Set();
   const server = http.createServer((_req, res) => {
     res.writeHead(405);
@@ -74,6 +77,13 @@ export async function startTerminalTunnel({
     else track(socket);
   });
   server.on("connect", async (req, client, head) => {
+    const supplied = Buffer.from(String(req.headers["proxy-authorization"] || ""));
+    if (supplied.length !== authorization.length || !timingSafeEqual(supplied, authorization)) {
+      client.end(
+        'HTTP/1.1 407 Proxy Authentication Required\r\nProxy-Authenticate: Basic realm="Claude Terminal"\r\nConnection: close\r\n\r\n'
+      );
+      return;
+    }
     let upstream;
     const reject = () => {
       if (!client.destroyed) client.end("HTTP/1.1 502 Bad Gateway\r\nConnection: close\r\n\r\n");
@@ -154,7 +164,7 @@ export async function startTerminalTunnel({
     server.listen(0, "127.0.0.1", resolve);
   });
   return {
-    url: `http://127.0.0.1:${server.address().port}`,
+    url: `http://terminal:${password}@127.0.0.1:${server.address().port}`,
     close: () => {
       for (const socket of sockets) socket.destroy();
       server.close();

@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
-  "trackedNexaFiles": 533,
-  "totalNexaBytes": 2508727,
+  "trackedNexaFiles": 536,
+  "totalNexaBytes": 2523642,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -153,9 +153,9 @@
     {
       "path": "nexa/deploy/build-candidate.sh",
       "mode": "100644",
-      "gitBlobSha": "35d0e5bba102d548f95fdd860dbac7f53e9420e1",
-      "bytes": 3082,
-      "sha256": "00a51bafbe35b9cf5190f9a958fb9bc9c13503d8471a722cf6eea56833209c52"
+      "gitBlobSha": "db6cfcb4aaf152ccd44cd09fd5ca22537685d610",
+      "bytes": 3130,
+      "sha256": "39638f3aa07429ebc4cb9cfff963fe12df274fa47e7afc3d1e33dbc94f5e4177"
     },
     {
       "path": "nexa/deploy/build-candidate.test.mjs",
@@ -184,6 +184,20 @@
       "gitBlobSha": "66228595489f2916ad7a887b107c4abf85e8734c",
       "bytes": 6357,
       "sha256": "b774d4426c91ceb26fc6ae4f87c07ea91cf870c495efbf1e263d32ddb72712a5"
+    },
+    {
+      "path": "nexa/deploy/compressed-database.py",
+      "mode": "100644",
+      "gitBlobSha": "7acbfa90724d80d4ea616fa1f312bdbf03c62768",
+      "bytes": 4104,
+      "sha256": "f9a409d85736e016e85af067c33b6805b250fd73d3d7d18e90650e80fa053395"
+    },
+    {
+      "path": "nexa/deploy/compressed-database.test.py",
+      "mode": "100644",
+      "gitBlobSha": "866188c234a72c20cfc83384bc23d7df535df43c",
+      "bytes": 3049,
+      "sha256": "cb96edb48c3ecbaceffbd947906134247c8cf36eb82b2feb3d1bae7cf3486b39"
     },
     {
       "path": "nexa/deploy/dashboard-gate.mjs",
@@ -494,6 +508,13 @@
       "sha256": "a3c0a61214ef9d027b3e5d11c14038a4d7937f1b9712cfe042fa2ddfd774122b"
     },
     {
+      "path": "nexa/deploy/snapshot-quiescent-compressed.py",
+      "mode": "100644",
+      "gitBlobSha": "662e9ba2c67279ffd86f459e4f2692d9a92f84ab",
+      "bytes": 3551,
+      "sha256": "432118716997c6ec1f950f21a97c932574925e1250f3feb0091c0083d3281345"
+    },
+    {
       "path": "nexa/deploy/stop-owned-bridge.mjs",
       "mode": "100644",
       "gitBlobSha": "0fac576190c83f21869075810c76fbbe901404a9",
@@ -573,9 +594,9 @@
     {
       "path": "nexa/docs/CLAUDE-TERMINAL-PROFILES-2026-11-11.md",
       "mode": "100644",
-      "gitBlobSha": "43d594b63fdb0530ce401b8a894f07ac403de1e7",
-      "bytes": 7662,
-      "sha256": "a4c642d14e3dd9c316027cf00580a2f0d5fe33075ae702462632a3deece5bc4b"
+      "gitBlobSha": "e4f2ba24fa8cdc0ed3da01fca8cfd1abb6091f47",
+      "bytes": 11825,
+      "sha256": "0ae504681a17c8cb0f428c2c82f3dc1d1cfd56198125b13300b62adcc4d27731"
     },
     {
       "path": "nexa/docs/CODEX-IMAGE-GENERATION.md",

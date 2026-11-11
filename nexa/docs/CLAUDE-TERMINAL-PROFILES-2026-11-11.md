@@ -82,13 +82,63 @@ call করা হয়নি। শেষ bounded read-only check-এ core এব
 health 200; এর আগে একটি 5-second health probe timeout হয়েছিল। Service restart
 করা হয়নি এবং timeout-এর কারণ প্রমাণিত বলা হচ্ছে না।
 
-**অবস্থা: SOURCE_VALIDATED_WAIT_RESOURCE।** Reviewed 8 GiB build profile-এর admission
-memory-pressure warning-এ ব্যর্থ; physical headroom প্রায় 8.43 GiB, প্রয়োজন অন্তত
-18 GiB ও 30-second quiet window। Internal usage মালিকের 400 GB সীমার ওপরে;
-NexaWork-এ build/backup space-ও সীমিত। Guard bypass, threshold কমানো, app বন্ধ বা
-ফাইল মুছে জায়গা তৈরি করা হয়নি।
+## Live release — ২০২৬-১১-১১
 
-নতুন Terminal helper install, full package build, isolated installed-security/smoke,
-actual native OAuth ও On/Off routing acceptance এবং live promotion করা হয়নি।
-বর্তমান live v3.8.53 বহাল আছে; এই CLI সংশোধন live-এ পৌঁছায়নি। Build ও promotion-এর
-আগে নতুন resource admission এবং চলমান request-এর নিরাপদ drain দরকার।
+**অবস্থা: LIVE_UPDATED_AND_ACCEPTED।** Full build ও live promotion সম্পূর্ণ।
+
+- Compiled source: `929061f367cbd1db1e1579e74bf4c7a1f46807fb`;
+  application integration/build: `1a615fd60e0a6ba207bf1debc7b0ebd749de5de6` / `1a615fd6`।
+  Validated runtime input অপরিবর্তিত; normal hooks-এর formatting-only fixture change
+  AST-identical ছিল।
+- Version `3.8.53`; sealed archive 155,816,049 bytes,
+  SHA256 `5ceb77cf4b799edb6ce9f8197c87a229d7b177756c2093f5a83679b64036f5c1`।
+- প্রথম 6 GiB heap run-এ inner RSS watchdog 8198 MiB-এ থামিয়েছে। সেই run ও receipt
+  রাখা আছে। পরে 5888 MiB heap ও একই 8192 MiB RSS cap-এ full build পাস করেছে;
+  measured family peak 7931.72 MiB, minimum physical headroom 15.83 GiB।
+  মালিক শুধু এই run-এর initial admission 15 GiB অনুমোদন করেছেন; original resource
+  guard file ও runtime stop thresholds বদলায়নি। Successful run-এর 30-second
+  minimum initial headroom প্রকৃতপক্ষে 19.30 GiB ছিল।
+- Isolated install: publication lock-এর 1036 dependency match; Fable 5.2 inference,
+  management authentication, catalog, native usage schema ও fail-closed CORS পাস।
+  Installed root ও dist audit-এ vulnerability 0।
+- Clone database integrity `ok`; accounts, keys, permissions, mappings, environment,
+  settings ও historical row counts preservation পাস। Byte/mode-verified rollback
+  runtime এবং consistent private database snapshot retained আছে।
+- Live trusted HTTPS IPv4/IPv6 ও core health 200; Bridge backend/ingress TLS ও DNS
+  readiness পাস। Live Fable 5.2 SSE request 200, real `end_turn`, `message_stop`,
+  requested marker ও native usage পাওয়া গেছে; manual retry 0। Live installed root
+  ও dist audit-এও vulnerability 0।
+- Managed Terminal launcher install ও fresh zsh login-shell detection পাস;
+  official CLI `2.1.322`, binary metadata ও shared settings অপরিবর্তিত।
+  প্রথম native check-এ CLI login ছিল না। মালিকের স্বাভাবিক login-এর পরে official
+  CLI-তে `claude.ai` / first-party authentication এবং Fable 5.2-এর fresh foreground
+  request native Off ও gateway On—দুই mode-এই পাস। Control flag stores isolated
+  ছিল; live flag ও model mappings বদলায়নি। কোনো existing chat চালানো হয়নি।
+- Live UI-তে `Claude Terminal routing` Off এবং Claude Fable field-এ
+  `claude-fable-5-2` দেখা গেছে। Shared native-app settings path অপরিবর্তিত;
+  form শুধু Terminal profile-এর path দেখায়।
+
+NexaWork-এর সীমিত জায়গায় final stopped database-এর checksum-verified gzip snapshot
+নেওয়া হয়েছে। প্রায় 4.63 GiB database 1,419,576,436 bytes-এ সংরক্ষিত; সব source
+bytes-এর SHA256 verified। Cache relocation, existing file deletion বা T7 write
+করতে হয়নি। `compressed-database.py` ও `snapshot-quiescent-compressed.py` deployment
+helpers Nexa-তে রাখা হয়েছে। Caller-কে আগে সব database handle বন্ধ এবং journal
+checkpointed প্রমাণ করতে হবে। Restore destination-এর existing path/inode রাখে;
+পুরো compressed stream verify হওয়ার আগে destination write হয় না। Corrupt
+checksum, truncated stream, dirty journal ও existing archive overwrite refusal-সহ
+পাঁচটি SQLite regression test আছে। চলমান database-এর restore সমর্থিত নয়।
+পরের local build-এ এই measured profile পুনর্ব্যবহার করতে explicit
+`NEXA_BUILD_HEAP_MB=5888` দিন। Shared deployment helper-এর default heap, initial
+resource admission ও RSS/runtime stop limits বদলানো হয়নি। Compressed snapshot
+helpers build/backup tooling; installed runtime payload বদলায় না।
+
+Private receipts-এর directory:
+`/Volumes/NexaWork/Work/omniroute-cli-profile-controls-2026-11-11/release-build-v1/evidence`।
+Canonical acceptance: `live-promotion-v3.json`, `post-live-acceptance-v1.json`,
+`terminal-cli-acceptance-v2.json` ও `terminal-shell-acceptance-v1.json`। আগের failed
+run/receipt overwritten হয়নি; receipt-name collision-এ interrupted test harness
+সংশোধন করে নতুন version রাখা হয়েছে।
+
+এটি tested foreground routing ও release acceptance-এর ফল। সব future provider
+response, quota availability বা GPT/Claude output-quality parity-এর নিশ্চয়তা নয়।
+নতুন package বসানোর পরে OS restart এবং detached supervisor lifecycle চালানো হয়নি।

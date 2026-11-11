@@ -1,0 +1,70 @@
+{
+  "status": "LIVE_UPDATED_AND_ACCEPTED",
+  "version": "3.8.53",
+  "buildSHA": "1a615fd6",
+  "compiledSourceCommit": "929061f367cbd1db1e1579e74bf4c7a1f46807fb",
+  "validatedRuntimeCodeCommit": "2d54a06759784b912c1bf3d9c657b59ea1f25cda",
+  "applicationIntegrationCommit": "1a615fd60e0a6ba207bf1debc7b0ebd749de5de6",
+  "artifact": {
+    "bytes": 155816049,
+    "sha256": "5ceb77cf4b799edb6ce9f8197c87a229d7b177756c2093f5a83679b64036f5c1",
+    "publicationLockMatchedInstalledDependencies": 1036
+  },
+  "validation": {
+    "sourceCIRequiredGatesPassed": 28,
+    "sourceCI": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/43002575950",
+    "compilerCompleted": true,
+    "compilerDiagnostics": 7313,
+    "compilerCeiling": 7314,
+    "newDiagnosticIdentities": 0,
+    "localFullCompilerRepeated": false,
+    "fullProductionBuild": true,
+    "isolatedPackageSmoke": true,
+    "isolatedAndLiveDependencyAuditFindings": 0,
+    "trustedHttpsIPv4IPv6AndCoreHealth": 200,
+    "bridgeIngressAndBackendTlsVerified": true,
+    "liveFable52Sse": true,
+    "officialCliVersion": "2.1.322",
+    "officialCliNativeAndGatewayFable52Requests": true,
+    "freshLoginShellManagedFunction": true,
+    "liveUiFableField": "claude-fable-5-2"
+  },
+  "preservation": {
+    "accountsKeysMappingsSettings": true,
+    "historyCountsNondecreasing": true,
+    "sharedClaudeSettingsByteIdentical": true,
+    "officialCliBinaryMetadataUnchanged": true,
+    "nativeAppBridgeConfigurationUnchanged": true,
+    "startupDefinitionsHostsCertificatesUnchanged": true,
+    "originalRuntimeRetained": true,
+    "consistentDatabaseBackupRetained": true,
+    "compressedDatabaseChecksumVerified": true,
+    "existingFilesDeleted": false,
+    "t7FilesWritten": false,
+    "otherAppsOrSessionsStopped": false
+  },
+  "buildResources": {
+    "ownerAuthorizedInitialHeadGiBForThisRun": 15,
+    "actualInitialMinimumHeadGiB": 19.302642822265625,
+    "heapMiB": 5888,
+    "rssCapMiB": 8192,
+    "measuredPeakRssMiB": 7931.72,
+    "minimumObservedHeadGiB": 15.829574584960938,
+    "globalGuardUnchanged": true,
+    "earlierResourceStoppedRunRetained": true
+  },
+  "operationalSourceValidation": {
+    "compressedDatabaseSQLiteRegressionsPassed": 5,
+    "isolatedManifestRegenerationByteIdentical": true,
+    "exactOverlayInventoryVerified": true,
+    "runtimePatchAndNewFileInputsUnchangedSinceCompiledSource": true,
+    "additionalAllocatingLocalTestsDeferredForOwnerRender": true
+  },
+  "limits": [
+    "Fresh foreground transport was tested; existing conversations were not replayed.",
+    "The native/gateway checks used isolated test flag stores and preserved the live routing flag.",
+    "Detached supervisor lifecycle and an OS restart after this installation were not tested.",
+    "Provider availability, quota and cross-model output quality are separate from transport acceptance.",
+    "The source CI above validates the compiled runtime code; later backup tooling and release documentation have separate local checks."
+  ]
+}

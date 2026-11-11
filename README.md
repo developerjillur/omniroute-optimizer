@@ -2,7 +2,34 @@
 
 Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। OmniRoute-এর pristine upstream source অপরিবর্তিত রেখে custom পরিবর্তনগুলো `nexa/` folder-এ রাখা হয়েছে।
 
-## v3.8.53 ও Fable 5.2 — live update সম্পন্ন
+## Claude Terminal routing ও Fable 5.2 — ২০২৬-১১-১১ live release
+
+বর্তমান local release **v3.8.53 / `1a615fd6`**। CLI Code-এর Fable field-এ
+`claude-fable-5-2` ফিরেছে। Managed launcher দিয়ে নতুন Terminal session-এ Off হলে
+নিজের native Claude login, On হলে OmniRoute profile ব্যবহৃত হয়; native app-এর
+Agent Bridge ও shared settings অপরিবর্তিত। মালিকের স্বাভাবিক CLI login-এর পরে
+official CLI `2.1.322` দিয়ে native Off ও gateway On—দুই পথেই Fable 5.2 fresh
+foreground request পাস করেছে। Live routing flag পরিবর্তন করে পরীক্ষা করা হয়নি।
+
+Full production build, exact installed-publication lock, isolated package smoke,
+trusted IPv4/IPv6 HTTPS/core health, live native Fable SSE ও Bridge TLS readiness
+পাস। Isolated এবং live root/dist dependency audit-এ finding 0; 1036 installed
+root dependency publication lock-এর সঙ্গে মেলে। Accounts, keys, mappings,
+settings, history, startup definitions, hosts ও certificates সংরক্ষিত।
+
+Compiled runtime code-এর [পূর্ণ source CI](https://github.com/developerjillur/omniroute-optimizer/actions/runs/43002575950)-তে
+28 required gate পাস। Completed TypeScript `7313 ≤ 7314`, new diagnostic identity
+0; inherited backlog শূন্য নয়। সীমিত scratch space-এ checksum-verified compressed
+stopped-database rollback snapshot নেওয়া হয়েছে; নতুন backup helpers-এর পাঁচটি
+SQLite regression পাস। Code/data বা পুরোনো T7 file মুছতে হয়নি।
+
+[Release receipt](reports/native-release-2026-11-11.json) ও
+[Terminal routing note](nexa/docs/CLAUDE-TERMINAL-PROFILES-2026-11-11.md)-এ exact
+source/artifact identity, preserved rollback, earlier interrupted runs ও acceptance
+limits আছে। Existing chat replay, detached supervisor lifecycle, নতুন package-এর
+OS reboot এবং সব model-এর output-quality parity এই smoke acceptance-এর অংশ নয়।
+
+## ঐতিহাসিক v3.8.53 ও Fable 5.2 — ২০২৬-১১-১০
 
 Released base `191dce8d534ceb56c28a08e71381284a9a87838f`-এ আগের Nexa customization port এবং `claude-fable-5-2` native routing/metadata source validation সম্পন্ন। Imported model, explicit mappings ও owner-selected defaults অক্ষত। Native signed prefix, selected effort, tool payload, refusal, Thread continuity, HTTP-attempt identity এবং standard/fast cache pricing সংরক্ষণ করা হয়েছে।
 

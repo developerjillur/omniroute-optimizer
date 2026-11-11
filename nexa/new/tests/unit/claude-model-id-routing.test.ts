@@ -191,11 +191,15 @@ test("the production missing-mapping branch returns a named Anthropic error befo
   assert.match(error.error.message, /cc\/claude-unmapped-99.*not mapped/);
 });
 
-
 test("an explicit Fable edit is normalized without changing the default model", () => {
-  const original = { env: { ANTHROPIC_DEFAULT_FABLE_MODEL: "owner-choice", ANTHROPIC_MODEL: "claude-sonnet-5-5" } };
-  const plan = settings.planClaudeSettings(original,
-    { ANTHROPIC_DEFAULT_FABLE_MODEL: "cc/claude-fable-5-2" }, { updateFable: true });
+  const original = {
+    env: { ANTHROPIC_DEFAULT_FABLE_MODEL: "owner-choice", ANTHROPIC_MODEL: "claude-sonnet-5-5" },
+  };
+  const plan = settings.planClaudeSettings(
+    original,
+    { ANTHROPIC_DEFAULT_FABLE_MODEL: "cc/claude-fable-5-2" },
+    { updateFable: true }
+  );
   assert.equal(plan.settings.env.ANTHROPIC_DEFAULT_FABLE_MODEL, "claude-fable-5-2");
   assert.equal(plan.settings.env.ANTHROPIC_MODEL, "claude-sonnet-5-5");
   assert.equal(original.env.ANTHROPIC_DEFAULT_FABLE_MODEL, "owner-choice");

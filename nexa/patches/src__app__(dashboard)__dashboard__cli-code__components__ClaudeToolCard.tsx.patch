@@ -34,7 +34,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
    // Backups state
    const [backups, setBackups] = useState([]);
    const [showBackups, setShowBackups] = useState(false);
-@@ -92,11 +95,12 @@
+@@ -92,11 +95,17 @@
  
    const getConfigStatus = () => {
      if (!cliReady) return null;
@@ -44,11 +44,16 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
      const localMatch = currentUrl.includes("localhost") || currentUrl.includes("127.0.0.1");
      const cloudMatch = cloudEnabled && CLOUD_URL && currentUrl.startsWith(CLOUD_URL);
 -    if (localMatch || cloudMatch) return "configured";
-+    if (localMatch || cloudMatch || normalizeClaudeBaseUrl(currentUrl) === normalizeClaudeBaseUrl(baseUrl)) return "configured";
++    if (
++      localMatch ||
++      cloudMatch ||
++      normalizeClaudeBaseUrl(currentUrl) === normalizeClaudeBaseUrl(baseUrl)
++    )
++      return "configured";
      return "other";
    };
  
-@@ -177,7 +181,7 @@
+@@ -177,7 +186,7 @@
      return normalizeClaudeBaseUrl(url);
    };
  
@@ -57,7 +62,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
      setApplying(true);
      setMessage(null);
      try {
-@@ -190,11 +194,19 @@
+@@ -190,11 +199,23 @@
  
        tool.defaultModels.forEach((model) => {
          const targetModel = modelMappings[model.alias] || model.defaultValue || "";
@@ -66,7 +71,11 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
        });
  
 -      const postBody: Record<string, unknown> = { env };
-+      let postBody: Record<string, unknown> = { env, preview: true, updateFable: explicitlyEditedSlots.current.has("fable") };
++      let postBody: Record<string, unknown> = {
++        env,
++        preview: true,
++        updateFable: explicitlyEditedSlots.current.has("fable"),
++      };
        if (selectedKeyId) postBody.keyId = selectedKeyId;
 +      if (reviewed) {
 +        if (!settingsPreview) return;
@@ -79,7 +88,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
  
        const res = await fetch("/api/cli-tools/claude-settings", {
          method: "POST",
-@@ -202,14 +214,17 @@
+@@ -202,14 +223,17 @@
          body: JSON.stringify(postBody),
        });
        const data = await res.json();
@@ -102,17 +111,18 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
          setMessage({
            type: "error",
            text:
-@@ -235,7 +250,9 @@
+@@ -235,7 +259,10 @@
          tool.defaultModels.forEach((model) =>
            onModelMappingChange(model.alias, model.defaultValue || "")
          );
 +        explicitlyEditedSlots.current.clear();
          setSelectedApiKey("");
 +        await checkClaudeStatus();
++        window.dispatchEvent(new Event("omniroute:claude-terminal-reset"));
        } else {
          setMessage({
            type: "error",
-@@ -257,8 +274,17 @@
+@@ -257,8 +284,19 @@
    };
  
    const handleModelSelect = (model) => {
@@ -125,14 +135,16 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
 +  };
 +
 +  useEffect(() => {
-+    const refresh = () => { void checkClaudeStatus(); };
++    const refresh = () => {
++      void checkClaudeStatus();
++    };
 +    window.addEventListener("omniroute:claude-terminal-mode", refresh);
 +    return () => window.removeEventListener("omniroute:claude-terminal-mode", refresh);
 +  }, [checkClaudeStatus]);
  
    // Generate settings.json content for manual copy
    const getManualConfigs = () => {
-@@ -271,12 +297,12 @@
+@@ -271,12 +309,12 @@
  
      tool.defaultModels.forEach((model) => {
        const targetModel = modelMappings[model.alias];
@@ -147,16 +159,22 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
          content: JSON.stringify({ env }, null, 2),
        },
      ];
-@@ -342,6 +368,8 @@
+@@ -342,6 +380,14 @@
  
        {isExpanded && (
          <div className="mt-4 pt-4 border-t border-border flex flex-col gap-4">
-+          <p className="text-sm text-text-main">{t(claudeStatus?.routingMode === "gateway" ? "claudeTerminalModeGateway" : "claudeTerminalModeNative")}</p>
++          <p className="text-sm text-text-main">
++            {t(
++              claudeStatus?.routingMode === "gateway"
++                ? "claudeTerminalModeGateway"
++                : "claudeTerminalModeNative"
++            )}
++          </p>
 +          <p className="text-xs text-text-muted">{t("claudeTerminalNote")}</p>
            {checkingClaude && (
              <div role="status" className="flex items-center gap-2 text-text-muted">
                <Spinner decorative size="sm" />
-@@ -502,7 +530,10 @@
+@@ -502,7 +548,10 @@
                      </Button>
                      <Input
                        value={modelMappings[model.alias] || ""}
@@ -168,7 +186,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
                        placeholder={t("providerModelPlaceholder")}
                        aria-label={model.name}
                        className="min-w-0 w-auto flex-1"
-@@ -512,7 +543,10 @@
+@@ -512,7 +561,10 @@
                        <Button
                          variant="ghost"
                          size="icon-sm"
@@ -180,7 +198,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
                          title={t("clear")}
                          aria-label={t("clear")}
                          className="text-text-muted hover:text-error"
-@@ -525,6 +559,32 @@
+@@ -525,6 +577,32 @@
                </div>
  
                {/* Opt-in (default off): Claude Code auto-permission classifier compat mode. */}
@@ -213,7 +231,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
                <ClaudeClassifierCompatToggle />
  
                {/* Info link to the discovery-alias gate (claude/<provider>/<model> mirror ids) */}
-@@ -546,12 +606,12 @@
+@@ -546,12 +624,12 @@
                  <Button
                    variant="primary"
                    size="sm"

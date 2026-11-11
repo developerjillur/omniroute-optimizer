@@ -9,17 +9,22 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
  import { requireCliToolsAuth } from "@/lib/api/requireCliToolsAuth";
  import {
    ensureCliConfigWriteAllowed,
-@@ -10,23 +11,31 @@
+@@ -10,23 +11,47 @@
    getCliRuntimeStatus,
  } from "@/shared/services/cliRuntime";
  import { createBackup } from "@/shared/services/backupService";
 -import { normalizeClaudeBaseUrl } from "@/shared/services/claudeCliConfig";
-+import { planClaudeSettings, mergeTerminalProfile, parseSettingsJson } from "@/shared/services/claudeCliConfig";
++import {
++  planClaudeSettings,
++  mergeTerminalProfile,
++  parseSettingsJson,
++} from "@/shared/services/claudeCliConfig";
  import { saveCliToolLastConfigured, deleteCliToolLastConfigured } from "@/lib/db/cliToolState";
  import { cliSettingsEnvSchema } from "@/shared/validation/schemas";
  import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
  import { getApiKeyById } from "@/lib/db/apiKeys";
 -import { readJsoncConfig } from "../_lib/jsoncConfig";
++import { setFeatureFlagOverride } from "@/lib/db/featureFlags";
 +import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
  
  // Get claude settings path based on OS
@@ -32,37 +37,50 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
 -const readSettings = async () => {
 -  const settingsPath = getClaudeSettingsPath();
 -  return readJsoncConfig(settingsPath);
-+const getClaudeSettingsPath = () => path.join(path.dirname(getCliPrimaryConfigPath("claude")), "omniroute-terminal", "settings.json");
++const getClaudeSettingsPath = () =>
++  path.join(path.dirname(getCliPrimaryConfigPath("claude")), "omniroute-terminal", "settings.json");
 +
 +// Terminal overrides never replace the shared native-app configuration.
 +const getGlobalSettingsPath = () => getCliPrimaryConfigPath("claude");
 +const readSettingsFile = async (filename: string) => {
-+  try { return parseSettingsJson(await fs.readFile(filename, "utf-8")); }
-+  catch (error: any) { if (error.code === "ENOENT") return {}; throw error; }
++  try {
++    return parseSettingsJson(await fs.readFile(filename, "utf-8"));
++  } catch (error: any) {
++    if (error.code === "ENOENT") return {};
++    throw error;
++  }
 +};
-+const readSettings = async () => mergeTerminalProfile(
-+  await readSettingsFile(getGlobalSettingsPath()), await readSettingsFile(getClaudeSettingsPath())
-+);
++const readSettings = async () =>
++  mergeTerminalProfile(
++    await readSettingsFile(getGlobalSettingsPath()),
++    await readSettingsFile(getClaudeSettingsPath())
++  );
 +
 +const assertTerminalWriteTarget = async () => {
 +  for (const filename of [path.dirname(getClaudeSettingsPath()), getClaudeSettingsPath()]) {
-+    try { if ((await fs.lstat(filename)).isSymbolicLink()) throw Error("Terminal settings must not be a symlink"); }
-+    catch (error: any) { if (error.code !== "ENOENT") throw error; }
++    try {
++      if ((await fs.lstat(filename)).isSymbolicLink())
++        throw Error("Terminal settings must not be a symlink");
++    } catch (error: any) {
++      if (error.code !== "ENOENT") throw error;
++    }
 +  }
  };
  
  // GET - Check claude CLI and read current settings
-@@ -54,7 +63,8 @@
+@@ -54,7 +79,10 @@
      }
  
      const settings = await readSettings();
 -    const hasOmniRoute = !!settings?.env?.ANTHROPIC_BASE_URL;
-+    const routingMode = isFeatureFlagEnabled("OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES") ? "gateway" : "native";
++    const routingMode = isFeatureFlagEnabled("OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES")
++      ? "gateway"
++      : "native";
 +    const hasOmniRoute = routingMode === "gateway" && !!settings?.env?.ANTHROPIC_BASE_URL;
  
      return NextResponse.json({
        installed: runtime.installed,
-@@ -66,9 +76,10 @@
+@@ -66,9 +94,10 @@
        settings: settings,
        hasOmniRoute: hasOmniRoute,
        settingsPath: getClaudeSettingsPath(),
@@ -74,7 +92,7 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
      return NextResponse.json({ error: "Failed to check claude settings" }, { status: 500 });
    }
  }
-@@ -123,42 +134,43 @@
+@@ -123,42 +152,45 @@
        }
      }
  
@@ -120,7 +138,9 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
 +      throw new Error("Expected a settings object");
 +    }
 +    const revision = createHash("sha256").update(currentContent).digest("hex");
-+    const plan = planClaudeSettings(currentSettings, env, { updateFable: rawBody.updateFable === true });
++    const plan = planClaudeSettings(currentSettings, env, {
++      updateFable: rawBody.updateFable === true,
++    });
 +    if (rawBody.preview === true) {
 +      return NextResponse.json({ preview: true, revision, changes: plan.changes });
 +    }
@@ -141,7 +161,7 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
  
      // Persist last-configured timestamp
      try {
-@@ -172,13 +184,18 @@
+@@ -172,13 +204,18 @@
        message: "Settings updated successfully",
      });
    } catch (error) {
@@ -161,7 +181,7 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
    "ANTHROPIC_BASE_URL",
    "ANTHROPIC_AUTH_TOKEN",
    "ANTHROPIC_API_KEY",
-@@ -199,13 +216,14 @@
+@@ -199,15 +236,17 @@
        return NextResponse.json({ error: writeGuard }, { status: 403 });
      }
  
@@ -176,8 +196,11 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
 +      currentSettings = parseSettingsJson(content);
      } catch (error: any) {
        if (error.code === "ENOENT") {
++        setFeatureFlagOverride("OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES", "false");
          return NextResponse.json({
-@@ -217,7 +235,7 @@
+           success: true,
+           message: "No settings file to reset",
+@@ -217,7 +256,7 @@
      }
  
      // Backup current settings before resetting
@@ -186,17 +209,19 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
  
      // Remove specified env fields
      if (currentSettings.env) {
-@@ -232,7 +250,8 @@
+@@ -232,7 +271,10 @@
      }
  
      // Write updated settings
 -    await fs.writeFile(settingsPath, JSON.stringify(currentSettings, null, 2));
 +    await fs.writeFile(settingsPath, JSON.stringify(currentSettings, null, 2), { mode: 0o600 });
 +    await fs.chmod(settingsPath, 0o600);
++
++    setFeatureFlagOverride("OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES", "false");
  
      // Clear last-configured timestamp
      try {
-@@ -246,7 +265,7 @@
+@@ -246,7 +288,7 @@
        message: "Settings reset successfully",
      });
    } catch (error) {

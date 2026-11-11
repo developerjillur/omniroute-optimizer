@@ -6,7 +6,7 @@ diff --git a/src/app/api/cli-tools/backups/route.ts b/src/app/api/cli-tools/back
  import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
  import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 +
-+const backupScope = (tool: string) => tool === "claude" ? "claude-terminal" : tool;
++const backupScope = (tool: string) => (tool === "claude" ? "claude-terminal" : tool);
  
  const VALID_TOOLS = ["claude", "codex", "droid", "grok-build", "openclaw", "cline", "kilo", "qwen"];
  

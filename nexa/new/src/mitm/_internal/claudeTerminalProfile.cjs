@@ -3,34 +3,53 @@
 const { normalizeClaudeModelId, selectClaudeFamilyModels, catalog } = require("./claudeModels.cjs");
 const PROFILE_DIRECTORY = "omniroute-terminal";
 const PROFILE_FLAG = "OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES";
-const MODEL_KEYS = ["ANTHROPIC_MODEL", "ANTHROPIC_DEFAULT_FABLE_MODEL", "ANTHROPIC_DEFAULT_OPUS_MODEL",
-  "ANTHROPIC_DEFAULT_SONNET_MODEL", "ANTHROPIC_DEFAULT_HAIKU_MODEL", "CLAUDE_CODE_SUBAGENT_MODEL",
-  "ANTHROPIC_SMALL_FAST_MODEL"];
-const GATEWAY_KEYS = ["ANTHROPIC_BASE_URL", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_API_KEY",
-  "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY", "CLAUDE_CODE_AUTO_COMPACT_WINDOW"];
+const MODEL_KEYS = [
+  "ANTHROPIC_MODEL",
+  "ANTHROPIC_DEFAULT_FABLE_MODEL",
+  "ANTHROPIC_DEFAULT_OPUS_MODEL",
+  "ANTHROPIC_DEFAULT_SONNET_MODEL",
+  "ANTHROPIC_DEFAULT_HAIKU_MODEL",
+  "CLAUDE_CODE_SUBAGENT_MODEL",
+  "ANTHROPIC_SMALL_FAST_MODEL",
+];
+const GATEWAY_KEYS = [
+  "ANTHROPIC_BASE_URL",
+  "ANTHROPIC_AUTH_TOKEN",
+  "ANTHROPIC_API_KEY",
+  "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY",
+  "CLAUDE_CODE_AUTO_COMPACT_WINDOW",
+];
 
 /** @returns {Record<string, any>} */
 function parseSettingsJson(content) {
   // Strip JSONC comments/trailing commas only outside strings.
-  let out = "", quoted = false, escaped = false;
+  let out = "",
+    quoted = false,
+    escaped = false;
   for (let i = 0; i < content.length; i++) {
-    const c = content[i], next = content[i + 1];
+    const c = content[i],
+      next = content[i + 1];
     if (quoted) {
       out += c;
       if (escaped) escaped = false;
       else if (c === "\\") escaped = true;
       else if (c === '"') quoted = false;
-    } else if (c === '"') { quoted = true; out += c; }
-    else if (c === "/" && next === "/") {
+    } else if (c === '"') {
+      quoted = true;
+      out += c;
+    } else if (c === "/" && next === "/") {
       while (i < content.length && content[i] !== "\n") i++;
       out += "\n";
     } else if (c === "/" && next === "*") {
       const end = content.indexOf("*/", i + 2);
       if (end < 0) throw Error("Unterminated settings comment");
-      i = end + 1; out += " ";
+      i = end + 1;
+      out += " ";
     } else out += c;
   }
-  let clean = ""; quoted = false; escaped = false;
+  let clean = "";
+  quoted = false;
+  escaped = false;
   for (let i = 0; i < out.length; i++) {
     const c = out[i];
     if (quoted) {
@@ -38,14 +57,23 @@ function parseSettingsJson(content) {
       if (escaped) escaped = false;
       else if (c === "\\") escaped = true;
       else if (c === '"') quoted = false;
-    } else if (c === '"') { quoted = true; clean += c; }
-    else if (c === "," && /^[\s]*[}\]]/.test(out.slice(i + 1))) continue;
+    } else if (c === '"') {
+      quoted = true;
+      clean += c;
+    } else if (c === "," && /^[\s]*[}\]]/.test(out.slice(i + 1))) continue;
     else clean += c;
   }
   const settings = JSON.parse(clean);
-  if (!settings || typeof settings !== "object" || Array.isArray(settings)) throw Error("Expected settings object");
-  if (settings.env !== undefined && (!settings.env || typeof settings.env !== "object" || Array.isArray(settings.env) ||
-      Object.values(settings.env).some(value => typeof value !== "string"))) throw Error("Expected string settings environment");
+  if (!settings || typeof settings !== "object" || Array.isArray(settings))
+    throw Error("Expected settings object");
+  if (
+    settings.env !== undefined &&
+    (!settings.env ||
+      typeof settings.env !== "object" ||
+      Array.isArray(settings.env) ||
+      Object.values(settings.env).some((value) => typeof value !== "string"))
+  )
+    throw Error("Expected string settings environment");
   return settings;
 }
 
@@ -64,13 +92,19 @@ function mergeTerminalProfile(globalSettings = {}, terminalSettings = {}) {
 
 function isNativeModel(value) {
   const id = normalizeClaudeModelId(String(value || ""));
-  return /^(?:claude-[a-z0-9][a-z0-9.\-]*(?:\[[^\]\r\n]+\])?|default|opus|sonnet|haiku|fable|opusplan|sonnetplan)(?:\[1m\])?$/i.test(id);
+  return /^(?:claude-[a-z0-9][a-z0-9.\-]*(?:\[[^\]\r\n]+\])?|default|opus|sonnet|haiku|fable|opusplan|sonnetplan)(?:\[1m\])?$/i.test(
+    id
+  );
 }
 
 function buildTerminalLaunchSettings(mode, globalSettings, terminalSettings, additional = {}) {
   if (mode !== "native" && mode !== "gateway") throw Error("Unknown Terminal routing mode");
   const profile = mergeTerminalProfile(globalSettings, terminalSettings);
-  const settings = { ...profile, ...additional, env: { ...profile.env, ...(additional.env || {}) } };
+  const settings = {
+    ...profile,
+    ...additional,
+    env: { ...profile.env, ...(additional.env || {}) },
+  };
   for (const key of MODEL_KEYS) {
     if (settings.env[key]) settings.env[key] = normalizeClaudeModelId(settings.env[key]);
   }
@@ -83,23 +117,58 @@ function buildTerminalLaunchSettings(mode, globalSettings, terminalSettings, add
     settings.env.CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY = "1";
     settings.env.CLAUDE_CODE_OAUTH_TOKEN = "";
   } else {
+    // Saved gateway model mappings belong to On mode. Native mode uses the
+    // native global preference plus explicit settings supplied for this launch.
+    const nativeDefaults = mergeTerminalProfile(globalSettings, {}).env;
+    for (const key of MODEL_KEYS) {
+      const explicit = additional.env?.[key];
+      if (explicit && !isNativeModel(explicit))
+        throw Error("Enable Terminal routing for a non-Claude model");
+      settings.env[key] = explicit ?? nativeDefaults[key] ?? "";
+    }
+    if (additional.model && !isNativeModel(additional.model))
+      throw Error("Enable Terminal routing for a non-Claude model");
+    settings.model = additional.model ?? globalSettings.model ?? "default";
+    const inheritedBase = String(globalSettings.env?.ANTHROPIC_BASE_URL || "").trim();
+    if (
+      inheritedBase &&
+      !/^https:\/\/api\.anthropic\.com\/?$/i.test(inheritedBase) &&
+      !Object.hasOwn(additional.env || {}, "ANTHROPIC_MODEL")
+    )
+      settings.env.ANTHROPIC_MODEL = "";
     settings.env.ANTHROPIC_BASE_URL = "https://api.anthropic.com";
     settings.env.ANTHROPIC_AUTH_TOKEN = "";
     settings.env.ANTHROPIC_API_KEY = "";
     settings.env.CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY = "";
     settings.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW = "";
     settings.apiKeyHelper = "";
-    for (const key of ["CLAUDE_CODE_USE_BEDROCK", "CLAUDE_CODE_USE_VERTEX", "CLAUDE_CODE_USE_FOUNDRY"])
+    for (const key of [
+      "CLAUDE_CODE_USE_BEDROCK",
+      "CLAUDE_CODE_USE_VERTEX",
+      "CLAUDE_CODE_USE_FOUNDRY",
+    ])
       settings.env[key] = "";
     for (const key of MODEL_KEYS) {
-      if (settings.env[key]) settings.env[key] = isNativeModel(settings.env[key])
-        ? normalizeClaudeModelId(settings.env[key]) : "";
+      if (settings.env[key])
+        settings.env[key] = isNativeModel(settings.env[key])
+          ? normalizeClaudeModelId(settings.env[key])
+          : "";
     }
     if (settings.model && !isNativeModel(settings.model)) delete settings.model;
-    if (!settings.model && globalSettings.model && !isNativeModel(globalSettings.model)) settings.model = "default";
+    if (!settings.model && globalSettings.model && !isNativeModel(globalSettings.model))
+      settings.model = "default";
   }
   return settings;
 }
 
-module.exports = { PROFILE_DIRECTORY, PROFILE_FLAG, MODEL_KEYS, GATEWAY_KEYS,
-  mergeTerminalProfile, buildTerminalLaunchSettings, isNativeModel, parseSettingsJson, normalizeClaudeModelId };
+module.exports = {
+  PROFILE_DIRECTORY,
+  PROFILE_FLAG,
+  MODEL_KEYS,
+  GATEWAY_KEYS,
+  mergeTerminalProfile,
+  buildTerminalLaunchSettings,
+  isNativeModel,
+  parseSettingsJson,
+  normalizeClaudeModelId,
+};

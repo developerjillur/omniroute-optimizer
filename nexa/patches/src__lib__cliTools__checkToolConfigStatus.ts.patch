@@ -10,13 +10,17 @@ diff --git a/src/lib/cliTools/checkToolConfigStatus.ts b/src/lib/cliTools/checkT
  import { getCliConfigHome, getCliPrimaryConfigPath } from "@/shared/services/cliRuntime";
  import { hasOmniRouteQwenCodeConfig } from "@/shared/services/qwenCodeConfig";
  import {
-@@ -30,12 +32,16 @@
+@@ -30,12 +32,20 @@
    _configPathOverride?: string
  ): Promise<"configured" | "not_configured" | "not_installed" | "unknown" | "other"> {
    try {
 -    const configPath =
-+    if (toolId === "claude" && !_configPathOverride &&
-+        !isFeatureFlagEnabled("OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES")) return "not_configured";
++    if (
++      toolId === "claude" &&
++      !_configPathOverride &&
++      !isFeatureFlagEnabled("OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES")
++    )
++      return "not_configured";
 +    let configPath =
        _configPathOverride ??
        (toolId === "grok-build"

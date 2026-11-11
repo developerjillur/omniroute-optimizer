@@ -13,10 +13,16 @@ async function fixture(initial?: Record<string, unknown>) {
   const filename = path.join(directory, "omniroute-terminal", "settings.json");
   await fs.mkdir(path.dirname(filename));
   const globalFile = path.join(directory, "settings.json");
-  const globalBytes = JSON.stringify({hooks:{UserPromptSubmit:["native app hook"]},env:{ANTHROPIC_AUTH_TOKEN:"native-app-key",ANTHROPIC_DEFAULT_FABLE_MODEL:"claude-fable-5-1"}});
+  const globalBytes = JSON.stringify({
+    hooks: { UserPromptSubmit: ["native app hook"] },
+    env: {
+      ANTHROPIC_AUTH_TOKEN: "native-app-key",
+      ANTHROPIC_DEFAULT_FABLE_MODEL: "claude-fable-5-1",
+    },
+  });
   await fs.writeFile(globalFile, globalBytes);
   if (initial) await fs.writeFile(filename, JSON.stringify(initial));
-  const state = { filename: globalFile, backups: 0, saved: 0 };
+  const state = { filename: globalFile, backups: 0, saved: 0, routingFlag: "true" };
   const key = `fixture${Date.now()}${Math.random().toString(36).slice(2)}`;
   Reflect.set(globalThis, key, state);
   const helper = pathToFileURL(path.resolve("src/shared/services/claudeCliConfig.ts")).href;
@@ -32,7 +38,9 @@ async function fixture(initial?: Record<string, unknown>) {
       "export const isValidationFailure=()=>false,validateBody=(_schema,body)=>({data:{env:{...body.env}}});",
     "@/lib/db/apiKeys":
       "export const getApiKeyById=async(id)=>id==='fixture-key-id'?{key:'fixture-resolved-token'}:null;",
-    "../_lib/jsoncConfig": "export const readJsoncConfig=async(filename)=>JSON.parse(await (await import('node:fs/promises')).readFile(filename,'utf8'));",
+    "../_lib/jsoncConfig":
+      "export const readJsoncConfig=async(filename)=>JSON.parse(await (await import('node:fs/promises')).readFile(filename,'utf8'));",
+    "@/lib/db/featureFlags": `export const setFeatureFlagOverride=(key,value)=>{globalThis['${key}'].routingFlag=value;};`,
     "@/shared/utils/featureFlags": "export const isFeatureFlagEnabled=()=>false;",
   };
   let source = await fs.readFile(
@@ -137,7 +145,6 @@ test("preview does not create a missing settings file", async () => {
   assert.equal(f.state.backups, 0);
 });
 
-
 test("GET reports native Terminal mode and Fable 5.2 without copying app hooks", async () => {
   const f = await fixture();
   const data = await (await f.route.GET(new Request("http://localhost/"))).json();
@@ -149,11 +156,23 @@ test("GET reports native Terminal mode and Fable 5.2 without copying app hooks",
 });
 
 test("explicit Fable selection and Reset affect only Terminal settings", async () => {
-  const f = await fixture({env:{CUSTOM:"retain"}});
-  const applied = await f.post({updateFable:true,env:{ANTHROPIC_DEFAULT_FABLE_MODEL:"cc/claude-fable-5-2"}});
+  const f = await fixture({ env: { CUSTOM: "retain" } });
+  const applied = await f.post({
+    updateFable: true,
+    env: { ANTHROPIC_DEFAULT_FABLE_MODEL: "cc/claude-fable-5-2" },
+  });
   assert.equal(applied.status, 200);
-  assert.equal(JSON.parse(await fs.readFile(f.filename,"utf8")).env.ANTHROPIC_DEFAULT_FABLE_MODEL,"claude-fable-5-2");
-  assert.equal((await f.route.DELETE(new Request("http://localhost/",{method:"DELETE"}))).status,200);
-  assert.deepEqual(JSON.parse(await fs.readFile(f.filename,"utf8")),{env:{CUSTOM:"retain"}});
-  assert.equal(await fs.readFile(f.globalFile,"utf8"),f.globalBytes);
+  assert.equal(
+    JSON.parse(await fs.readFile(f.filename, "utf8")).env.ANTHROPIC_DEFAULT_FABLE_MODEL,
+    "claude-fable-5-2"
+  );
+  assert.equal(
+    (await f.route.DELETE(new Request("http://localhost/", { method: "DELETE" }))).status,
+    200
+  );
+  assert.deepEqual(JSON.parse(await fs.readFile(f.filename, "utf8")), {
+    env: { CUSTOM: "retain" },
+  });
+  assert.equal(f.state.routingFlag, "false");
+  assert.equal(await fs.readFile(f.globalFile, "utf8"), f.globalBytes);
 });

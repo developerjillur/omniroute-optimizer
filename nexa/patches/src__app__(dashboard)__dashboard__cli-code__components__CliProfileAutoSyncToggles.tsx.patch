@@ -15,7 +15,20 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/CliProfileAutoSyn
   */
  export default function CliProfileAutoSyncToggles() {
    const t = useTranslations("cliTools");
-@@ -64,6 +65,7 @@
+@@ -52,6 +53,12 @@
+     })();
+   }, [load]);
+ 
++  useEffect(() => {
++    const refresh = () => { void load(); };
++    window.addEventListener("omniroute:claude-terminal-reset", refresh);
++    return () => window.removeEventListener("omniroute:claude-terminal-reset", refresh);
++  }, [load]);
++
+   const persist = useCallback(
+     async (key: string, next: boolean, previous: boolean, apply: (v: boolean) => void) => {
+       apply(next); // optimistic
+@@ -64,6 +71,7 @@
            body: JSON.stringify({ key, value: next ? "true" : "false" }),
          });
          if (!res.ok) throw new Error(`HTTP ${res.status}`);

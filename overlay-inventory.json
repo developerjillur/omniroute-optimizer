@@ -7,7 +7,7 @@
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
   "trackedNexaFiles": 533,
-  "totalNexaBytes": 2506150,
+  "totalNexaBytes": 2506453,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -3415,9 +3415,9 @@
     {
       "path": "nexa/tests/claude-terminal-profile.test.mjs",
       "mode": "100644",
-      "gitBlobSha": "edcfb0cb4308dfe2c6639342f2e2892efc4f4e94",
-      "bytes": 15110,
-      "sha256": "0f9612a4f4c347961445d8063a33aa5445e9856cf022aba71b904e104f0a5f19"
+      "gitBlobSha": "7965b79fe65d340c2a7427f08cd39048ce508a1f",
+      "bytes": 15413,
+      "sha256": "cbe8ea5d99340cd80e642e9d2b79a3c3052d82b4fd2b8851a004aaffedf2bce8"
     },
     {
       "path": "nexa/tests/compare-upgrade-types.mjs",

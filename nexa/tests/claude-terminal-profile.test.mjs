@@ -382,6 +382,7 @@ test("late upstream errors close TLS tunnels without HTTP injection", async () =
     },
   });
   const originalWrite = net.Socket.prototype.write;
+  const originalEnd = net.Socket.prototype.end;
   let lateHttpErrors = 0;
   try {
     const req = proxyRequest(tunnel.url, { method: "CONNECT", path: "api.anthropic.com:443" });
@@ -395,12 +396,17 @@ test("late upstream errors close TLS tunnels without HTTP injection", async () =
       if (typeof chunk === "string" && chunk.includes("502 Bad Gateway")) lateHttpErrors++;
       return originalWrite.call(this, chunk, ...args);
     };
+    net.Socket.prototype.end = function (chunk, ...args) {
+      if (typeof chunk === "string" && chunk.includes("502 Bad Gateway")) lateHttpErrors++;
+      return originalEnd.call(this, chunk, ...args);
+    };
     outbound.emit("error", new Error("fixture late connection reset"));
     outbound.destroy();
     await closed;
     assert.equal(lateHttpErrors, 0);
   } finally {
     net.Socket.prototype.write = originalWrite;
+    net.Socket.prototype.end = originalEnd;
     tunnel.close();
     await new Promise((resolve) => destination.close(resolve));
   }

@@ -323,6 +323,10 @@ test("Off ignores saved gateway model mappings while On restores them", () => {
   const gateway = buildTerminalLaunchSettings("gateway", original, terminal);
   assert.equal(gateway.env.ANTHROPIC_MODEL, "claude-haiku-5-5");
   assert.equal(gateway.env.ANTHROPIC_DEFAULT_FABLE_MODEL, "cx/gpt-6.1-sol");
+  assert.equal(
+    buildTerminalLaunchSettings("native", original, {}, { model: "cc/claude-fable-5-2" }).model,
+    "claude-fable-5-2"
+  );
   assert.throws(() =>
     buildTerminalLaunchSettings("native", original, {}, { model: "cx/gpt-6.1-sol" })
   );

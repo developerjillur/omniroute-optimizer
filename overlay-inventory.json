@@ -7,7 +7,7 @@
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
   "trackedNexaFiles": 533,
-  "totalNexaBytes": 2502386,
+  "totalNexaBytes": 2502638,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -1035,9 +1035,9 @@
     {
       "path": "nexa/new/src/mitm/_internal/claudeTerminalProfile.cjs",
       "mode": "100644",
-      "gitBlobSha": "a5033d6cc9113ccb7f60d4bf21b983e7ce3b37b3",
-      "bytes": 6423,
-      "sha256": "f194a95ce17c0ebf208342fbb9e16a17f29427411471632bbaebad4a8f49e226"
+      "gitBlobSha": "7eb3b57799e6c65347a948eb0d1d890b4f206a81",
+      "bytes": 6522,
+      "sha256": "3aec3000259ef8abe97a0601e4096025284f1441d2f7693766c7cdd55ffff534"
     },
     {
       "path": "nexa/new/src/mitm/_internal/nativeToolModels.cjs",
@@ -2302,9 +2302,9 @@
     {
       "path": "nexa/patches/src__app__(dashboard)__dashboard__cli-code__components__CliProfileAutoSyncToggles.tsx.patch",
       "mode": "100644",
-      "gitBlobSha": "c81ddcf320311f277d5af7559a0befc06b278db7",
-      "bytes": 1907,
-      "sha256": "70073bfd34b163bb29139bd50b4084079a05e589b63a3bfccc83355776da5e87"
+      "gitBlobSha": "b8bf6bc337a306a3861bcd709dd308b580e641eb",
+      "bytes": 1919,
+      "sha256": "49b27d830e8fdb1c3358570966b2b1e43859fabe7701f4eee6910c35bf75435d"
     },
     {
       "path": "nexa/patches/src__app__(dashboard)__dashboard__cli-code__components__HermesAgentToolCard.tsx.patch",
@@ -3415,9 +3415,9 @@
     {
       "path": "nexa/tests/claude-terminal-profile.test.mjs",
       "mode": "100644",
-      "gitBlobSha": "1089b9a4996217bfb641c3ed9181839e53d4541f",
-      "bytes": 12468,
-      "sha256": "c15ea59518c9ad4837a313667c1334134c21567648d925ae56621f5a6db01a61"
+      "gitBlobSha": "db7231b98d9c0496e64f624df92a63b9a417be00",
+      "bytes": 12609,
+      "sha256": "a7adceb8c693ec466cbfc948b7968d625e6a2ececfc567684d1e83bfe2006644"
     },
     {
       "path": "nexa/tests/compare-upgrade-types.mjs",

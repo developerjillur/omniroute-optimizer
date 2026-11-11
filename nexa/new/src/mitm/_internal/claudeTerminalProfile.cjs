@@ -158,6 +158,7 @@ function buildTerminalLaunchSettings(mode, globalSettings, terminalSettings, add
     if (!settings.model && globalSettings.model && !isNativeModel(globalSettings.model))
       settings.model = "default";
   }
+  if (typeof settings.model === "string") settings.model = normalizeClaudeModelId(settings.model);
   return settings;
 }
 

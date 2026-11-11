@@ -86,6 +86,22 @@ jobs:
         continue-on-error: true
         working-directory: ${{ runner.temp }}/focused-application
         run: npm run typecheck:core
+      - name: Lint Terminal profile changes
+        id: terminal_lint
+        continue-on-error: true
+        working-directory: ${{ runner.temp }}/focused-application
+        run: >-
+          node node_modules/eslint/bin/eslint.js
+          src/app/api/cli-tools/claude-settings/route.ts
+          src/app/api/cli-tools/backups/route.ts
+          src/shared/services/claudeCliConfig.ts
+          src/shared/constants/cliTools.ts
+          src/lib/cliTools/checkToolConfigStatus.ts
+          'src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.tsx'
+          'src/app/(dashboard)/dashboard/cli-code/components/CliProfileAutoSyncToggles.tsx'
+          src/mitm/_internal/claudeTerminalProfile.cjs
+          tests/unit/claude-model-id-routing.test.ts
+          tests/unit/claude-model-settings-route.test.ts
       - name: Select the review runtime for Terminal helpers
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
@@ -110,7 +126,7 @@ jobs:
           import json, os, re
           from pathlib import Path
           steps = json.loads(os.environ['FOCUSED_OUTCOMES'])
-          failed = {name: steps.get(name, {}).get('outcome', 'missing') for name in ['terminal26','terminal_format','terminal','network_guard','syntax','native','interface','core'] if steps.get(name, {}).get('outcome') != 'success'}
+          failed = {name: steps.get(name, {}).get('outcome', 'missing') for name in ['terminal_lint','terminal26','terminal_format','terminal','network_guard','syntax','native','interface','core'] if steps.get(name, {}).get('outcome') != 'success'}
           tap = Path(os.environ['RUNNER_TEMP']) / 'focused-native.tap'
           counts = {}
           if tap.is_file():

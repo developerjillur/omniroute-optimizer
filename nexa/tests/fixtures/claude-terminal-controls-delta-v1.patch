@@ -141,10 +141,12 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
        settings: settings,
        hasOmniRoute: hasOmniRoute,
        settingsPath: getClaudeSettingsPath(),
-+      routingMode,
-     });
-   } catch (error) {
+-    });
+-  } catch (error) {
 -    console.log("Error checking claude settings:", error);
++      routingMode,
++    });
++  } catch {
 +    console.error("Error reading Claude Terminal settings");
      return NextResponse.json({ error: "Failed to check claude settings" }, { status: 500 });
    }
@@ -193,11 +195,13 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
  
      // Persist last-configured timestamp
      try {
-@@ -172,13 +204,18 @@
+@@ -171,14 +203,19 @@
+       success: true,
        message: "Settings updated successfully",
      });
-   } catch (error) {
+-  } catch (error) {
 -    console.log("Error updating claude settings:", error);
++  } catch {
 +    console.error("Error updating Claude Terminal settings");
      return NextResponse.json({ error: "Failed to update claude settings" }, { status: 500 });
    }
@@ -253,11 +257,13 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
  
      // Clear last-configured timestamp
      try {
-@@ -246,7 +288,7 @@
+@@ -245,8 +287,8 @@
+       success: true,
        message: "Settings reset successfully",
      });
-   } catch (error) {
+-  } catch (error) {
 -    console.log("Error resetting claude settings:", error);
++  } catch {
 +    console.error("Error resetting Claude Terminal settings");
      return NextResponse.json({ error: "Failed to reset claude settings" }, { status: 500 });
    }

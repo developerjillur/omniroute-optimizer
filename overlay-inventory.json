@@ -7,7 +7,7 @@
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
   "trackedNexaFiles": 533,
-  "totalNexaBytes": 2504376,
+  "totalNexaBytes": 2504560,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -2400,9 +2400,9 @@
     {
       "path": "nexa/patches/src__app__api__cli-tools__claude-settings__route.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "5a3da14c45a5e5e5d8f29af2ce39aca3b6a64cec",
-      "bytes": 8527,
-      "sha256": "52fa67e188d0e7a5dc0f8a8fe6d29c189e87a62ca4e1f0544dc2384c60e7c98a"
+      "gitBlobSha": "47008db50c54be8f5a65789295e5a0f4d3a49661",
+      "bytes": 8619,
+      "sha256": "572cefbc769b7730f92e261eb46fc2bb53083bd5b09a7439bc82fd7a97a72d6d"
     },
     {
       "path": "nexa/patches/src__app__api__cli-tools__hermes-agent-settings__route.ts.patch",
@@ -3471,9 +3471,9 @@
     {
       "path": "nexa/tests/fixtures/claude-terminal-controls-delta-v1.patch",
       "mode": "100644",
-      "gitBlobSha": "4d8e10c8000fbac5d1b1407e997e29d2251f5174",
-      "bytes": 9893,
-      "sha256": "7962d439947f263608d85950f3bdae4f6d79ffc5a43e3d51977e384ef9ade3c2"
+      "gitBlobSha": "e3e04c3f0e1047c483a3294010172e1383340b02",
+      "bytes": 9985,
+      "sha256": "6ab5b9c0549ad09fe55615ac9384e8b86c6d41692fd7c177a2b2401a28087045"
     },
     {
       "path": "nexa/tests/fixtures/native-attribution-delta-v3.8.52.patch",

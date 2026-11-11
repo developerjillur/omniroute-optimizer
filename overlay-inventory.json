@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
-  "trackedNexaFiles": 520,
-  "totalNexaBytes": 2420282,
+  "trackedNexaFiles": 531,
+  "totalNexaBytes": 2489214,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -172,6 +172,20 @@
       "sha256": "6c08d402f0bf59475065ddad0b1dbc8e937ee28f4a028d8a604c5ffb4283b8e3"
     },
     {
+      "path": "nexa/deploy/claude-terminal-launcher.mjs",
+      "mode": "100644",
+      "gitBlobSha": "eba9df6b2465ac9eb6dfdeaece678a635eb46ad2",
+      "bytes": 7772,
+      "sha256": "bf9b9bd795ea9c54fa91274813ea06abfcb7f1fc1f1c56befc34dc8380fc884f"
+    },
+    {
+      "path": "nexa/deploy/claude-terminal-tunnel.mjs",
+      "mode": "100644",
+      "gitBlobSha": "0e85a9b05a1fbb036e6cefb0f59c64197e9ac446",
+      "bytes": 4795,
+      "sha256": "608d0b46f373466f4e0026462a365d69037fe4b2d6be97b4f6d2d4fcffe225ea"
+    },
+    {
       "path": "nexa/deploy/dashboard-gate.mjs",
       "mode": "100644",
       "gitBlobSha": "c10425ef616658a567674ba64af0a3bdd72a1bd8",
@@ -226,6 +240,13 @@
       "gitBlobSha": "1e1a9422c65f9fc2d3a51fa1992400d1f8c0e191",
       "bytes": 2926,
       "sha256": "068be480dcfa6475000dd711295c866a8c34cbe15522e71356fc970d0b635a9d"
+    },
+    {
+      "path": "nexa/deploy/install-claude-terminal.mjs",
+      "mode": "100644",
+      "gitBlobSha": "19cb5eedcd790b96b4304157cc39a22b751d1c9d",
+      "bytes": 5921,
+      "sha256": "e6a2d0a4d5bfd021d23a99897e153ec81e7ec8c75db46c4e214f22265cdfe8e6"
     },
     {
       "path": "nexa/deploy/install-local-command.sh",
@@ -550,6 +571,13 @@
       "sha256": "2d4199597539005746eefb62aeb0691c8b241115788369443b0de4c549bd51ab"
     },
     {
+      "path": "nexa/docs/CLAUDE-TERMINAL-PROFILES-2026-11-11.md",
+      "mode": "100644",
+      "gitBlobSha": "d15944f14f33911073f8a6e1ef0ab7c63fe65315",
+      "bytes": 5194,
+      "sha256": "9bbdd088806053657fc21ce4e582ddde26e87c923a8facb459cb996ac69f6764"
+    },
+    {
       "path": "nexa/docs/CODEX-IMAGE-GENERATION.md",
       "mode": "100644",
       "gitBlobSha": "7c68cd97eaab50f39a966d15e70b426d78b64d1b",
@@ -720,9 +748,9 @@
     {
       "path": "nexa/manifest.json",
       "mode": "100644",
-      "gitBlobSha": "df923ad4896bc76fdea7e0a8c20be1abd338ffc9",
-      "bytes": 93253,
-      "sha256": "af1556ce008b56490953297bb2d19c8938ca53248fa720df8a0bba6f7ac144a0"
+      "gitBlobSha": "b355e5c75d1922b93214b7f33d89cf9adbcfdad0",
+      "bytes": 94377,
+      "sha256": "cf5f7434345a85f3335f9e4d101aff84a173af57e45ae5539b5fbe6f6c168bad"
     },
     {
       "path": "nexa/new/bin/cli/utils/packageMigrations.mjs",
@@ -1003,6 +1031,13 @@
       "gitBlobSha": "5ce699f6767fd9341ab8014f0a39c5701409537a",
       "bytes": 4228,
       "sha256": "ac8fdc72cb624ef2a3834db17cc9592a1cb501a2194bd0e8cbfa4d777ceb99d3"
+    },
+    {
+      "path": "nexa/new/src/mitm/_internal/claudeTerminalProfile.cjs",
+      "mode": "100644",
+      "gitBlobSha": "14ed648b76cabf9a7c31102622172920366650e3",
+      "bytes": 5221,
+      "sha256": "69f94793f3c2b318ff6843c27d11a28d49345511615eeaff1eb3a2100aca0b0e"
     },
     {
       "path": "nexa/new/src/mitm/_internal/nativeToolModels.cjs",
@@ -1294,16 +1329,16 @@
     {
       "path": "nexa/new/tests/unit/claude-model-id-routing.test.ts",
       "mode": "100644",
-      "gitBlobSha": "424c63979d66a135fe41ea8b11d43b034a687ef9",
-      "bytes": 7518,
-      "sha256": "40dfe710e266f2485069038b52b1c801c896e81a2b4c7d938a7ae3c1d450dffb"
+      "gitBlobSha": "ead3012fb806df19b06adff93c534026bfdf52f7",
+      "bytes": 8165,
+      "sha256": "a9c8e166c5648659f68f39fe6cbb03b0279c2779933b91a5053860296a542372"
     },
     {
       "path": "nexa/new/tests/unit/claude-model-settings-route.test.ts",
       "mode": "100644",
-      "gitBlobSha": "cf3d4a044f23f7ec86b3f3788a6c48962f860e27",
-      "bytes": 6109,
-      "sha256": "a4a9f4b464fbead49304a20bed7387623d0b97066ad8a799d02511709274cfe7"
+      "gitBlobSha": "5670d08122e9784fcfb2a0b85c52c5f7bd497ae5",
+      "bytes": 7986,
+      "sha256": "8da33e3008d8c6d283c4d456a93f9976fffaa3a7d564a14c3ba9ee353a0c5a3d"
     },
     {
       "path": "nexa/new/tests/unit/claude-quota-alert-vs-exhaustion.test.ts",
@@ -2260,9 +2295,16 @@
     {
       "path": "nexa/patches/src__app__(dashboard)__dashboard__cli-code__components__ClaudeToolCard.tsx.patch",
       "mode": "100644",
-      "gitBlobSha": "95084bf3080887b0f0b811622750ce38fb23b2c0",
-      "bytes": 5192,
-      "sha256": "25379de9fc44eb7b64016bc0fa7c45182faa8fc4db258a20697dc0fe1f455ba8"
+      "gitBlobSha": "30b5cd2d304dfc96a09a84a45e6fab358eb188d7",
+      "bytes": 9221,
+      "sha256": "63960b44e6343c79c80148244087831bed00666692439dee9ed7f25184d6c5fa"
+    },
+    {
+      "path": "nexa/patches/src__app__(dashboard)__dashboard__cli-code__components__CliProfileAutoSyncToggles.tsx.patch",
+      "mode": "100644",
+      "gitBlobSha": "48ffa3123b228b55c27bd3b603dac79d6a70f682",
+      "bytes": 756,
+      "sha256": "4dc5afc1fa1d56736a438492fb0b924c08916085884fe6f337f81b769489b5f5"
     },
     {
       "path": "nexa/patches/src__app__(dashboard)__dashboard__cli-code__components__HermesAgentToolCard.tsx.patch",
@@ -2349,11 +2391,18 @@
       "sha256": "5e3d2c4d3b2ae44b79172e03bef1374930ae4841d6a7acbf353b157279a8aa57"
     },
     {
+      "path": "nexa/patches/src__app__api__cli-tools__backups__route.ts.patch",
+      "mode": "100644",
+      "gitBlobSha": "207ebe3a763265662586518cd7c68fd92cf7e495",
+      "bytes": 1774,
+      "sha256": "b4e76a228118ce644fa92c83b624d656a2a61fd26aef697b4c0772bda7b65a3c"
+    },
+    {
       "path": "nexa/patches/src__app__api__cli-tools__claude-settings__route.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "9ffc29aa82d20cfd2711c24e26bd32475588efe1",
-      "bytes": 3372,
-      "sha256": "d9b82b4edb6dfc211ccca22ef05cb1625591ec01d84359bc62a320747e5ac021"
+      "gitBlobSha": "18a80e279d6e08d8850c13604d4660e4cdd88a81",
+      "bytes": 8126,
+      "sha256": "b6070da85d0094b27fbce0280bc3ac8f478f45422a6e6c05c49fdc86f5c7ca1a"
     },
     {
       "path": "nexa/patches/src__app__api__cli-tools__hermes-agent-settings__route.ts.patch",
@@ -2442,9 +2491,9 @@
     {
       "path": "nexa/patches/src__i18n__messages__en.json.patch",
       "mode": "100644",
-      "gitBlobSha": "692e3711c03ac9b2c85554e4ea9fbc03aab60c20",
-      "bytes": 919,
-      "sha256": "c70894d58bd975895b4633ab8c0f1d71946bffc1ba9365f98661791fe64eb514"
+      "gitBlobSha": "cb08b6a06da4be259bccfb6050c1dd57804c0b7b",
+      "bytes": 3184,
+      "sha256": "84b633c0f927ffe3c19163802a540bb9f6bd336ea0a8908d390b50530a4d96ff"
     },
     {
       "path": "nexa/patches/src__i18n__messages__pt-BR.json.patch",
@@ -2480,6 +2529,13 @@
       "gitBlobSha": "f55e7cac7388291a5fc387d22970b3d7bc0d1450",
       "bytes": 6377,
       "sha256": "22fdab81b3792a7028fdc432b8e85e6ce176b192feebd5cdd9c5157ff4f95250"
+    },
+    {
+      "path": "nexa/patches/src__lib__cliTools__checkToolConfigStatus.ts.patch",
+      "mode": "100644",
+      "gitBlobSha": "2c349e257a61768ec77bf203f16335b9f34b548f",
+      "bytes": 1395,
+      "sha256": "699d70ec8019062e0f3e820c753ce0e0470a3cf8273c4adfb8ea19d079081bc5"
     },
     {
       "path": "nexa/patches/src__lib__cloudSync.ts.patch",
@@ -2778,9 +2834,9 @@
     {
       "path": "nexa/patches/src__shared__constants__cliTools.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "ef34d9b1bfa7f97f48917cd4c12a7b6b666224b4",
-      "bytes": 1807,
-      "sha256": "d5f6731b3b3996709de7e64a7da492e11980f87090acd839f7b7fb10aae85d4d"
+      "gitBlobSha": "47566cd2e5fee9b2401f445c69b618d562b7a657",
+      "bytes": 1976,
+      "sha256": "0646e40bd2b4a2d89de2b2b2c254637a64cec5bee3f137abd82f90623c6757f8"
     },
     {
       "path": "nexa/patches/src__shared__constants__codexClient.ts.patch",
@@ -2827,9 +2883,9 @@
     {
       "path": "nexa/patches/src__shared__services__claudeCliConfig.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "d9f6a0f258137f53ba3376667e12306f515fc5f4",
-      "bytes": 1787,
-      "sha256": "5ec0a5e2883e651a6f36c3cf7d52437cd37bf7ea347bf1b0402702ea78ba8209"
+      "gitBlobSha": "0614b6ec730d06a811efd31beefc84feb32f3a25",
+      "bytes": 1961,
+      "sha256": "9fe62434d5f940fb189eb3edc52316095dec2ccbda6322326241ddd9e58b8250"
     },
     {
       "path": "nexa/patches/src__shared__utils__classify429.ts.patch",
@@ -3350,6 +3406,13 @@
       "sha256": "9a8f227dbcc6c2b1cf9fd99aabeec376b8b7b40d7457bc92a3cf1d95faa8a788"
     },
     {
+      "path": "nexa/tests/claude-terminal-profile.test.mjs",
+      "mode": "100644",
+      "gitBlobSha": "e4f43d3efd08b4cc2f988fd92230ab2e7ca61c52",
+      "bytes": 9271,
+      "sha256": "fce5aab8f597b6c85e56efe788dc15e13458a16843d805508d2d3d0c7feedeb3"
+    },
+    {
       "path": "nexa/tests/compare-upgrade-types.mjs",
       "mode": "100644",
       "gitBlobSha": "8287ecec29fa78bc0119296a16598e6ab0b7fe36",
@@ -3397,6 +3460,13 @@
       "gitBlobSha": "ffff5a3d47898e2a54349738b0881c2615693672",
       "bytes": 370,
       "sha256": "238da876799eea5c3b7ef19824d02b094a945809a77531026169dd08e5852fcd"
+    },
+    {
+      "path": "nexa/tests/fixtures/claude-terminal-controls-delta-v1.patch",
+      "mode": "100644",
+      "gitBlobSha": "791cbd6176c4eea1de8918431bfbce51da977ac0",
+      "bytes": 9451,
+      "sha256": "04999734787928bb17f291f4e1ff055098449cff3d30dc6f9e3e23e909d9ae22"
     },
     {
       "path": "nexa/tests/fixtures/native-attribution-delta-v3.8.52.patch",
@@ -3579,6 +3649,13 @@
       "gitBlobSha": "9d5f598f6450e16670916fdd5fbcedc770f0cc16",
       "bytes": 746,
       "sha256": "f9ae037d99b84e01f4a794efcfd1c13c0cd3e586b37aa78ebc09bece9bc5ab8c"
+    },
+    {
+      "path": "nexa/tests/verify-claude-terminal-red.mjs",
+      "mode": "100644",
+      "gitBlobSha": "211357ea5847192dfff309142fbe3d048ce1c210",
+      "bytes": 2343,
+      "sha256": "7a538371b24079a4456f811cbb684f643dbb9884b41602912cc655fb5ebc9080"
     },
     {
       "path": "nexa/tests/verify-effort-coverage.mjs",

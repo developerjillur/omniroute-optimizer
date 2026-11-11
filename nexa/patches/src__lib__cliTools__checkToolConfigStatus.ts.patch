@@ -1,0 +1,30 @@
+diff --git a/src/lib/cliTools/checkToolConfigStatus.ts b/src/lib/cliTools/checkToolConfigStatus.ts
+--- a/src/lib/cliTools/checkToolConfigStatus.ts
++++ b/src/lib/cliTools/checkToolConfigStatus.ts
+@@ -1,6 +1,8 @@
+ // DRY: shared between /api/cli-tools/status and /api/cli-tools/all-statuses (plan 14 F2)
+ 
+ import fs from "fs/promises";
++import path from "node:path";
++import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+ import { getCliConfigHome, getCliPrimaryConfigPath } from "@/shared/services/cliRuntime";
+ import { hasOmniRouteQwenCodeConfig } from "@/shared/services/qwenCodeConfig";
+ import {
+@@ -30,12 +32,16 @@
+   _configPathOverride?: string
+ ): Promise<"configured" | "not_configured" | "not_installed" | "unknown" | "other"> {
+   try {
+-    const configPath =
++    if (toolId === "claude" && !_configPathOverride &&
++        !isFeatureFlagEnabled("OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES")) return "not_configured";
++    let configPath =
+       _configPathOverride ??
+       (toolId === "grok-build"
+         ? resolveGrokBuildConfigPath(process.env, getCliConfigHome())
+         : getCliPrimaryConfigPath(toolId));
+     if (!configPath) return "unknown";
++    if (toolId === "claude" && !_configPathOverride)
++      configPath = path.join(path.dirname(configPath), "omniroute-terminal", "settings.json");
+ 
+     const content = await fs.readFile(configPath, "utf-8");
+ 

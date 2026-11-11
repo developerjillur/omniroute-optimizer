@@ -22,7 +22,7 @@ function resolve(model: string, mappings: Record<string, unknown> = {}, agent = 
   });
 }
 
-test("Claude CLI defaults are plain current native IDs and do not choose Fable", () => {
+test("Claude CLI defaults expose Fable without making it the default model", () => {
   assert.deepEqual(getClaudeCodeDefaultModels(), {
     fable: "claude-fable-5-2",
     opus: "claude-opus-5-5",
@@ -32,10 +32,11 @@ test("Claude CLI defaults are plain current native IDs and do not choose Fable",
   const defaults = CLI_TOOLS.claude.defaultModels!;
   assert.equal(
     defaults.some((entry) => entry.envKey === "ANTHROPIC_DEFAULT_FABLE_MODEL"),
-    false
+    true
   );
+  assert.equal(defaults[0].defaultValue, "claude-sonnet-5-5");
   for (const entry of defaults) {
-    assert.match(entry.defaultValue!, /^claude-(?:opus|sonnet|haiku)-/);
+    assert.match(entry.defaultValue!, /^claude-(?:fable|opus|sonnet|haiku)-/);
     assert.equal(entry.defaultValue!.includes("/"), false);
   }
 });
@@ -188,4 +189,14 @@ test("the production missing-mapping branch returns a named Anthropic error befo
   assert.equal(error.type, "error");
   assert.equal(error.error.type, "invalid_request_error");
   assert.match(error.error.message, /cc\/claude-unmapped-99.*not mapped/);
+});
+
+
+test("an explicit Fable edit is normalized without changing the default model", () => {
+  const original = { env: { ANTHROPIC_DEFAULT_FABLE_MODEL: "owner-choice", ANTHROPIC_MODEL: "claude-sonnet-5-5" } };
+  const plan = settings.planClaudeSettings(original,
+    { ANTHROPIC_DEFAULT_FABLE_MODEL: "cc/claude-fable-5-2" }, { updateFable: true });
+  assert.equal(plan.settings.env.ANTHROPIC_DEFAULT_FABLE_MODEL, "claude-fable-5-2");
+  assert.equal(plan.settings.env.ANTHROPIC_MODEL, "claude-sonnet-5-5");
+  assert.equal(original.env.ANTHROPIC_DEFAULT_FABLE_MODEL, "owner-choice");
 });

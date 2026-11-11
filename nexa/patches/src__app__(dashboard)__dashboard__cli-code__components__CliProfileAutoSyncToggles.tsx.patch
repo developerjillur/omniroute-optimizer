@@ -1,0 +1,11 @@
+diff --git a/src/app/(dashboard)/dashboard/cli-code/components/CliProfileAutoSyncToggles.tsx b/src/app/(dashboard)/dashboard/cli-code/components/CliProfileAutoSyncToggles.tsx
+--- a/src/app/(dashboard)/dashboard/cli-code/components/CliProfileAutoSyncToggles.tsx
++++ b/src/app/(dashboard)/dashboard/cli-code/components/CliProfileAutoSyncToggles.tsx
+@@ -64,6 +64,7 @@
+           body: JSON.stringify({ key, value: next ? "true" : "false" }),
+         });
+         if (!res.ok) throw new Error(`HTTP ${res.status}`);
++        if (key === CLAUDE_KEY) window.dispatchEvent(new Event("omniroute:claude-terminal-mode"));
+       } catch (err) {
+         apply(previous); // revert on failure
+         setError(err instanceof Error ? err.message : t("failedSave"));

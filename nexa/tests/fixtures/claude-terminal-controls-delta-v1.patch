@@ -1,0 +1,232 @@
+diff --git a/src/shared/constants/cliTools.ts b/src/shared/constants/cliTools.ts
+--- a/src/shared/constants/cliTools.ts
++++ b/src/shared/constants/cliTools.ts
+@@ -29,7 +29,7 @@
+       haikuModel: "ANTHROPIC_DEFAULT_HAIKU_MODEL",
+     },
+     modelAliases: ["default", "fable", "sonnet", "opus", "haiku", "opusplan"],
+-    settingsFile: "~/.claude/settings.json",
++    settingsFile: "~/.claude/omniroute-terminal/settings.json",
+     defaultCommand: "claude",
+     defaultModels: [
+       {
+@@ -39,6 +39,13 @@
+         envKey: "ANTHROPIC_MODEL",
+         defaultValue: _cc.sonnet || "claude-sonnet-5-5",
+         isTopLevel: true,
++      },
++      {
++        id: "fable",
++        name: "Claude Fable",
++        alias: "fable",
++        envKey: "ANTHROPIC_DEFAULT_FABLE_MODEL",
++        defaultValue: _cc.fable || "claude-fable-5-2",
+       },
+       {
+         id: "opus",
+diff --git a/src/shared/services/claudeCliConfig.ts b/src/shared/services/claudeCliConfig.ts
+--- a/src/shared/services/claudeCliConfig.ts
++++ b/src/shared/services/claudeCliConfig.ts
+@@ -1,14 +1,17 @@
++import { mergeTerminalProfile, parseSettingsJson } from "../../mitm/_internal/claudeTerminalProfile.cjs";
++export { mergeTerminalProfile, parseSettingsJson };
+ import { normalizeClaudeModelId } from "../../mitm/_internal/claudeModels.cjs";
+ export { normalizeClaudeModelId };
+ 
+ /** Merge only requested fields; Fable remains an independently managed owner choice. */
+ export function planClaudeSettings<Settings extends Record<string, any>>(
+   currentSettings: Settings,
+-  requestedEnv: Record<string, string>
++  requestedEnv: Record<string, string>,
++  options: { updateFable?: boolean } = {}
+ ) {
+   const env = { ...(currentSettings.env || {}) };
+   for (const [key, value] of Object.entries(requestedEnv)) {
+-    if (key === "ANTHROPIC_DEFAULT_FABLE_MODEL") continue;
++    if (key === "ANTHROPIC_DEFAULT_FABLE_MODEL" && options.updateFable !== true) continue;
+     env[key] =
+       key === "ANTHROPIC_MODEL" || /^ANTHROPIC_DEFAULT_[A-Z0-9_]+_MODEL$/.test(key)
+         ? normalizeClaudeModelId(value)
+@@ -19,7 +22,7 @@
+   }
+   const previous = currentSettings.env || {};
+   const changes = Object.keys(requestedEnv)
+-    .filter((key) => key !== "ANTHROPIC_DEFAULT_FABLE_MODEL" && previous[key] !== env[key])
++    .filter((key) => (key !== "ANTHROPIC_DEFAULT_FABLE_MODEL" || options.updateFable === true) && previous[key] !== env[key])
+     .sort()
+     .map((key) => ({
+       key,
+diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-tools/claude-settings/route.ts
+--- a/src/app/api/cli-tools/claude-settings/route.ts
++++ b/src/app/api/cli-tools/claude-settings/route.ts
+@@ -11,23 +11,31 @@
+   getCliRuntimeStatus,
+ } from "@/shared/services/cliRuntime";
+ import { createBackup } from "@/shared/services/backupService";
+-import { planClaudeSettings } from "@/shared/services/claudeCliConfig";
++import { planClaudeSettings, mergeTerminalProfile, parseSettingsJson } from "@/shared/services/claudeCliConfig";
+ import { saveCliToolLastConfigured, deleteCliToolLastConfigured } from "@/lib/db/cliToolState";
+ import { cliSettingsEnvSchema } from "@/shared/validation/schemas";
+ import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
+ import { getApiKeyById } from "@/lib/db/apiKeys";
+-import { readJsoncConfig } from "../_lib/jsoncConfig";
++import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+ 
+ // Get claude settings path based on OS
+-const getClaudeSettingsPath = () => getCliPrimaryConfigPath("claude");
+-
+-// Read current settings.
+-// Ported from upstream decolua/9router@6c10edf8: tolerate JSONC (trailing
+-// commas) and return null on any parse error so the dashboard renders
+-// "installed but not configured" instead of a 500 misread as "not installed".
+-const readSettings = async () => {
+-  const settingsPath = getClaudeSettingsPath();
+-  return readJsoncConfig(settingsPath);
++const getClaudeSettingsPath = () => path.join(path.dirname(getCliPrimaryConfigPath("claude")), "omniroute-terminal", "settings.json");
++
++// Terminal overrides never replace the shared native-app configuration.
++const getGlobalSettingsPath = () => getCliPrimaryConfigPath("claude");
++const readSettingsFile = async (filename: string) => {
++  try { return parseSettingsJson(await fs.readFile(filename, "utf-8")); }
++  catch (error: any) { if (error.code === "ENOENT") return {}; throw error; }
++};
++const readSettings = async () => mergeTerminalProfile(
++  await readSettingsFile(getGlobalSettingsPath()), await readSettingsFile(getClaudeSettingsPath())
++);
++
++const assertTerminalWriteTarget = async () => {
++  for (const filename of [path.dirname(getClaudeSettingsPath()), getClaudeSettingsPath()]) {
++    try { if ((await fs.lstat(filename)).isSymbolicLink()) throw Error("Terminal settings must not be a symlink"); }
++    catch (error: any) { if (error.code !== "ENOENT") throw error; }
++  }
+ };
+ 
+ // GET - Check claude CLI and read current settings
+@@ -55,7 +63,8 @@
+     }
+ 
+     const settings = await readSettings();
+-    const hasOmniRoute = !!settings?.env?.ANTHROPIC_BASE_URL;
++    const routingMode = isFeatureFlagEnabled("OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES") ? "gateway" : "native";
++    const hasOmniRoute = routingMode === "gateway" && !!settings?.env?.ANTHROPIC_BASE_URL;
+ 
+     return NextResponse.json({
+       installed: runtime.installed,
+@@ -67,9 +76,10 @@
+       settings: settings,
+       hasOmniRoute: hasOmniRoute,
+       settingsPath: getClaudeSettingsPath(),
++      routingMode,
+     });
+   } catch (error) {
+-    console.log("Error checking claude settings:", error);
++    console.error("Error reading Claude Terminal settings");
+     return NextResponse.json({ error: "Failed to check claude settings" }, { status: 500 });
+   }
+ }
+@@ -124,6 +134,7 @@
+       }
+     }
+ 
++    await assertTerminalWriteTarget();
+     const settingsPath = getClaudeSettingsPath();
+     const claudeDir = path.dirname(settingsPath);
+ 
+@@ -132,7 +143,7 @@
+     let currentContent = "";
+     try {
+       currentContent = await fs.readFile(settingsPath, "utf-8");
+-      currentSettings = JSON.parse(currentContent);
++      currentSettings = parseSettingsJson(currentContent);
+     } catch (error: any) {
+       if (error.code !== "ENOENT") {
+         throw error;
+@@ -143,7 +154,7 @@
+       throw new Error("Expected a settings object");
+     }
+     const revision = createHash("sha256").update(currentContent).digest("hex");
+-    const plan = planClaudeSettings(currentSettings, env);
++    const plan = planClaudeSettings(currentSettings, env, { updateFable: rawBody.updateFable === true });
+     if (rawBody.preview === true) {
+       return NextResponse.json({ preview: true, revision, changes: plan.changes });
+     }
+@@ -154,11 +165,12 @@
+       );
+     }
+ 
+-    await fs.mkdir(claudeDir, { recursive: true });
+-    await createBackup("claude", settingsPath);
++    await fs.mkdir(claudeDir, { recursive: true, mode: 0o700 });
++    await createBackup("claude-terminal", settingsPath);
+ 
+     // Write new settings
+-    await fs.writeFile(settingsPath, JSON.stringify(plan.settings, null, 2));
++    await fs.writeFile(settingsPath, JSON.stringify(plan.settings, null, 2), { mode: 0o600 });
++    await fs.chmod(settingsPath, 0o600);
+ 
+     // Persist last-configured timestamp
+     try {
+@@ -172,13 +184,18 @@
+       message: "Settings updated successfully",
+     });
+   } catch (error) {
+-    console.log("Error updating claude settings:", error);
++    console.error("Error updating Claude Terminal settings");
+     return NextResponse.json({ error: "Failed to update claude settings" }, { status: 500 });
+   }
+ }
+ 
+ // Fields to remove when resetting
+ const RESET_ENV_KEYS = [
++  "ANTHROPIC_MODEL",
++  "ANTHROPIC_DEFAULT_FABLE_MODEL",
++  "CLAUDE_CODE_SUBAGENT_MODEL",
++  "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY",
++  "CLAUDE_CODE_AUTO_COMPACT_WINDOW",
+   "ANTHROPIC_BASE_URL",
+   "ANTHROPIC_AUTH_TOKEN",
+   "ANTHROPIC_API_KEY",
+@@ -199,13 +216,14 @@
+       return NextResponse.json({ error: writeGuard }, { status: 403 });
+     }
+ 
++    await assertTerminalWriteTarget();
+     const settingsPath = getClaudeSettingsPath();
+ 
+     // Read current settings
+     let currentSettings: Record<string, any> = {};
+     try {
+       const content = await fs.readFile(settingsPath, "utf-8");
+-      currentSettings = JSON.parse(content);
++      currentSettings = parseSettingsJson(content);
+     } catch (error: any) {
+       if (error.code === "ENOENT") {
+         return NextResponse.json({
+@@ -217,7 +235,7 @@
+     }
+ 
+     // Backup current settings before resetting
+-    await createBackup("claude", settingsPath);
++    await createBackup("claude-terminal", settingsPath);
+ 
+     // Remove specified env fields
+     if (currentSettings.env) {
+@@ -232,7 +250,8 @@
+     }
+ 
+     // Write updated settings
+-    await fs.writeFile(settingsPath, JSON.stringify(currentSettings, null, 2));
++    await fs.writeFile(settingsPath, JSON.stringify(currentSettings, null, 2), { mode: 0o600 });
++    await fs.chmod(settingsPath, 0o600);
+ 
+     // Clear last-configured timestamp
+     try {
+@@ -246,7 +265,7 @@
+       message: "Settings reset successfully",
+     });
+   } catch (error) {
+-    console.log("Error resetting claude settings:", error);
++    console.error("Error resetting Claude Terminal settings");
+     return NextResponse.json({ error: "Failed to reset claude settings" }, { status: 500 });
+   }
+ }

@@ -1,5 +1,4 @@
 diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-tools/claude-settings/route.ts
-index b6030494126d56ccb729597b31019d08d7f94200..38cdfca7bea8debcb9fd1c3bd0ce582d19f3e4b1 100644
 --- a/src/app/api/cli-tools/claude-settings/route.ts
 +++ b/src/app/api/cli-tools/claude-settings/route.ts
 @@ -3,6 +3,7 @@
@@ -10,16 +9,76 @@ index b6030494126d56ccb729597b31019d08d7f94200..38cdfca7bea8debcb9fd1c3bd0ce582d
  import { requireCliToolsAuth } from "@/lib/api/requireCliToolsAuth";
  import {
    ensureCliConfigWriteAllowed,
-@@ -10,7 +11,7 @@ import {
+@@ -10,23 +11,31 @@
    getCliRuntimeStatus,
  } from "@/shared/services/cliRuntime";
  import { createBackup } from "@/shared/services/backupService";
 -import { normalizeClaudeBaseUrl } from "@/shared/services/claudeCliConfig";
-+import { planClaudeSettings } from "@/shared/services/claudeCliConfig";
++import { planClaudeSettings, mergeTerminalProfile, parseSettingsJson } from "@/shared/services/claudeCliConfig";
  import { saveCliToolLastConfigured, deleteCliToolLastConfigured } from "@/lib/db/cliToolState";
  import { cliSettingsEnvSchema } from "@/shared/validation/schemas";
  import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
-@@ -126,39 +127,38 @@ export async function POST(request: Request) {
+ import { getApiKeyById } from "@/lib/db/apiKeys";
+-import { readJsoncConfig } from "../_lib/jsoncConfig";
++import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+ 
+ // Get claude settings path based on OS
+-const getClaudeSettingsPath = () => getCliPrimaryConfigPath("claude");
+-
+-// Read current settings.
+-// Ported from upstream decolua/9router@6c10edf8: tolerate JSONC (trailing
+-// commas) and return null on any parse error so the dashboard renders
+-// "installed but not configured" instead of a 500 misread as "not installed".
+-const readSettings = async () => {
+-  const settingsPath = getClaudeSettingsPath();
+-  return readJsoncConfig(settingsPath);
++const getClaudeSettingsPath = () => path.join(path.dirname(getCliPrimaryConfigPath("claude")), "omniroute-terminal", "settings.json");
++
++// Terminal overrides never replace the shared native-app configuration.
++const getGlobalSettingsPath = () => getCliPrimaryConfigPath("claude");
++const readSettingsFile = async (filename: string) => {
++  try { return parseSettingsJson(await fs.readFile(filename, "utf-8")); }
++  catch (error: any) { if (error.code === "ENOENT") return {}; throw error; }
++};
++const readSettings = async () => mergeTerminalProfile(
++  await readSettingsFile(getGlobalSettingsPath()), await readSettingsFile(getClaudeSettingsPath())
++);
++
++const assertTerminalWriteTarget = async () => {
++  for (const filename of [path.dirname(getClaudeSettingsPath()), getClaudeSettingsPath()]) {
++    try { if ((await fs.lstat(filename)).isSymbolicLink()) throw Error("Terminal settings must not be a symlink"); }
++    catch (error: any) { if (error.code !== "ENOENT") throw error; }
++  }
+ };
+ 
+ // GET - Check claude CLI and read current settings
+@@ -54,7 +63,8 @@
+     }
+ 
+     const settings = await readSettings();
+-    const hasOmniRoute = !!settings?.env?.ANTHROPIC_BASE_URL;
++    const routingMode = isFeatureFlagEnabled("OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES") ? "gateway" : "native";
++    const hasOmniRoute = routingMode === "gateway" && !!settings?.env?.ANTHROPIC_BASE_URL;
+ 
+     return NextResponse.json({
+       installed: runtime.installed,
+@@ -66,9 +76,10 @@
+       settings: settings,
+       hasOmniRoute: hasOmniRoute,
+       settingsPath: getClaudeSettingsPath(),
++      routingMode,
+     });
+   } catch (error) {
+-    console.log("Error checking claude settings:", error);
++    console.error("Error reading Claude Terminal settings");
+     return NextResponse.json({ error: "Failed to check claude settings" }, { status: 500 });
+   }
+ }
+@@ -123,42 +134,43 @@
+       }
+     }
+ 
++    await assertTerminalWriteTarget();
      const settingsPath = getClaudeSettingsPath();
      const claudeDir = path.dirname(settingsPath);
  
@@ -31,12 +90,13 @@ index b6030494126d56ccb729597b31019d08d7f94200..38cdfca7bea8debcb9fd1c3bd0ce582d
 -
      // Read current settings
      let currentSettings: Record<string, any> = {};
-+    let currentContent = "";
-     try {
+-    try {
 -      const content = await fs.readFile(settingsPath, "utf-8");
 -      currentSettings = JSON.parse(content);
++    let currentContent = "";
++    try {
 +      currentContent = await fs.readFile(settingsPath, "utf-8");
-+      currentSettings = JSON.parse(currentContent);
++      currentSettings = parseSettingsJson(currentContent);
      } catch (error: any) {
        if (error.code !== "ENOENT") {
          throw error;
@@ -46,21 +106,8 @@ index b6030494126d56ccb729597b31019d08d7f94200..38cdfca7bea8debcb9fd1c3bd0ce582d
 -    // Claude Code gateway mode expects the unified root endpoint, not a forced /v1 suffix.
 -    if (env.ANTHROPIC_BASE_URL) {
 -      env.ANTHROPIC_BASE_URL = normalizeClaudeBaseUrl(env.ANTHROPIC_BASE_URL);
-+    if (!currentSettings || typeof currentSettings !== "object" || Array.isArray(currentSettings)) {
-+      throw new Error("Expected a settings object");
-+    }
-+    const revision = createHash("sha256").update(currentContent).digest("hex");
-+    const plan = planClaudeSettings(currentSettings, env);
-+    if (rawBody.preview === true) {
-+      return NextResponse.json({ preview: true, revision, changes: plan.changes });
-+    }
-+    if (rawBody.expectedRevision !== undefined && rawBody.expectedRevision !== revision) {
-+      return NextResponse.json(
-+        { error: "Settings changed; review the changes again" },
-+        { status: 409 }
-+      );
-     }
- 
+-    }
+-
 -    // Merge new env with existing settings
 -    const newSettings = {
 -      ...currentSettings,
@@ -69,12 +116,92 @@ index b6030494126d56ccb729597b31019d08d7f94200..38cdfca7bea8debcb9fd1c3bd0ce582d
 -        ...env,
 -      },
 -    };
-+    await fs.mkdir(claudeDir, { recursive: true });
-+    await createBackup("claude", settingsPath);
++    if (!currentSettings || typeof currentSettings !== "object" || Array.isArray(currentSettings)) {
++      throw new Error("Expected a settings object");
++    }
++    const revision = createHash("sha256").update(currentContent).digest("hex");
++    const plan = planClaudeSettings(currentSettings, env, { updateFable: rawBody.updateFable === true });
++    if (rawBody.preview === true) {
++      return NextResponse.json({ preview: true, revision, changes: plan.changes });
++    }
++    if (rawBody.expectedRevision !== undefined && rawBody.expectedRevision !== revision) {
++      return NextResponse.json(
++        { error: "Settings changed; review the changes again" },
++        { status: 409 }
++      );
++    }
++
++    await fs.mkdir(claudeDir, { recursive: true, mode: 0o700 });
++    await createBackup("claude-terminal", settingsPath);
  
      // Write new settings
 -    await fs.writeFile(settingsPath, JSON.stringify(newSettings, null, 2));
-+    await fs.writeFile(settingsPath, JSON.stringify(plan.settings, null, 2));
++    await fs.writeFile(settingsPath, JSON.stringify(plan.settings, null, 2), { mode: 0o600 });
++    await fs.chmod(settingsPath, 0o600);
  
      // Persist last-configured timestamp
      try {
+@@ -172,13 +184,18 @@
+       message: "Settings updated successfully",
+     });
+   } catch (error) {
+-    console.log("Error updating claude settings:", error);
++    console.error("Error updating Claude Terminal settings");
+     return NextResponse.json({ error: "Failed to update claude settings" }, { status: 500 });
+   }
+ }
+ 
+ // Fields to remove when resetting
+ const RESET_ENV_KEYS = [
++  "ANTHROPIC_MODEL",
++  "ANTHROPIC_DEFAULT_FABLE_MODEL",
++  "CLAUDE_CODE_SUBAGENT_MODEL",
++  "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY",
++  "CLAUDE_CODE_AUTO_COMPACT_WINDOW",
+   "ANTHROPIC_BASE_URL",
+   "ANTHROPIC_AUTH_TOKEN",
+   "ANTHROPIC_API_KEY",
+@@ -199,13 +216,14 @@
+       return NextResponse.json({ error: writeGuard }, { status: 403 });
+     }
+ 
++    await assertTerminalWriteTarget();
+     const settingsPath = getClaudeSettingsPath();
+ 
+     // Read current settings
+     let currentSettings: Record<string, any> = {};
+     try {
+       const content = await fs.readFile(settingsPath, "utf-8");
+-      currentSettings = JSON.parse(content);
++      currentSettings = parseSettingsJson(content);
+     } catch (error: any) {
+       if (error.code === "ENOENT") {
+         return NextResponse.json({
+@@ -217,7 +235,7 @@
+     }
+ 
+     // Backup current settings before resetting
+-    await createBackup("claude", settingsPath);
++    await createBackup("claude-terminal", settingsPath);
+ 
+     // Remove specified env fields
+     if (currentSettings.env) {
+@@ -232,7 +250,8 @@
+     }
+ 
+     // Write updated settings
+-    await fs.writeFile(settingsPath, JSON.stringify(currentSettings, null, 2));
++    await fs.writeFile(settingsPath, JSON.stringify(currentSettings, null, 2), { mode: 0o600 });
++    await fs.chmod(settingsPath, 0o600);
+ 
+     // Clear last-configured timestamp
+     try {
+@@ -246,7 +265,7 @@
+       message: "Settings reset successfully",
+     });
+   } catch (error) {
+-    console.log("Error resetting claude settings:", error);
++    console.error("Error resetting Claude Terminal settings");
+     return NextResponse.json({ error: "Failed to reset claude settings" }, { status: 500 });
+   }
+ }

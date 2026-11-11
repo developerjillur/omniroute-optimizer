@@ -1,5 +1,4 @@
 diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.tsx b/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.tsx
-index ee7269ae3caa50d017097027f7aa5f771a17464e..d7c4bb68cb7a3dd510ed4924f51d3fc563a292cf 100644
 --- a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.tsx
 +++ b/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.tsx
 @@ -15,6 +15,7 @@
@@ -18,7 +17,29 @@ index ee7269ae3caa50d017097027f7aa5f771a17464e..d7c4bb68cb7a3dd510ed4924f51d3fc5
    const [restoring, setRestoring] = useState(false);
    const [message, setMessage] = useState(null);
    const [showInstallGuide, setShowInstallGuide] = useState(false);
-@@ -177,7 +179,7 @@
+@@ -84,6 +86,7 @@
+   const [showManualConfigModal, setShowManualConfigModal] = useState(false);
+   const [customBaseUrl, setCustomBaseUrl] = useState("");
+   const hasInitializedModels = useRef(false);
++  const explicitlyEditedSlots = useRef(new Set<string>());
+   // Backups state
+   const [backups, setBackups] = useState([]);
+   const [showBackups, setShowBackups] = useState(false);
+@@ -92,11 +95,12 @@
+ 
+   const getConfigStatus = () => {
+     if (!cliReady) return null;
++    if (claudeStatus.routingMode === "native") return "not_configured";
+     const currentUrl = claudeStatus.settings?.env?.ANTHROPIC_BASE_URL;
+     if (!currentUrl) return "not_configured";
+     const localMatch = currentUrl.includes("localhost") || currentUrl.includes("127.0.0.1");
+     const cloudMatch = cloudEnabled && CLOUD_URL && currentUrl.startsWith(CLOUD_URL);
+-    if (localMatch || cloudMatch) return "configured";
++    if (localMatch || cloudMatch || normalizeClaudeBaseUrl(currentUrl) === normalizeClaudeBaseUrl(baseUrl)) return "configured";
+     return "other";
+   };
+ 
+@@ -177,7 +181,7 @@
      return normalizeClaudeBaseUrl(url);
    };
  
@@ -27,7 +48,7 @@ index ee7269ae3caa50d017097027f7aa5f771a17464e..d7c4bb68cb7a3dd510ed4924f51d3fc5
      setApplying(true);
      setMessage(null);
      try {
-@@ -190,11 +192,19 @@
+@@ -190,11 +194,19 @@
  
        tool.defaultModels.forEach((model) => {
          const targetModel = modelMappings[model.alias] || model.defaultValue || "";
@@ -36,7 +57,7 @@ index ee7269ae3caa50d017097027f7aa5f771a17464e..d7c4bb68cb7a3dd510ed4924f51d3fc5
        });
  
 -      const postBody: Record<string, unknown> = { env };
-+      let postBody: Record<string, unknown> = { env, preview: true };
++      let postBody: Record<string, unknown> = { env, preview: true, updateFable: explicitlyEditedSlots.current.has("fable") };
        if (selectedKeyId) postBody.keyId = selectedKeyId;
 +      if (reviewed) {
 +        if (!settingsPreview) return;
@@ -49,7 +70,7 @@ index ee7269ae3caa50d017097027f7aa5f771a17464e..d7c4bb68cb7a3dd510ed4924f51d3fc5
  
        const res = await fetch("/api/cli-tools/claude-settings", {
          method: "POST",
-@@ -202,14 +212,16 @@
+@@ -202,14 +214,17 @@
          body: JSON.stringify(postBody),
        });
        const data = await res.json();
@@ -58,6 +79,7 @@ index ee7269ae3caa50d017097027f7aa5f771a17464e..d7c4bb68cb7a3dd510ed4924f51d3fc5
 +        return;
 +      }
        if (res.ok) {
++        explicitlyEditedSlots.current.clear();
 +        setSettingsPreview(null);
          setMessage({ type: "success", text: t("settingsApplied") });
 -        setClaudeStatus((prev) => ({
@@ -71,7 +93,37 @@ index ee7269ae3caa50d017097027f7aa5f771a17464e..d7c4bb68cb7a3dd510ed4924f51d3fc5
          setMessage({
            type: "error",
            text:
-@@ -271,7 +283,7 @@
+@@ -235,7 +250,9 @@
+         tool.defaultModels.forEach((model) =>
+           onModelMappingChange(model.alias, model.defaultValue || "")
+         );
++        explicitlyEditedSlots.current.clear();
+         setSelectedApiKey("");
++        await checkClaudeStatus();
+       } else {
+         setMessage({
+           type: "error",
+@@ -257,8 +274,17 @@
+   };
+ 
+   const handleModelSelect = (model) => {
+-    if (currentEditingAlias) onModelMappingChange(currentEditingAlias, model.value);
+-  };
++    if (currentEditingAlias) {
++      explicitlyEditedSlots.current.add(currentEditingAlias);
++      onModelMappingChange(currentEditingAlias, model.value);
++    }
++  };
++
++  useEffect(() => {
++    const refresh = () => { void checkClaudeStatus(); };
++    window.addEventListener("omniroute:claude-terminal-mode", refresh);
++    return () => window.removeEventListener("omniroute:claude-terminal-mode", refresh);
++  }, [checkClaudeStatus]);
+ 
+   // Generate settings.json content for manual copy
+   const getManualConfigs = () => {
+@@ -271,12 +297,12 @@
  
      tool.defaultModels.forEach((model) => {
        const targetModel = modelMappings[model.alias];
@@ -80,7 +132,46 @@ index ee7269ae3caa50d017097027f7aa5f771a17464e..d7c4bb68cb7a3dd510ed4924f51d3fc5
      });
  
      return [
-@@ -525,6 +537,32 @@
+       {
+-        filename: "~/.claude/settings.json",
++        filename: "~/.claude/omniroute-terminal/settings.json",
+         content: JSON.stringify({ env }, null, 2),
+       },
+     ];
+@@ -342,6 +368,8 @@
+ 
+       {isExpanded && (
+         <div className="mt-4 pt-4 border-t border-border flex flex-col gap-4">
++          <p className="text-sm text-text-main">{t(claudeStatus?.routingMode === "gateway" ? "claudeTerminalModeGateway" : "claudeTerminalModeNative")}</p>
++          <p className="text-xs text-text-muted">{t("claudeTerminalNote")}</p>
+           {checkingClaude && (
+             <div role="status" className="flex items-center gap-2 text-text-muted">
+               <Spinner decorative size="sm" />
+@@ -502,7 +530,10 @@
+                     </Button>
+                     <Input
+                       value={modelMappings[model.alias] || ""}
+-                      onChange={(e) => onModelMappingChange(model.alias, e.target.value)}
++                      onChange={(e) => {
++                        explicitlyEditedSlots.current.add(model.alias);
++                        onModelMappingChange(model.alias, e.target.value);
++                      }}
+                       placeholder={t("providerModelPlaceholder")}
+                       aria-label={model.name}
+                       className="min-w-0 w-auto flex-1"
+@@ -512,7 +543,10 @@
+                       <Button
+                         variant="ghost"
+                         size="icon-sm"
+-                        onClick={() => onModelMappingChange(model.alias, "")}
++                        onClick={() => {
++                          explicitlyEditedSlots.current.add(model.alias);
++                          onModelMappingChange(model.alias, "");
++                        }}
+                         title={t("clear")}
+                         aria-label={t("clear")}
+                         className="text-text-muted hover:text-error"
+@@ -525,6 +559,32 @@
                </div>
  
                {/* Opt-in (default off): Claude Code auto-permission classifier compat mode. */}
@@ -113,7 +204,7 @@ index ee7269ae3caa50d017097027f7aa5f771a17464e..d7c4bb68cb7a3dd510ed4924f51d3fc5
                <ClaudeClassifierCompatToggle />
  
                {/* Info link to the discovery-alias gate (claude/<provider>/<model> mirror ids) */}
-@@ -546,12 +584,12 @@
+@@ -546,12 +606,12 @@
                  <Button
                    variant="primary"
                    size="sm"

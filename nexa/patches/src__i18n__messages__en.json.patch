@@ -1,7 +1,24 @@
 diff --git a/src/i18n/messages/en.json b/src/i18n/messages/en.json
-index 11c7e6b09d417a15f798103377ca7c110e8ca4a1..138e7f565ba834f1966c42654f7d3a2b53fa28d9 100644
 --- a/src/i18n/messages/en.json
 +++ b/src/i18n/messages/en.json
+@@ -2894,13 +2894,13 @@
+     "ccOnboardingKeyPlaceholder": "'<your OmniRoute API key>'",
+     "ccOnboardingWindowNote": "Claude Code assumes a 200K context window for any model id it does not recognize. For a model with a different real window, add CLAUDE_CODE_AUTO_COMPACT_WINDOW just under it so auto-compaction does not fire too early.",
+     "failedSave": "Failed to save",
+-    "profileSyncTitle": "CLI profile auto-sync",
+-    "profileSyncDescription": "After provider models are synchronized, automatically regenerate CLI tool profiles from the live catalog. Off by default — only profile files are written; the active/default configuration is never changed.",
++    "profileSyncTitle": "Terminal routing and profile sync",
++    "profileSyncDescription": "Claude routing applies when you next launch claude in Terminal. Codex profile sync remains independent; running sessions are unchanged.",
+     "profileSyncLoadFailed": "Failed to load settings",
+     "codexProfiles": "Codex profiles",
+     "codexProfilesDescription": "Regenerate ~/.codex/*.config.toml after model discovery.",
+-    "claudeProfiles": "Claude Code profiles",
+-    "claudeProfilesDescription": "Regenerate each ~/.claude/profiles/…/settings.json after model discovery.",
++    "claudeProfiles": "Claude Terminal routing",
++    "claudeProfilesDescription": "On: new Terminal sessions use the OmniRoute profile. Off: new Terminal sessions use your native Claude login. The native app and its Agent Bridge stay unchanged. Requires the managed Terminal launcher.",
+     "noActiveProviders": "No active providers",
+     "noActiveProvidersDesc": "Please add and connect providers first to configure CLI tools.",
+     "mapModels": "Map Models",
 @@ -3336,6 +3336,10 @@
      "hermesRoleMoaReferenceDesc": "Mixture-of-Agents reference model",
      "hermesRoleMoaAggregator": "MoA Aggregator",
@@ -13,3 +30,15 @@ index 11c7e6b09d417a15f798103377ca7c110e8ca4a1..138e7f565ba834f1966c42654f7d3a2b
      "hermesSelectBeforePreview": "Select models for roles, or ensure the roles are loaded, before previewing.",
      "hermesPreviewFailed": "Failed to generate preview",
      "hermesSavedTo": "Saved to {path}",
+@@ -3407,7 +3411,10 @@
+     "useDefaultKey": "Use the OmniRoute default key",
+     "mainModelAria": "Main model",
+     "manualConfigTitle": "Grok Build manual config",
+-    "removeMapping": "Remove mapping"
++    "removeMapping": "Remove mapping",
++    "claudeTerminalModeNative": "Terminal: native Claude subscription (Off)",
++    "claudeTerminalModeGateway": "Terminal: OmniRoute (On)",
++    "claudeTerminalNote": "This card configures ~/.claude/omniroute-terminal/settings.json. Shared native-app settings are preserved. Open a new Terminal after installing the managed launcher."
+   },
+   "modelCatalog": {
+     "title": "Models & Combos",

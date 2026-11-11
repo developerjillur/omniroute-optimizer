@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 358,
-    "patches": 215,
-    "new": 137,
+    "total": 362,
+    "patches": 218,
+    "new": 138,
     "tooling": 6,
     "upstreamCandidates": 27,
     "nexaSpecific": 109,
-    "needsReview": 222,
+    "needsReview": 226,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
   },
@@ -674,6 +674,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/src__app__(dashboard)__dashboard__cli-code__components__CliProfileAutoSyncToggles.tsx.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/app/(dashboard)/dashboard/cli-code/components/CliProfileAutoSyncToggles.tsx",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/src__app__(dashboard)__dashboard__cli-code__components__HermesAgentToolCard.tsx.patch",
       "layer": "patch",
       "class": "needs-review",
@@ -766,6 +774,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "src/app/(dashboard)/dashboard/usage/components/ProviderLimits/parts/QuotaCardExpanded.tsx",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/src__app__api__cli-tools__backups__route.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/app/api/cli-tools/backups/route.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -921,6 +937,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "src/lib/cli-helper/config-generator/hermes-agent.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/src__lib__cliTools__checkToolConfigStatus.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/lib/cliTools/checkToolConfigStatus.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -2082,6 +2106,14 @@
       "layer": "new",
       "class": "needs-review",
       "target": "src/mitm/_internal/claudeModels.json",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/src/mitm/_internal/claudeTerminalProfile.cjs",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "src/mitm/_internal/claudeTerminalProfile.cjs",
       "conflictRisk": "none",
       "upstreamPR": null
     },

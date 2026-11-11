@@ -10,9 +10,13 @@ async function fixture(initial?: Record<string, unknown>) {
   const directory = await fs.mkdtemp(
     path.join(process.env.TMPDIR || os.tmpdir(), "claude-settings-route-")
   );
-  const filename = path.join(directory, "settings.json");
+  const filename = path.join(directory, "omniroute-terminal", "settings.json");
+  await fs.mkdir(path.dirname(filename));
+  const globalFile = path.join(directory, "settings.json");
+  const globalBytes = JSON.stringify({hooks:{UserPromptSubmit:["native app hook"]},env:{ANTHROPIC_AUTH_TOKEN:"native-app-key",ANTHROPIC_DEFAULT_FABLE_MODEL:"claude-fable-5-1"}});
+  await fs.writeFile(globalFile, globalBytes);
   if (initial) await fs.writeFile(filename, JSON.stringify(initial));
-  const state = { filename, backups: 0, saved: 0 };
+  const state = { filename: globalFile, backups: 0, saved: 0 };
   const key = `fixture${Date.now()}${Math.random().toString(36).slice(2)}`;
   Reflect.set(globalThis, key, state);
   const helper = pathToFileURL(path.resolve("src/shared/services/claudeCliConfig.ts")).href;
@@ -28,7 +32,8 @@ async function fixture(initial?: Record<string, unknown>) {
       "export const isValidationFailure=()=>false,validateBody=(_schema,body)=>({data:{env:{...body.env}}});",
     "@/lib/db/apiKeys":
       "export const getApiKeyById=async(id)=>id==='fixture-key-id'?{key:'fixture-resolved-token'}:null;",
-    "../_lib/jsoncConfig": "export const readJsoncConfig=async()=>null;",
+    "../_lib/jsoncConfig": "export const readJsoncConfig=async(filename)=>JSON.parse(await (await import('node:fs/promises')).readFile(filename,'utf8'));",
+    "@/shared/utils/featureFlags": "export const isFeatureFlagEnabled=()=>false;",
   };
   let source = await fs.readFile(
     path.resolve("src/app/api/cli-tools/claude-settings/route.ts"),
@@ -54,7 +59,7 @@ async function fixture(initial?: Record<string, unknown>) {
         body: JSON.stringify(body),
       })
     );
-  return { state, filename, post };
+  return { state, filename, globalFile, globalBytes, post, route };
 }
 
 test("actual settings route previews without writes, then applies normalized IDs on a copy", async () => {
@@ -103,6 +108,8 @@ test("actual settings route previews without writes, then applies normalized IDs
   assert.equal(saved.env.ANTHROPIC_BASE_URL, "https://omni.local");
   assert.equal(f.state.backups, 1);
   assert.equal(f.state.saved, 1);
+  assert.equal(await fs.readFile(f.globalFile, "utf8"), f.globalBytes);
+  assert.equal((await fs.stat(f.filename)).mode & 0o777, 0o600);
 });
 
 test("a settings edit after preview is preserved and returns a conflict before backup", async () => {
@@ -128,4 +135,25 @@ test("preview does not create a missing settings file", async () => {
   assert.equal((await response.json()).preview, true);
   await assert.rejects(fs.stat(f.filename), { code: "ENOENT" });
   assert.equal(f.state.backups, 0);
+});
+
+
+test("GET reports native Terminal mode and Fable 5.2 without copying app hooks", async () => {
+  const f = await fixture();
+  const data = await (await f.route.GET(new Request("http://localhost/"))).json();
+  assert.equal(data.routingMode, "native");
+  assert.equal(data.hasOmniRoute, false);
+  assert.equal(data.settings.env.ANTHROPIC_DEFAULT_FABLE_MODEL, "claude-fable-5-2");
+  assert.equal(data.settings.hooks, undefined);
+  assert.equal(await fs.readFile(f.globalFile, "utf8"), f.globalBytes);
+});
+
+test("explicit Fable selection and Reset affect only Terminal settings", async () => {
+  const f = await fixture({env:{CUSTOM:"retain"}});
+  const applied = await f.post({updateFable:true,env:{ANTHROPIC_DEFAULT_FABLE_MODEL:"cc/claude-fable-5-2"}});
+  assert.equal(applied.status, 200);
+  assert.equal(JSON.parse(await fs.readFile(f.filename,"utf8")).env.ANTHROPIC_DEFAULT_FABLE_MODEL,"claude-fable-5-2");
+  assert.equal((await f.route.DELETE(new Request("http://localhost/",{method:"DELETE"}))).status,200);
+  assert.deepEqual(JSON.parse(await fs.readFile(f.filename,"utf8")),{env:{CUSTOM:"retain"}});
+  assert.equal(await fs.readFile(f.globalFile,"utf8"),f.globalBytes);
 });

@@ -1,0 +1,47 @@
+diff --git a/src/app/api/cli-tools/backups/route.ts b/src/app/api/cli-tools/backups/route.ts
+--- a/src/app/api/cli-tools/backups/route.ts
++++ b/src/app/api/cli-tools/backups/route.ts
+@@ -7,6 +7,8 @@
+ import { cliBackupMutationSchema } from "@/shared/validation/schemas";
+ import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
+ import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
++
++const backupScope = (tool: string) => tool === "claude" ? "claude-terminal" : tool;
+ 
+ const VALID_TOOLS = ["claude", "codex", "droid", "grok-build", "openclaw", "cline", "kilo", "qwen"];
+ 
+@@ -24,14 +26,14 @@
+     }
+ 
+     if (tool) {
+-      const backups = await listBackups(tool);
++      const backups = await listBackups(backupScope(tool));
+       return NextResponse.json({ tool, backups });
+     }
+ 
+     // List all tools
+     const result = {};
+     for (const t of VALID_TOOLS) {
+-      result[t] = await listBackups(t);
++      result[t] = await listBackups(backupScope(t));
+     }
+     return NextResponse.json({ backups: result });
+   } catch (error) {
+@@ -77,7 +79,7 @@
+       return NextResponse.json({ error: `Invalid tool: ${tool}` }, { status: 400 });
+     }
+ 
+-    const result = await restoreBackup(tool, backupId);
++    const result = await restoreBackup(backupScope(tool), backupId);
+     return NextResponse.json({
+       success: true,
+       message: `Backup restored for ${tool}`,
+@@ -128,7 +130,7 @@
+       return NextResponse.json({ error: `Invalid tool: ${tool}` }, { status: 400 });
+     }
+ 
+-    const result = await deleteBackup(tool, backupId);
++    const result = await deleteBackup(backupScope(tool), backupId);
+     return NextResponse.json({
+       success: true,
+       message: `Backup deleted for ${tool}`,

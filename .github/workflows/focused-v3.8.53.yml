@@ -47,6 +47,18 @@ jobs:
           node nexa/apply.mjs
           npm ci --ignore-scripts --no-audit --no-fund
           npm rebuild better-sqlite3 --foreground-scripts
+      - name: Claude Terminal routing and preserved native app settings
+        id: terminal
+        shell: bash
+        run: |
+          set -euo pipefail
+          export TMPDIR="$RUNNER_TEMP"
+          node --test --test-concurrency=1 --test-reporter=tap nexa/tests/claude-terminal-profile.test.mjs | tee "$RUNNER_TEMP/claude-terminal-tooling.tap"
+          cd "$RUNNER_TEMP/focused-application"
+          export DATA_DIR="$RUNNER_TEMP/terminal-fixture-data"
+          node nexa/tests/verify-claude-terminal-red.mjs
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/claude-model-id-routing.test.ts tests/unit/claude-model-settings-route.test.ts tests/unit/claude-cli-config.test.ts tests/unit/claude-cli-defaults.test.ts | tee "$RUNNER_TEMP/claude-terminal-settings.tap"
+          node node_modules/typescript/bin/tsc --project nexa/tests/fixtures/claude-settings-type-contract.tsconfig.json
       - name: Verify the fixture socket guard
         id: network_guard
         run: node --test nexa/tests/isolated-network.test.mjs
@@ -83,7 +95,7 @@ jobs:
           import json, os, re
           from pathlib import Path
           steps = json.loads(os.environ['FOCUSED_OUTCOMES'])
-          failed = {name: steps.get(name, {}).get('outcome', 'missing') for name in ['network_guard','syntax','native','interface','core'] if steps.get(name, {}).get('outcome') != 'success'}
+          failed = {name: steps.get(name, {}).get('outcome', 'missing') for name in ['terminal','network_guard','syntax','native','interface','core'] if steps.get(name, {}).get('outcome') != 'success'}
           tap = Path(os.environ['RUNNER_TEMP']) / 'focused-native.tap'
           counts = {}
           if tap.is_file():
@@ -103,5 +115,9 @@ jobs:
         with:
           name: focused-compatibility
           path: |
+            ${{ runner.temp }}/claude-terminal-red.tap
+            ${{ runner.temp }}/claude-terminal-red.json
+            ${{ runner.temp }}/claude-terminal-tooling.tap
+            ${{ runner.temp }}/claude-terminal-settings.tap
             ${{ runner.temp }}/focused-native.tap
             ${{ runner.temp }}/focused-validation.json

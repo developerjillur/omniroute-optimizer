@@ -347,7 +347,6 @@ test("Off ignores saved gateway model mappings while On restores them", () => {
   );
 });
 
-
 test("an unrelated local client cannot use the Terminal tunnel or inherited proxy credentials", async () => {
   let connected = false;
   const tunnel = await startTerminalTunnel({

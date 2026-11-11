@@ -59,7 +59,9 @@ export async function startTerminalTunnel({
   idleTimeout = 600000,
 } = {}) {
   const password = randomBytes(24).toString("hex");
-  const authorization = Buffer.from("Basic " + Buffer.from("terminal:" + password).toString("base64"));
+  const authorization = Buffer.from(
+    "Basic " + Buffer.from("terminal:" + password).toString("base64")
+  );
   const sockets = new Set();
   const server = http.createServer((_req, res) => {
     res.writeHead(405);

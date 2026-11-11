@@ -7,7 +7,7 @@
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
   "trackedNexaFiles": 533,
-  "totalNexaBytes": 2504567,
+  "totalNexaBytes": 2506150,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -181,9 +181,9 @@
     {
       "path": "nexa/deploy/claude-terminal-tunnel.mjs",
       "mode": "100644",
-      "gitBlobSha": "364b79ccbb5e34d01489999b01e300876071df93",
-      "bytes": 6205,
-      "sha256": "3d9af7ca017f58cc4acb0be74503503737c6f4e26906c96e089b3a573d1efd62"
+      "gitBlobSha": "66228595489f2916ad7a887b107c4abf85e8734c",
+      "bytes": 6357,
+      "sha256": "b774d4426c91ceb26fc6ae4f87c07ea91cf870c495efbf1e263d32ddb72712a5"
     },
     {
       "path": "nexa/deploy/dashboard-gate.mjs",
@@ -3415,9 +3415,9 @@
     {
       "path": "nexa/tests/claude-terminal-profile.test.mjs",
       "mode": "100644",
-      "gitBlobSha": "0415131d83c558195379ecacb7c10eca76614f9b",
-      "bytes": 13679,
-      "sha256": "f022a6abb8860385be57af0acc8270aa552f4e10347803cb40446cd5bf7bbba1"
+      "gitBlobSha": "edcfb0cb4308dfe2c6639342f2e2892efc4f4e94",
+      "bytes": 15110,
+      "sha256": "0f9612a4f4c347961445d8063a33aa5445e9856cf022aba71b904e104f0a5f19"
     },
     {
       "path": "nexa/tests/compare-upgrade-types.mjs",

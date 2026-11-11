@@ -368,3 +368,40 @@ test("an unrelated local client cannot use the Terminal tunnel or inherited prox
     tunnel.close();
   }
 });
+
+test("late upstream errors close TLS tunnels without HTTP injection", async () => {
+  const destination = net.createServer((socket) => socket.pipe(socket));
+  destination.listen(0, "127.0.0.1");
+  await once(destination, "listening");
+  let outbound;
+  const tunnel = await startTerminalTunnel({
+    resolveApi: async () => "203.0.113.5",
+    connect: () => {
+      outbound = net.connect(destination.address().port, "127.0.0.1");
+      return outbound;
+    },
+  });
+  const originalWrite = net.Socket.prototype.write;
+  let lateHttpErrors = 0;
+  try {
+    const req = proxyRequest(tunnel.url, { method: "CONNECT", path: "api.anthropic.com:443" });
+    const connected = once(req, "connect");
+    req.end();
+    const [response, client] = await connected;
+    assert.equal(response.statusCode, 200);
+    client.on("error", () => {});
+    const closed = new Promise((resolve) => client.once("close", resolve));
+    net.Socket.prototype.write = function (chunk, ...args) {
+      if (typeof chunk === "string" && chunk.includes("502 Bad Gateway")) lateHttpErrors++;
+      return originalWrite.call(this, chunk, ...args);
+    };
+    outbound.emit("error", new Error("fixture late connection reset"));
+    outbound.destroy();
+    await closed;
+    assert.equal(lateHttpErrors, 0);
+  } finally {
+    net.Socket.prototype.write = originalWrite;
+    tunnel.close();
+    await new Promise((resolve) => destination.close(resolve));
+  }
+});

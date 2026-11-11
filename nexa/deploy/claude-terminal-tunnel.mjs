@@ -138,7 +138,10 @@ export async function startTerminalTunnel({
           if (response.statusCode !== 200) {
             socket.destroy();
             reject();
-          } else bind(socket, extra);
+          } else {
+            request.removeListener("error", reject);
+            bind(socket, extra);
+          }
         });
         request.on("error", reject);
         request.on("timeout", () => request.destroy());
@@ -153,7 +156,10 @@ export async function startTerminalTunnel({
           reject();
         });
         socket.once("error", reject);
-        socket.once("connect", () => bind(socket));
+        socket.once("connect", () => {
+          socket.removeListener("error", reject);
+          bind(socket);
+        });
         client.once("close", () => socket.destroy());
       }
     } catch {

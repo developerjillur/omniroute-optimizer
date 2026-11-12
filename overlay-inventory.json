@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
-  "trackedNexaFiles": 536,
-  "totalNexaBytes": 2523642,
+  "trackedNexaFiles": 541,
+  "totalNexaBytes": 2558663,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -186,6 +186,13 @@
       "sha256": "b774d4426c91ceb26fc6ae4f87c07ea91cf870c495efbf1e263d32ddb72712a5"
     },
     {
+      "path": "nexa/deploy/claude-vscode-launcher.mjs",
+      "mode": "100644",
+      "gitBlobSha": "d4eaced6a8f7a5325d09eb3639b919a9838ca617",
+      "bytes": 3143,
+      "sha256": "3eac5c246daeb3c6ede9c1fba8b9fa3eb639309408ce1052bfa91219e4940872"
+    },
+    {
       "path": "nexa/deploy/compressed-database.py",
       "mode": "100644",
       "gitBlobSha": "7acbfa90724d80d4ea616fa1f312bdbf03c62768",
@@ -261,6 +268,13 @@
       "gitBlobSha": "b9950c88f85f53ee050fe762fff9f069f6beee7a",
       "bytes": 6240,
       "sha256": "620f7b461aa769dd0a119ca7aa36db5aed8c67c44eec7c475f52fda5ae54693f"
+    },
+    {
+      "path": "nexa/deploy/install-claude-vscode.mjs",
+      "mode": "100644",
+      "gitBlobSha": "dd37c8fb19b7a979e2289827009b4929f3db80a2",
+      "bytes": 8647,
+      "sha256": "46cfb8ea4efa7528d6684a6e66a8d75e1a2d114c1d5670c0d9d6c977600b5276"
     },
     {
       "path": "nexa/deploy/install-local-command.sh",
@@ -641,6 +655,13 @@
       "sha256": "d904beac9b1296b5f1eec3ad2edc58dba870050535ed585f761d758418b36e48"
     },
     {
+      "path": "nexa/docs/LIVE-AVAILABILITY-2026-11-11.md",
+      "mode": "100644",
+      "gitBlobSha": "8e8b195286b061d53c289dd3bc8606b797ec118e",
+      "bytes": 5792,
+      "sha256": "ae50a6f682ba24351b8e03a84fa1ed275dbd82e12956e92db6eee0984227939f"
+    },
+    {
       "path": "nexa/docs/NATIVE-ARTIFACT-RECOVERY-AND-GPT61-PRICING-2026-10-14.md",
       "mode": "100644",
       "gitBlobSha": "96b4308e23b10ea9740e0b9a7b67d986ad3c6ca9",
@@ -737,6 +758,13 @@
       "gitBlobSha": "17712c8e18d956ea9eceab562a8680fb230c3b09",
       "bytes": 13040,
       "sha256": "8e7bc5346e27259e7d68db8c318df45ddb24db0062bbadad8e66fdf2b799999a"
+    },
+    {
+      "path": "nexa/docs/VSCODE-FABLE-5.2-2026-11-12.md",
+      "mode": "100644",
+      "gitBlobSha": "1b9349fecbdcd1d941ef35c063e16ea91c945536",
+      "bytes": 6879,
+      "sha256": "39ee9b68854953de0819c8294b67af54e5a05e5ce8c1d3f9811f524f59303bb3"
     },
     {
       "path": "nexa/gen-manifest.mjs",
@@ -3439,6 +3467,13 @@
       "gitBlobSha": "7965b79fe65d340c2a7427f08cd39048ce508a1f",
       "bytes": 15413,
       "sha256": "cbe8ea5d99340cd80e642e9d2b79a3c3052d82b4fd2b8851a004aaffedf2bce8"
+    },
+    {
+      "path": "nexa/tests/claude-vscode-routing.test.mjs",
+      "mode": "100644",
+      "gitBlobSha": "35f8346549b0a943eef5b10a920e3bd0a55e0e4b",
+      "bytes": 10560,
+      "sha256": "a3b711e32e90bc0302407fe86f419d7599906453408d873e4edd833eadf95922"
     },
     {
       "path": "nexa/tests/compare-upgrade-types.mjs",

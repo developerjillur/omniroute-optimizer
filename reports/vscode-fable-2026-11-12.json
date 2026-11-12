@@ -9,7 +9,7 @@
   "nativeAppBridgeChanged": false,
   "terminalDefaultChanged": false,
   "vscodeRoutingChanged": false,
-  "vscodeRoutingPreferencePending": true,
+  "vscodeRoutingPreferencePending": false,
   "sharedSettingsChanged": false,
   "extensionBinaryChanged": false,
   "windowReloaded": false,
@@ -19,11 +19,13 @@
   "limitations": [
     "No new VS Code generation or entitlement test was run during system memory pressure warning.",
     "The earlier default-model error was not reproduced or assigned a single proven cause.",
-    "VS Code currently retains its existing shared gateway configuration; the Terminal shell function does not wrap the extension panel."
+    "The existing VS Code session retains its earlier route until a new process uses the validated adapter."
   ],
   "references": [
     "https://code.claude.com/docs/en/vs-code#extension-settings",
     "https://code.claude.com/docs/en/model-config",
     "https://code.claude.com/docs/en/network-config"
-  ]
+  ],
+  "approvedVSCodeRouting": "Same Terminal flag: native subscription when Off; OmniRoute when On",
+  "switchIntegrationStatus": "SOURCE_PREPARED_VALIDATION_AND_ACTIVATION_PENDING"
 }

@@ -1,0 +1,46 @@
+name: VS Code routing
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [fix/claude-cli-profile-controls-2026-11-11]
+    paths:
+      - nexa/deploy/claude-vscode-launcher.mjs
+      - nexa/deploy/install-claude-vscode.mjs
+      - nexa/tests/claude-vscode-routing.test.mjs
+      - .github/workflows/vscode-routing.yml
+
+permissions:
+  contents: read
+
+jobs:
+  routing:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    strategy:
+      max-parallel: 1
+      matrix:
+        node: ["24.15.0", "26.7.0"]
+    env:
+      NODE_OPTIONS: --max-old-space-size=256
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Verify the complete source inventory
+        run: node nexa/tests/verify-source-inventory.mjs
+      - name: Check launcher and installer syntax
+        run: |
+          node --check nexa/deploy/claude-vscode-launcher.mjs
+          node --check nexa/deploy/install-claude-vscode.mjs
+          node --check nexa/tests/claude-vscode-routing.test.mjs
+      - name: Test VS Code routing and the existing Terminal boundary
+        env:
+          TMPDIR: ${{ runner.temp }}
+        run: >-
+          node --test --test-concurrency=1 --test-reporter=tap
+          nexa/tests/claude-vscode-routing.test.mjs
+          nexa/tests/claude-terminal-profile.test.mjs

@@ -29,11 +29,35 @@ Terminal-এর flag read-only query-তে `false` পাওয়া গেছে
 per-launch settings, public upstream TLS tunnel, shared login ও On-mode gateway
 behavior আগের [Terminal note](CLAUDE-TERMINAL-PROFILES-2026-11-11.md)-এ আছে।
 
-VS Code-এর জন্য `claudeCode.claudeProcessWrapper` configured নয়। VS Code panel-ও
-Terminal-এর একই switch অনুসরণ করবে, সবসময় gateway ব্যবহার করবে, নাকি সবসময়
-subscription ব্যবহার করবে—এই preference জানতে চাওয়া হয়েছে। উত্তর ছাড়া সেই
-surface-এর billing/routing পরিবর্তন করা হয়নি। Native app-এর Bridge এবং
-Terminal-এর existing Off default বহাল।
+প্রথম UI যাচাইয়ের সময়ে `claudeCode.claudeProcessWrapper` configured ছিল না। পরে
+মালিক স্পষ্টভাবে VS Code panel-কেও Terminal-এর একই switch-এর সঙ্গে যুক্ত করতে
+বলেছেন: Off-এ subscription, On-এ OmniRoute। Native app-এর Bridge এবং Terminal-এর
+existing Off default বহাল থাকবে।
+
+## VS Code switch integration
+
+- `claude-vscode-launcher.mjs` extension-এর supplied official bundled CLI prefix
+  আলাদা করে existing Terminal launcher-এ দেয়। Official binary edit করা হয় না;
+  extension update-এ version/path বদলালেও supported native-binary layout গ্রহণ
+  করে। অজানা executable, publisher এবং extension directory-র বাইরের symlink
+  প্রত্যাখ্যাত হয়।
+- নতুন process একই read-only DB flag, private per-launch settings এবং Off-mode
+  public-upstream CONNECT tunnel ব্যবহার করে। Existing login/config root, SDK
+  stream protocol, resume/model arguments, hooks ও permissions-এর সীমা থাকে।
+  stdout-এ wrapper status মেশানো হয় না; gateway credentials argv-এ যায় না।
+- `install-claude-vscode.mjs` default-এ preview দেয়। Apply-এর আগে mounted work
+  volume-এ settings/helper backup রাখে; VS Code user settings-এর শুধু
+  `claudeCode.claudeProcessWrapper` field যোগ করে, বাকি JSONC bytes/comments রেখে।
+  অন্য launcher বা বদলানো managed helper থাকলে থামে। Shared Claude settings,
+  routing flag, Terminal shell function, hosts, certificate ও Bridge edit করে না।
+- Switch বদল নতুন process launch-এ পড়া হয়। Already-running conversation-এর
+  provider পাল্টানোর দাবি নেই। Full VS Code hosted-feature parity বা detached
+  background-session acceptance এই adapter-এর পরীক্ষা নয়; supported wrapper
+  setting-এর extension behavior প্রযোজ্য থাকে।
+
+Source প্রস্তুত; regression validation ও safe live installation-এর ফল পরের
+receipt-এ সংরক্ষণ করতে হবে। Memory pressure warning চলাকালে extension setting
+বদলে নতুন process শুরু করা হয়নি।
 
 ## Default model ও shared settings
 

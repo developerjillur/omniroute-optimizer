@@ -7,7 +7,7 @@
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
   "trackedNexaFiles": 541,
-  "totalNexaBytes": 2558741,
+  "totalNexaBytes": 2558948,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -272,9 +272,9 @@
     {
       "path": "nexa/deploy/install-claude-vscode.mjs",
       "mode": "100644",
-      "gitBlobSha": "dd37c8fb19b7a979e2289827009b4929f3db80a2",
-      "bytes": 8647,
-      "sha256": "46cfb8ea4efa7528d6684a6e66a8d75e1a2d114c1d5670c0d9d6c977600b5276"
+      "gitBlobSha": "6703027d908eec4863332792da0a5cb142830aaf",
+      "bytes": 8730,
+      "sha256": "58777904a1378130d6be316fee116e8abddd2a4291f495ceee8333524bf20761"
     },
     {
       "path": "nexa/deploy/install-local-command.sh",
@@ -3471,9 +3471,9 @@
     {
       "path": "nexa/tests/claude-vscode-routing.test.mjs",
       "mode": "100644",
-      "gitBlobSha": "35f8346549b0a943eef5b10a920e3bd0a55e0e4b",
-      "bytes": 10560,
-      "sha256": "a3b711e32e90bc0302407fe86f419d7599906453408d873e4edd833eadf95922"
+      "gitBlobSha": "273c897b9a2eb9c10e050659edeabd1e33bc8a95",
+      "bytes": 10684,
+      "sha256": "f72ac9023e7b834b23321610e3ca9faab0bd26677bef994a8115f4f8fe9ef639"
     },
     {
       "path": "nexa/tests/compare-upgrade-types.mjs",

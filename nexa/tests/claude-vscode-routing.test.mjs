@@ -153,6 +153,7 @@ test("installer previews without changes and then backs up only its own targets"
   const backup = path.join(f.root, "vscode-before");
   const result = await installVSCode({ ...options, apply: true, backupDirectory: backup });
   assert.equal(result.status, "installed");
+  assert.equal(JSON.parse(await fs.readFile(path.join(f.target, "vscode-installation.json"), "utf8")).status, "installed");
   assert.equal(await fs.readFile(path.join(backup, "vscode-settings.before.jsonc"), "utf8"), f.content);
   assert.ok((await fs.readFile(f.settings, "utf8")).includes(wrapperKey));
   assert.deepEqual(await fs.readFile(path.join(f.target, "installation.json")), terminalBefore);

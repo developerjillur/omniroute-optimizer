@@ -176,6 +176,7 @@ export async function installVSCode({
   await fs.mkdir(path.dirname(settingsPath), { recursive: true });
   await atomicWrite(settingsPath, updated, before?.mode || 0o600);
   receipt.status = "installed";
+  await atomicWrite(metadataPath, JSON.stringify(receipt, null, 2) + "\n", 0o600);
   await fs.writeFile(path.join(backupDirectory, "receipt.json"), JSON.stringify(receipt, null, 2) + "\n",
     { flag: "wx", mode: 0o600 });
   return receipt;

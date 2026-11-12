@@ -5,11 +5,14 @@ Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। Om
 ## VS Code Fable 5.2 — ২০২৬-১১-১২
 
 Official extension `2.1.322`-এর আসল picker-এ explicit `claude-fable-5-2` entry
-দেখা গেছে। Terminal-এর existing Off default subscription-এ থাকে; native app-এর
-Bridge অক্ষত। VS Code panel-এর existing gateway configuration পরিবর্তন করা হয়নি।
+দেখা গেছে। Installed VS Code process wrapper এখন Terminal-এর একই switch পড়ে:
+Off-এ Claude subscription, On-এ OmniRoute। বর্তমান Off default ও native app-এর
+Bridge অক্ষত; চলমান conversation-এর route পাল্টানো হয়নি। দুই Node runtime-এ
+২৪/২৪ regression এবং installed official CLI-এর authentication metadata যাচাই
+পাস; gateway model catalog-এ Fable 5.2 আছে। Core rebuild বা restart লাগেনি।
 [VS Code note](nexa/docs/VSCODE-FABLE-5.2-2026-11-12.md) ও
 [receipt](reports/vscode-fable-2026-11-12.json)-এ routing boundary, পাশাপাশি থাকা
-legacy alias row ও memory-pressure-এর কারণে generation না চালানোর সীমা আছে।
+legacy alias row, installation backup ও নতুন generation না চালানোর সীমা আছে।
 
 ## Live availability follow-up — ২০২৬-১১-১১
 

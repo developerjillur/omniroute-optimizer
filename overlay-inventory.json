@@ -7,7 +7,7 @@
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
   "trackedNexaFiles": 541,
-  "totalNexaBytes": 2558948,
+  "totalNexaBytes": 2562149,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -762,9 +762,9 @@
     {
       "path": "nexa/docs/VSCODE-FABLE-5.2-2026-11-12.md",
       "mode": "100644",
-      "gitBlobSha": "1b9349fecbdcd1d941ef35c063e16ea91c945536",
-      "bytes": 6879,
-      "sha256": "39ee9b68854953de0819c8294b67af54e5a05e5ce8c1d3f9811f524f59303bb3"
+      "gitBlobSha": "85e88bb8f54dc4b7b42d12c4c1b14edd54d2ae04",
+      "bytes": 10080,
+      "sha256": "ef1fe1218105615fa100408408982cf5b3a4198ba8ef11dc7c47a99d00deb0cf"
     },
     {
       "path": "nexa/gen-manifest.mjs",

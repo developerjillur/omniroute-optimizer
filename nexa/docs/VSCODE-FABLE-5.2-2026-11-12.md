@@ -22,7 +22,7 @@ extension বা binary পরিবর্তন/upgrade প্রয়োজন �
 | --- | --- |
 | Claude native app | Existing OmniRoute/Agent Bridge; shared settings অপরিবর্তিত |
 | নতুন managed Terminal `claude` launch | `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=false`: নিজের Claude subscription; On করলে OmniRoute profile |
-| VS Code extension panel | Existing shared gateway configuration; Terminal-এর zsh function extension-এর bundled CLI launch-কে wrap করে না |
+| নতুন VS Code extension process | Terminal-এর একই switch: Off-এ নিজের Claude subscription, On-এ OmniRoute profile |
 
 Terminal-এর flag read-only query-তে `false` পাওয়া গেছে। Installed পাঁচটি helper
 তার installation manifest-এর SHA256-এর সঙ্গে মিলেছে। Subscription mode-এর
@@ -55,9 +55,19 @@ existing Off default বহাল থাকবে।
   background-session acceptance এই adapter-এর পরীক্ষা নয়; supported wrapper
   setting-এর extension behavior প্রযোজ্য থাকে।
 
-Source প্রস্তুত; regression validation ও safe live installation-এর ফল পরের
-receipt-এ সংরক্ষণ করতে হবে। Memory pressure warning চলাকালে extension setting
-বদলে নতুন process শুরু করা হয়নি।
+Adapter ও installer source `99d077cba983bbf5f7a7ceeb86fe989d7ac15c2f`-এর
+[regression CI](https://github.com/developerjillur/omniroute-optimizer/actions/runs/43175342203)-তে
+Node `24.15.0` ও `26.7.0` প্রত্যেকটিতে ২৪/২৪ test পাস; failure, skip ও cancellation
+শূন্য। সাতটি VS Code case-এর সঙ্গে existing Terminal এবং build preflight cases
+চালানো হয়েছে। Complete source inventory ও syntax check-ও পাস। পুরোনো build
+fixture-এ অনুপস্থিত compressed-database helper দুটি যোগ করা হয়েছে; assertions
+দুর্বল বা test বাদ দেওয়া হয়নি। এটি full application CI/build-এর বিকল্প নয়।
+
+Memory pressure normal হওয়ার পরে শুধু ছোট installer ও authentication metadata
+process পর্যায়ক্রমে চালানো হয়েছে। VS Code user settings-এ wrapper বসানো হয়েছে;
+Settings UI-তেও `Claude Code: Claude Process Wrapper`-এর মান হিসেবে installed
+`claude-vscode-wrapper` দেখা গেছে। অন্য user settings/comments সংরক্ষিত। নতুন
+core package build, service reload বা app/window restart লাগেনি এবং করা হয়নি।
 
 ## Default model ও shared settings
 
@@ -74,15 +84,34 @@ Fable 5.2 unavailable হওয়ার প্রমাণ বলা হয়নি;
 
 ## Evidence ও সীমা
 
-Private metadata-only receipt:
-`/Volumes/NexaWork/Work/omniroute-vscode-fable-2026-11-12/verified-configuration-v1.json`।
-Public summary: [VS Code receipt](../../reports/vscode-fable-2026-11-12.json)।
+Private installation, backup ও metadata receipts:
+`/Volumes/NexaWork/Work/omniroute-vscode-fable-2026-11-12/switch-integration-v1/`।
+আগের observation receipt অক্ষত আছে; নতুন `final-integration-v1.json` installation
+ও তার পরের যাচাই সংরক্ষণ করে। Public summary:
+[VS Code receipt](../../reports/vscode-fable-2026-11-12.json)।
 
-Live trusted HTTPS health read-only check HTTP `200` দিয়েছে। System memory
-pressure warning ছিল; নতুন CLI/model process, inference, test suite বা full build
-চালানো হয়নি। Picker-এর দৃশ্যমান entry ও routing configuration যাচাই হয়েছে;
-নতুন VS Code Fable generation, account entitlement, quota ও সব hosted feature-এর
-end-to-end acceptance দাবি করা হচ্ছে না। কোনো credential, private transcript
+- Installed official extension binary `2.1.322` দিয়ে শুধু `auth status --json`
+  চালিয়ে live Off flag-এ `loggedIn: true`, `authMethod: claude.ai` পাওয়া গেছে।
+  Effective base URL public Claude endpoint এবং gateway key/token ফাঁকা ছিল।
+- একই installed adapter-এর On পরীক্ষা আলাদা ছোট flag fixture-এ হয়েছে; live flag
+  বদলানো হয়নি। Effective base URL `https://omni.local`; saved gateway credential
+  দিয়ে read-only `/v1/models` HTTP `200` এবং `claude-fable-5-2` পাওয়া গেছে। CLI-এর
+  auth metadata-র `firstParty` label একা routing প্রমাণ হিসেবে ব্যবহার করা হয়নি।
+- দুই mode-এর isolated settings-এ Fable alias `claude-fable-5-2`; stdout-এ শুধু
+  sanitized metadata সংরক্ষিত। Account details বা credential export করা হয়নি।
+- Shared Claude settings, existing পাঁচ Terminal helper ও installation metadata,
+  shell configuration, core environment/startup plist, hosts এবং native ingress
+  source-এর আগের hash অপরিবর্তিত। Live routing flag এখনও `false`।
+- প্রথমে system pressure warning ছিল; তখন নতুন CLI process বা local test suite
+  চালানো হয়নি। পরে normal pressure ও ১১.২৪ GiB headroom পাওয়া গেলে installer-এর
+  ১২৮ MiB এবং metadata family-এর ৫১২ MiB cap-এ কাজ হয়েছে। Measured peak যথাক্রমে
+  ১৯.৫৩, ১৯৩.৪৪ ও ৬৬.১১ MiB; watchdog stop হয়নি। User render/app/session বন্ধ হয়নি।
+
+Live trusted HTTPS health read-only check HTTP `200` দিয়েছে। বর্তমান package
+`v3.8.53 / 1a615fd6` অক্ষত। এই follow-up-এ নতুন model generation চালানো হয়নি;
+VS Code UI থেকে fresh Fable response, account entitlement/quota এবং সব hosted
+feature-এর end-to-end acceptance দাবি করা হচ্ছে না। Already-running conversation
+তার পুরোনো process ও route রাখে; নতুন process switch পড়ে। কোনো private transcript
 বা unrelated project content repository-তে নেওয়া হয়নি।
 
 Official references, checked ২০২৬-১১-১২:

@@ -1,6 +1,6 @@
 {
-  "atUtc": "2026-11-12T06:29:11.650976+00:00",
-  "status": "FABLE_5_2_VISIBLE_ROUTING_PRESERVED",
+  "atUtc": "2026-11-12T07:35:27.437703+00:00",
+  "status": "INSTALLED_AUTH_METADATA_VALIDATED",
   "extensionVersion": "2.1.322",
   "visibleModelId": "claude-fable-5-2",
   "legacyFable51RowAlsoVisible": true,
@@ -8,7 +8,7 @@
   "installedTerminalHelpersMatchReceipt": true,
   "nativeAppBridgeChanged": false,
   "terminalDefaultChanged": false,
-  "vscodeRoutingChanged": false,
+  "vscodeRoutingChanged": true,
   "vscodeRoutingPreferencePending": false,
   "sharedSettingsChanged": false,
   "extensionBinaryChanged": false,
@@ -17,9 +17,10 @@
   "newGenerationCalls": 0,
   "heavyValidationStarted": false,
   "limitations": [
-    "No new VS Code generation or entitlement test was run during system memory pressure warning.",
-    "The earlier default-model error was not reproduced or assigned a single proven cause.",
-    "The existing VS Code session retains its earlier route until a new process uses the validated adapter."
+    "New process launch reads the switch; existing conversation routing was preserved.",
+    "No fresh VS Code model response or complete hosted-feature acceptance was attempted.",
+    "No claim of all-model quality parity or a zero inherited TypeScript backlog.",
+    "The earlier default-model error was not reproduced or assigned a single proven cause."
   ],
   "references": [
     "https://code.claude.com/docs/en/vs-code#extension-settings",
@@ -27,5 +28,32 @@
     "https://code.claude.com/docs/en/network-config"
   ],
   "approvedVSCodeRouting": "Same Terminal flag: native subscription when Off; OmniRoute when On",
-  "switchIntegrationStatus": "SOURCE_PREPARED_VALIDATION_AND_ACTIVATION_PENDING"
+  "switchIntegrationStatus": "INSTALLED_AUTH_METADATA_VALIDATED",
+  "sourceCodeCommit": "99d077cba983bbf5f7a7ceeb86fe989d7ac15c2f",
+  "sourceCI": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/43175342203",
+  "regressions": {
+    "24.15.0": {
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0
+    },
+    "26.7.0": {
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "wrapperUIVerified": true,
+  "installedAdapterMatchesSource": true,
+  "protectedFileHashesUnchanged": true,
+  "unrelatedVSCodeSettingsUnchanged": true,
+  "currentLivePackage": "3.8.53 / 1a615fd6",
+  "corePackageRebuilt": false,
+  "nativeSubscriptionAuthVerified": true,
+  "gatewayAuthVerifiedUsingIsolatedFlagFixture": true,
+  "gatewayCatalog": {
+    "http": 200,
+    "fable52": true
+  },
+  "privateEvidenceDirectory": "/Volumes/NexaWork/Work/omniroute-vscode-fable-2026-11-12/switch-integration-v1"
 }

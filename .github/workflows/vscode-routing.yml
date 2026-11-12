@@ -8,6 +8,7 @@ on:
       - nexa/deploy/claude-vscode-launcher.mjs
       - nexa/deploy/install-claude-vscode.mjs
       - nexa/tests/claude-vscode-routing.test.mjs
+      - nexa/deploy/build-candidate.test.mjs
       - .github/workflows/vscode-routing.yml
 
 permissions:
@@ -44,3 +45,4 @@ jobs:
           node --test --test-concurrency=1 --test-reporter=tap
           nexa/tests/claude-vscode-routing.test.mjs
           nexa/tests/claude-terminal-profile.test.mjs
+          nexa/deploy/build-candidate.test.mjs

@@ -13,7 +13,12 @@ function checkBuildGate(output, status = 0, googleStatus = 0) {
   fs.mkdirSync(bin);
   const deployment = path.join(directory, "nexa/deploy");
   fs.mkdirSync(deployment, { recursive: true });
-  for (const name of ["snapshot-local.py", "snapshot-local.test.py"]) {
+  for (const name of [
+    "snapshot-local.py",
+    "snapshot-local.test.py",
+    "compressed-database.py",
+    "compressed-database.test.py",
+  ]) {
     fs.copyFileSync(fileURLToPath(new URL(name, import.meta.url)), path.join(deployment, name));
   }
   fs.writeFileSync(path.join(bin, "npm"), "#!/bin/sh\nexit 0\n", { mode: 0o700 });

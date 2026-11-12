@@ -7,7 +7,7 @@
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
   "trackedNexaFiles": 541,
-  "totalNexaBytes": 2558663,
+  "totalNexaBytes": 2558741,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -160,9 +160,9 @@
     {
       "path": "nexa/deploy/build-candidate.test.mjs",
       "mode": "100644",
-      "gitBlobSha": "3f695646b2be4eeb6ac1ec232457e9da7f64e457",
-      "bytes": 3387,
-      "sha256": "0cacf1d27f13926e423b911efa5b907345dc6d59db4a5f72a8a8c673d8ffd733"
+      "gitBlobSha": "b2b5a3530ac70c56fa4e769042bffc72249ef748",
+      "bytes": 3465,
+      "sha256": "6002c492b7ed5aca164b0be52532bcf4d3a64fcfe9a06399b9870e4644c4b6d5"
     },
     {
       "path": "nexa/deploy/check-upgrade-data.py",

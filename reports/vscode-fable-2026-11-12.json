@@ -1,0 +1,29 @@
+{
+  "atUtc": "2026-11-12T06:29:11.650976+00:00",
+  "status": "FABLE_5_2_VISIBLE_ROUTING_PRESERVED",
+  "extensionVersion": "2.1.322",
+  "visibleModelId": "claude-fable-5-2",
+  "legacyFable51RowAlsoVisible": true,
+  "terminalRoutingFlag": "false",
+  "installedTerminalHelpersMatchReceipt": true,
+  "nativeAppBridgeChanged": false,
+  "terminalDefaultChanged": false,
+  "vscodeRoutingChanged": false,
+  "vscodeRoutingPreferencePending": true,
+  "sharedSettingsChanged": false,
+  "extensionBinaryChanged": false,
+  "windowReloaded": false,
+  "conversationModelChanged": false,
+  "newGenerationCalls": 0,
+  "heavyValidationStarted": false,
+  "limitations": [
+    "No new VS Code generation or entitlement test was run during system memory pressure warning.",
+    "The earlier default-model error was not reproduced or assigned a single proven cause.",
+    "VS Code currently retains its existing shared gateway configuration; the Terminal shell function does not wrap the extension panel."
+  ],
+  "references": [
+    "https://code.claude.com/docs/en/vs-code#extension-settings",
+    "https://code.claude.com/docs/en/model-config",
+    "https://code.claude.com/docs/en/network-config"
+  ]
+}

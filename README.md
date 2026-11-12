@@ -2,6 +2,15 @@
 
 Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। OmniRoute-এর pristine upstream source অপরিবর্তিত রেখে custom পরিবর্তনগুলো `nexa/` folder-এ রাখা হয়েছে।
 
+## VS Code Fable 5.2 — ২০২৬-১১-১২
+
+Official extension `2.1.322`-এর আসল picker-এ explicit `claude-fable-5-2` entry
+দেখা গেছে। Terminal-এর existing Off default subscription-এ থাকে; native app-এর
+Bridge অক্ষত। VS Code panel-এর existing gateway configuration পরিবর্তন করা হয়নি।
+[VS Code note](nexa/docs/VSCODE-FABLE-5.2-2026-11-12.md) ও
+[receipt](reports/vscode-fable-2026-11-12.json)-এ routing boundary, পাশাপাশি থাকা
+legacy alias row ও memory-pressure-এর কারণে generation না চালানোর সীমা আছে।
+
 ## Live availability follow-up — ২০২৬-১১-১১
 
 Release-এর পর intermittent core/HTTPS timeout পাওয়া গেছে। Existing deferred DB

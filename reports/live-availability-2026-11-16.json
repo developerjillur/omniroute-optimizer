@@ -1,0 +1,72 @@
+{
+  "atUtc": "2026-11-16T12:13:57.069322+00:00",
+  "status": "RECOVERED_LATENCY_FOLLOWUP_OPEN",
+  "packageVersion": "3.8.53",
+  "coreCodeChanged": false,
+  "packageRebuilt": false,
+  "initialListenQueue": {
+    "queued": 121,
+    "capacity": 128
+  },
+  "afterListenQueue": {
+    "queued": 1,
+    "capacity": 128
+  },
+  "gracefulRecovery": true,
+  "forcedKill": false,
+  "oldCorePid": 1226,
+  "newCorePid": 66128,
+  "existingSupervisorPid": 1088,
+  "protectedFileHashesUnchanged": true,
+  "manualDatabaseMutation": false,
+  "rootIngressReloaded": false,
+  "userAppsOrSessionsClosed": false,
+  "modelGenerationCalls": 0,
+  "checks": [
+    {
+      "atUtc": "2026-11-16T12:12:44.702689+00:00",
+      "probe": "core",
+      "exit": 0,
+      "http": 200,
+      "seconds": 7.651349
+    },
+    {
+      "atUtc": "2026-11-16T12:12:50.778376+00:00",
+      "probe": "https-ipv4",
+      "exit": 0,
+      "http": 200,
+      "seconds": 2.053671
+    },
+    {
+      "atUtc": "2026-11-16T12:13:00.340145+00:00",
+      "probe": "https-ipv6",
+      "exit": 0,
+      "http": 200,
+      "seconds": 5.539691
+    },
+    {
+      "atUtc": "2026-11-16T12:13:05.752399+00:00",
+      "probe": "dashboard",
+      "exit": 0,
+      "http": 200,
+      "seconds": 1.389374
+    },
+    {
+      "atUtc": "2026-11-16T12:13:16.414080+00:00",
+      "probe": "core-repeat",
+      "exit": 0,
+      "http": 200,
+      "seconds": 6.642699
+    }
+  ],
+  "browserProviderQuotaPageLoaded": true,
+  "certificateVerificationEnabled": true,
+  "sourceCodeCommit": "b45f601cfdc82c17e2daf019983b951781c5d54d",
+  "privateEvidenceDirectory": "/Volumes/NexaWork/Work/omniroute-empty-response-2026-11-16",
+  "limits": [
+    "The native sample does not attribute the complete incident to one query or handler.",
+    "Post-recovery latency ranged from 1.389 to 7.651 seconds; sustained low-latency acceptance remains open.",
+    "Late shutdown call-log callbacks hit a closed database; completeness of those diagnostic records was not certified.",
+    "No full database integrity scan, full build, inference, or local regression suite ran."
+  ]
+}

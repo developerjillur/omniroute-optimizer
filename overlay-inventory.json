@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
-  "trackedNexaFiles": 541,
-  "totalNexaBytes": 2562149,
+  "trackedNexaFiles": 542,
+  "totalNexaBytes": 2567004,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -660,6 +660,13 @@
       "gitBlobSha": "8e8b195286b061d53c289dd3bc8606b797ec118e",
       "bytes": 5792,
       "sha256": "ae50a6f682ba24351b8e03a84fa1ed275dbd82e12956e92db6eee0984227939f"
+    },
+    {
+      "path": "nexa/docs/LIVE-AVAILABILITY-2026-11-16.md",
+      "mode": "100644",
+      "gitBlobSha": "2de1bae08b8541ee018667ce345be13bfa130817",
+      "bytes": 4855,
+      "sha256": "e061bb45b9bd537d9963baf73332aedf53f177e16bf59b323457791012687923"
     },
     {
       "path": "nexa/docs/NATIVE-ARTIFACT-RECOVERY-AND-GPT61-PRICING-2026-10-14.md",

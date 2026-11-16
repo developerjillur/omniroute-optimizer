@@ -2,6 +2,15 @@
 
 Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। OmniRoute-এর pristine upstream source অপরিবর্তিত রেখে custom পরিবর্তনগুলো `nexa/` folder-এ রাখা হয়েছে।
 
+## Live recovery — ২০২৬-১১-১৬
+
+Core listener-এর connection queue `121/128` জমে `ERR_EMPTY_RESPONSE` হচ্ছিল।
+Graceful core recovery-এর পরে existing Chrome tab-এ quota dashboard খুলেছে;
+certificate-verified IPv4/IPv6 HTTPS ও core/page check ৫/৫ HTTP `200`। Package,
+configuration ও user apps অক্ষত; নতুন build হয়নি। কিছু response এখনও ধীর,
+তাই sustained performance acceptance খোলা আছে। [Incident note](nexa/docs/LIVE-AVAILABILITY-2026-11-16.md)
+ও [receipt](reports/live-availability-2026-11-16.json)-এ recovery ও সীমা আছে।
+
 ## VS Code Fable 5.2 — ২০২৬-১১-১২
 
 Official extension `2.1.322`-এর আসল picker-এ explicit `claude-fable-5-2` entry

@@ -1,6 +1,6 @@
 # v3.8.54 release compatibility — ২০২৬-১১-১৮
 
-স্থিতি: **source port candidate প্রস্তুত; dependency lock, validation, full build ও live promotion অসম্পূর্ণ**।
+স্থিতি: **source port ও dependency lock প্রস্তুত; release validation চলছে, full build ও live promotion অসম্পূর্ণ**।
 
 GitHub-এর নতুন stable release `v3.8.54` (১৭ নভেম্বর ২০২৬) নির্দিষ্ট commit
 `1c880c5c95b3f0240d5e4c6c8f0947ec46b5d25e`-এ পরীক্ষা করা হয়েছে। একই সময় npm
@@ -18,8 +18,8 @@ GitHub-এর নতুন stable release `v3.8.54` (১৭ নভেম্ব�
 - 145টি নতুন application/test file-এর upstream path collision নেই।
 
 এই inspection-এর পরে আলাদা `fix/v3.8.54-models` worktree-তে 36টি source overlap
-মেলানো হয়েছে; `package-lock.json` পুনর্গঠন বাকি। বর্তমান candidate-এ 233টি active
-patch ও 146টি নতুন file আছে। আগের accepted v3.8.53 source পুরোনো worktree ও
+মেলানো হয়েছে এবং `package-lock.json` পুনর্গঠন করা হয়েছে। Security integration-সহ
+বর্তমান candidate-এ 234টি active patch ও 149টি নতুন file আছে। আগের accepted v3.8.53 source পুরোনো worktree ও
 commit-এ অক্ষত। Candidate manifest এখন published v3.8.54 commit-এ pin করা,
 তবে এটি accepted release নয়। আগের TypeScript ceilings ও live settings অপরিবর্তিত।
 
@@ -28,8 +28,30 @@ base/blob/patch hash-সহ retired registry-তে রাখা হয়েছে
 নতুন transport-support ও analytics-pricing helper-এ আছে। Native payload,
 Thread/Fable thinking prefix, cumulative usage, cache TTL, quota reset scheduling,
 Google token-refresh health এবং namespaced migrations-এর আচরণ নতুন source-এর
-সঙ্গে মেলানো হয়েছে। Lock বাদে 232টি active patch-এর strict applicability পাস;
-functional acceptance এখনও বাকি।
+সঙ্গে মেলানো হয়েছে। Lock-সহ আগের 233টি active patch-এর strict applicability পাস;
+নতুন security integration-এর পর পুরো manifest আবার যাচাই করতে হবে। Independent
+compatibility, Bridge, model helper ও core typecheck gates cloud runner-এ পাস করেছে;
+পূর্ণ validation ও installed acceptance এখনও বাকি।
+
+## Dependency security
+
+Production audit-এ একটি [reviewed picomatch advisory](https://github.com/advisories/GHSA-fc5q-39xc-vjpf)
+ছয়টি dependency package-কে high হিসেবে দেখায়। Registry-তে patched version নেই;
+dependency downgrade বা audit ফল লুকিয়ে এটি পাস করানো হয়নি। `picomatch` 4.0.7 ও
+2.3.2-এর registry-integrity-verified parser-এ সীমিত local guard risky repeated-extglob
+compilation প্রত্যাখ্যান করে। অজানা version বা parser hash স্বয়ংক্রিয়ভাবে বদলানো হয় না।
+
+দুই version-এ মোট 12টি baseline assertion failure reproduce হয়েছে; guarded copy-তে
+72টি unsafe pattern/options combination প্রত্যাখ্যাত এবং 3,264টি ordinary matching/capture
+ফল অপরিবর্তিত। Integration-এর পাঁচটি test পাস: idempotence, hard-link cache preservation,
+unknown bytes refusal, raw audit findings ধরে রেখে exact remediation verification এবং
+failed audit প্রত্যাখ্যান। এগুলো full glob-language equivalence বা installed-runtime acceptance নয়।
+
+Package postinstall root ও standalone dependency copies-এ guard প্রয়োগ করবে; startup
+exact parser hash ও actual unsafe-pattern behavior মিলিয়ে দেখবে। Audit gate একই advisory-এর
+সব installed copy যাচাই ছাড়া ছাড় দেয় না; অন্য finding release আটকে দেয়। Registry audit-এ
+ছয়টি high finding রয়ে যেতে পারে—এটি registry zero-vulnerability দাবি নয়। Full source,
+packaging ও Mac installed-runtime gates পাসের আগে এই guard live-এ যাবে না।
 
 ## নতুন models এবং release gates
 
@@ -54,6 +76,12 @@ production build admitted হওয়ার দাবি করা হচ্ছে
 resource admission পেলে full production build, sealed package, isolated installation,
 security/migration/config preservation, consistent rollback snapshot ও idle inference
 check-এর পরে live promotion করা যাবে।
+
+স্থানীয় RAM gate পূরণ না হলে একই pinned source-এর full build public GitHub Linux
+runner-এ করা যাবে। Upstream postinstall standalone-এর Linux native modules-কে target
+platform-এর root dependency দিয়ে repair করার ব্যবস্থা রাখে। তাই cloud build-এর পরে
+Mac-এ actual isolated install, native module load, package/security ও protocol smoke
+অবশ্যই পাস করতে হবে; cloud build alone Mac compatibility প্রমাণ করে না।
 
 ## বর্তমান live সীমা
 

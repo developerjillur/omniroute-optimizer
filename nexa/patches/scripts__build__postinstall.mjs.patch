@@ -1,0 +1,20 @@
+diff --git a/scripts/build/postinstall.mjs b/scripts/build/postinstall.mjs
+index 446b1aa97a0872fffa54a68841dc2241389fba08..a0d67aca0bfe9df65d5e15ce80ec3c1faf3e3920 100644
+--- a/scripts/build/postinstall.mjs
++++ b/scripts/build/postinstall.mjs
+@@ -27,6 +27,7 @@
+ 
+ import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+ import { createRequire } from "node:module";
++import { applyDependencySecurityFixes } from "../../bin/cli/utils/dependencySecurity.mjs";
+ import { dirname, join } from "node:path";
+ import { fileURLToPath } from "node:url";
+ 
+@@ -41,6 +42,7 @@
+ const __dirname = dirname(__filename);
+ const ROOT = join(__dirname, "..", "..");
+ const requireFromPackage = createRequire(join(ROOT, "package.json"));
++applyDependencySecurityFixes(ROOT);
+ 
+ /**
+  * Patch node-gyp's common.gypi to include the android_ndk_path variable.

@@ -1,0 +1,19 @@
+{
+  "advisory": "GHSA-fc5q-39xc-vjpf",
+  "anchor": "    const analysis = analyzeRepeatedExtglob(body, opts);\n",
+  "guard": "\n    // Reject ambiguous nested repetition before compiling a backtracking RegExp.\n    // Fixed-width repetitions and the existing proven-safe rewrites remain unchanged.\n    if ((token.type === 'plus' || token.type === 'star') && !analysis.risky &&\n        splitTopLevel(body).length === 1 &&\n        tokens.slice(token.tokensIndex + 2).some(part =>\n          part.type === 'star' || part.type === 'globstar' || part.type === 'plus' ||\n          part.type === 'pipe' || part.type === 'comma' ||\n          (part.type === 'paren' && part.value === '(') ||\n          (part.type === 'brace' && part.value === '{'))) {\n      throw new SyntaxError('Unsafe single-branch repeated extglob');\n    }\n",
+  "versions": {
+    "4.0.7": {
+      "originalSHA256": "4e1e05447668aa1e94366c5516a2bcd8f5fff800cc92b1d0cd7d77703b8618c4",
+      "patchedSHA256": "99c6db16191c5f931205c58c2ac76c2891c15f860bb1008f9bf840dc350e266f",
+      "registryIntegrity": "sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==",
+      "tarball": "https://registry.npmjs.org/picomatch/-/picomatch-4.0.7.tgz"
+    },
+    "2.3.2": {
+      "originalSHA256": "3a91656f440069aa8f8e15c9d695b9f6b2209df1eab2be8127c72cbcca45ff5f",
+      "patchedSHA256": "37030667c62ae9344c3f7d448b9ac5a8bd12d081240dbbb4d8c28ce322c530e8",
+      "registryIntegrity": "sha512-V7+vQEJ06Z+c5tSye8S+nHUfI51xoXIXjHQ99cQtKUkQqqO1kO/KCJUfZXuB47h/YBlDhah2H3hdUGXn8ie0oA==",
+      "tarball": "https://registry.npmjs.org/picomatch/-/picomatch-2.3.2.tgz"
+    }
+  }
+}

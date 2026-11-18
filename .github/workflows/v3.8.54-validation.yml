@@ -65,6 +65,7 @@ jobs:
           set -euo pipefail
           node nexa/apply.mjs
           npm ci --ignore-scripts --no-audit --no-fund
+          node bin/cli/utils/dependencySecurity.mjs --apply
           npm rebuild better-sqlite3 --foreground-scripts
           npx --no-install fumadocs-mdx
           echo "DATA_DIR=$RUNNER_TEMP/validation-data" >> "$GITHUB_ENV"
@@ -138,7 +139,13 @@ jobs:
         id: security
         continue-on-error: true
         working-directory: ${{ runner.temp }}/omniroute-fixture
-        run: npm audit --omit=dev --json > "$RUNNER_TEMP/v354-production-audit.json"
+        run: |
+          set +e
+          npm audit --omit=dev --json > "$RUNNER_TEMP/v354-production-audit.json"
+          audit_exit=$?
+          set -e
+          if [ "$audit_exit" -gt 1 ]; then exit "$audit_exit"; fi
+          node bin/cli/utils/dependencySecurity.mjs --audit "$RUNNER_TEMP/v354-production-audit.json" | tee "$RUNNER_TEMP/v354-security-remediation.json"
       - name: Select production Node runtime
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:

@@ -1,8 +1,18 @@
 diff --git a/bin/omniroute.mjs b/bin/omniroute.mjs
-index 45b0bf417a7a677c30064672d68d4c276daea1ed..23f075048c3351ff3108bce6e8e21d34b506b437 100644
+index 45b0bf417a7a677c30064672d68d4c276daea1ed..47f60d3d4cb04cb1521b884a3b02d19480d4baf1 100644
 --- a/bin/omniroute.mjs
 +++ b/bin/omniroute.mjs
-@@ -244,8 +244,19 @@
+@@ -115,6 +115,9 @@
+ // Register tsx so dynamic imports of .ts source files (referenced as .js per
+ // TypeScript conventions) resolve correctly. The build never emits .js for
+ // src/lib/cli-helper/, so tsx handles the .ts → .js resolution at runtime.
++const { verifyDependencySecurityFixes } = await import("./cli/utils/dependencySecurity.mjs");
++verifyDependencySecurityFixes(ROOT);
++
+ await import("tsx/esm");
+ await import("../open-sse/utils/setupPolyfill.ts");
+ 
+@@ -244,8 +247,19 @@
      }
    }
  
@@ -23,7 +33,7 @@ index 45b0bf417a7a677c30064672d68d4c276daea1ed..23f075048c3351ff3108bce6e8e21d34
    }
  
    for (const [key, { winner, loser }] of shadowed) {
-@@ -295,6 +306,9 @@
+@@ -295,6 +309,9 @@
  }
  
  loadEnvFile();

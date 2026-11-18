@@ -140,6 +140,12 @@ test("Gemini 4 emits no numeric thinking budget, including zero, and retains nat
 });
 
 test("Hydrogen keeps explicit XHIGH/max while lower supported efforts remain unchanged", () => {
+  assert.equal(
+    gemini4ThinkingConfig("gemini-4-hydrogen", 8192, {
+      generationConfig: { thinkingConfig: { thinkingLevel: "MINIMAL" } },
+    }).thinkingLevel,
+    "MINIMAL"
+  );
   for (const level of ["low", "medium", "high", "xhigh"]) {
     assert.equal(
       gemini4ThinkingConfig("gemini-4-hydrogen", 24576, { reasoning_effort: level }).thinkingLevel,

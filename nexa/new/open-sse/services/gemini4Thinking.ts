@@ -22,7 +22,9 @@ export function gemini4ThinkingConfig(
   const level = typeof effort === "string" ? effort.toLowerCase().trim() : "";
   const hydrogen = /(?:^|\/)gemini-4-hydrogen(?:$|-)/i.test(model);
   const config: { thinkingLevel?: string; includeThoughts?: boolean } = {};
-  if (["low", "medium", "high", "xhigh"].includes(level)) {
+  if (typeof explicitNative === "string" && explicitNative.trim()) {
+    config.thinkingLevel = explicitNative.trim();
+  } else if (["low", "medium", "high", "xhigh"].includes(level)) {
     // An explicit native level stays explicit, including an upstream-invalid request.
     config.thinkingLevel = level;
   } else if (level === "max" || level === "ultra") {

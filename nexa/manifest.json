@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 380,
-    "patches": 229,
+    "total": 382,
+    "patches": 231,
     "new": 145,
     "tooling": 6,
     "upstreamCandidates": 27,
     "nexaSpecific": 109,
-    "needsReview": 244,
+    "needsReview": 246,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
   },
@@ -1511,6 +1511,22 @@
       "layer": "patch",
       "class": "nexa-specific",
       "target": "tests/unit/agy-family-not-connection-cooldown.test.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/tests__unit__antigravity-discovery-bootstrap.test.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "tests/unit/antigravity-discovery-bootstrap.test.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/tests__unit__antigravity-usage-version-warmup.test.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "tests/unit/antigravity-usage-version-warmup.test.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },

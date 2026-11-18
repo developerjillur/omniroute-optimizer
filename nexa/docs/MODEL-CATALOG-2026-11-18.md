@@ -57,6 +57,10 @@ Source candidate প্রস্তুত; local helper tests 10/10 পাস।
 - নতুন scoped GitHub workflow pinned v3.8.53-তে সব overlay patch applicability,
   isolated adapter/dashboard tests, পুরোনো pricing/effort/Fable regressions,
   completed compiler diagnostics comparison এবং docs-all পরীক্ষা করবে।
+- প্রথম application run-এ 295টির মধ্যে 293টি পাস, 2টি ব্যর্থ। দুই failure-তেই
+  পুরোনো test `1.3.4` CLI header আশা করেছিল; নতুন fallback `1.5.8` অনুযায়ী শুধু
+  ওই exact expectations আপডেট হয়েছে। অন্য header checks বা functional assertion বাদ যায়নি।
+  প্রথম run: https://github.com/developerjillur/omniroute-optimizer/actions/runs/44232777124 ।
 - Model generation, provider quota consumption, account enable/rotation, default model
   switch, root job change, app update বা live restart করা হয়নি।
 - Provider dashboard-এর Playground-এ `catalog_build_timeout`-ও দেখা গেছে; এটি নতুন

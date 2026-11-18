@@ -32,7 +32,7 @@ jobs:
         run: |
           set -euo pipefail
           node nexa/tests/verify-source-inventory.mjs
-          node --test --test-concurrency=1 nexa/tests/frontier-model-catalog.test.mjs | tee "$RUNNER_TEMP/model-helpers.tap"
+          node --test --test-reporter=tap --test-concurrency=1 nexa/tests/frontier-model-catalog.test.mjs | tee "$RUNNER_TEMP/model-helpers.tap"
       - name: Prepare the pinned pristine source
         run: |
           set -euo pipefail
@@ -63,30 +63,55 @@ jobs:
           node nexa/apply.mjs
           node node_modules/prettier/bin/prettier.cjs --check --print-width 100 --trailing-comma es5 open-sse/config/discoveryAvailability.ts open-sse/services/gemini4Thinking.ts open-sse/services/installedAntigravityVersion.ts src/lib/providerModels/dashboardSyncedCatalog.ts src/shared/constants/pricing/frontier-20261118.ts tests/unit/frontier-model-release.test.ts tests/unit/dashboard-live-model-release.test.ts
       - name: Run model adapters and related regressions without provider traffic
+        id: model_tests
+        continue-on-error: true
         working-directory: ${{ runner.temp }}/omniroute-fixture
         run: |
           set -euo pipefail
           export DATA_DIR="$RUNNER_TEMP/model-release-data"
           export TMPDIR="$RUNNER_TEMP/model-release-tmp"
           mkdir -p "$DATA_DIR" "$TMPDIR"
-          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-concurrency=1 tests/unit/frontier-model-release.test.ts tests/unit/dashboard-live-model-release.test.ts tests/unit/antigravity-version.test.ts tests/unit/antigravity-discovery-bootstrap.test.ts tests/unit/antigravity-usage-version-warmup.test.ts tests/unit/gemini-38-thinking-level-output.test.ts tests/unit/gemini-default-thinking-budget-vs-max-tokens.test.ts tests/unit/gemini-flash-lite-thinking-zero.test.ts tests/unit/gemini-no-thinking-models-16928.test.ts tests/unit/gemini-thinking-budget-fallback.test.ts tests/unit/gemini-thinking-budget-zero-6813.test.ts tests/unit/gemini-thinking-level-forwarding.test.ts tests/unit/openai-to-gemini-gemma-thinking.test.ts tests/unit/translator-gemini-thinking-budget-6943.test.ts tests/unit/gpt-6-1-sol-pricing.test.ts tests/unit/gpt-6-1-sol-pricing-analytics.test.ts tests/unit/gpt-selected-effort-passthrough.test.ts tests/unit/claude-fable-5-2.test.ts | tee "$RUNNER_TEMP/model-integration.tap"
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/frontier-model-release.test.ts tests/unit/dashboard-live-model-release.test.ts tests/unit/antigravity-version.test.ts tests/unit/antigravity-discovery-bootstrap.test.ts tests/unit/antigravity-usage-version-warmup.test.ts tests/unit/gemini-38-thinking-level-output.test.ts tests/unit/gemini-default-thinking-budget-vs-max-tokens.test.ts tests/unit/gemini-flash-lite-thinking-zero.test.ts tests/unit/gemini-no-thinking-models-16928.test.ts tests/unit/gemini-thinking-budget-fallback.test.ts tests/unit/gemini-thinking-budget-zero-6813.test.ts tests/unit/gemini-thinking-level-forwarding.test.ts tests/unit/openai-to-gemini-gemma-thinking.test.ts tests/unit/translator-gemini-thinking-budget-6943.test.ts tests/unit/gpt-6-1-sol-pricing.test.ts tests/unit/gpt-6-1-sol-pricing-analytics.test.ts tests/unit/gpt-selected-effort-passthrough.test.ts tests/unit/claude-fable-5-2.test.ts | tee "$RUNNER_TEMP/model-integration.tap"
       - name: Core typecheck
+        id: core_types
+        continue-on-error: true
         working-directory: ${{ runner.temp }}/omniroute-fixture
         run: npm run typecheck:core
       - name: Compare completed compiler diagnostics
+        id: full_types
+        continue-on-error: true
         env:
           NODE_OPTIONS: --max-old-space-size=6144
         working-directory: ${{ runner.temp }}/omniroute-fixture
         run: |
           set -euo pipefail
           node scripts/check/check-tsc-ratchet.mjs --ratchet --diagnostics-out "$RUNNER_TEMP/tsc-diagnostics.log"
-          node nexa/tests/compare-upgrade-types.mjs
+      - name: Compare diagnostic identities
+        id: compare_types
+        continue-on-error: true
+        working-directory: ${{ runner.temp }}/omniroute-fixture
+        run: node nexa/tests/compare-upgrade-types.mjs
       - name: Lint
+        id: lint
+        continue-on-error: true
         working-directory: ${{ runner.temp }}/omniroute-fixture
         run: npm run lint
       - name: Documentation checks
+        id: docs
+        continue-on-error: true
         working-directory: ${{ runner.temp }}/omniroute-fixture
         run: npm run check:docs-all
+      - name: Require every acceptance gate
+        if: always()
+        env:
+          MODEL_GATE_OUTCOMES: ${{ toJSON(steps) }}
+        run: |
+          python3 - <<'PY_GATE'
+          import json, os
+          steps = json.loads(os.environ['MODEL_GATE_OUTCOMES'])
+          failed = [key for key in ['model_tests', 'core_types', 'full_types', 'compare_types', 'lint', 'docs'] if steps.get(key, {}).get('outcome') != 'success']
+          assert not failed, 'Unpassed acceptance gates: ' + ', '.join(failed)
+          PY_GATE
       - name: Preserve validation evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

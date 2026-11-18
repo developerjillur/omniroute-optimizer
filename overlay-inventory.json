@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
-  "trackedNexaFiles": 561,
-  "totalNexaBytes": 2618944,
+  "trackedNexaFiles": 563,
+  "totalNexaBytes": 2622021,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -671,9 +671,9 @@
     {
       "path": "nexa/docs/MODEL-CATALOG-2026-11-18.md",
       "mode": "100644",
-      "gitBlobSha": "ad08af6f99857a9d15f004ff5b00b862d6af307e",
-      "bytes": 7136,
-      "sha256": "25857bddb9aa5ca59e22698cf099aa5da97e1a85f9c119152e6e255a5a109f39"
+      "gitBlobSha": "259591214aad4eb0d2446e42c509a290c9139d65",
+      "bytes": 7676,
+      "sha256": "acc517f3a1cbe3c50d28a241f38a78a174c7103f16eb052467a385b0f3ffe5fb"
     },
     {
       "path": "nexa/docs/NATIVE-ARTIFACT-RECOVERY-AND-GPT61-PRICING-2026-10-14.md",
@@ -811,9 +811,9 @@
     {
       "path": "nexa/manifest.json",
       "mode": "100644",
-      "gitBlobSha": "96fef0afd6b5f2992ffb17a3ae6e4275ca3dec54",
-      "bytes": 99042,
-      "sha256": "fd1fcf00c64fef74e98b097fb5f3ea03b5c86a19e37c0da05c16549d8da71b89"
+      "gitBlobSha": "a72f382c256c9cd82be47582a4ed10bff3ce3b30",
+      "bytes": 99610,
+      "sha256": "b102e059a24b45cc4008fa88f75623fb6898133252f60f7ddff1c7a961243cd3"
     },
     {
       "path": "nexa/new/bin/cli/utils/packageMigrations.mjs",
@@ -853,9 +853,9 @@
     {
       "path": "nexa/new/open-sse/services/gemini4Thinking.ts",
       "mode": "100644",
-      "gitBlobSha": "a5bad79515c868b4c462a51e56306de808252a8d",
-      "bytes": 1845,
-      "sha256": "bbbf8310b865d6e873f416596a277c8d9a21aec4b8ac85504b71e1de702e1278"
+      "gitBlobSha": "4f71728813251c091ff411de086a23abfa15c7ca",
+      "bytes": 1971,
+      "sha256": "65ce7ed5df0918d0dff592e79690951b0afd33e06ec4c3fa9005b9b90803b0d4"
     },
     {
       "path": "nexa/new/open-sse/services/installedAntigravityVersion.ts",
@@ -3154,6 +3154,20 @@
       "sha256": "475e0da2e5de9eda591777484372ba1e47d7cb835d35108ffb46ac591eec5ea2"
     },
     {
+      "path": "nexa/patches/tests__unit__antigravity-discovery-bootstrap.test.ts.patch",
+      "mode": "100644",
+      "gitBlobSha": "9da4bbf92c20c66631511b04e8fd24a3dc15dae7",
+      "bytes": 752,
+      "sha256": "6c339b4a54ff107418b7832c39d391830bebd3b30d4aaac49d1200c9124f48dc"
+    },
+    {
+      "path": "nexa/patches/tests__unit__antigravity-usage-version-warmup.test.ts.patch",
+      "mode": "100644",
+      "gitBlobSha": "8609f685f72c5f67779522319e8904d212a4f5fe",
+      "bytes": 905,
+      "sha256": "a320a757e031ff9ee202e2f92634bbe79e0a44323f3d44fa180650a6ea866115"
+    },
+    {
       "path": "nexa/patches/tests__unit__antigravity-version.test.ts.patch",
       "mode": "100644",
       "gitBlobSha": "075e739e119dccf8c0f2339f1223721934bb8132",
@@ -3737,9 +3751,9 @@
     {
       "path": "nexa/tests/frontier-model-catalog.test.mjs",
       "mode": "100644",
-      "gitBlobSha": "39224ec8c59afbe98bfe9f4a72a615df3a125aa1",
-      "bytes": 7210,
-      "sha256": "5c26058e2260ab11676711eaa58b0146cd4e4aae8d3e5db510b1f339e79fda6f"
+      "gitBlobSha": "e017ad25fb27a0e9382ee91ae38e7d4465f29146",
+      "bytes": 7396,
+      "sha256": "365423b87247905c7a0fdce931dde9280a0b866a0b223bb8139cc2184a21b33d"
     },
     {
       "path": "nexa/tests/inspect-upgrade.mjs",

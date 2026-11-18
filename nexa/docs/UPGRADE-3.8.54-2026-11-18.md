@@ -1,6 +1,9 @@
 # v3.8.54 release compatibility — ২০২৬-১১-১৮
 
-স্থিতি: **source port ও dependency lock প্রস্তুত; release validation চলছে, full build ও live promotion অসম্পূর্ণ**।
+এই নথি source port ও তার মধ্যবর্তী receipts-এর রেকর্ড। বর্তমান source acceptance,
+production-build corrections ও বাকি Mac/live gates-এর জন্য
+[সর্বশেষ acceptance report](V3.8.54-ACCEPTANCE-2026-11-18.md) দেখুন। নিচের অপেক্ষমাণ
+বা failed-run বিবরণ সংশ্লিষ্ট সময়ের ফল; সেগুলো বর্তমান acceptance-এর বিকল্প নয়।
 
 GitHub-এর নতুন stable release `v3.8.54` (১৭ নভেম্বর ২০২৬) নির্দিষ্ট commit
 `1c880c5c95b3f0240d5e4c6c8f0947ec46b5d25e`-এ পরীক্ষা করা হয়েছে। একই সময় npm

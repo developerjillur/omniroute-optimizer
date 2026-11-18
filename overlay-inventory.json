@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "1c880c5c95b3f0240d5e4c6c8f0947ec46b5d25e",
   "upstreamVersion": "3.8.54",
-  "trackedNexaFiles": 580,
-  "totalNexaBytes": 2721599,
+  "trackedNexaFiles": 581,
+  "totalNexaBytes": 2731104,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -776,9 +776,9 @@
     {
       "path": "nexa/docs/UPGRADE-3.8.54-2026-11-18.md",
       "mode": "100644",
-      "bytes": 13949,
-      "sha256": "71ee3d6ce547267960f25f09a6fcac267fbbb52c7b20f736e035dd0059831c0d",
-      "gitBlobSha": "891ed4ff6565a76977564d9d0c2934b4e3958795"
+      "bytes": 14317,
+      "sha256": "d470349c60fe1b3d2e46c30b32991e17b43134e8b307b1dd2fb7ded29100f0e6",
+      "gitBlobSha": "cd3021cd5bac486473826c60135bfb39546bf1bc"
     },
     {
       "path": "nexa/docs/USAGE-AUDIT-2026-10-14.md",
@@ -786,6 +786,13 @@
       "bytes": 13040,
       "sha256": "8e7bc5346e27259e7d68db8c318df45ddb24db0062bbadad8e66fdf2b799999a",
       "gitBlobSha": "17712c8e18d956ea9eceab562a8680fb230c3b09"
+    },
+    {
+      "path": "nexa/docs/V3.8.54-ACCEPTANCE-2026-11-18.md",
+      "mode": "100644",
+      "bytes": 9137,
+      "sha256": "9438f1e70ad753cc7fb36bec1c8f18a766d56c05c9f0b0604ec5dac13b574606",
+      "gitBlobSha": "4c4503cba9275464e3d37b9072946fc4ee6b0ada"
     },
     {
       "path": "nexa/docs/VSCODE-FABLE-5.2-2026-11-12.md",

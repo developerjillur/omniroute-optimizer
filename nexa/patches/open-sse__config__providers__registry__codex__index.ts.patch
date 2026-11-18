@@ -1,23 +1,26 @@
 diff --git a/open-sse/config/providers/registry/codex/index.ts b/open-sse/config/providers/registry/codex/index.ts
-index f773df5d944d23c079db74c86d3e1dbfc023d10f..3d0d74a4c1606c3da6ab905a15a5388e483d0ea3 100644
+index f773df5d944d23c079db74c86d3e1dbfc023d10f..6637e4e1488e01c766e8c1c47dfa24c66579bb6b 100644
 --- a/open-sse/config/providers/registry/codex/index.ts
 +++ b/open-sse/config/providers/registry/codex/index.ts
-@@ -6,6 +6,11 @@ import {
+@@ -5,6 +5,11 @@
+   getCodexDefaultHeaders,
    resolvePublicCred,
  } from "../../shared.ts";
- 
++
 +const GPT_6_1_SOL_CODEX_CAPABILITIES = {
 +  ...GPT_5_6_CODEX_CAPABILITIES,
 +  supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max", "ultra"],
 +} as const;
-+
+
  export const codexProvider: RegistryEntry = {
    id: "codex",
-   alias: "cx",
-@@ -28,6 +33,24 @@ export const codexProvider: RegistryEntry = {
+@@ -28,6 +33,27 @@
      tokenUrl: "https://auth.openai.com/oauth/token",
    },
    models: [
++    // Provider-specific maximum from the authenticated Codex catalog (2026-11-18).
++    { id: "gpt-6.2-sol", name: "GPT 6.2 Sol", ...GPT_6_1_SOL_CODEX_CAPABILITIES },
++    { id: "gpt-6.2-astra", name: "GPT 6.2 Astra", ...GPT_6_1_SOL_CODEX_CAPABILITIES },
 +    // Verified live Codex catalog: 872K maximum context and low through ultra efforts.
 +    { id: "gpt-6.1-sol", name: "GPT 6.1 Sol", ...GPT_6_1_SOL_CODEX_CAPABILITIES },
 +    { id: "gpt-6.1-sol-ultra", name: "GPT 6.1 Sol (Ultra)", ...GPT_6_1_SOL_CODEX_CAPABILITIES },

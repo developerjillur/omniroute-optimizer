@@ -121,7 +121,7 @@ Historical documents-এর পুরোনো status-এর পরে পাও
 | Upstream version                 | `3.8.53`                                                      |
 | Managed overlay files            | exact count: [overlay-inventory.json](overlay-inventory.json) |
 
-বর্তমান `nexa/`-তে reference overlay-এর সঙ্গে নতুন reliability fixes আছে; তাই সব file reference commit-এর হুবহু copy—এমন দাবি করা হচ্ছে না। প্রতিটি managed file-এর byte count, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এ 363টি entry: 219টি active patch, 138টি নতুন application/test file ও 6টি tooling entry। ৯টি retired patch মূল path-এ সংরক্ষিত। অতিরিক্ত deployment, overlay tests ও documentation-ও inventory-তে রয়েছে।
+বর্তমান `nexa/`-তে reference overlay-এর সঙ্গে নতুন reliability fixes আছে; তাই সব file reference commit-এর হুবহু copy—এমন দাবি করা হচ্ছে না। প্রতিটি managed file-এর byte count, mode, Git blob SHA ও SHA-256 [overlay-inventory.json](overlay-inventory.json)-এ আছে। Manifest-এ 380টি entry: 229টি active patch, 145টি নতুন application/test file ও 6টি tooling entry। ৯টি retired patch মূল path-এ সংরক্ষিত। অতিরিক্ত deployment, overlay tests ও documentation-ও inventory-তে রয়েছে।
 
 ## কী রয়েছে
 
@@ -205,3 +205,7 @@ Application-এ পরিবর্তন শুধু overlay apply-এর স�
 OmniRoute-derived code-এর মূল MIT license [LICENSE](LICENSE)-এ অক্ষত রাখা হয়েছে; বিস্তারিত [NOTICE.md](NOTICE.md)-এ।
 
 Claude Code model ID ও settings preview-এর নতুন সংশোধন [model-ID record](nexa/docs/CLAUDE-CODE-MODEL-IDS-2026-11-08.md)-এ আছে। এই পরিবর্তন আগের compiled package-এ নেই; নতুন source CI, build ও live acceptance প্রয়োজন।
+
+## নতুন model compatibility — 2026-11-18
+
+GPT-6.2 Sol/Astra ও Gemini 4 discovery/thinking compatibility candidate Nexa overlay-তে সংরক্ষিত। Current source, validation ও live limits: [model catalog report](nexa/docs/MODEL-CATALOG-2026-11-18.md)। নতুন candidate-এর full build/live promotion এখনও হয়নি।

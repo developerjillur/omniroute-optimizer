@@ -1,0 +1,35 @@
+diff --git a/src/app/api/providers/[id]/models/discovery/normalizers.ts b/src/app/api/providers/[id]/models/discovery/normalizers.ts
+index 2fcb1794c81eaf38c9c36a9e839031a2486a9d12..0e01deb4ed7ae98afe2e1d9064aa7256c3a5ed56 100644
+--- a/src/app/api/providers/[id]/models/discovery/normalizers.ts
++++ b/src/app/api/providers/[id]/models/discovery/normalizers.ts
+@@ -22,6 +22,7 @@
+ } from "@omniroute/open-sse/services/antigravityProjectBootstrap.ts";
+ import { persistDiscoveredAntigravityProjectId } from "@omniroute/open-sse/services/antigravityProjectPersist.ts";
+ import { asRecord, toNonEmptyString } from "./helpers";
++import { buildAntigravityDiscoveryBody } from "@/lib/providerModels/dashboardSyncedCatalog";
+ import type { DiscoveryFailure } from "@/shared/discovery/degradedCause";
+
+ const antigravityDiscoveryInflight = new Map<
+@@ -180,6 +181,13 @@
+       );
+     }
+
++    const knownProject = asRecord(providerSpecificData).projectId;
++    const project = isUsableAntigravityProjectId(discovered)
++      ? discovered
++      : isUsableAntigravityProjectId(knownProject)
++        ? knownProject
++        : undefined;
++
+     // The first attempt that produced no model explains the fallback.
+     let failure: DiscoveryFailure | undefined;
+
+@@ -194,7 +202,7 @@
+           proxyConfig: proxy,
+           method: "POST",
+           headers: getAntigravityContentHeaders(profile, accessToken),
+-          body: JSON.stringify({}),
++          body: JSON.stringify(buildAntigravityDiscoveryBody(discoveryUrl, project)),
+         });
+
+         if (!response.ok) {

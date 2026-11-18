@@ -1,0 +1,26 @@
+diff --git a/src/lib/db/models/synced.ts b/src/lib/db/models/synced.ts
+index 2e1d376e9da80cc70b7f61e1ac0102c2c94db80a..7af60c394474f62c00cd059bb27cedc89c037de5 100644
+--- a/src/lib/db/models/synced.ts
++++ b/src/lib/db/models/synced.ts
+@@ -1,3 +1,4 @@
++import { isDisabledDiscoveryModelId } from "@omniroute/open-sse/config/discoveryAvailability.ts";
+ import { isRetiredGitHubCopilotModelId } from "@omniroute/open-sse/config/providers/registry/github/retiredModels.ts";
+ import type { VertexModelMetadataProvenance } from "@/lib/providerModels/vertexModelMetadata";
+
+@@ -158,7 +159,15 @@
+   const deduped = new Map<string, SyncedAvailableModel>();
+   for (const model of models) {
+     const normalized = normalizeSyncedAvailableModel(model);
+-    if (normalized && !isRetiredGitHubCopilotModelId(providerId, normalized.id)) {
++    const disabledGooglePlaceholder =
++      normalized &&
++      (providerId === "agy" || providerId === "antigravity") &&
++      isDisabledDiscoveryModelId(normalized.id);
++    if (
++      normalized &&
++      !disabledGooglePlaceholder &&
++      !isRetiredGitHubCopilotModelId(providerId, normalized.id)
++    ) {
+       deduped.set(normalized.id, normalized);
+     }
+   }

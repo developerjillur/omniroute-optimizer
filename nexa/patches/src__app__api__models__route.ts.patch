@@ -1,0 +1,124 @@
+diff --git a/src/app/api/models/route.ts b/src/app/api/models/route.ts
+index c886f9b1519c191d81e796c015fca0f5d1c91e0f..bc97038c89cf7f7baf3f654fa87cf43332e5e48c 100644
+--- a/src/app/api/models/route.ts
++++ b/src/app/api/models/route.ts
+@@ -26,6 +26,12 @@
+ import { buildAliasMaps } from "@/app/api/v1/models/catalogProviderMaps";
+ import { resolveCanonicalProviderId as resolveCanonicalProviderIdFromMaps } from "@/app/api/v1/models/catalogProviderMaps";
+
++import { getModelCompatOverrides, isOverrideHiddenForModality } from "@/lib/db/models/compat";
++import {
++  mergeDashboardModelRows,
++  projectDashboardSyncedModel,
++} from "@/lib/providerModels/dashboardSyncedCatalog";
++
+ interface GetModelsDependencies {
+   createCapabilitySnapshot?: typeof createModelCapabilityResolutionSnapshot;
+ }
+@@ -79,10 +85,12 @@
+
+     // Get active provider connections to filter available models
+     let activeProviders: Set<string> | null = null;
++    let activeConnections: Awaited<ReturnType<typeof getProviderConnections>> = [];
+     if (!showAll) {
+       try {
+         const connections = await getProviderConnections();
+         const active = connections.filter((c: any) => c.isActive !== false);
++        activeConnections = active;
+         // Include both provider IDs and their aliases in the active set.
+         // PROVIDER_MODELS keys are aliases (e.g. 'cc' for 'claude', 'gh' for 'github').
+         // DB connections are stored under provider IDs ('claude', 'github').
+@@ -148,11 +156,42 @@
+       hidePaid = settings?.hidePaidModels === true;
+     } catch {}
+
++    const hiddenByProvider = new Map<string, Set<string>>();
++    const hiddenForProvider = (provider: string, alias: string) => {
++      const key = `${provider}:${alias}`;
++      if (!hiddenByProvider.has(key))
++        hiddenByProvider.set(
++          key,
++          new Set(
++            [...new Set([provider, alias])].flatMap((id) =>
++              getModelCompatOverrides(id)
++                .filter((row) => isOverrideHiddenForModality(row, "chat"))
++                .map((row) => row.id)
++            )
++          )
++        );
++      return hiddenByProvider.get(key)!;
++    };
++
+     // Filter before capability resolution so unavailable/paid rows cannot trigger
+     // needless capability work. One request-local snapshot supplies all persisted
+     // capability and custom-vision rows to the remaining resolutions.
+     const candidates = AI_MODELS.filter((model: any) => {
+       if (!showAll && activeProviders && !activeProviders.has(model.provider)) return false;
++      if (!showAll && activeConnections.length > 0) {
++        const provider = model.provider;
++        const canonical =
++          Object.keys(PROVIDER_ID_TO_ALIAS).find((key) => PROVIDER_ID_TO_ALIAS[key] === provider) ||
++          provider;
++        const connections = activeConnections.filter(
++          (c) => c.provider === provider || c.provider === canonical
++        );
++        if (
++          !hasEligibleConnectionForModel(connections, model.model) ||
++          hiddenForProvider(canonical, provider).has(model.model)
++        )
++          return false;
++      }
+       return (
+         !hidePaid ||
+         (providerHasFreeModels(model.provider) && isFreeModel(model.provider, { id: model.model }))
+@@ -166,10 +205,11 @@
+     // dropped it because a provider's live-synced catalog covers it (or, for
+     // exclusive-listing providers like Cursor, replaces the static list entirely).
+     // Recompute the same suppression /v1/models applies so the two endpoints agree.
++    let syncedModelsByProvider: Awaited<ReturnType<typeof getAllActiveSyncedModels>> = {};
+     let syncedModelIdsByCanonicalProvider = new Map<string, Set<string>>();
+     let resolveCanonicalProviderIdForStatic: (alias: string) => string = (alias) => alias;
+     try {
+-      const syncedModelsByProvider = await getAllActiveSyncedModels({
++      syncedModelsByProvider = await getAllActiveSyncedModels({
+         customModelsByProvider: capabilitySnapshot.customModelsByProvider,
+       });
+       const { aliasToProviderId, providerIdToAlias } = buildAliasMaps();
+@@ -224,7 +264,36 @@
+       };
+     });
+
+-    return NextResponse.json({ models });
++    // The active synced catalog also introduces new releases; it is not only a
++    // suppression list for static models. Preserve operator visibility and rules.
++    if (showAll && activeConnections.length === 0) {
++      activeConnections = (await getProviderConnections()).filter((c: any) => c.isActive !== false);
++    }
++    const liveRows: Record<string, unknown>[] = [];
++    for (const [provider, synced] of Object.entries(syncedModelsByProvider)) {
++      const alias = PROVIDER_ID_TO_ALIAS[provider] || provider;
++      const canonical = resolveCanonicalProviderIdForStatic(provider);
++      const connections = activeConnections.filter(
++        (c) =>
++          c.provider === provider ||
++          c.provider === canonical ||
++          PROVIDER_ID_TO_ALIAS[c.provider] === alias
++      );
++      const hidden = hiddenForProvider(provider, alias);
++      for (const model of synced) {
++        if (!hasEligibleConnectionForModel(connections, model.id) || hidden.has(model.id)) continue;
++        if (hidePaid && !(providerHasFreeModels(alias) && isFreeModel(alias, model))) continue;
++        const row = projectDashboardSyncedModel(provider, model, alias);
++        if (!row) continue;
++        const fullModel = String(row.fullModel);
++        liveRows.push({
++          ...row,
++          ...resolveModelCapabilityFields(fullModel, capabilitySnapshot, withLimits),
++          alias: modelAliases[fullModel] || model.id,
++        });
++      }
++    }
++    return NextResponse.json({ models: mergeDashboardModelRows(models, liveRows) });
+   } catch (error) {
+     console.log("Error fetching models:", error);
+     return NextResponse.json({ error: "Failed to fetch models" }, { status: 500 });

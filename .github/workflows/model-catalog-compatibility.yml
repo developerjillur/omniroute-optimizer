@@ -1,0 +1,101 @@
+name: Model catalog compatibility
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, fix/claude-cli-profile-controls-2026-11-11]
+    paths: [nexa/**, overlay-inventory.json, .github/workflows/model-catalog-compatibility.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  models:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      NODE_OPTIONS: --max-old-space-size=4096
+      NODE_ENV: test
+      DISABLE_SQLITE_AUTO_BACKUP: "true"
+      MITM_AUTO_RECOVER: "false"
+      OMNIROUTE_SKIP_SYSTEM_TRUST: "1"
+      OMNIROUTE_SKIP_DNS_WRITE: "1"
+      APP_LOG_TO_FILE: "false"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "26.7.0"
+      - name: Verify source inventory and metadata helpers
+        run: |
+          set -euo pipefail
+          node nexa/tests/verify-source-inventory.mjs
+          node --test --test-concurrency=1 nexa/tests/frontier-model-catalog.test.mjs | tee "$RUNNER_TEMP/model-helpers.tap"
+      - name: Prepare the pinned pristine source
+        run: |
+          set -euo pipefail
+          fixture="$RUNNER_TEMP/omniroute-fixture"
+          git init "$fixture"
+          git -C "$fixture" remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+          git -C "$fixture" fetch --depth=1 upstream 191dce8d534ceb56c28a08e71381284a9a87838f
+          git -C "$fixture" checkout --detach FETCH_HEAD
+          git -C "$fixture" branch upstream-main HEAD
+          cp -R nexa "$fixture/nexa"
+          cd "$fixture"
+          node nexa/check/pristine-base.mjs
+          node nexa/apply.mjs --check
+          node nexa/gen-manifest.mjs
+          cmp nexa/manifest.json "$GITHUB_WORKSPACE/nexa/manifest.json"
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm rebuild better-sqlite3 --foreground-scripts
+          npx --no-install fumadocs-mdx
+      - name: Measure pristine compiler diagnostics
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+        working-directory: ${{ runner.temp }}/omniroute-fixture
+        run: node nexa/tests/capture-pristine-types.mjs
+      - name: Apply overlay and verify formatting
+        working-directory: ${{ runner.temp }}/omniroute-fixture
+        run: |
+          set -euo pipefail
+          node nexa/apply.mjs
+          node node_modules/prettier/bin/prettier.cjs --check --print-width 100 --trailing-comma es5 open-sse/config/discoveryAvailability.ts open-sse/services/gemini4Thinking.ts open-sse/services/installedAntigravityVersion.ts src/lib/providerModels/dashboardSyncedCatalog.ts src/shared/constants/pricing/frontier-20261118.ts tests/unit/frontier-model-release.test.ts tests/unit/dashboard-live-model-release.test.ts
+      - name: Run model adapters and related regressions without provider traffic
+        working-directory: ${{ runner.temp }}/omniroute-fixture
+        run: |
+          set -euo pipefail
+          export DATA_DIR="$RUNNER_TEMP/model-release-data"
+          export TMPDIR="$RUNNER_TEMP/model-release-tmp"
+          mkdir -p "$DATA_DIR" "$TMPDIR"
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-concurrency=1 tests/unit/frontier-model-release.test.ts tests/unit/dashboard-live-model-release.test.ts tests/unit/antigravity-version.test.ts tests/unit/antigravity-discovery-bootstrap.test.ts tests/unit/antigravity-usage-version-warmup.test.ts tests/unit/gemini-38-thinking-level-output.test.ts tests/unit/gemini-default-thinking-budget-vs-max-tokens.test.ts tests/unit/gemini-flash-lite-thinking-zero.test.ts tests/unit/gemini-no-thinking-models-16928.test.ts tests/unit/gemini-thinking-budget-fallback.test.ts tests/unit/gemini-thinking-budget-zero-6813.test.ts tests/unit/gemini-thinking-level-forwarding.test.ts tests/unit/openai-to-gemini-gemma-thinking.test.ts tests/unit/translator-gemini-thinking-budget-6943.test.ts tests/unit/gpt-6-1-sol-pricing.test.ts tests/unit/gpt-6-1-sol-pricing-analytics.test.ts tests/unit/gpt-selected-effort-passthrough.test.ts tests/unit/claude-fable-5-2.test.ts | tee "$RUNNER_TEMP/model-integration.tap"
+      - name: Core typecheck
+        working-directory: ${{ runner.temp }}/omniroute-fixture
+        run: npm run typecheck:core
+      - name: Compare completed compiler diagnostics
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+        working-directory: ${{ runner.temp }}/omniroute-fixture
+        run: |
+          set -euo pipefail
+          node scripts/check/check-tsc-ratchet.mjs --ratchet --diagnostics-out "$RUNNER_TEMP/tsc-diagnostics.log"
+          node nexa/tests/compare-upgrade-types.mjs
+      - name: Lint
+        working-directory: ${{ runner.temp }}/omniroute-fixture
+        run: npm run lint
+      - name: Documentation checks
+        working-directory: ${{ runner.temp }}/omniroute-fixture
+        run: npm run check:docs-all
+      - name: Preserve validation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: model-catalog-validation
+          path: |
+            ${{ runner.temp }}/model-helpers.tap
+            ${{ runner.temp }}/model-integration.tap
+            ${{ runner.temp }}/pristine-tsc-diagnostics.log
+            ${{ runner.temp }}/pristine-tsc-identities.json
+            ${{ runner.temp }}/tsc-diagnostics.log
+            ${{ runner.temp }}/upgrade-types.json

@@ -1,0 +1,14 @@
+diff --git a/tests/unit/gemini-38-thinking-level-output.test.ts b/tests/unit/gemini-38-thinking-level-output.test.ts
+index 77c49f8f026956c677896066cc12496efa22e737..e816dbb454b91741d1f5d0ba4bd901bacd99197a 100644
+--- a/tests/unit/gemini-38-thinking-level-output.test.ts
++++ b/tests/unit/gemini-38-thinking-level-output.test.ts
+@@ -199,7 +199,8 @@
+
+ test("vertex/gemini-4-argon emits thinkingLevel, never thinkingBudget (#16603)", () => {
+   const silent = thinkingConfigOf("vertex/gemini-4-argon");
+-  assert.equal(silent?.thinkingLevel, "medium");
++  // Gemini 4 keeps its native default when no reasoning level was requested.
++  assert.equal(silent?.thinkingLevel, undefined);
+   assert.equal(silent?.thinkingBudget, undefined);
+
+   const low = thinkingConfigOf("vertex/gemini-4-argon", { reasoning_effort: "low" });

@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 363,
-    "patches": 219,
-    "new": 138,
+    "total": 380,
+    "patches": 229,
+    "new": 145,
     "tooling": 6,
     "upstreamCandidates": 27,
     "nexaSpecific": 109,
-    "needsReview": 227,
+    "needsReview": 244,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
   },
@@ -115,6 +115,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/open-sse__config__agyModels.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/config/agyModels.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/open-sse__config__anthropicHeaders.ts.patch",
       "layer": "patch",
       "class": "upstream-candidate",
@@ -124,6 +132,14 @@
         "pr": 15323,
         "state": "OPEN"
       }
+    },
+    {
+      "file": "patches/open-sse__config__antigravityModelAliases.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/config/antigravityModelAliases.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
     },
     {
       "file": "patches/open-sse__config__claudeCodeCompatibleIdentity.ts.patch",
@@ -194,6 +210,14 @@
       "layer": "patch",
       "class": "upstream-candidate",
       "target": "open-sse/config/providers/registry/codex/index.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__config__providers__registry__gemini__index.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/config/providers/registry/gemini/index.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -415,6 +439,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/open-sse__services__antigravityVersion.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/services/antigravityVersion.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/open-sse__services__claudeCodeCCH.ts.patch",
       "layer": "patch",
       "class": "nexa-specific",
@@ -486,6 +518,14 @@
       "layer": "patch",
       "class": "upstream-candidate",
       "target": "open-sse/services/sessionManager.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__services__thinkingBudget.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/services/thinkingBudget.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -802,10 +842,26 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/src__app__api__models__route.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/app/api/models/route.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/src__app__api__models__test__route.ts.patch",
       "layer": "patch",
       "class": "needs-review",
       "target": "src/app/api/models/test/route.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/src__app__api__providers__[id]__models__discovery__normalizers.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/app/api/providers/[id]/models/discovery/normalizers.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -1001,6 +1057,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "src/lib/db/migrationRunner/schemaState.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/src__lib__db__models__synced.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/lib/db/models/synced.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -1451,6 +1515,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/tests__unit__antigravity-version.test.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "tests/unit/antigravity-version.test.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/tests__unit__api-key-self-service.test.ts.patch",
       "layer": "patch",
       "class": "needs-review",
@@ -1651,6 +1723,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/tests__unit__gemini-38-thinking-level-output.test.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "tests/unit/gemini-38-thinking-level-output.test.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/tests__unit__guardrails-registry.test.ts.patch",
       "layer": "patch",
       "class": "nexa-specific",
@@ -1823,6 +1903,30 @@
       "layer": "new",
       "class": "needs-review",
       "target": "open-sse/config/claudeHaikuCapabilities.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/open-sse/config/discoveryAvailability.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "open-sse/config/discoveryAvailability.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/open-sse/services/gemini4Thinking.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "open-sse/services/gemini4Thinking.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/open-sse/services/installedAntigravityVersion.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "open-sse/services/installedAntigravityVersion.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },
@@ -2062,6 +2166,14 @@
       "upstreamPR": null
     },
     {
+      "file": "new/src/lib/providerModels/dashboardSyncedCatalog.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "src/lib/providerModels/dashboardSyncedCatalog.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
       "file": "new/src/lib/providers/googleAccountHealth.ts",
       "layer": "new",
       "class": "needs-review",
@@ -2173,6 +2285,14 @@
       "layer": "new",
       "class": "nexa-specific",
       "target": "src/mitm/runtimeState.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/src/shared/constants/pricing/frontier-20261118.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "src/shared/constants/pricing/frontier-20261118.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },
@@ -2517,6 +2637,14 @@
       "upstreamPR": null
     },
     {
+      "file": "new/tests/unit/dashboard-live-model-release.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/dashboard-live-model-release.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
       "file": "new/tests/unit/db/cache-ttl-analytics-route.test.ts",
       "layer": "new",
       "class": "needs-review",
@@ -2585,6 +2713,14 @@
       "layer": "new",
       "class": "needs-review",
       "target": "tests/unit/deployment-policy.test.mjs",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/frontier-model-release.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/frontier-model-release.test.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },

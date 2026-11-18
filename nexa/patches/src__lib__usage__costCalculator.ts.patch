@@ -1,33 +1,40 @@
 diff --git a/src/lib/usage/costCalculator.ts b/src/lib/usage/costCalculator.ts
-index 8ce361cacf94cf18c14efcb9db127ab1148199fb..28231fb71dc00fe52f35e0d1aad122ce5fe53149 100644
+index 8ce361cacf94cf18c14efcb9db127ab1148199fb..284116f092b48850b0a62c4472df0388ab177c59 100644
 --- a/src/lib/usage/costCalculator.ts
 +++ b/src/lib/usage/costCalculator.ts
-@@ -11,6 +11,7 @@
+@@ -1,3 +1,4 @@
++import { getGpt62ServiceTierMultiplier } from "../../shared/constants/pricing/frontier-20261118";
+ /**
+  * Cost Calculator — extracted from usageDb.js (T-15)
+  *
+@@ -11,6 +12,7 @@
  import { splitCodexReasoningSuffix } from "@omniroute/open-sse/executors/codex/reasoningSuffix.ts";
  import { isCreditMeteredProvider } from "./creditMeteredProviders";
  import { isFlatRateProvider } from "./flatRateProviders";
 +import { getCacheCreationTtl } from "./cacheCreationTtl";
- 
+
  /**
   * Normalize model name — strip provider path prefixes.
-@@ -38,6 +39,8 @@
+@@ -38,6 +40,8 @@
     * `provider` to be set.
     */
    flatRateAsZero?: boolean;
 +  /** Aggregates must carry their original per-request context bucket. */
 +  longContext?: boolean;
  };
- 
+
  /**
-@@ -169,11 +172,14 @@
+@@ -169,11 +173,16 @@
    // while still using the Responses API with service_tier="flex".
    if (tier === "flex") return 0.5;
- 
+
 -  if (tier !== "priority" && tier !== "fast") return 1;
 -
    const modelKey = stripCodexEffortSuffix(
      splitCodexReasoningSuffix(normalizeModelName(String(model || "")).toLowerCase()).baseModel
    );
++  const newModelMultiplier = getGpt62ServiceTierMultiplier(modelKey, tier);
++  if (newModelMultiplier !== null) return newModelMultiplier;
 +  if (modelKey === "gpt-6.1-sol") {
 +    if (tier === "ultrafast") return 6;
 +    if (tier === "priority" || tier === "fast") return 2;
@@ -36,10 +43,10 @@ index 8ce361cacf94cf18c14efcb9db127ab1148199fb..28231fb71dc00fe52f35e0d1aad122ce
    const compactModelKey = modelKey.replace(/-/g, "");
    // Codex GPT-6 Fast is 2.5x Standard (https://developers.openai.com/codex/pricing).
    if (
-@@ -193,6 +199,17 @@
+@@ -193,6 +202,17 @@
    return 1;
  }
- 
+
 +/** Anthropic fast-mode cache multipliers stack on top of the doubled Fable 5.2 rates. */
 +export function getClaudeFastCostMultiplier(
 +  provider: string | null | undefined,
@@ -54,7 +61,7 @@ index 8ce361cacf94cf18c14efcb9db127ab1148199fb..28231fb71dc00fe52f35e0d1aad122ce
  /**
   * Long-context pricing tier: a row may carry `long_context: { threshold, inclusive?, ...rates }`
   * (e.g. OpenAI bills prompts above 272K input tokens at 2x input / 1.5x output for the whole
-@@ -202,14 +219,15 @@
+@@ -202,14 +222,15 @@
   */
  function applyLongContextTier(
    pricing: Record<string, unknown>,
@@ -71,8 +78,8 @@ index 8ce361cacf94cf18c14efcb9db127ab1148199fb..28231fb71dc00fe52f35e0d1aad122ce
 +  const crossed = selected ?? (inclusive === true ? inputTokens >= limit : inputTokens > limit);
    return crossed ? { ...pricing, ...tierRates } : pricing;
  }
- 
-@@ -245,12 +263,37 @@
+
+@@ -245,12 +266,37 @@
    // never a cost basis: pricing them would bill the request a second time.
    if (isCreditMeteredProvider(options.provider)) return 0;
    const inputTokens = tokens.input ?? tokens.prompt_tokens ?? tokens.input_tokens ?? 0;
@@ -113,13 +120,13 @@ index 8ce361cacf94cf18c14efcb9db127ab1148199fb..28231fb71dc00fe52f35e0d1aad122ce
 +        ? toNumber(rates.input, 0) * 2
 +        : toNumber(rates.cache_creation, toNumber(rates.input, 0))
 +    ) * inputMultiplier;
- 
+
    let cost = 0;
    const promptDetails = tokens.prompt_tokens_details;
-@@ -302,9 +345,19 @@
+@@ -302,9 +348,19 @@
    }
    cost = Math.max(0, cost);
- 
+
 -  if (cacheCreationTokens > 0) cost += cacheCreationTokens * (cacheCreationPrice / 1_000_000);
 -
 -  return cost * getCodexFastCostMultiplier(options.provider, options.model, options.serviceTier);
@@ -137,5 +144,5 @@ index 8ce361cacf94cf18c14efcb9db127ab1148199fb..28231fb71dc00fe52f35e0d1aad122ce
 +    getClaudeFastCostMultiplier(options.provider, options.model, options.serviceTier)
 +  );
  }
- 
+
  /**

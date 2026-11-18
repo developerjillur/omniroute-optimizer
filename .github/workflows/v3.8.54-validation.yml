@@ -53,8 +53,10 @@ jobs:
           npm rebuild better-sqlite3 --foreground-scripts
           npx --no-install fumadocs-mdx
       - name: Measure completed pristine compiler diagnostics
+        id: pristine_types
+        continue-on-error: true
         env:
-          NODE_OPTIONS: --max-old-space-size=6144
+          NODE_OPTIONS: --max-old-space-size=8192
         working-directory: ${{ runner.temp }}/omniroute-fixture
         run: node nexa/tests/capture-pristine-types.mjs
       - name: Apply only the reviewed overlay and locked dependencies
@@ -115,7 +117,7 @@ jobs:
         continue-on-error: true
         working-directory: ${{ runner.temp }}/omniroute-fixture
         env:
-          NODE_OPTIONS: --max-old-space-size=6144
+          NODE_OPTIONS: --max-old-space-size=8192
         run: node scripts/check/check-tsc-ratchet.mjs --ratchet --diagnostics-out "$RUNNER_TEMP/tsc-diagnostics.log"
       - name: Reject any newly introduced diagnostic identity
         id: compare_types
@@ -160,7 +162,7 @@ jobs:
           import json, os
           from pathlib import Path
           outcomes=json.loads(os.environ['GATE_OUTCOMES'])
-          required=['syntax','baseline_red','focused_green','compatibility','bridge','model_helpers','core','full_types','compare_types','lint','docs','security','production_native']
+          required=['pristine_types','syntax','baseline_red','focused_green','compatibility','bridge','model_helpers','core','full_types','compare_types','lint','docs','security','production_native']
           failed={name:outcomes.get(name,{}).get('outcome','missing') for name in required if outcomes.get(name,{}).get('outcome')!='success'}
           receipt={'sourceCommit':os.environ['GITHUB_SHA'],'status':'PASS' if not failed else 'NOT_ACCEPTED','failedGates':failed,'productionBuildExecuted':False,'liveChanged':False}
           (Path(os.environ['RUNNER_TEMP'])/'v354-validation.json').write_text(json.dumps(receipt,indent=2)+'\n')

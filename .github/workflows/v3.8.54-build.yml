@@ -1,0 +1,159 @@
+name: v3.8.54 sealed production package
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [fix/v3.8.54-models]
+    paths: [.github/workflows/v3.8.54-build.yml]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 70
+    env:
+      GH_TOKEN: ${{ github.token }}
+      NODE_ENV: production
+      DISABLE_SQLITE_AUTO_BACKUP: "true"
+      MITM_AUTO_RECOVER: "false"
+      OMNIROUTE_SKIP_SYSTEM_TRUST: "1"
+      OMNIROUTE_SKIP_DNS_WRITE: "1"
+      ADOBE_FIREFLY_BROWSER_REFRESH: "0"
+      APP_LOG_TO_FILE: "false"
+      NEXT_TELEMETRY_DISABLED: "1"
+      npm_config_cache: ${{ runner.temp }}/npm-cache
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24.15.0"
+      - name: Require completed validation of this exact Nexa tree
+        run: |
+          set -euo pipefail
+          node nexa/tests/verify-source-inventory.mjs
+          export EXPECTED_NEXA_TREE="$(git rev-parse HEAD:nexa)"
+          python3 - <<'PY'
+          import json, os, subprocess, time
+          from pathlib import Path
+          repo=os.environ['GITHUB_REPOSITORY']
+          def api(path): return json.loads(subprocess.check_output(['gh','api','repos/'+repo+'/'+path],text=True))
+          for attempt in range(41):
+              runs=api('actions/workflows/v3.8.54-validation.yml/runs?branch=fix%2Fv3.8.54-models&per_page=10')['workflow_runs']
+              selected=None
+              for run in runs:
+                  tree=api('git/trees/'+run['head_sha'])['tree']
+                  nexa=next((x['sha'] for x in tree if x['path']=='nexa'),None)
+                  if nexa==os.environ['EXPECTED_NEXA_TREE']:
+                      selected=run
+                      break
+              if selected and selected['status']=='completed':
+                  assert selected['conclusion']=='success', 'Exact-source validation failed; production build remains blocked'
+                  evidence=Path(os.environ['RUNNER_TEMP'])/'validated-source'
+                  subprocess.run(['gh','run','download',str(selected['id']),'--repo',repo,'--name','v3.8.54-validation','--dir',str(evidence)],check=True)
+                  receipt=json.loads((evidence/'v354-validation.json').read_text())
+                  assert receipt['status']=='PASS' and not receipt['failedGates']
+                  assert receipt['sourceCommit']==selected['head_sha']
+                  origin={'validationRun':selected['id'],'validatedCommit':selected['head_sha'],'nexaTree':os.environ['EXPECTED_NEXA_TREE'],'buildSourceCommit':os.environ['GITHUB_SHA']}
+                  (Path(os.environ['RUNNER_TEMP'])/'validation-origin.json').write_text(json.dumps(origin,indent=2)+'\n')
+                  print(json.dumps(origin))
+                  break
+              assert attempt<40, 'No completed exact-source validation within the bounded wait'
+              print('Waiting for exact-source validation',flush=True)
+              time.sleep(30)
+          PY
+      - name: Prepare a fresh pinned application and native dependencies
+        run: |
+          set -euo pipefail
+          fixture="$RUNNER_TEMP/production-source"
+          git init "$fixture"
+          git -C "$fixture" remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+          git -C "$fixture" fetch --depth=1 upstream 1c880c5c95b3f0240d5e4c6c8f0947ec46b5d25e
+          git -C "$fixture" checkout --detach FETCH_HEAD
+          git -C "$fixture" branch upstream-main HEAD
+          cp -R nexa "$fixture/nexa"
+          cd "$fixture"
+          node nexa/check/pristine-base.mjs
+          node nexa/apply.mjs --check
+          node nexa/apply.mjs
+          mkdir "$RUNNER_TEMP/build-data" "$RUNNER_TEMP/build-tmp" "$RUNNER_TEMP/release-package"
+          echo "DATA_DIR=$RUNNER_TEMP/build-data" >> "$GITHUB_ENV"
+          echo "TMPDIR=$RUNNER_TEMP/build-tmp" >> "$GITHUB_ENV"
+          echo "OMNIROUTE_BUILD_SHA=$GITHUB_SHA" >> "$GITHUB_ENV"
+          NODE_ENV=development npm ci --include=dev --ignore-scripts --no-audit --no-fund
+          node bin/cli/utils/dependencySecurity.mjs --apply
+          npm rebuild --foreground-scripts
+          npx --no-install fumadocs-mdx
+      - name: Build the complete dashboard, server, Bridge and CLI sequentially
+        working-directory: ${{ runner.temp }}/production-source
+        env:
+          NEXA_BUILD_RSS_MB: "8192"
+          NEXA_BUILD_HEAP_MB: "6144"
+          NEXA_BUILD_WORKERS: "1"
+        run: |
+          set -euo pipefail
+          ulimit -c 0
+          # This is a new source checkout: no prior dist or build is removed.
+          test ! -e .build
+          test ! -e dist
+          cat > "$RUNNER_TEMP/full-production.sh" <<'SH'
+          set -euo pipefail
+          unset OMNIROUTE_BUILD_BACKEND_ONLY OMNIROUTE_BUILD_PROFILE OMNIROUTE_SKIP_STANDALONE
+          npm run build
+          npm run build:cli-api
+          npm run build:cli
+          node scripts/build/write-build-sha.mjs
+          node bin/cli/utils/dependencySecurity.mjs --apply
+          node nexa/deploy/dashboard-gate.mjs dist/.build/next
+          OMNIROUTE_ALLOW_CANARY_BUILD=1 npm run check:pack-artifact
+          SH
+          node nexa/deploy/run-bounded-build.mjs -- /bin/bash "$RUNNER_TEMP/full-production.sh" 2>&1 | tee "$RUNNER_TEMP/production-build.log"
+      - name: Seal the exact dependency graph and verify the archive contract
+        working-directory: ${{ runner.temp }}/production-source
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/release-package"
+          mkdir "$out/unsealed"
+          npm pack --pack-destination "$out/unsealed" --json > "$out/npm-pack.json"
+          npm_root="$(npm root --global)"
+          node nexa/deploy/publication-lock.mjs "$PWD" "$npm_root/npm/package.json" "$out/publication-lock"
+          python3 nexa/deploy/seal-package.py "$out/unsealed/omniroute-3.8.54.tgz" package-lock.json "$out/publication-lock/npm-shrinkwrap.json" "$out/omniroute-3.8.54.tgz" --effective-edges "$out/publication-lock/effective-edges.json"
+          node --input-type=module - "$out/omniroute-3.8.54.tgz" <<'JS'
+          import { verifyPackage } from './nexa/deploy/bridge-gate.mjs';
+          console.log(JSON.stringify(verifyPackage(process.argv[2])));
+          JS
+          cp package-lock.json "$out/source-package-lock.json"
+          cp "$RUNNER_TEMP/validation-origin.json" "$out/validation-origin.json"
+          node --input-type=module - "$out" <<'JS'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import {createHash} from 'node:crypto';
+          const out=process.argv[2], archive=path.join(out,'omniroute-3.8.54.tgz');
+          const receipt={status:'CLOUD_FULL_BUILD_PASS_MAC_ACCEPTANCE_REQUIRED',version:'3.8.54',sourceCommit:process.env.GITHUB_SHA,upstreamBase:'1c880c5c95b3f0240d5e4c6c8f0947ec46b5d25e',...JSON.parse(fs.readFileSync(path.join(out,'validation-origin.json'))),archiveSHA256:createHash('sha256').update(fs.readFileSync(archive)).digest('hex'),archiveBytes:fs.statSync(archive).size,fullBuild:true,backendOnly:false,buildFamilyLimitMiB:8192,macInstalledAcceptance:false,liveChanged:false};
+          fs.writeFileSync(path.join(out,'cloud-build.json'),JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
+          console.log(JSON.stringify(receipt));
+          JS
+      - name: Preserve build evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: v3.8.54-production-build-log
+          path: |
+            ${{ runner.temp }}/production-build.log
+            ${{ runner.temp }}/validation-origin.json
+      - name: Save the sealed package for Mac acceptance
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: v3.8.54-sealed-package
+          compression-level: 0
+          path: |
+            ${{ runner.temp }}/release-package/omniroute-3.8.54.tgz
+            ${{ runner.temp }}/release-package/omniroute-3.8.54.tgz.receipt.json
+            ${{ runner.temp }}/release-package/source-package-lock.json
+            ${{ runner.temp }}/release-package/cloud-build.json
+            ${{ runner.temp }}/release-package/validation-origin.json
+            ${{ runner.temp }}/release-package/publication-lock/

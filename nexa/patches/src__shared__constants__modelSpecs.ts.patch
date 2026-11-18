@@ -1,11 +1,57 @@
 diff --git a/src/shared/constants/modelSpecs.ts b/src/shared/constants/modelSpecs.ts
-index c6ec27848333cf865557588e0b78f64b1f11fe29..a7085e22be608581a2e609f89415850dafa7814f 100644
+index c6ec27848333cf865557588e0b78f64b1f11fe29..32fa53e18011d16178ddd2bc43dd557c0a4a80ee 100644
 --- a/src/shared/constants/modelSpecs.ts
 +++ b/src/shared/constants/modelSpecs.ts
-@@ -530,6 +530,19 @@
-     aliases: BEDROCK_CLAUDE_ALIASES("claude-opus-4-7", "claude-opus-4.7"),
+@@ -161,6 +161,14 @@
+
+ export const MODEL_SPECS: Record<string, ModelSpec> = {
+   // Public API limits; Codex's smaller window lives in its provider registry.
++  "gpt-6.2-sol": {
++    ...GPT_5_6_MODEL_SPEC,
++    aliases: ["openai/gpt-6.2-sol"],
++  },
++  "gpt-6.2-astra": {
++    ...GPT_5_6_MODEL_SPEC,
++    aliases: ["openai/gpt-6.2-astra"],
++  },
+   "gpt-6.1-sol": {
+     ...GPT_5_6_MODEL_SPEC,
+     aliases: ["openai/gpt-6.1-sol"],
+@@ -343,6 +351,28 @@
    },
- 
+
+   // ── Gemini 4 Argon ──────────────────────────────────────────────
++  // These entries precede the generic gemini-4 alias so tier variants resolve correctly.
++  "gemini-4-hydrogen": {
++    maxOutputTokens: 65536,
++    contextWindow: 1048576,
++    defaultThinkingBudget: 8192,
++    thinkingBudgetCap: 24576,
++    supportsThinking: true,
++    supportsTools: true,
++    supportsVision: true,
++    noThinkingAlias: false,
++  },
++  "gemini-4-carbon": {
++    // Conservative foreground cap also accepted by the non-streaming API.
++    maxOutputTokens: 32768,
++    contextWindow: 1048576,
++    defaultThinkingBudget: 8192,
++    thinkingBudgetCap: 24576,
++    supportsThinking: true,
++    supportsTools: true,
++    supportsVision: true,
++    noThinkingAlias: false,
++  },
+   "gemini-4-argon": {
+     maxOutputTokens: 65536,
+     contextWindow: 1048576,
+@@ -528,6 +558,19 @@
+     supportsVision: true,
+     adaptiveThinkingOnly: true,
+     aliases: BEDROCK_CLAUDE_ALIASES("claude-opus-4-7", "claude-opus-4.7"),
++  },
++
 +  // Claude Fable 5.2: adaptive-only thinking and native one-million-token context.
 +  "claude-fable-5-2": {
 +    maxOutputTokens: 128000,
@@ -17,8 +63,6 @@ index c6ec27848333cf865557588e0b78f64b1f11fe29..a7085e22be608581a2e609f89415850d
 +    adaptiveThinkingOnly: true,
 +    rejectsForcedToolChoice: true,
 +    aliases: BEDROCK_CLAUDE_ALIASES("claude-fable-5-2"),
-+  },
-+
+   },
+
    // ── Claude Fable 5.1 ────────────────────────────────────────────
-   "claude-fable-5-1": {
-     maxOutputTokens: 128000,

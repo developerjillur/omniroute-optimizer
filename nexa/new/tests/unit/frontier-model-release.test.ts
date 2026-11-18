@@ -9,6 +9,13 @@ import {
 } from "../../open-sse/config/antigravityModelAliases.ts";
 import { normalizeSyncedAvailableModels } from "../../src/lib/db/models/synced.ts";
 import { gemini38ThinkingConfig } from "../../open-sse/services/thinkingBudget.ts";
+import { getModelSpec, getCanonicalModelSpecId } from "../../src/shared/constants/modelSpecs.ts";
+import { getResolvedModelCapabilities } from "../../src/lib/modelCapabilities.ts";
+import {
+  openaiToGeminiRequest,
+  openaiToAntigravityRequest,
+} from "../../open-sse/translator/request/openai-to-gemini.ts";
+import { claudeToGeminiRequest } from "../../open-sse/translator/request/claude-to-gemini.ts";
 import { DEFAULT_PRICING } from "../../src/shared/constants/pricing/default-pricing.ts";
 import {
   computeCostFromPricing,
@@ -44,6 +51,41 @@ test("Google release models keep conservative foreground limits and tool/vision 
     assert.equal(model.supportsVision, true);
     assert.equal(model.toolCalling, true);
   }
+});
+
+test("new family specs precede generic aliases and Codex keeps its provider-specific window", () => {
+  for (const family of ["hydrogen", "carbon"]) {
+    assert.equal(getCanonicalModelSpecId(`agy/gemini-4-${family}-high`), `gemini-4-${family}`);
+    assert.equal(getModelSpec(`gemini-4-${family}`)?.noThinkingAlias, false);
+  }
+  for (const model of ["gpt-6.2-sol", "gpt-6.2-astra"]) {
+    assert.equal(getModelSpec(model)?.contextWindow, 1050000);
+    assert.equal(getResolvedModelCapabilities(`cx/${model}`).contextWindow, 872000);
+  }
+});
+
+test("actual Gemini and Antigravity translators retain Hydrogen XHIGH without numeric budgets", () => {
+  type Config = { thinkingLevel?: string; thinkingBudget?: number };
+  type Wire = { generationConfig?: { thinkingConfig?: Config } };
+  const body = {
+    messages: [{ role: "user", content: "hello" }],
+    reasoning_effort: "xhigh",
+    max_tokens: 4096,
+  };
+  const direct = openaiToGeminiRequest("gemini-4-hydrogen", body, true) as Wire;
+  const bridge = openaiToAntigravityRequest("gemini-4-hydrogen", body, true) as { request?: Wire };
+  for (const config of [
+    direct.generationConfig?.thinkingConfig,
+    bridge.request?.generationConfig?.thinkingConfig,
+  ]) {
+    assert.equal(config?.thinkingLevel, "xhigh");
+    assert.equal(config?.thinkingBudget, undefined);
+  }
+  const claude = claudeToGeminiRequest("gemini-4-hydrogen", {
+    messages: [{ role: "user", content: "hello" }],
+    thinking: { type: "enabled", budget_tokens: 0 },
+  }) as Wire;
+  assert.equal(claude.generationConfig?.thinkingConfig?.thinkingBudget, undefined);
 });
 
 test("both Google surfaces exclude disabled placeholders, including pre-existing cached rows", () => {

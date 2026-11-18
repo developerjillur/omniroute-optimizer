@@ -7,7 +7,7 @@
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
   "trackedNexaFiles": 563,
-  "totalNexaBytes": 2622021,
+  "totalNexaBytes": 2626042,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -671,9 +671,9 @@
     {
       "path": "nexa/docs/MODEL-CATALOG-2026-11-18.md",
       "mode": "100644",
-      "gitBlobSha": "259591214aad4eb0d2446e42c509a290c9139d65",
-      "bytes": 7676,
-      "sha256": "acc517f3a1cbe3c50d28a241f38a78a174c7103f16eb052467a385b0f3ffe5fb"
+      "gitBlobSha": "508b1897c9e47d17167109a695a585baab156e5a",
+      "bytes": 8121,
+      "sha256": "9277b7b0a9a5c2e65470791a7c58568cec38835f8f9680a87648cb1fb72d692a"
     },
     {
       "path": "nexa/docs/NATIVE-ARTIFACT-RECOVERY-AND-GPT61-PRICING-2026-10-14.md",
@@ -1539,9 +1539,9 @@
     {
       "path": "nexa/new/tests/unit/frontier-model-release.test.ts",
       "mode": "100644",
-      "gitBlobSha": "8dcee9246e967bcad3c1767af41472a7a14e4d1f",
-      "bytes": 4147,
-      "sha256": "b7d4759995f1977d9fa3aff130eebddb563ca5c76946b705929a7cbc08f7efff"
+      "gitBlobSha": "7a2a05f0c896b774410a58012ce30cf64a268bb8",
+      "bytes": 6150,
+      "sha256": "aa8efa9dff480879d61ff629162324150ab64f63a01b7eb94aa78882bb61df59"
     },
     {
       "path": "nexa/new/tests/unit/gpt-6-1-sol-pricing-analytics.test.ts",
@@ -2015,9 +2015,9 @@
     {
       "path": "nexa/patches/open-sse__config__providers__registry__gemini__index.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "e878f7c772f0dacd4366aab1bd0d79fe1ee9a761",
-      "bytes": 1021,
-      "sha256": "6ca996aa5e3e9f87b3b1920bc518067120bb0d23edc435e86c30482add819763"
+      "gitBlobSha": "fa119b7607d2db26f14105269e584a0279f36e55",
+      "bytes": 1184,
+      "sha256": "a7855730915ee847d27a4c3400ca95b06f56bfcddbf8cdd756f4629cba01fa15"
     },
     {
       "path": "nexa/patches/open-sse__config__providers__registry__vertex__index.ts.patch",
@@ -3023,9 +3023,9 @@
     {
       "path": "nexa/patches/src__shared__constants__modelSpecs.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "dd5324d3f385a712a6f9853d1a68bb10ff8694c4",
-      "bytes": 1008,
-      "sha256": "3cafbd393aeacbcc2e16862b968b0f16f96c4c8d1035028884fb35eecfdbce43"
+      "gitBlobSha": "d7ccc36ccd6baf9dcdf8f743759487dfa96ce18e",
+      "bytes": 2418,
+      "sha256": "73425f2edbf24a04c6a4938e7d275cd8416187e9343f2ea8099349a923ee93fb"
     },
     {
       "path": "nexa/patches/src__shared__constants__pricing__frontier-labs.ts.patch",

@@ -4,7 +4,16 @@ on:
   workflow_dispatch:
   push:
     branches: [main, fix/claude-cli-profile-controls-2026-11-11]
-    paths: [nexa/**, overlay-inventory.json, .github/workflows/model-catalog-compatibility.yml]
+    paths:
+      - nexa/new/**
+      - nexa/patches/**
+      - nexa/tests/**
+      - nexa/lib/**
+      - nexa/check/**
+      - nexa/apply.mjs
+      - nexa/gen-manifest.mjs
+      - nexa/manifest.json
+      - .github/workflows/model-catalog-compatibility.yml
 
 permissions:
   contents: read

@@ -45,6 +45,10 @@ Source candidate প্রস্তুত; local helper tests 10/10 পাস।
 7. নতুন Gemini API registry metadata-তে Hydrogen-এর 65536 ও Carbon-এর 32768
    conservative foreground output cap রাখা হয়েছে। এটি 1M-token foreground output বা
    background long-decode implementation-এর দাবি নয়।
+8. Hydrogen/Carbon-এর নিজস্ব central specification generic `gemini-4` alias-এর
+   আগে resolve হয়; GPT-6.2-এর public API specifications-ও আলাদা আছে। Codex-এর
+   ছোট provider-specific window বজায় থাকে। Gemini ও Antigravity-এর actual request
+   translators দিয়েও Hydrogen XHIGH এবং numeric budget বাদ দেওয়ার test আছে।
 
 ## Validation ও সীমা
 

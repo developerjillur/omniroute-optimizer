@@ -43,7 +43,7 @@ jobs:
           from pathlib import Path
           repo=os.environ['GITHUB_REPOSITORY']
           def api(path): return json.loads(subprocess.check_output(['gh','api','repos/'+repo+'/'+path],text=True))
-          for attempt in range(41):
+          for attempt in range(81):
               runs=api('actions/workflows/v3.8.54-validation.yml/runs?branch=fix%2Fv3.8.54-models&per_page=10')['workflow_runs']
               selected=None
               for run in runs:
@@ -63,7 +63,7 @@ jobs:
                   (Path(os.environ['RUNNER_TEMP'])/'validation-origin.json').write_text(json.dumps(origin,indent=2)+'\n')
                   print(json.dumps(origin))
                   break
-              assert attempt<40, 'No completed exact-source validation within the bounded wait'
+              assert attempt<80, 'No completed exact-source validation within the bounded wait'
               print('Waiting for exact-source validation',flush=True)
               time.sleep(30)
           PY
@@ -76,7 +76,7 @@ jobs:
           from pathlib import Path
           repo=os.environ['GITHUB_REPOSITORY']
           def api(path): return json.loads(subprocess.check_output(['gh','api','repos/'+repo+'/'+path],text=True))
-          for attempt in range(41):
+          for attempt in range(81):
               runs=api('actions/workflows/v3.8.54-contracts.yml/runs?branch=fix%2Fv3.8.54-models&per_page=10')['workflow_runs']
               selected=None
               for run in runs:
@@ -94,7 +94,7 @@ jobs:
                   (Path(os.environ['RUNNER_TEMP'])/'contract-origin.json').write_text(json.dumps(origin,indent=2)+'\n')
                   print(json.dumps(origin))
                   break
-              assert attempt<40, 'No completed exact-source contract acceptance within the bounded wait'
+              assert attempt<80, 'No completed exact-source contract acceptance within the bounded wait'
               print('Waiting for upstream contract acceptance',flush=True)
               time.sleep(30)
           PY
@@ -219,56 +219,3 @@ jobs:
             ${{ runner.temp }}/release-package/validation-origin.json
             ${{ runner.temp }}/release-package/contract-origin.json
             ${{ runner.temp }}/release-package/publication-lock/
-      - name: Prepare an optional verified byte delta
-        id: byte_delta
-        continue-on-error: true
-        run: |
-          set -euo pipefail
-          mkdir "$RUNNER_TEMP/delta-base" "$RUNNER_TEMP/delta-tools"
-          gh run download 44279482358 --repo "$GITHUB_REPOSITORY" --name v3.8.54-sealed-package --dir "$RUNNER_TEMP/delta-base"
-          cd "$RUNNER_TEMP/delta-tools"
-          apt-get download bsdiff
-          python3 - <<'PYDELTA'
-          import hashlib,json,os,shutil,subprocess
-          from pathlib import Path
-          root=Path(os.environ['RUNNER_TEMP'])
-          base=root/'delta-base/omniroute-3.8.54.tgz'
-          package=root/'release-package'
-          target=package/'omniroute-3.8.54.tgz'
-          source=root/'production-source'
-          output=root/'release-byte-delta'
-          output.mkdir()
-          def sha(p):
-              d=hashlib.sha256()
-              with p.open('rb') as f:
-                  for block in iter(lambda:f.read(1024*1024),b''):d.update(block)
-              return d.hexdigest()
-          expected='a8bc85f32d350776a76424632ac1ee16f5d96884ee086c56899d7145f405ffb1'
-          assert sha(base)==expected
-          receipt=json.loads((package/'cloud-build.json').read_text())
-          assert sha(target)==receipt['archiveSHA256'] and target.stat().st_size==receipt['archiveBytes']
-          archives=list((root/'delta-tools').glob('bsdiff_*.deb'))
-          assert len(archives)==1 and archives[0].is_file()
-          tools=root/'delta-tools/extracted'
-          subprocess.run(['dpkg-deb','-x',str(archives[0]),str(tools)],check=True)
-          patch=output/'omniroute-3.8.54.tgz.bsdiff'
-          env=dict(os.environ,NEXA_BUILD_RSS_MB='4096',NEXA_BUILD_HEAP_MB='1024')
-          subprocess.run(['node',str(source/'nexa/deploy/run-bounded-build.mjs'),'--',str(tools/'usr/bin/bsdiff'),str(base),str(target),str(patch)],env=env,check=True)
-          assert patch.stat().st_size<100*1024**2, 'Full artifact remains available when a delta is not economical'
-          roundtrip=root/'delta-tools/reconstructed.tgz'
-          subprocess.run([str(tools/'usr/bin/bspatch'),str(base),str(roundtrip),str(patch)],check=True)
-          assert sha(roundtrip)==receipt['archiveSHA256'] and roundtrip.stat().st_size==receipt['archiveBytes']
-          for name in ['cloud-build.json','validation-origin.json','contract-origin.json','source-package-lock.json','omniroute-3.8.54.tgz.receipt.json']:
-              shutil.copyfile(package/name,output/name)
-          shutil.copytree(package/'publication-lock',output/'publication-lock')
-          manifest={'format':'BSDIFF40','baseSHA256':expected,'baseBytes':base.stat().st_size,'targetSHA256':receipt['archiveSHA256'],'targetBytes':receipt['archiveBytes'],'patchSHA256':sha(patch),'patchBytes':patch.stat().st_size,'sourceCommit':receipt['sourceCommit'],'nexaTree':receipt['nexaTree'],'roundTripSHA256Verified':True,'fullSealedArtifactAlsoRetained':True,'builderDebSHA256':sha(archives[0]),'builderDeb':archives[0].name}
-          (output/'byte-delta.json').write_text(json.dumps(manifest,indent=2)+'\n')
-          print(json.dumps(manifest))
-          PYDELTA
-      - name: Save the round-trip-verified transfer delta
-        if: steps.byte_delta.outcome == 'success'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: v3.8.54-verified-byte-delta
-          compression-level: 0
-          path: ${{ runner.temp }}/release-byte-delta/

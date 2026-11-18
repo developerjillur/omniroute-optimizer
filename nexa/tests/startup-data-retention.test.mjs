@@ -93,3 +93,37 @@ test("configured retention scheduler remains wired behind its background-service
     "Preserve the operator's configured retention policy",
   );
 });
+
+test("enabled native Bridge recovery is registered before server readiness", () => {
+  const scheduled = calls("scheduleBridgeRecovery");
+  const ready = calls("markServerReady");
+  assert.equal(
+    scheduled.length,
+    1,
+    "Enabled native Bridge recovery must remain registered at startup",
+  );
+  assert.equal(ready.length, 1);
+  const block = scheduled[0].parent.parent;
+  const guard = block.parent;
+  assert.ok(ts.isBlock(block) && ts.isIfStatement(guard));
+  assert.equal(
+    guard.parent,
+    registration.body,
+    "Recovery belongs to the actual startup path",
+  );
+  const condition = guard.expression;
+  assert.ok(ts.isBinaryExpression(condition));
+  assert.equal(condition.left.getText(source), "process.env.MITM_AUTO_RECOVER");
+  assert.equal(
+    condition.operatorToken.kind,
+    ts.SyntaxKind.EqualsEqualsEqualsToken,
+  );
+  assert.ok(
+    ts.isStringLiteral(condition.right) && condition.right.text === "true",
+  );
+  assert.ok(block.getText(source).includes('import("@/mitm/bootRecovery")'));
+  assert.ok(
+    scheduled[0].end < ready[0].pos,
+    "Schedule recovery before publishing server readiness",
+  );
+});

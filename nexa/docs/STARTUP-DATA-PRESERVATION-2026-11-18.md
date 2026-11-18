@@ -5,7 +5,7 @@
 The first full v3.8.54 cloud package passed compilation, native modules, registry
 mitigation checks and two isolated production cold starts. It is not accepted for
 live promotion: a complete private SQLite before/after comparison found changes
-that a health response alone did not reveal. The live v3.8.53 service remains intact.
+that a health response alone did not reveal. That initial archive was rejected. A later corrected C95 build is live; its separate Bridge startup omission is being repaired.
 
 The private baseline hashed 147 tables and 8,447,119 rows. After startup and protocol
 probes the clone contained 153 tables and 8,442,268 rows. Existing-column changes:
@@ -61,3 +61,20 @@ asserts that a generic explicit session ID with the same text cannot collide.
 Generic-header precedence, distinct native-session separation and input hashing
 assertions remain unchanged. No runtime routing behavior is changed for this
 compatibility-test correction.
+
+## C95 preservation accepted; Bridge startup registration restored
+
+The corrected C95 installed-package comparison retained every original typed row
+value in all 147 baseline tables (8,447,119 original rows), apart from the explicitly
+allowed monotonic API-key last_used_at caused by authenticated protocol probes.
+Credentials, scopes, mappings, settings and history remained unchanged. The final
+live migration used a new current quiescent snapshot and retained the original
+database inode. Failed/resource receipts remain immutable.
+
+A separate live check found the prior Bridge startup registration absent from the
+C95 overlay diff. Regenerating against an already-applied base had lost that hunk.
+The complete instrumentation patch must always be based on pristine upstream:
+retain audit initialization, suppress the separate destructive cleanup pass, honor
+the affinity background guard, and schedule explicitly enabled Bridge recovery
+before markServerReady(). A new startup assertion rejects the C95 omission.
+Automatic recovery acceptance of the corrected production package is still required.

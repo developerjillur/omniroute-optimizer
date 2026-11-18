@@ -38,18 +38,23 @@ assert.equal(
   "An environment error or interrupted run is not a baseline reproduction",
 );
 for (const expected of [
-  "# tests 3",
+  "# tests 4",
   "# pass 1",
-  "# fail 2",
+  "# fail 3",
   "# cancelled 0",
   "# skipped 0",
 ])
   assert.ok(result.stdout.includes(expected), expected);
 assert.ok(result.stdout.includes("Boot must not silently prune"));
 assert.ok(result.stdout.includes("Read-only migration fixtures must retain"));
+assert.ok(
+  result.stdout.includes(
+    "Enabled native Bridge recovery must remain registered",
+  ),
+);
 console.log(
   JSON.stringify({
-    baselineAssertionsReproduced: 2,
+    baselineAssertionsReproduced: 3,
     unaffectedPolicyAssertionPassed: 1,
     environmentErrors: 0,
   }),

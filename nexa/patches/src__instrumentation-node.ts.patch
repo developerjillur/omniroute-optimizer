@@ -1,5 +1,5 @@
 diff --git a/src/instrumentation-node.ts b/src/instrumentation-node.ts
-index 1364b124c6136d7ad7e5fb45b91a761739f1b996..b4255ee0b7837507c9d89257de840cabd4ac6d02 100755
+index b85c1db163d2bf36dba81bfc96fd20109a003c8f..b4255ee0b7837507c9d89257de840cabd4ac6d02 100755
 --- a/src/instrumentation-node.ts
 +++ b/src/instrumentation-node.ts
 @@ -803,7 +803,7 @@ export async function registerNodejs(): Promise<void> {
@@ -36,3 +36,14 @@ index 1364b124c6136d7ad7e5fb45b91a761739f1b996..b4255ee0b7837507c9d89257de840cab
    } catch (err: unknown) {
      const msg = err instanceof Error ? err.message : String(err);
      console.warn("[COMPLIANCE] Could not initialize audit log:", msg);
+@@ -971,5 +962,10 @@ export async function registerNodejs(): Promise<void> {
+     ]);
+   }
+
++  if (process.env.MITM_AUTO_RECOVER === "true") {
++    const { scheduleBridgeRecovery } = await import("@/mitm/bootRecovery");
++    scheduleBridgeRecovery();
++  }
++
+   markServerReady();
+ }

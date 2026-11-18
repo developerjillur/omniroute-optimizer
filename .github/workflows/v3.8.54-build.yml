@@ -67,6 +67,37 @@ jobs:
               print('Waiting for exact-source validation',flush=True)
               time.sleep(30)
           PY
+      - name: Require upstream contracts for the same Nexa tree
+        run: |
+          set -euo pipefail
+          export EXPECTED_NEXA_TREE="$(git rev-parse HEAD:nexa)"
+          python3 - <<'PY'
+          import json, os, subprocess, time
+          from pathlib import Path
+          repo=os.environ['GITHUB_REPOSITORY']
+          def api(path): return json.loads(subprocess.check_output(['gh','api','repos/'+repo+'/'+path],text=True))
+          for attempt in range(41):
+              runs=api('actions/workflows/v3.8.54-contracts.yml/runs?branch=fix%2Fv3.8.54-models&per_page=10')['workflow_runs']
+              selected=None
+              for run in runs:
+                  nexa=next((x['sha'] for x in api('git/trees/'+run['head_sha'])['tree'] if x['path']=='nexa'),None)
+                  if nexa==os.environ['EXPECTED_NEXA_TREE']:
+                      selected=run
+                      break
+              if selected and selected['status']=='completed':
+                  assert selected['conclusion']=='success', 'Upstream contract regressions block production'
+                  evidence=Path(os.environ['RUNNER_TEMP'])/'validated-contracts'
+                  subprocess.run(['gh','run','download',str(selected['id']),'--repo',repo,'--name','v3.8.54-contracts','--dir',str(evidence)],check=True)
+                  receipt=json.loads((evidence/'v354-contracts.json').read_text())
+                  assert receipt['status']=='PASS' and receipt['sourceCommit']==selected['head_sha']
+                  origin={'contractRun':selected['id'],'contractCommit':selected['head_sha'],'nexaTree':os.environ['EXPECTED_NEXA_TREE'],'counts':receipt['counts']}
+                  (Path(os.environ['RUNNER_TEMP'])/'contract-origin.json').write_text(json.dumps(origin,indent=2)+'\n')
+                  print(json.dumps(origin))
+                  break
+              assert attempt<40, 'No completed exact-source contract acceptance within the bounded wait'
+              print('Waiting for upstream contract acceptance',flush=True)
+              time.sleep(30)
+          PY
       - name: Prepare a fresh pinned application and native dependencies
         run: |
           set -euo pipefail
@@ -129,12 +160,13 @@ jobs:
           JS
           cp package-lock.json "$out/source-package-lock.json"
           cp "$RUNNER_TEMP/validation-origin.json" "$out/validation-origin.json"
+          cp "$RUNNER_TEMP/contract-origin.json" "$out/contract-origin.json"
           node --input-type=module - "$out" <<'JS'
           import fs from 'node:fs';
           import path from 'node:path';
           import {createHash} from 'node:crypto';
           const out=process.argv[2], archive=path.join(out,'omniroute-3.8.54.tgz');
-          const receipt={status:'CLOUD_FULL_BUILD_PASS_MAC_ACCEPTANCE_REQUIRED',version:'3.8.54',sourceCommit:process.env.GITHUB_SHA,upstreamBase:'1c880c5c95b3f0240d5e4c6c8f0947ec46b5d25e',...JSON.parse(fs.readFileSync(path.join(out,'validation-origin.json'))),archiveSHA256:createHash('sha256').update(fs.readFileSync(archive)).digest('hex'),archiveBytes:fs.statSync(archive).size,fullBuild:true,backendOnly:false,buildFamilyLimitMiB:8192,macInstalledAcceptance:false,liveChanged:false};
+          const receipt={status:'CLOUD_FULL_BUILD_PASS_MAC_ACCEPTANCE_REQUIRED',version:'3.8.54',sourceCommit:process.env.GITHUB_SHA,upstreamBase:'1c880c5c95b3f0240d5e4c6c8f0947ec46b5d25e',...JSON.parse(fs.readFileSync(path.join(out,'validation-origin.json'))),...JSON.parse(fs.readFileSync(path.join(out,'contract-origin.json'))),archiveSHA256:createHash('sha256').update(fs.readFileSync(archive)).digest('hex'),archiveBytes:fs.statSync(archive).size,fullBuild:true,backendOnly:false,buildFamilyLimitMiB:8192,macInstalledAcceptance:false,liveChanged:false};
           fs.writeFileSync(path.join(out,'cloud-build.json'),JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
           console.log(JSON.stringify(receipt));
           JS
@@ -146,6 +178,7 @@ jobs:
           path: |
             ${{ runner.temp }}/production-build.log
             ${{ runner.temp }}/validation-origin.json
+            ${{ runner.temp }}/contract-origin.json
       - name: Save the sealed package for Mac acceptance
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
@@ -157,4 +190,5 @@ jobs:
             ${{ runner.temp }}/release-package/source-package-lock.json
             ${{ runner.temp }}/release-package/cloud-build.json
             ${{ runner.temp }}/release-package/validation-origin.json
+            ${{ runner.temp }}/release-package/contract-origin.json
             ${{ runner.temp }}/release-package/publication-lock/

@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
-  "trackedNexaFiles": 564,
-  "totalNexaBytes": 2630787,
+  "trackedNexaFiles": 565,
+  "totalNexaBytes": 2635080,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -772,6 +772,13 @@
       "gitBlobSha": "bd0416caa2a45a13bcc3040238d0da8ba1270082",
       "bytes": 23041,
       "sha256": "dd9576b763e5953602cadef0162f23be9297527c7cb3e04e9b1dd584aa0458dd"
+    },
+    {
+      "path": "nexa/docs/UPGRADE-3.8.54-2026-11-18.md",
+      "mode": "100644",
+      "gitBlobSha": "0e8416c365207f917af03e361900ef09f5997b33",
+      "bytes": 4293,
+      "sha256": "285ee9b0a6db3ce6e11e65e2d1e285ec9ecc1e421452507b42017d19dbf0b055"
     },
     {
       "path": "nexa/docs/USAGE-AUDIT-2026-10-14.md",

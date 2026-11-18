@@ -1,0 +1,129 @@
+{
+  "atUtc": "2026-11-18T04:55:38.126271+00:00",
+  "status": "INSPECTED_NOT_PORTED_NOT_BUILT",
+  "validatedModelSourceCommit": "25dcf7e7f9c54682013c61dac9bb11be72d19da5",
+  "oldBase": {
+    "version": "3.8.53",
+    "sha": "191dce8d534ceb56c28a08e71381284a9a87838f"
+  },
+  "target": {
+    "version": "3.8.54",
+    "sha": "1c880c5c95b3f0240d5e4c6c8f0947ec46b5d25e",
+    "release": "https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.54",
+    "publishedUtc": "2026-11-17T14:04:45Z"
+  },
+  "npmLatestObserved": "3.8.53",
+  "inspectionRun": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/44240108762",
+  "inspectionHelperTestsPassed": 3,
+  "inspectionCounts": {
+    "PORTED_FOR_REVIEW": 194,
+    "MANUAL_REVIEW_REQUIRED": 37
+  },
+  "manualReviewTargets": [
+    "bin/omniroute.mjs",
+    "docs/reference/ENVIRONMENT.md",
+    ".env.example",
+    "open-sse/handlers/chatCore/claudePassthroughBody.ts",
+    "open-sse/handlers/chatCore/failureUsage.ts",
+    "open-sse/handlers/chatCore/nonStreamingProviderLeg.ts",
+    "open-sse/handlers/chatCore/skipCredentialRefresh.ts",
+    "open-sse/handlers/usageExtractor.ts",
+    "open-sse/services/claudeCodeCCH.ts",
+    "open-sse/services/claudeCodeConstraints.ts",
+    "open-sse/services/sessionManager.ts",
+    "open-sse/translator/request/claude-to-openai.ts",
+    "open-sse/translator/response/claude-to-openai.ts",
+    "open-sse/utils/proxyFetch.ts",
+    "open-sse/utils/stream.ts",
+    "open-sse/utils/usageTracking.ts",
+    "package-lock.json",
+    "package.json",
+    "src/app/(dashboard)/dashboard/usage/components/ProviderLimits/parts/QuotaCardExpanded.tsx",
+    "src/app/api/usage/analytics/route.ts",
+    "src/domain/quotaCache.ts",
+    "src/lib/db/migrationRunner.ts",
+    "src/lib/db/providers.ts",
+    "src/lib/db/usageAnalytics.ts",
+    "src/lib/db/usageAnalytics/sources.ts",
+    "src/lib/usage/cacheHealth.ts",
+    "src/lib/usage/callContentProvenance.ts",
+    "src/lib/usage/callLogs.ts",
+    "src/lib/usage/costCalculator.ts",
+    "src/lib/usage/providerLimits.ts",
+    "src/lib/usage/providerWindowCosts.ts",
+    "src/lib/usage/usageHistory/helpers.ts",
+    "src/lib/usage/usageStats.ts",
+    "src/lib/usage/usageWriteRetry.ts",
+    "src/shared/constants/pricing/oauth-subscriptions.ts",
+    "src/sse/services/auth.ts",
+    "tests/unit/provider-translate-path-golden.test.ts"
+  ],
+  "preservedRetiredPatchTargets": [
+    {
+      "target": "bin/cli/utils/pid.mjs",
+      "status": "RETIRED_TARGET_REVIEW_REQUIRED"
+    },
+    {
+      "target": "open-sse/handlers/responseTranslator.ts",
+      "status": "RETIRED_TARGET_REVIEW_REQUIRED"
+    },
+    {
+      "target": "src/lib/usage/usageHistory.ts",
+      "status": "RETIRED_TARGET_REVIEW_REQUIRED"
+    },
+    {
+      "target": "tests/unit/cli-serve-port-in-use-preflight.test.mjs",
+      "status": "IDENTICAL_RETIRED_TARGET"
+    },
+    {
+      "target": "tests/unit/proxyfetch-direct-response-start-timeout-10214.test.ts",
+      "status": "RETIRED_TARGET_REVIEW_REQUIRED"
+    },
+    {
+      "target": "tests/unit/usage-history-provider-alias-13459.test.ts",
+      "status": "IDENTICAL_RETIRED_TARGET"
+    },
+    {
+      "target": "config/quality/eslint-suppressions.json",
+      "status": "RETIRED_TARGET_REVIEW_REQUIRED"
+    },
+    {
+      "target": "src/shared/constants/codexClient.ts",
+      "status": "IDENTICAL_RETIRED_TARGET"
+    },
+    {
+      "target": "tests/unit/executor-codex.test.ts",
+      "status": "IDENTICAL_RETIRED_TARGET"
+    }
+  ],
+  "newFileCollisions": [],
+  "inspectionChangesApplicationSource": false,
+  "acceptedBaseChanged": false,
+  "typeBaselineChanged": false,
+  "sourceValidationComplete": false,
+  "buildAdmission": {
+    "admitted": false,
+    "reason": "Physical memory headroom below 18.0 GiB",
+    "headroomGiB": 9.29193115234375,
+    "requiredHeadroomGiB": 18,
+    "pressure": 1,
+    "swapGiB": 0.0,
+    "bootFreeGiB": 119.78794479370117
+  },
+  "productionBuildStarted": false,
+  "liveVersion": "3.8.53",
+  "liveChanged": false,
+  "protectedConfigurationHashesUnchanged": true,
+  "otherAppsOrSessionsStopped": false,
+  "requiredBeforeBuild": [
+    "Review and port 37 overlapping active patches and 5 changed retired targets; retain every required behavior",
+    "Regenerate source lock and run new release functional, compiler, lint and documentation gates",
+    "Meet the unchanged full-build resource gate and quiet/controller check"
+  ],
+  "requiredBeforeLive": [
+    "Full build and sealed artifact",
+    "Isolated installed-package, migration/config preservation and security acceptance",
+    "Preserved runtime and consistent database rollback snapshots; wait for existing inference to drain",
+    "Verified HTTPS, core, Agent Bridge and new-model smoke with preserved routing"
+  ]
+}

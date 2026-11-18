@@ -1,5 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import vm from "node:vm";
+import { fileURLToPath } from "node:url";
+import { build } from "esbuild";
 import { codexProvider } from "../../open-sse/config/providers/registry/codex/index.ts";
 import { geminiProvider } from "../../open-sse/config/providers/registry/gemini/index.ts";
 import { isDiscoverableAgyModelId } from "../../open-sse/config/agyModels.ts";
@@ -21,6 +24,47 @@ import {
   computeCostFromPricing,
   getCodexFastCostMultiplier,
 } from "../../src/lib/usage/costCalculator.ts";
+
+test("the shared video catalog bundles for browsers without Node builtin modules", async () => {
+  const result = await build({
+    entryPoints: [fileURLToPath(new URL("../../open-sse/config/videoRegistry.ts", import.meta.url))],
+    bundle: true,
+    platform: "browser",
+    format: "iife",
+    globalName: "SharedVideoCatalog",
+    write: false,
+    metafile: true,
+    define: { "process.env": "{}" },
+  });
+  assert.ok(result.outputFiles);
+  assert.ok(result.metafile);
+  assert.equal(result.outputFiles.length, 1);
+  assert.ok(Object.keys(result.metafile.inputs).some((name) => name.endsWith("installedAntigravityVersion.ts")));
+  for (const output of Object.values(result.metafile.outputs)) assert.equal(output.imports.length, 0);
+  const browser = { TextEncoder, TextDecoder, URL, URLSearchParams, Headers, AbortController,
+    fetch: () => { throw new Error("No browser fixture network"); } };
+  vm.runInNewContext(result.outputFiles[0].text, browser);
+  assert.ok("SharedVideoCatalog" in browser);
+});
+
+test("the installed-version reader and parser execute without browser Node globals", async () => {
+  const result = await build({
+    entryPoints: [fileURLToPath(new URL("../../open-sse/services/installedAntigravityVersion.ts", import.meta.url))],
+    bundle: true,
+    platform: "browser",
+    format: "iife",
+    globalName: "InstalledVersion",
+    write: false,
+  });
+  assert.ok(result.outputFiles);
+  const plist = "<key>CFBundleShortVersionString</key><string>2.28.2</string>";
+  for (const runtime of [{}, { process: { platform: "darwin", env: {} } }]) {
+    const context = vm.createContext({ ...runtime, TextEncoder });
+    vm.runInContext(result.outputFiles[0].text, context);
+    assert.equal(vm.runInContext("InstalledVersion.readInstalledAntigravityIdeVersion()", context), null);
+    assert.equal(vm.runInContext(`InstalledVersion.versionFromAntigravityPlist(${JSON.stringify(plist)})`, context), "2.28.2");
+  }
+});
 
 test("both GPT 6.2 models use Responses with native Codex limits and full effort range", () => {
   for (const id of ["gpt-6.2-sol", "gpt-6.2-astra"]) {

@@ -7,7 +7,7 @@
   "upstreamBase": "1c880c5c95b3f0240d5e4c6c8f0947ec46b5d25e",
   "upstreamVersion": "3.8.54",
   "trackedNexaFiles": 580,
-  "totalNexaBytes": 2718030,
+  "totalNexaBytes": 2721599,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -776,9 +776,9 @@
     {
       "path": "nexa/docs/UPGRADE-3.8.54-2026-11-18.md",
       "mode": "100644",
-      "bytes": 12948,
-      "sha256": "2fdd7630a6fe3089001d29c486e4a5a744d993c703be81b6a1669fd60c204a54",
-      "gitBlobSha": "1e2ade484260032436671251a851ca90895e0189"
+      "bytes": 13949,
+      "sha256": "71ee3d6ce547267960f25f09a6fcac267fbbb52c7b20f736e035dd0059831c0d",
+      "gitBlobSha": "891ed4ff6565a76977564d9d0c2934b4e3958795"
     },
     {
       "path": "nexa/docs/USAGE-AUDIT-2026-10-14.md",
@@ -888,9 +888,9 @@
     {
       "path": "nexa/new/open-sse/services/installedAntigravityVersion.ts",
       "mode": "100644",
-      "bytes": 1336,
-      "sha256": "e943d95f55b0bdfe28ac9a029cf36bc2767f32f17c17cb7dc56596b2f96c8f48",
-      "gitBlobSha": "9666b467de2a59e078b2c26c64388edf5a303331"
+      "bytes": 1859,
+      "sha256": "ef97c37ab0e2489150ec4638296064ed5219cb0cf7c59149f9e0903f59fec011",
+      "gitBlobSha": "8a83b2c4b11a9fa6cfd63ee345e3f9ad1b297475"
     },
     {
       "path": "nexa/new/open-sse/services/nativeClaudeCacheIdentity.ts",
@@ -1574,9 +1574,9 @@
     {
       "path": "nexa/new/tests/unit/frontier-model-release.test.ts",
       "mode": "100644",
-      "bytes": 6179,
-      "sha256": "bfe7b16f79ba66060c04fb0e7506dc4e6daf2a031ee3bb296f19925d7c0a5d28",
-      "gitBlobSha": "06420260709247f7e0b1415db147eb6cb503fc78"
+      "bytes": 8224,
+      "sha256": "2c25af72cdbd89c9a2f02e6b2886a31ef21b5d934d3aec10432c749d60f9f793",
+      "gitBlobSha": "9420ff718bc7f041e7e62f6e4480920dcfb21169"
     },
     {
       "path": "nexa/new/tests/unit/gpt-6-1-sol-pricing-analytics.test.ts",

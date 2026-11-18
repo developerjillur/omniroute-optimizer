@@ -1,0 +1,76 @@
+name: v3.8.54 upstream contract regressions
+on:
+  workflow_dispatch:
+  push:
+    branches: [fix/v3.8.54-models]
+    paths: [.github/workflows/v3.8.54-contracts.yml, nexa/**]
+permissions:
+  contents: read
+jobs:
+  contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      NODE_ENV: test
+      NODE_OPTIONS: --max-old-space-size=2048
+      MITM_AUTO_RECOVER: "false"
+      DISABLE_SQLITE_AUTO_BACKUP: "true"
+      OMNIROUTE_SKIP_SYSTEM_TRUST: "1"
+      OMNIROUTE_SKIP_DNS_WRITE: "1"
+      APP_LOG_TO_FILE: "false"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24.15.0"
+      - name: Prepare the pinned applied fixture
+        run: |
+          set -euo pipefail
+          node nexa/tests/verify-source-inventory.mjs
+          fixture="$RUNNER_TEMP/contracts-source"
+          git init "$fixture"
+          git -C "$fixture" remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+          git -C "$fixture" fetch --depth=1 upstream 1c880c5c95b3f0240d5e4c6c8f0947ec46b5d25e
+          git -C "$fixture" checkout --detach FETCH_HEAD
+          git -C "$fixture" branch upstream-main HEAD
+          cp -R nexa "$fixture/nexa"
+          cd "$fixture"
+          node nexa/apply.mjs --check
+          node nexa/apply.mjs
+          npm ci --ignore-scripts --no-audit --no-fund
+          node bin/cli/utils/dependencySecurity.mjs --apply
+          npm rebuild better-sqlite3 --foreground-scripts
+          npx --no-install fumadocs-mdx
+          mkdir "$RUNNER_TEMP/contracts-data" "$RUNNER_TEMP/contracts-tmp"
+          echo "DATA_DIR=$RUNNER_TEMP/contracts-data" >> "$GITHUB_ENV"
+          echo "TMPDIR=$RUNNER_TEMP/contracts-tmp" >> "$GITHUB_ENV"
+      - name: Preserve existing native accounting, cache and DNS contracts
+        id: contracts
+        working-directory: ${{ runner.temp }}/contracts-source
+        run: |
+          set -euo pipefail
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/claude-code-parity.test.ts tests/unit/claude-passthrough-cache-wiring.test.ts tests/unit/claude-passthrough-cache-rescue.test.ts tests/unit/native-claude-usage-tracker.test.ts tests/unit/safe-outbound-fetch.test.ts tests/unit/safe-outbound-fetch-probe-timeout.test.ts tests/unit/cache-write-tiers.test.ts tests/unit/cache-write-persistence.test.ts tests/unit/cache-write-openai-shape.test.ts tests/unit/cache-write-snapshots.test.ts tests/unit/cache-write-diagnostics.test.ts tests/unit/usage-cache-write-roundtrip.test.ts tests/unit/db/cache-write-tiers-migration.test.ts tests/unit/db/cache-write-tiers-migration-version.test.ts tests/unit/db/native-claude-usage-persistence.test.ts | tee "$RUNNER_TEMP/v354-contracts.tap"
+      - name: Save contract acceptance
+        if: always()
+        env:
+          CONTRACT_OUTCOME: ${{ steps.contracts.outcome }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          p=Path(os.environ['RUNNER_TEMP'])/'v354-contracts.tap'
+          text=p.read_text() if p.exists() else ''
+          counts={key:int(re.search(r'^# '+key+r' (\d+)$',text,re.M)[1]) if re.search(r'^# '+key+r' (\d+)$',text,re.M) else None for key in ['tests','pass','fail','cancelled','skipped']}
+          accepted=os.environ['CONTRACT_OUTCOME']=='success' and counts['tests'] and counts['pass']==counts['tests'] and all(counts[k]==0 for k in ['fail','cancelled','skipped'])
+          receipt={'status':'PASS' if accepted else 'NOT_ACCEPTED','sourceCommit':os.environ['GITHUB_SHA'],'counts':counts,'liveChanged':False}
+          (Path(os.environ['RUNNER_TEMP'])/'v354-contracts.json').write_text(json.dumps(receipt,indent=2)+'\n')
+          print(json.dumps(receipt))
+          assert accepted
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: v3.8.54-contracts
+          path: ${{ runner.temp }}/v354-contracts.*

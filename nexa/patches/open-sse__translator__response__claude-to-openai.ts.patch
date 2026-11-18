@@ -1,11 +1,10 @@
 diff --git a/open-sse/translator/response/claude-to-openai.ts b/open-sse/translator/response/claude-to-openai.ts
-index ed0faa8bd4c019ca471faa109c883b8fbb457adc..61e33911c45b781a51c2099ac01de754406bb39e 100644
+index ed0faa8bd4c019ca471faa109c883b8fbb457adc..f75179f2fe51adf419165b1a139e199f60090361 100644
 --- a/open-sse/translator/response/claude-to-openai.ts
 +++ b/open-sse/translator/response/claude-to-openai.ts
 @@ -1,6 +1,7 @@
  import { register } from "../registry.ts";
--import { cacheCreationFields, mergeCacheCreationFields } from "../../utils/cacheWriteUsage.ts";
-+import { cacheCreationFields } from "../../utils/cacheWriteUsage.ts";
+ import { cacheCreationFields, mergeCacheCreationFields } from "../../utils/cacheWriteUsage.ts";
  import { FORMATS } from "../formats.ts";
 +import { mergeAnthropicUsage, normalizeAnthropicUsage } from "../../utils/anthropicUsage.ts";
  import { initThinkState, applyThinkTag, flushThinkBuffer } from "../../utils/thinkTagParser.ts";
@@ -83,7 +82,7 @@ index ed0faa8bd4c019ca471faa109c883b8fbb457adc..61e33911c45b781a51c2099ac01de754
          }
          if (textDelta.content) {
            results.push(createChunk(state, { content: textDelta.content }));
-@@ -252,80 +226,15 @@
+@@ -252,80 +226,21 @@
      }
  
      case "message_delta": {
@@ -140,7 +139,13 @@ index ed0faa8bd4c019ca471faa109c883b8fbb457adc..61e33911c45b781a51c2099ac01de754
 -          completion_tokens: outputTokens,
 -          input_tokens: billableInputTokens,
 -          output_tokens: outputTokens,
--        };
++        // Stream accounting may already hold earlier cumulative cache evidence.
++        // Seed only its cache fields; inclusive prompt totals must not be counted twice.
++        const cacheFields = mergeCacheCreationFields(state.usage, chunk.usage);
++        state.nativeAnthropicUsage = {
++          ...mergeAnthropicUsage(state.nativeAnthropicUsage, chunk.usage),
++          ...cacheFields,
+         };
 -
 -        // Anthropic includes thinking in output_tokens. Surface the separately
 -        // reported portion without adding it to completion_tokens a second time.
@@ -161,7 +166,6 @@ index ed0faa8bd4c019ca471faa109c883b8fbb457adc..61e33911c45b781a51c2099ac01de754
 -          state.usage.cache_creation_input_tokens === undefined
 -        ) {
 -          state.usage.cache_creation_input_tokens = effectiveCacheCreationTokens;
-+        state.nativeAnthropicUsage = mergeAnthropicUsage(state.nativeAnthropicUsage, chunk.usage);
 +        state.usage = normalizeAnthropicUsage(state.nativeAnthropicUsage);
 +        const reasoning = state.usage.reasoning_tokens;
 +        if (typeof reasoning === "number") {
@@ -172,7 +176,7 @@ index ed0faa8bd4c019ca471faa109c883b8fbb457adc..61e33911c45b781a51c2099ac01de754
          }
        }
  
-@@ -376,8 +285,8 @@
+@@ -376,8 +291,8 @@
            const cachedTokens = state.usage.cache_read_input_tokens || 0;
            const cacheCreationTokens = state.usage.cache_creation_input_tokens || 0;
  
@@ -183,7 +187,7 @@ index ed0faa8bd4c019ca471faa109c883b8fbb457adc..61e33911c45b781a51c2099ac01de754
            // completion_tokens = output_tokens
            // total_tokens = prompt_tokens + completion_tokens
            const promptTokens = inputTokens;
-@@ -386,6 +295,12 @@
+@@ -386,6 +301,12 @@
  
            finalChunk.usage = {
              ...cacheCreationFields(state.usage),
@@ -196,7 +200,7 @@ index ed0faa8bd4c019ca471faa109c883b8fbb457adc..61e33911c45b781a51c2099ac01de754
              prompt_tokens: promptTokens,
              completion_tokens: completionTokens,
              total_tokens: totalTokens,
-@@ -407,7 +322,7 @@
+@@ -407,7 +328,7 @@
              }
              if (cacheCreationTokens > 0) {
                finalChunk.usage.prompt_tokens_details.cache_creation_tokens = cacheCreationTokens;
@@ -205,7 +209,7 @@ index ed0faa8bd4c019ca471faa109c883b8fbb457adc..61e33911c45b781a51c2099ac01de754
              }
            }
          }
-@@ -430,6 +345,12 @@
+@@ -430,6 +351,12 @@
              ? {
                  usage: {
                    ...cacheCreationFields(state.usage),
@@ -218,7 +222,7 @@ index ed0faa8bd4c019ca471faa109c883b8fbb457adc..61e33911c45b781a51c2099ac01de754
                    prompt_tokens: state.usage.input_tokens || 0,
                    completion_tokens: state.usage.output_tokens || 0,
                    total_tokens: (state.usage.input_tokens || 0) + (state.usage.output_tokens || 0),
-@@ -449,7 +370,7 @@
+@@ -449,7 +376,7 @@
                            ...(cacheCreationTokens > 0
                              ? {
                                  cache_creation_tokens: cacheCreationTokens,
@@ -227,7 +231,7 @@ index ed0faa8bd4c019ca471faa109c883b8fbb457adc..61e33911c45b781a51c2099ac01de754
                                }
                              : {}),
                          },
-@@ -488,12 +409,13 @@
+@@ -488,12 +415,13 @@
        return "stop";
      case "max_tokens":
        return "length";

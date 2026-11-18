@@ -43,15 +43,15 @@ jobs:
           node bin/cli/utils/dependencySecurity.mjs --apply
           npm rebuild better-sqlite3 --foreground-scripts
           npx --no-install fumadocs-mdx
-          mkdir "$RUNNER_TEMP/contracts-data" "$RUNNER_TEMP/contracts-tmp"
-          echo "DATA_DIR=$RUNNER_TEMP/contracts-data" >> "$GITHUB_ENV"
+          mkdir "$RUNNER_TEMP/model-release-contracts-data" "$RUNNER_TEMP/contracts-tmp"
+          echo "DATA_DIR=$RUNNER_TEMP/model-release-contracts-data" >> "$GITHUB_ENV"
           echo "TMPDIR=$RUNNER_TEMP/contracts-tmp" >> "$GITHUB_ENV"
       - name: Preserve existing native accounting, cache and DNS contracts
         id: contracts
         working-directory: ${{ runner.temp }}/contracts-source
         run: |
           set -euo pipefail
-          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/claude-code-parity.test.ts tests/unit/claude-passthrough-cache-wiring.test.ts tests/unit/claude-passthrough-cache-rescue.test.ts tests/unit/native-claude-usage-tracker.test.ts tests/unit/safe-outbound-fetch.test.ts tests/unit/safe-outbound-fetch-probe-timeout.test.ts tests/unit/cache-write-tiers.test.ts tests/unit/cache-write-persistence.test.ts tests/unit/cache-write-openai-shape.test.ts tests/unit/cache-write-snapshots.test.ts tests/unit/cache-write-diagnostics.test.ts tests/unit/usage-cache-write-roundtrip.test.ts tests/unit/db/cache-write-tiers-migration.test.ts tests/unit/db/cache-write-tiers-migration-version.test.ts tests/unit/db/native-claude-usage-persistence.test.ts | tee "$RUNNER_TEMP/v354-contracts.tap"
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/claude-code-parity.test.ts tests/unit/claude-passthrough-cache-wiring.test.ts tests/unit/claude-passthrough-cache-rescue.test.ts tests/unit/native-claude-usage-tracker.test.ts tests/unit/safe-outbound-fetch.test.ts tests/unit/safe-outbound-fetch-probe-timeout.test.ts tests/unit/cache-write-tiers.test.ts tests/unit/cache-write-persistence.test.ts tests/unit/cache-write-openai-shape.test.ts tests/unit/cache-write-snapshots.test.ts tests/unit/cache-write-diagnostics.test.ts tests/unit/usage-cache-write-roundtrip.test.ts tests/unit/db/cache-write-tiers-migration.test.ts tests/unit/db/cache-write-tiers-migration-version.test.ts tests/unit/db/native-claude-usage-persistence.test.ts tests/unit/connection-model-rules.test.ts tests/unit/discovery-free-only-policy.test.ts tests/unit/live-model-catalog-reconciliation-8926.test.ts tests/unit/api-models-shared-custom-models-read.test.ts tests/unit/issue-14989-synced-image-model-unreachable.test.ts tests/unit/zai-partial-discovery-registry-union.test.ts tests/unit/search-provider-v1-models-exclusion.test.ts tests/unit/dashboard-live-model-release.test.ts tests/unit/nexa-v354-metering.test.ts | tee "$RUNNER_TEMP/v354-contracts.tap"
       - name: Save contract acceptance
         if: always()
         env:

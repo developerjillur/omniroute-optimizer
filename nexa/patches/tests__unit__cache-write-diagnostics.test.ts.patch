@@ -1,0 +1,27 @@
+diff --git a/tests/unit/cache-write-diagnostics.test.ts b/tests/unit/cache-write-diagnostics.test.ts
+index 173b3eda2073e4bddc4e1b7be1280b961c86d43b..77145adee308fffaa4566a1d3f0117c4fcc85b08 100644
+--- a/tests/unit/cache-write-diagnostics.test.ts
++++ b/tests/unit/cache-write-diagnostics.test.ts
+@@ -122,7 +122,7 @@
+   );
+ });
+ 
+-test("diagnostic pricing distinguishes tiers while legacy quota cost is unchanged", () => {
++test("known TTL prices API-equivalent writes while the aggregate-only fallback stays unchanged", () => {
+   const pricing = { input: 1, output: 2, cache_creation: 1.25 };
+   const options = { provider: "anthropic", model: "claude-synthetic" };
+   const usage = {
+@@ -135,11 +135,8 @@
+   assert.equal(diagnostic.pricedTokens, 100);
+   assert.ok(Math.abs(diagnostic.knownTierCostUsd! - 0.0001775) < 1e-12);
+   const { cache_creation: _tiers, ...legacy } = usage;
+-  assert.equal(
+-    computeCostFromPricing(pricing, usage, options),
+-    computeCostFromPricing(pricing, legacy, options)
+-  );
+-  assert.ok(Math.abs(computeCostFromPricing(pricing, usage, options) - 0.000139) < 1e-12);
++  assert.ok(Math.abs(computeCostFromPricing(pricing, usage, options) - 0.0001915) < 1e-12);
++  assert.ok(Math.abs(computeCostFromPricing(pricing, legacy, options) - 0.000139) < 1e-12);
+   assert.equal(computeCostFromPricing(pricing, { ...usage, cost_usd: 0.42 }, options), 0.42);
+   assert.equal(
+     computeCostFromPricing(pricing, { ...usage, cost_in_usd_ticks: 100000000 }, options),

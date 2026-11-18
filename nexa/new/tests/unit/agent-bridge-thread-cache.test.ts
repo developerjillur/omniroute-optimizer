@@ -50,7 +50,7 @@ test("last user heuristic cannot refill the reserved thread marker slot", () => 
   const body = fixture();
   const messages = body.messages as Array<{ content: Array<Record<string, unknown>> }>;
   delete messages[0].content[0].cache_control;
-  ensureCacheControlOnLastUserMessage(body);
+  ensureCacheControlOnLastUserMessage(body, { countTools: true });
   assert.equal(count(body), 3);
   assert.equal(messages[0].content[0].cache_control, undefined);
 });
@@ -59,7 +59,7 @@ test("last user heuristic counts tool markers in the ordinary four-slot budget",
   (body.tools as Array<Record<string, unknown>>).push({ name: "other", cache_control: marker() });
   delete (body.messages as Array<{ content: Array<Record<string, unknown>> }>)[0].content[0]
     .cache_control;
-  ensureCacheControlOnLastUserMessage(body);
+  ensureCacheControlOnLastUserMessage(body, { countTools: true });
   assert.equal(count(body), 4);
 });
 test("final wire constraints enforce the native thread marker budget", () => {

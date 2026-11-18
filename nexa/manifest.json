@@ -7,11 +7,11 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 391,
-    "patches": 234,
+    "total": 393,
+    "patches": 236,
     "new": 151,
     "tooling": 6,
-    "upstreamCandidates": 27,
+    "upstreamCandidates": 29,
     "nexaSpecific": 108,
     "needsReview": 256,
     "pendingUpstreamPR": 10,
@@ -1077,6 +1077,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/src__lib__db__models__freeOnlyAdmission.ts.patch",
+      "layer": "patch",
+      "class": "upstream-candidate",
+      "target": "src/lib/db/models/freeOnlyAdmission.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/src__lib__db__models__synced.ts.patch",
       "layer": "patch",
       "class": "needs-review",
@@ -1583,6 +1591,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "tests/unit/auto-update.test.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/tests__unit__cache-write-diagnostics.test.ts.patch",
+      "layer": "patch",
+      "class": "upstream-candidate",
+      "target": "tests/unit/cache-write-diagnostics.test.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },

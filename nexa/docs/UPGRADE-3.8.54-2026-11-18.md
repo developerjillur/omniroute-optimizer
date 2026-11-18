@@ -19,7 +19,7 @@ GitHub-এর নতুন stable release `v3.8.54` (১৭ নভেম্ব�
 
 এই inspection-এর পরে আলাদা `fix/v3.8.54-models` worktree-তে 36টি source overlap
 মেলানো হয়েছে এবং `package-lock.json` পুনর্গঠন করা হয়েছে। Security integration-সহ
-বর্তমান candidate-এ 234টি active patch ও 151টি নতুন file আছে। আগের accepted v3.8.53 source পুরোনো worktree ও
+বর্তমান candidate-এ 236টি active patch ও 151টি নতুন file আছে। আগের accepted v3.8.53 source পুরোনো worktree ও
 commit-এ অক্ষত। Candidate manifest এখন published v3.8.54 commit-এ pin করা,
 তবে এটি accepted release নয়। আগের TypeScript ceilings ও live settings অপরিবর্তিত।
 
@@ -101,3 +101,9 @@ IPv4/IPv6 HTTPS health তিনটিই `200` ছিল। Protected settings,
 LaunchAgent ও hosts hashes পরে মিলেছে। কোনো app/session বন্ধ হয়নি এবং নতুন
 provider generation চালানো হয়নি। নতুন release-এর native parity বা permanent
 availability দাবি করা হচ্ছে না।
+
+## অতিরিক্ত contract review
+
+পরের পূর্ণ source run-এ 1,447/1,447 compatibility test পাস, completed pristine/applied TypeScript 8,291/8,240 এবং added diagnostic identity শূন্য। তবে release-specific ceiling-এর সিদ্ধান্ত ও একটি Node 24 account-availability regression বাকি থাকায় acceptance হয়নি। অতিরিক্ত 379টি upstream contract test-এ 37টি failure পাওয়া যায়; সেই failed receipt অক্ষত আছে।
+
+Responses stream-কে Claude event ভেবে cumulative cache usage reset করা, partial cache-write receipt হারানো, tools না পাঠানোয় cache marker গণনার upstream default, invalid TTL diagnostic-এর pricing এবং synced model-এর account-specific exclusions provider union-এর আগে প্রয়োগ করার সংশোধন প্রস্তুত। Tests কোনো account-এর denied model অন্য unsynced account দিয়ে দৃশ্যমান না হওয়ার পাশাপাশি পৃথক eligible account সত্যিই model advertise করলে অনুমতি পাওয়া যাচাই করে। নতুন source-এর rerun বাকি; build ও live পরিবর্তন হয়নি।

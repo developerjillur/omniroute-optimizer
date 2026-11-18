@@ -13,6 +13,11 @@ test("dashboard lists newly synced releases and preserves exclusions, hidden row
     process.env.DATA_DIR?.includes("model-release"),
     "must use the isolated model-release fixture"
   );
+  // An unrelated account without a synced inventory cannot admit another
+  // account's explicitly excluded discovered model.
+  const unrelated = await createProviderConnection({
+    provider: "codex", name: "Unsynced release fixture", authType: "oauth", isActive: true,
+  });
   const connection = await createProviderConnection({
     provider: "codex",
     name: "Model release fixture",
@@ -59,6 +64,18 @@ test("dashboard lists newly synced releases and preserves exclusions, hidden row
     models.find((row) => row.fullModel === "cx/gpt-6.2-future-fixture")?.inputTokenLimit,
     872000
   );
+  const allowed = await createProviderConnection({
+    provider: "codex", name: "Allowed release fixture", authType: "oauth", isActive: true,
+  });
+  await replaceSyncedAvailableModelsForConnection("codex", String(allowed.id), rows.filter(
+    (row) => row.id === "gpt-6.2-blocked-fixture"
+  ));
+  const allowedResponse = await handleGetModels(new Request("http://fixture.local/api/models"));
+  assert.equal(allowedResponse.status, 200);
+  assert.ok(((await allowedResponse.json()) as { models: Array<Record<string, unknown>> }).models.some(
+    (row) => row.fullModel === "cx/gpt-6.2-blocked-fixture"
+  ), "a separate account that actually advertises the model may admit it");
+  await updateProviderConnection(String(allowed.id), { isActive: false });
   await updateProviderConnection(String(connection.id), { isActive: false });
   const disabled = await handleGetModels(new Request("http://fixture.local/api/models"));
   assert.equal(disabled.status, 200);
@@ -68,4 +85,5 @@ test("dashboard lists newly synced releases and preserves exclusions, hidden row
     ),
     false
   );
+  await updateProviderConnection(String(unrelated.id), { isActive: false });
 });

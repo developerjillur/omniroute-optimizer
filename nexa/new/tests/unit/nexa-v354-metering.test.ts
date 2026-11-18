@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { DatabaseSync } from "node:sqlite";
 import test from "node:test";
+import { getCacheCreationTtl } from "../../src/lib/usage/cacheCreationTtl.ts";
 import { cacheTtlTokenSql } from "../../src/lib/db/usageAnalytics/cacheTtl.ts";
 import { createNativeClaudeUsageTracker } from "../../open-sse/utils/nativeClaudeUsage.ts";
 
@@ -114,4 +115,14 @@ test("a later cumulative counter update supersedes earlier iteration detail", ()
   });
   assert.equal(tracker.getUsage()?.prompt_tokens, 10);
   assert.equal(tracker.getUsage()?.completion_tokens, 5);
+});
+
+test("invalid and inconsistent cache diagnostics never produce known TTL billing", () => {
+  for (const status of ["invalid", "inconsistent"]) {
+    assert.deepEqual(getCacheCreationTtl({
+      cache_creation_input_tokens: 10,
+      cache_creation: { ephemeral_5m_input_tokens: 5, ephemeral_1h_input_tokens: 5 },
+      cache_creation_tier_status: status,
+    }), { cacheCreation5m: null, cacheCreation1h: null });
+  }
 });

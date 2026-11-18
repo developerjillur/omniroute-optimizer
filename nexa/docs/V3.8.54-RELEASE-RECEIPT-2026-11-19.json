@@ -1,0 +1,145 @@
+{
+  "status": "ACCEPTED_FOR_CURRENT_NATIVE_RUNTIME_AND_LIVE_DEPLOYMENT",
+  "atUtc": "2026-11-18T18:38:05.477184+00:00",
+  "version": "3.8.54",
+  "sourceCommit": "40306d68be01ef55b40c7fbbdd4d455a910827bb",
+  "validatedNexaTree": "14dcca14aa084015ab96c462f9f9c1ef59b17723",
+  "upstreamBase": "1c880c5c95b3f0240d5e4c6c8f0947ec46b5d25e",
+  "sourceValidationRun": 44359606311,
+  "contractRun": 44359606262,
+  "fullBuildRun": 44359606660,
+  "archiveSHA256": "36fd509711042f976c967ac25d978a054a529c6021b1a6b5a442596f6402f9e2",
+  "archiveBytes": 165080266,
+  "fullBuild": true,
+  "backendOnly": false,
+  "staticPages": 674,
+  "fullBuildPeakMiB": 7282,
+  "fullBuildCapMiB": 8192,
+  "sourceTests": {
+    "port": 9,
+    "startupRetentionAndRecovery": 4,
+    "retentionAndAffinity": 63,
+    "nativeQuotaMigrationTranslation": 1510,
+    "bridge": 709,
+    "dashboardInterfaces": 41,
+    "frontierMetadataHelpers": 10,
+    "productionNodeNative": 70,
+    "contracts": 480,
+    "executions": 2896,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "typeDiagnostics": {
+    "pristine": 8291,
+    "applied": 8240,
+    "newIdentities": 0,
+    "acceptedCeiling": 8240,
+    "zeroTypeErrorClaimed": false
+  },
+  "macRuntime": {
+    "node": "24.15.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "nativeSQLiteSharpWreq": "PASS",
+    "dependencyNodesVerified": 1037,
+    "sameLifecycleEnabledMacDependencyInstallationReusedAfterExactLockAndMetadataMatch": true,
+    "freshNpmCiClaimed": false
+  },
+  "automaticBridgeColdStarts": 2,
+  "certificateVerificationEnabled": true,
+  "untrustedCARejectedInBothColdStarts": true,
+  "nativeCountTokensForwarding": "PASS",
+  "providerGenerationCalls": 0,
+  "installedSecurity": {
+    "status": "PASS",
+    "runtime": "v24.15.0",
+    "arch": "arm64",
+    "nativeRootsVerified": 2,
+    "rootRegistryFindings": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "distRegistryFindings": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "unmitigatedFindings": [],
+    "providerGenerationCalls": 0,
+    "liveChanged": false
+  },
+  "preservation": {
+    "tables": 147,
+    "originalTypedRowsCompared": 8419904,
+    "credentialsAndScopesUnchanged": true,
+    "authenticationTelemetry": {
+      "existingKeyRows": 5,
+      "credentialAndScopeValuesUnchanged": true,
+      "monotonicAuthenticatedLastUsedRows": 2,
+      "explicitlyAuthorizedKeys": 2,
+      "otherKeyColumnsChanged": 0
+    },
+    "migrationLedgerHandledByPreviouslyAcceptedV354Migration": true,
+    "currentDatabaseReplaced": false,
+    "originalDatabasePathInodeOwnerModePreserved": true,
+    "protectedFilesUnchanged": 22
+  },
+  "live": {
+    "publicHTTPS": {
+      "/": 307,
+      "/api/health": 200,
+      "/dashboard/quota": 307,
+      "/dashboard/tools/agent-bridge": 307,
+      "/dashboard/cli-code": 307
+    },
+    "httpsIPv4": 200,
+    "httpsIPv6": 200,
+    "bridgeBackend8443TLS": "PASS",
+    "nativeIngress443TLS": "PASS",
+    "automaticBridgeStartup": true,
+    "claudeCLI": {
+      "installed": true,
+      "runnable": true,
+      "routingMode": "native",
+      "hasOmniRoute": false,
+      "runtimeMode": "auto"
+    },
+    "runtimePathPreserved": true,
+    "rollbackRetained": true,
+    "rootJobsChanged": false,
+    "userAppsOrSessionsStopped": 0
+  },
+  "models": {
+    "liveCatalogContains": [
+      "gpt-6.2-sol",
+      "gpt-6.2-astra",
+      "claude-fable-5-2"
+    ],
+    "googleSourceMetadata": [
+      "Hydrogen",
+      "Argon",
+      "Carbon"
+    ],
+    "twoNativeGoogleAccountCatalogsAdvertised": [
+      "gemini-4-hydrogen-sonar"
+    ],
+    "nativeArgonCarbonAccessAdvertisedByThoseCatalogs": false,
+    "disabledPlaceholdersMadeCallable": false,
+    "providerEntitlementOrGenerationProven": false
+  },
+  "limits": {
+    "physicalMacRestartAfterDeploymentTested": false,
+    "processColdStartsTested": 2,
+    "strictPython314X509": "Existing certificate profile is rejected for missing Authority Key Identifier. Two failed receipts retained. Production Node 24 TLS verification and untrusted-CA rejection pass. Existing CA preserved.",
+    "creativeQualityParityClaimed": false,
+    "permanentProviderAvailabilityClaimed": false
+  }
+}

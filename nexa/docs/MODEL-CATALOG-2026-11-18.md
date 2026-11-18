@@ -1,5 +1,32 @@
 # নতুন model catalog ও compatibility — 2026-11-18
 
+## Live acceptance — 2026-11-19
+
+**v3.8.54 build `40306d68be01ef55b40c7fbbdd4d455a910827bb` এখন live।**
+[সম্পূর্ণ release receipt](V3.8.54-RELEASE-RECEIPT-2026-11-19.json)।
+Full source validation, 2896 source test execution, 674/674 static page ও full production build পাস।
+Mac Node 24.15.0 arm64-এ SQLite/Sharp/wreq, actual installed security audit,
+দুটি automatic Bridge cold start, certificate verification, untrusted-CA rejection এবং
+native `count_tokens` forwarding পাস। Generation call 0।
+
+147টি original table-এর 8,419,904টি original typed row যাচাই হয়েছে; পুরোনো migration
+ledger পৃথক accepted migration receipt-এ আছে। দুই নির্দিষ্ট authenticated caller-এর
+monotonic `last_used_at` ছাড়া credential/scope/config/history value retained।
+Same-schema runtime-only cutover-এ current database replace হয়নি; original
+path/inode/owner/mode ও 22টি protected file অক্ষত। Active inference 0 থাকাকালে প্রায়
+5 সেকেন্ডে cutover হয়েছে। HTTPS IPv4/IPv6, backend 8443 ও native ingress 443 TLS পাস;
+Bridge নিজে উঠেছে। User app/session বা root job পরিবর্তন করা হয়নি। CLI/VS Code-এর
+existing Off/direct intent retained।
+
+Python 3.14 strict X509 verifier পুরোনো certificate profile-এ missing Authority Key
+Identifier পেয়েছে। দুটি failed receipt retained; সেগুলো PASS গণনা হয়নি। Existing CA
+অক্ষত রেখে production Node 24 verification এবং untrusted-CA negative control পাস।
+এটি সব TLS stack-এর compatibility claim নয়। দুই Google account catalog Hydrogen
+Sonar দিয়েছে; Argon/Carbon সেগুলোতে advertise হয়নি। Metadata support ও entitlement
+পৃথক। Physical Mac reboot, provider generation/entitlement, creative-quality parity
+বা permanent availability দাবি করা হয়নি।
+
+
 ## বর্তমান অবস্থা
 
 Source ও tests validation সম্পন্ন। Final source commit

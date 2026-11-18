@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "1c880c5c95b3f0240d5e4c6c8f0947ec46b5d25e",
   "upstreamVersion": "3.8.54",
-  "trackedNexaFiles": 590,
-  "totalNexaBytes": 2765440,
+  "trackedNexaFiles": 594,
+  "totalNexaBytes": 2785409,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -109,6 +109,20 @@
       "gitBlobSha": "90cd8d5e398b4faeb8da60f1feb8aac900e81b3b"
     },
     {
+      "path": "nexa/deploy/api-key-telemetry.py",
+      "mode": "100644",
+      "bytes": 1929,
+      "sha256": "ada3e7a085e7de99e34718926b19e24065348a9e2727b0345a395252719abd08",
+      "gitBlobSha": "699f6ad4a72640047c40d06e6badc54e54f10f3f"
+    },
+    {
+      "path": "nexa/deploy/api-key-telemetry.test.py",
+      "mode": "100644",
+      "bytes": 2646,
+      "sha256": "2e40f2f2796afabfa604c756376ae4bb010b09cd3253b65014debe3f32685a21",
+      "gitBlobSha": "13ce7eb7105cd628ab1ca55f89413991fa2d7552"
+    },
+    {
       "path": "nexa/deploy/bootstrap-launchdaemon.sh",
       "mode": "100644",
       "bytes": 1152,
@@ -142,6 +156,13 @@
       "bytes": 3536,
       "sha256": "63d73c4704b83740e348b4f052d980e37b6d690d03c01ec95da2ad756ed787f8",
       "gitBlobSha": "15a47e7770ad7ae2d77cff8f3b5de5f82733856f"
+    },
+    {
+      "path": "nexa/deploy/bridge-transport-probe.mjs",
+      "mode": "100644",
+      "bytes": 3668,
+      "sha256": "00343b35b57a859249add6a8d9ce978ff76087c604591c0bc58c400eea1dab5c",
+      "gitBlobSha": "adfdfd889eb1ecc52394536657286eb3122825a6"
     },
     {
       "path": "nexa/deploy/bridge-upstream-dns.cjs",
@@ -706,9 +727,9 @@
     {
       "path": "nexa/docs/MODEL-CATALOG-2026-11-18.md",
       "mode": "100644",
-      "bytes": 10553,
-      "sha256": "88b384ec168e01ef3d8ce42edcd8edee78613bb30f71ad6d6a653a6ea952d29e",
-      "gitBlobSha": "6bca8a2114afda0e5e61f06c089055a38dfae905"
+      "bytes": 12720,
+      "sha256": "150295486ac6d0510dc58eaf7f72dbc6a8ed623e64d610d5aef38c6be5b46e52",
+      "gitBlobSha": "38f3c86de596a6481fd7f6182c49aa26181d620e"
     },
     {
       "path": "nexa/docs/MODEL-CATALOG-VALIDATION-2026-11-18.json",
@@ -797,9 +818,9 @@
     {
       "path": "nexa/docs/STARTUP-DATA-PRESERVATION-2026-11-18.md",
       "mode": "100644",
-      "bytes": 4779,
-      "sha256": "557961b1a8fbd9643f898b51ecc3ef70c79ff460d44e7744fc2be189f250f519",
-      "gitBlobSha": "7f35ed3d53de97aeda08481cf86561b2a64aee0c"
+      "bytes": 6994,
+      "sha256": "bbc1cafae6320e82b0b60a53a685e20690f3de03c0da293adeb9a44a5e837930",
+      "gitBlobSha": "3bcb25c3fbd19fe95d36211393eeec0d4020b214"
     },
     {
       "path": "nexa/docs/TYPECHECK-BASELINE-2026-10-02.md",
@@ -818,9 +839,9 @@
     {
       "path": "nexa/docs/UPGRADE-3.8.54-2026-11-18.md",
       "mode": "100644",
-      "bytes": 14317,
-      "sha256": "d470349c60fe1b3d2e46c30b32991e17b43134e8b307b1dd2fb7ded29100f0e6",
-      "gitBlobSha": "cd3021cd5bac486473826c60135bfb39546bf1bc"
+      "bytes": 16484,
+      "sha256": "92eade145972c2eecc40e833cc90f4f670162aca8604ece31ab9873f390771de",
+      "gitBlobSha": "b239ca1b4d3c6f9f18b733f4c4df534dd11d25ae"
     },
     {
       "path": "nexa/docs/USAGE-AUDIT-2026-10-14.md",
@@ -832,9 +853,16 @@
     {
       "path": "nexa/docs/V3.8.54-ACCEPTANCE-2026-11-18.md",
       "mode": "100644",
-      "bytes": 5964,
-      "sha256": "d4ef9384ff6ea90477fc0f727ee874a946bd29195d708cdc07926ce4708883ca",
-      "gitBlobSha": "464d557ea3e0b8097ceeec93d0f5bff8d8ff19ed"
+      "bytes": 6851,
+      "sha256": "7dd630e8cb1f8e88ef17c59b9c3d22b347e502e64309594607a2e36a422fbd63",
+      "gitBlobSha": "12319ba1775457a8c47970f037c0a46edf8caaf4"
+    },
+    {
+      "path": "nexa/docs/V3.8.54-RELEASE-RECEIPT-2026-11-19.json",
+      "mode": "100644",
+      "bytes": 4290,
+      "sha256": "7e879d2ba5c56f02494fb23e3e882a7cfa13634f7e6cbdf7ac242c14bca3a2f8",
+      "gitBlobSha": "8feece93ca562ed477c56d598ccb3b22fec39359"
     },
     {
       "path": "nexa/docs/VSCODE-FABLE-5.2-2026-11-12.md",

@@ -1,0 +1,24 @@
+diff --git a/tests/unit/session-affinity-edge-cases.test.ts b/tests/unit/session-affinity-edge-cases.test.ts
+index 04be3b5eb3cd37ad5edcf5cff438bd996d1ebe90..452c84c549a473b8a46d05d80f8a8c9ae740903b 100644
+--- a/tests/unit/session-affinity-edge-cases.test.ts
++++ b/tests/unit/session-affinity-edge-cases.test.ts
+@@ -185,9 +185,17 @@ test("extractSessionAffinityKey keys Claude Code requests by X-Claude-Code-Sessi
+     body,
+     new Headers({ "X-Claude-Code-Session-Id": "0b5e3c1a-0000-4000-8000-00000000000b" })
+   );
+-  assert.equal(a, "header:0b5e3c1a-0000-4000-8000-00000000000a");
+-  assert.equal(b, "header:0b5e3c1a-0000-4000-8000-00000000000b");
++  assert.equal(a, "claude:0b5e3c1a-0000-4000-8000-00000000000a");
++  assert.equal(b, "claude:0b5e3c1a-0000-4000-8000-00000000000b");
+   assert.notEqual(a, b, "distinct Claude Code sessions must not share an affinity key");
++  assert.notEqual(
++    a,
++    extractSessionAffinityKey(
++      body,
++      new Headers({ "x-session-id": "0b5e3c1a-0000-4000-8000-00000000000a" })
++    ),
++    "native Claude identities must not collide with generic explicit session identities"
++  );
+   assert.equal(
+     extractSessionAffinityKey(body),
+     `input:sha256:${sha256hex(preamble.slice(0, 4096))}`

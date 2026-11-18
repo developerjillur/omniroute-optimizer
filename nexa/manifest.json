@@ -7,12 +7,12 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 393,
-    "patches": 236,
+    "total": 394,
+    "patches": 237,
     "new": 151,
     "tooling": 6,
     "upstreamCandidates": 29,
-    "nexaSpecific": 108,
+    "nexaSpecific": 109,
     "needsReview": 256,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
@@ -1895,6 +1895,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "tests/unit/security/cloudsync-signature-fail-open-13679.test.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/tests__unit__session-affinity-edge-cases.test.ts.patch",
+      "layer": "patch",
+      "class": "nexa-specific",
+      "target": "tests/unit/session-affinity-edge-cases.test.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },

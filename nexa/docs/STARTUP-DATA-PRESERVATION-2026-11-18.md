@@ -48,3 +48,16 @@ monotonic `last_used_at` telemetry from credentials and configuration. Final liv
 migration uses no authenticated model/catalog probe, so its key rows must remain
 strictly unchanged. Preserve the latest live writes with a new quiescent snapshot;
 never promote an older smoke-test database.
+
+## Session-identity compatibility
+
+The first corrected-source run passed the new retention contract, native/protocol
+regressions, full compiler comparison and remaining release checks, but one newly
+selected upstream edge-case test expected `header:` for Claude's native header.
+Nexa deliberately uses `claude:` for both native header and body session identity;
+its existing cache-continuity and account-selection regressions require that
+namespace. The test now expects the existing native identity and additionally
+asserts that a generic explicit session ID with the same text cannot collide.
+Generic-header precedence, distinct native-session separation and input hashing
+assertions remain unchanged. No runtime routing behavior is changed for this
+compatibility-test correction.

@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 390,
-    "patches": 234,
-    "new": 150,
+    "total": 393,
+    "patches": 236,
+    "new": 151,
     "tooling": 6,
-    "upstreamCandidates": 27,
+    "upstreamCandidates": 29,
     "nexaSpecific": 108,
-    "needsReview": 255,
+    "needsReview": 256,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
   },
@@ -1077,6 +1077,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/src__lib__db__models__freeOnlyAdmission.ts.patch",
+      "layer": "patch",
+      "class": "upstream-candidate",
+      "target": "src/lib/db/models/freeOnlyAdmission.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/src__lib__db__models__synced.ts.patch",
       "layer": "patch",
       "class": "needs-review",
@@ -1583,6 +1591,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "tests/unit/auto-update.test.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/tests__unit__cache-write-diagnostics.test.ts.patch",
+      "layer": "patch",
+      "class": "upstream-candidate",
+      "target": "tests/unit/cache-write-diagnostics.test.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -2365,6 +2381,14 @@
       "layer": "new",
       "class": "needs-review",
       "target": "src/sse/services/googleAccountVerification.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/helpers/antigravityAppFixture.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/helpers/antigravityAppFixture.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },

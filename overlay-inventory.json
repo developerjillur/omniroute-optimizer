@@ -7,7 +7,7 @@
   "upstreamBase": "1c880c5c95b3f0240d5e4c6c8f0947ec46b5d25e",
   "upstreamVersion": "3.8.54",
   "trackedNexaFiles": 584,
-  "totalNexaBytes": 2739471,
+  "totalNexaBytes": 2740250,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -839,9 +839,9 @@
     {
       "path": "nexa/manifest.json",
       "mode": "100644",
-      "bytes": 101572,
-      "sha256": "d6d32b471ab2282a1225cc3df6ad8e75422411ea1db3ee43ff0da833da2e0c57",
-      "gitBlobSha": "a1bddf6dc85f63dd2a06c20d431156d49d768421"
+      "bytes": 102351,
+      "sha256": "efdcd87d97b0a89b3fa4afd67b39b795e93da673c1b38a3b0c450d5d79dcbdea",
+      "gitBlobSha": "cd3fd66a3ba00615a0a12a1b5067f3573372d31d"
     },
     {
       "path": "nexa/new/bin/cli/utils/dependencyFixes.json",

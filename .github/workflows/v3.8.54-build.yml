@@ -146,6 +146,22 @@ jobs:
           cat > "$RUNNER_TEMP/full-production.sh" <<'SH'
           set -euo pipefail
           unset OMNIROUTE_BUILD_BACKEND_ONLY OMNIROUTE_BUILD_PROFILE OMNIROUTE_SKIP_STANDALONE
+          # The standalone plugin is not a root workspace. Its locked build
+          # dependencies must be present even while NODE_ENV is production.
+          plugin="$PWD/@omniroute/opencode-plugin"
+          NODE_ENV=development npm ci --prefix "$plugin" --include=dev --workspaces=false --no-audit --no-fund
+          node --input-type=module - "$plugin" <<'JS'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import {createRequire} from 'node:module';
+          const root=process.argv[2], require=createRequire(path.join(root,'package.json'));
+          for(const name of ['typescript','tsup']) {
+            const installed=fs.realpathSync(require.resolve(name+'/package.json'));
+            assert.ok(installed.startsWith(root+'/node_modules/'),'Plugin compiler must come from its locked local installation');
+          }
+          JS
+          NODE_ENV=production npm run build --prefix "$plugin" --workspaces=false
           npm run build
           npm run build:cli-api
           npm run build:cli

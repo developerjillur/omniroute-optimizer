@@ -70,6 +70,10 @@ Source candidate প্রস্তুত; local helper tests 10/10 পাস।
   diagnostic পাওয়া গেলেও নতুন `TS2538` identity 1টি থাকায় acceptance ব্যর্থ হয়।
   Dashboard-এর provider index string করে ওই error সংশোধিত; ceiling বাড়ানো হয়নি।
   দ্বিতীয় run: https://github.com/developerjillur/omniroute-optimizer/actions/runs/44233522999 ।
+- তৃতীয় run-এ actual translator cases-সহ 297/297 runtime tests পাস। আগের
+  application `TS2538` আর ছিল না; নতুন test call-এ required stream argument না
+  দেওয়ায় `TS2554` 1টি পাওয়া যায়। Non-streaming flag explicit করে সংশোধন হয়েছে।
+  তৃতীয় run: https://github.com/developerjillur/omniroute-optimizer/actions/runs/44235284412 ।
 - Model generation, provider quota consumption, account enable/rotation, default model
   switch, root job change, app update বা live restart করা হয়নি।
 - Provider dashboard-এর Playground-এ `catalog_build_timeout`-ও দেখা গেছে; এটি নতুন

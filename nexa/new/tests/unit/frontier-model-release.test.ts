@@ -81,10 +81,14 @@ test("actual Gemini and Antigravity translators retain Hydrogen XHIGH without nu
     assert.equal(config?.thinkingLevel, "xhigh");
     assert.equal(config?.thinkingBudget, undefined);
   }
-  const claude = claudeToGeminiRequest("gemini-4-hydrogen", {
-    messages: [{ role: "user", content: "hello" }],
-    thinking: { type: "enabled", budget_tokens: 0 },
-  }) as Wire;
+  const claude = claudeToGeminiRequest(
+    "gemini-4-hydrogen",
+    {
+      messages: [{ role: "user", content: "hello" }],
+      thinking: { type: "enabled", budget_tokens: 0 },
+    },
+    false
+  ) as Wire;
   assert.equal(claude.generationConfig?.thinkingConfig?.thinkingBudget, undefined);
 });
 

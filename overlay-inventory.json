@@ -7,7 +7,7 @@
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
   "trackedNexaFiles": 563,
-  "totalNexaBytes": 2626638,
+  "totalNexaBytes": 2627129,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -671,9 +671,9 @@
     {
       "path": "nexa/docs/MODEL-CATALOG-2026-11-18.md",
       "mode": "100644",
-      "gitBlobSha": "392a6de1cc20dc2a471de1ab53ab89e1fb6de8c2",
-      "bytes": 8709,
-      "sha256": "899b7e3387cd08c3512d5edaa36f72aa9b634641e7b46ccbcfb334560551f6cf"
+      "gitBlobSha": "120ca6602b13ee773e6a07575b598b4cf2808723",
+      "bytes": 9171,
+      "sha256": "7c37f079fc20ab1227570f595449fe2535059d1768c4813e76cf739d0446c14f"
     },
     {
       "path": "nexa/docs/NATIVE-ARTIFACT-RECOVERY-AND-GPT61-PRICING-2026-10-14.md",
@@ -1539,9 +1539,9 @@
     {
       "path": "nexa/new/tests/unit/frontier-model-release.test.ts",
       "mode": "100644",
-      "gitBlobSha": "7a2a05f0c896b774410a58012ce30cf64a268bb8",
-      "bytes": 6150,
-      "sha256": "aa8efa9dff480879d61ff629162324150ab64f63a01b7eb94aa78882bb61df59"
+      "gitBlobSha": "06420260709247f7e0b1415db147eb6cb503fc78",
+      "bytes": 6179,
+      "sha256": "bfe7b16f79ba66060c04fb0e7506dc4e6daf2a031ee3bb296f19925d7c0a5d28"
     },
     {
       "path": "nexa/new/tests/unit/gpt-6-1-sol-pricing-analytics.test.ts",

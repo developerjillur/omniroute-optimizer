@@ -129,9 +129,20 @@ jobs:
         run: |
           set -euo pipefail
           ulimit -c 0
-          # This is a new source checkout: no prior dist or build is removed.
-          test ! -e .build
-          test ! -e dist
+          # Postinstall may stage native runtime packages before compilation.
+          # Preserve them and refuse only an already-produced application build.
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path.cwd().resolve()
+          for relative in ['.build','dist']:
+              candidate=Path(relative)
+              if candidate.exists():
+                  assert not candidate.is_symlink() and candidate.resolve().is_relative_to(root)
+                  print(json.dumps({'preparedDirectory':str(candidate.resolve()),'entries':sorted(p.name for p in candidate.iterdir())[:30],'filesRemoved':0}))
+          for relative in ['.build/next/BUILD_ID','dist/BUILD_SHA','dist/.build/next/BUILD_ID','dist/.build/next/server.js']:
+              assert not Path(relative).exists(), 'Preserve an earlier built application: '+relative
+          PY
           cat > "$RUNNER_TEMP/full-production.sh" <<'SH'
           set -euo pipefail
           unset OMNIROUTE_BUILD_BACKEND_ONLY OMNIROUTE_BUILD_PROFILE OMNIROUTE_SKIP_STANDALONE

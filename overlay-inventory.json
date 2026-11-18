@@ -7,7 +7,7 @@
   "upstreamBase": "1c880c5c95b3f0240d5e4c6c8f0947ec46b5d25e",
   "upstreamVersion": "3.8.54",
   "trackedNexaFiles": 580,
-  "totalNexaBytes": 2716181,
+  "totalNexaBytes": 2718030,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -776,9 +776,9 @@
     {
       "path": "nexa/docs/UPGRADE-3.8.54-2026-11-18.md",
       "mode": "100644",
-      "bytes": 12120,
-      "sha256": "49c5911a25016c3668c8d5ac75e1e85a672cf8844c35e060f1d46d74008eba59",
-      "gitBlobSha": "0e3bc035c1869ad5befe3b83f858b367df21c7c6"
+      "bytes": 12948,
+      "sha256": "2fdd7630a6fe3089001d29c486e4a5a744d993c703be81b6a1669fd60c204a54",
+      "gitBlobSha": "1e2ade484260032436671251a851ca90895e0189"
     },
     {
       "path": "nexa/docs/USAGE-AUDIT-2026-10-14.md",
@@ -853,9 +853,9 @@
     {
       "path": "nexa/new/config/quality/tsc-error-baseline.json",
       "mode": "100644",
-      "bytes": 2261,
-      "sha256": "c0b02fa023fad1c98daffff9ae395d3cd8584bc902dfa3d7afea9ed793fedd5f",
-      "gitBlobSha": "b6fa6b197632b664c5bafce647de1189b93bf6dc"
+      "bytes": 3282,
+      "sha256": "18460aaa80eb8f30651120ad41a7da0a55fa1ab4f34a573c12fafde56eb96ef6",
+      "gitBlobSha": "e596a2847998914fc39d3da21f411d6dfd1822b1"
     },
     {
       "path": "nexa/new/docker-compose.nexaconnect.yml",

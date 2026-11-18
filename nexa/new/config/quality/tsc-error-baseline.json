@@ -1,14 +1,25 @@
 {
-  "_comment": "Full-scope inherited TypeScript backlog for pinned v3.8.53, initially measured on Linux with Node 26.7.0. Pristine upstream: 7361; applied Nexa source: 7314; newly introduced diagnostic identities: 0. The owner approved a separate v3.8.53 ceiling on 2026-11-10. Final source must remain at or below 7314 with zero added diagnostic identities, a completed compiler, all functional gates and independent core typecheck. Earlier release records are preserved in full. Future measurements can only lower this version budget.",
-  "value": 7314,
+  "_comment": "Full-scope inherited TypeScript backlog for pinned v3.8.54, measured by completed Linux Node 26.7.0 compilers: pristine upstream 8291, applied Nexa source 8240, added diagnostic identities 0. The owner approved a separate maximum 8240 ceiling on 2026-11-18. This budget does not accept functional failures or an incomplete compiler. Final candidate count must stay at or below 8240, with zero added identities, all functional/security/documentation gates and independent core typecheck passing. Earlier release records are preserved in full; --update remains down-only.",
+  "value": 8240,
   "direction": "down",
-  "upstreamBaseVersion": "3.8.53",
-  "upstreamBaseCommit": "191dce8d534ceb56c28a08e71381284a9a87838f",
-  "verifiedUpstreamValue": 7361,
-  "reconciledSourceCommit": "464fb08a9968dd39a9a05b7e46825a7e58403941",
-  "measurementRun": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/42739864217",
-  "ownerAcceptedAt": "2026-11-10",
+  "upstreamBaseVersion": "3.8.54",
+  "upstreamBaseCommit": "1c880c5c95b3f0240d5e4c6c8f0947ec46b5d25e",
+  "verifiedUpstreamValue": 8291,
+  "reconciledSourceCommit": "8efd13baef18f9b5cb92a4a6a14adfbc939d917e",
+  "measurementRun": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/44261533921",
+  "ownerAcceptedAt": "2026-11-18",
   "previousReleaseBudgets": [
+    {
+      "_comment": "Full-scope inherited TypeScript backlog for pinned v3.8.53, initially measured on Linux with Node 26.7.0. Pristine upstream: 7361; applied Nexa source: 7314; newly introduced diagnostic identities: 0. The owner approved a separate v3.8.53 ceiling on 2026-11-10. Final source must remain at or below 7314 with zero added diagnostic identities, a completed compiler, all functional gates and independent core typecheck. Earlier release records are preserved in full. Future measurements can only lower this version budget.",
+      "value": 7314,
+      "direction": "down",
+      "upstreamBaseVersion": "3.8.53",
+      "upstreamBaseCommit": "191dce8d534ceb56c28a08e71381284a9a87838f",
+      "verifiedUpstreamValue": 7361,
+      "reconciledSourceCommit": "464fb08a9968dd39a9a05b7e46825a7e58403941",
+      "measurementRun": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/42739864217",
+      "ownerAcceptedAt": "2026-11-10"
+    },
     {
       "_comment": "Full-scope inherited TypeScript backlog for pinned v3.8.52, measured on Linux with Node 26.7.0. Pristine upstream: 6572; applied overlay: 6529; newly introduced source diagnostic identities: 0. Core typecheck remains independently required. The prior v3.8.51 budget is preserved below. Future measurements may only lower this release budget; incomplete measurements and functional failures block acceptance.",
       "value": 6529,

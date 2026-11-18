@@ -99,6 +99,21 @@ jobs:
         run: |
           set -euo pipefail
           node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/nexa-v354-compatibility.test.ts | tee "$RUNNER_TEMP/v354-focused-green.tap"
+      - name: Reproduce and reject destructive startup retention
+        id: startup_retention
+        continue-on-error: true
+        working-directory: ${{ runner.temp }}/omniroute-fixture
+        run: |
+          set -euo pipefail
+          node nexa/tests/verify-startup-retention-red.mjs
+          node --test --test-concurrency=1 nexa/tests/startup-data-retention.test.mjs | tee "$RUNNER_TEMP/v354-startup-retention.tap"
+      - name: Preserve explicit retention and affinity behavior
+        id: retention_regressions
+        continue-on-error: true
+        working-directory: ${{ runner.temp }}/omniroute-fixture
+        run: |
+          set -euo pipefail
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/log-retention.test.ts tests/unit/compliance-index.test.ts tests/unit/compliance-startup-usage-rollup.test.ts tests/unit/db-session-account-affinity.test.ts tests/unit/session-affinity-edge-cases.test.ts | tee "$RUNNER_TEMP/v354-retention-regressions.tap"
       - name: Preserve native, quota, migration, pricing and translation regressions
         id: compatibility
         continue-on-error: true
@@ -180,7 +195,7 @@ jobs:
           import json, os
           from pathlib import Path
           outcomes=json.loads(os.environ['GATE_OUTCOMES'])
-          required=['pristine_types','syntax','baseline_red','focused_green','compatibility','bridge','model_helpers','core','full_types','compare_types','lint','docs','security','production_native']
+          required=['pristine_types','syntax','baseline_red','focused_green','startup_retention','retention_regressions','compatibility','bridge','model_helpers','core','full_types','compare_types','lint','docs','security','production_native']
           failed={name:outcomes.get(name,{}).get('outcome','missing') for name in required if outcomes.get(name,{}).get('outcome')!='success'}
           receipt={'sourceCommit':os.environ['GITHUB_SHA'],'status':'PASS' if not failed else 'NOT_ACCEPTED','failedGates':failed,'productionBuildExecuted':False,'liveChanged':False}
           (Path(os.environ['RUNNER_TEMP'])/'v354-validation.json').write_text(json.dumps(receipt,indent=2)+'\n')

@@ -1,54 +1,54 @@
 diff --git a/src/lib/usage/usageStats.ts b/src/lib/usage/usageStats.ts
-index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..b349578ebb849ff97949dbf5aa878be3df0701fd 100644
+index c1c259fea4567935bc2ff2f40cda701eeb42935f..411e8ee165e7bd529d8d9432991d56a2bf8ad7f6 100644
 --- a/src/lib/usage/usageStats.ts
 +++ b/src/lib/usage/usageStats.ts
-@@ -8,6 +8,7 @@
+@@ -9,6 +9,7 @@
   */
-
+ 
  import { getDbInstance } from "../db/core";
 +import { cacheTtlTokenSql } from "../db/usageAnalytics/cacheTtl";
  import { getApiKeys } from "../db/apiKeys";
  import { getPendingRequests } from "./usageHistory";
  import { getAccountDisplayName } from "@/lib/display/names";
-@@ -15,6 +16,7 @@
+@@ -16,6 +17,7 @@
  import { isFlatRateProvider } from "./flatRateProviders";
  import { getRawDataCutoffDate, isAggregationEnabled } from "./aggregateHistory";
  import { toNumber } from "@/shared/utils/numeric";
 +import { GPT_6_1_SOL_LONG_CONTEXT_THRESHOLD } from "@/shared/constants/pricing/shared-tiers";
-
+ 
  type JsonRecord = Record<string, unknown>;
  type UsageBucket = {
-@@ -102,8 +104,13 @@
-         CASE WHEN provider_cost_usd IS NULL THEN COALESCE(tokens_output, 0) ELSE 0 END as cost_tokens_output,
-         CASE WHEN provider_cost_usd IS NULL THEN COALESCE(tokens_cache_read, 0) ELSE 0 END as cost_tokens_cache_read,
-         CASE WHEN provider_cost_usd IS NULL THEN COALESCE(tokens_cache_creation, 0) ELSE 0 END as cost_tokens_cache_creation,
-+        CASE WHEN provider_cost_usd IS NULL THEN ${cacheTtlTokenSql().five} ELSE 0 END as cost_tokens_cache_creation_5m,
-+        CASE WHEN provider_cost_usd IS NULL THEN ${cacheTtlTokenSql().hour} ELSE 0 END as cost_tokens_cache_creation_1h,
-         CASE WHEN provider_cost_usd IS NULL THEN COALESCE(tokens_reasoning, 0) ELSE 0 END as cost_tokens_reasoning,
-         COALESCE(provider_cost_usd, 0.0) as stored_cost`;
+@@ -107,8 +109,13 @@
+         CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN COALESCE(tokens_output, 0) ELSE 0 END as cost_tokens_output,
+         CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN COALESCE(tokens_cache_read, 0) ELSE 0 END as cost_tokens_cache_read,
+         CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN COALESCE(tokens_cache_creation, 0) ELSE 0 END as cost_tokens_cache_creation,
++        CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN ${cacheTtlTokenSql().five} ELSE 0 END as cost_tokens_cache_creation_5m,
++        CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN ${cacheTtlTokenSql().hour} ELSE 0 END as cost_tokens_cache_creation_1h,
+         CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN COALESCE(tokens_reasoning, 0) ELSE 0 END as cost_tokens_reasoning,
+         COALESCE(provider_cost_usd, calculated_cost_usd, 0.0) as stored_cost`;
 +
 +const pricingContextBucket = `CASE WHEN tokens_input > ${GPT_6_1_SOL_LONG_CONTEXT_THRESHOLD}
 +  AND (LOWER(model) LIKE '%gpt-6.1-sol%' OR LOWER(model) LIKE '%gpt-6.2-sol%' OR LOWER(model) LIKE '%gpt-6.2-astra%') THEN 1 ELSE 0 END`;
-
+ 
  function buildUsageSourceSql(aggregationEnabled: boolean) {
    if (!aggregationEnabled) {
-@@ -121,6 +128,7 @@
+@@ -126,6 +133,7 @@
          COALESCE(tokens_cache_creation, 0) as tokens_cache_creation,
          COALESCE(tokens_reasoning, 0) as tokens_reasoning,
          ${RAW_COST_COLUMNS},
 +        ${pricingContextBucket} as long_context,
          COALESCE(service_tier, 'standard') as service_tier,
-         1 as request_count
-       FROM usage_history
-@@ -141,6 +149,7 @@
+         CASE WHEN tokens_cache_read IS NULL THEN 1 ELSE 0 END as cached_input_unknown_requests,
+         ${ESTIMATED_USAGE_SQL} as estimated_requests,
+@@ -149,6 +157,7 @@
        COALESCE(tokens_cache_creation, 0) as tokens_cache_creation,
        COALESCE(tokens_reasoning, 0) as tokens_reasoning,
        ${RAW_COST_COLUMNS},
 +      ${pricingContextBucket} as long_context,
        COALESCE(service_tier, 'standard') as service_tier,
-       1 as request_count
-     FROM usage_history
-@@ -164,7 +173,10 @@
+       CASE WHEN tokens_cache_read IS NULL THEN 1 ELSE 0 END as cached_input_unknown_requests,
+         ${ESTIMATED_USAGE_SQL} as estimated_requests,
+@@ -175,7 +184,10 @@
        0 as cost_tokens_output,
        0 as cost_tokens_cache_read,
        0 as cost_tokens_cache_creation,
@@ -58,8 +58,8 @@ index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..b349578ebb849ff97949dbf5aa878be3
 +      0 as long_context,
        COALESCE(total_cost, 0.0) as stored_cost,
        'standard' as service_tier,
-       COALESCE(total_requests, 0) as request_count
-@@ -184,6 +196,8 @@
+       COALESCE(cached_input_unknown_requests, CASE WHEN total_cache_read_tokens IS NULL THEN COALESCE(total_requests, 0) ELSE 0 END) as cached_input_unknown_requests,
+@@ -201,6 +213,8 @@
    COALESCE(SUM(cost_tokens_output), 0) as cost_tokens_output,
    COALESCE(SUM(cost_tokens_cache_read), 0) as cost_tokens_cache_read,
    COALESCE(SUM(cost_tokens_cache_creation), 0) as cost_tokens_cache_creation,
@@ -68,7 +68,7 @@ index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..b349578ebb849ff97949dbf5aa878be3
    COALESCE(SUM(cost_tokens_reasoning), 0) as cost_tokens_reasoning,
    COALESCE(SUM(stored_cost), 0.0) as stored_cost,
    MAX(timestamp) as last_used
-@@ -202,9 +216,11 @@
+@@ -219,9 +233,11 @@
        output: toNumber(row.cost_tokens_output ?? row.tokens_output),
        cacheRead: toNumber(row.cost_tokens_cache_read ?? row.tokens_cache_read),
        cacheCreation: toNumber(row.cost_tokens_cache_creation ?? row.tokens_cache_creation),
@@ -81,9 +81,9 @@ index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..b349578ebb849ff97949dbf5aa878be3
    );
    // daily_usage_summary stores API-equivalent value so the dedicated costs
    // view can preserve history. This legacy stats surface keeps billed-cost
-@@ -230,10 +246,11 @@
+@@ -252,10 +268,11 @@
  }
-
+ 
  /**
 - * Sum of all token columns recorded for one provider connection in the current
 + * Inclusive input plus output recorded for one provider connection in the current
@@ -94,7 +94,7 @@ index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..b349578ebb849ff97949dbf5aa878be3
   * Only reflects traffic that went THROUGH OmniRoute (not the provider's panel).
   */
  export function getMonthlyProviderTokensForConnection(
-@@ -249,10 +266,7 @@
+@@ -271,10 +288,7 @@
    const row = db
      .prepare(
        `SELECT COALESCE(SUM(tokens_input), 0)
@@ -106,20 +106,20 @@ index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..b349578ebb849ff97949dbf5aa878be3
         FROM usage_history
         WHERE provider = ? AND connection_id = ? AND timestamp >= ?`
      )
-@@ -280,25 +294,30 @@
+@@ -302,25 +316,30 @@
    const db = getDbInstance();
    const rows = db
      .prepare(
 -      `SELECT model,
 +      `SELECT model, ${pricingContextBucket} as long_context,
-           COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_input ELSE 0 END), 0) AS input,
-           COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_output ELSE 0 END), 0) AS output,
-           COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_read ELSE 0 END), 0) AS cacheRead,
-           COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_creation ELSE 0 END), 0) AS cacheCreation,
-+          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN ${cacheTtlTokenSql().five} ELSE 0 END), 0) AS cacheCreation5m,
-+          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN ${cacheTtlTokenSql().hour} ELSE 0 END), 0) AS cacheCreation1h,
-           COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_reasoning ELSE 0 END), 0) AS reasoning,
-           COALESCE(SUM(provider_cost_usd), 0) AS storedCost,
+           COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_input ELSE 0 END), 0) AS input,
+           COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_output ELSE 0 END), 0) AS output,
+           COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_read ELSE 0 END), 0) AS cacheRead,
+           COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_creation ELSE 0 END), 0) AS cacheCreation,
++          COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN ${cacheTtlTokenSql().five} ELSE 0 END), 0) AS cacheCreation5m,
++          COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN ${cacheTtlTokenSql().hour} ELSE 0 END), 0) AS cacheCreation1h,
+           COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_reasoning ELSE 0 END), 0) AS reasoning,
+           COALESCE(SUM(COALESCE(provider_cost_usd, calculated_cost_usd)), 0) AS storedCost,
            COUNT(*) AS requests
         FROM usage_history
         WHERE connection_id = ? AND provider = ? AND success = 1
@@ -139,7 +139,7 @@ index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..b349578ebb849ff97949dbf5aa878be3
      reasoning?: number;
      requests?: number;
    }>;
-@@ -313,6 +332,8 @@
+@@ -335,6 +354,8 @@
        output: Number(row.output ?? 0),
        cacheRead: Number(row.cacheRead ?? 0),
        cacheCreation: Number(row.cacheCreation ?? 0),
@@ -148,15 +148,15 @@ index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..b349578ebb849ff97949dbf5aa878be3
        reasoning: Number(row.reasoning ?? 0),
      };
      costUsd += Number(row.storedCost ?? 0);
-@@ -320,6 +341,7 @@
+@@ -342,6 +363,7 @@
        provider,
        model,
        flatRateAsZero: true,
 +      longContext: Number(row.long_context) === 1,
      });
    }
-
-@@ -413,9 +435,9 @@
+ 
+@@ -459,9 +481,9 @@
      .prepare(
        `
          WITH usage_source AS (${sourceSql})
@@ -168,7 +168,7 @@ index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..b349578ebb849ff97949dbf5aa878be3
        `
      )
      .all(...sourceParams) as unknown[];
-@@ -469,10 +491,10 @@
+@@ -543,10 +565,10 @@
      .prepare(
        `
          WITH usage_source AS (${sourceSql})
@@ -181,7 +181,7 @@ index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..b349578ebb849ff97949dbf5aa878be3
        `
      )
      .all(...sourceParams) as unknown[];
-@@ -522,11 +544,11 @@
+@@ -604,11 +626,11 @@
      .prepare(
        `
          WITH usage_source AS (${sourceSql})
@@ -195,7 +195,7 @@ index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..b349578ebb849ff97949dbf5aa878be3
        `
      )
      .all(...sourceParams) as unknown[];
-@@ -580,11 +602,14 @@
+@@ -676,11 +698,14 @@
            provider,
            model,
            COALESCE(service_tier, 'standard') as service_tier,
@@ -208,10 +208,10 @@ index 3887fd0c3098bf2a9a34c57b0677a3b7679e9f5f..b349578ebb849ff97949dbf5aa878be3
 +          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN ${cacheTtlTokenSql().five} ELSE 0 END), 0) as cost_tokens_cache_creation_5m,
 +          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN ${cacheTtlTokenSql().hour} ELSE 0 END), 0) as cost_tokens_cache_creation_1h,
            COALESCE(SUM(tokens_reasoning), 0) as tokens_reasoning,
-           COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_input ELSE 0 END), 0) as cost_tokens_input,
-           COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_output ELSE 0 END), 0) as cost_tokens_output,
-@@ -594,7 +619,7 @@
-           COALESCE(SUM(provider_cost_usd), 0.0) as stored_cost
+           COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_input ELSE 0 END), 0) as cost_tokens_input,
+           COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_output ELSE 0 END), 0) as cost_tokens_output,
+@@ -690,7 +715,7 @@
+           COALESCE(SUM(COALESCE(provider_cost_usd, calculated_cost_usd)), 0.0) as stored_cost
          FROM usage_history
          WHERE timestamp >= ? AND timestamp <= ?
 -        GROUP BY minute, provider, model, service_tier

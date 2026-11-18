@@ -1,5 +1,5 @@
 diff --git a/src/lib/db/quotaSnapshots.ts b/src/lib/db/quotaSnapshots.ts
-index 70237d6745ec8f64a5285a1fbaceea8f93bbf29f..599cc195205ba5ce8eabe268a78bd7505a6accc5 100644
+index 403522a6792275351b0c517b850a06e03510fa5b..9b2d12b0c61e963aed7c66b9e1d01d439ffb64f3 100644
 --- a/src/lib/db/quotaSnapshots.ts
 +++ b/src/lib/db/quotaSnapshots.ts
 @@ -1,4 +1,5 @@

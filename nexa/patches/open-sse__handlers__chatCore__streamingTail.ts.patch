@@ -1,5 +1,5 @@
 diff --git a/open-sse/handlers/chatCore/streamingTail.ts b/open-sse/handlers/chatCore/streamingTail.ts
-index 6489b24408f0a477a1ba61dd89245158de75069c..e40a2024b48bbcb131ce5bcfe67a2ab9975a6f97 100644
+index 20e7acfb20575321fda4a575f07fd83d4dcb2fe6..7de3501fa22b1ed7de577b755b457a3002bd0a48 100644
 --- a/open-sse/handlers/chatCore/streamingTail.ts
 +++ b/open-sse/handlers/chatCore/streamingTail.ts
 @@ -1,3 +1,5 @@
@@ -8,7 +8,7 @@ index 6489b24408f0a477a1ba61dd89245158de75069c..e40a2024b48bbcb131ce5bcfe67a2ab9
  import { inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
  import { getCodexClientSessionId } from "../../config/codexIdentity.ts";
  import { modelAfterFamilyFallback } from "../../services/modelFamilyFallbackPolicy.ts";
-@@ -85,6 +87,8 @@
+@@ -90,6 +92,8 @@ function flushPendingStreamCapture(reqLogger: unknown): void {
  }
  
  export async function runStreamingTail(deps: StreamingTailDeps) {
@@ -17,7 +17,7 @@ index 6489b24408f0a477a1ba61dd89245158de75069c..e40a2024b48bbcb131ce5bcfe67a2ab9
    const {
      agentGoalPolicy,
      apiKeyInfo,
-@@ -390,11 +394,13 @@
+@@ -411,11 +415,13 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
  
    let streamCompletionRecorded = false;
    let streamFailureCompletionRecorded = false;
@@ -31,7 +31,7 @@ index 6489b24408f0a477a1ba61dd89245158de75069c..e40a2024b48bbcb131ce5bcfe67a2ab9
      usage: streamUsage,
      responseBody: streamResponseBody,
      providerPayload,
-@@ -410,6 +416,7 @@
+@@ -431,6 +437,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
    }) => {
      const ttft = requestTtftMs(streamTimingOriginOffsetMs, firstOutputMs);
      const normalizedStreamStatus = streamStatus || 200;
@@ -39,7 +39,7 @@ index 6489b24408f0a477a1ba61dd89245158de75069c..e40a2024b48bbcb131ce5bcfe67a2ab9
      if (streamCompletionRecorded) return;
      streamCompletionRecorded = true;
      if (normalizedStreamStatus !== 200) {
-@@ -737,7 +744,8 @@
+@@ -763,7 +770,8 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
        requestToolIdentityMap,
        null,
        undefined,
@@ -49,7 +49,7 @@ index 6489b24408f0a477a1ba61dd89245158de75069c..e40a2024b48bbcb131ce5bcfe67a2ab9
      );
    } else if (needsTranslation(targetFormat, clientResponseFormat)) {
      // Standard translation for other providers
-@@ -773,7 +781,8 @@
+@@ -799,7 +807,8 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
        // tool-name casing back from any provider (OpenCode `read`, Claude Code `Read`).
        (body as Record<string, unknown> | null | undefined)?.tools ?? null,
        undefined,
@@ -59,7 +59,7 @@ index 6489b24408f0a477a1ba61dd89245158de75069c..e40a2024b48bbcb131ce5bcfe67a2ab9
      );
    } else {
      log?.debug?.("STREAM", `Standard passthrough mode`);
-@@ -840,6 +849,8 @@
+@@ -866,6 +875,8 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
        model,
        credentials
      ),

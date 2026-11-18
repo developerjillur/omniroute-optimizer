@@ -1,8 +1,8 @@
 diff --git a/open-sse/handlers/chatCore/streamingPipeline.ts b/open-sse/handlers/chatCore/streamingPipeline.ts
-index 31202a7d6caa6ae71054852fd56b6a37d133386e..dc58a518c3d02911abf850f2286011bae596421e 100644
+index 936aa76805440034192c1a092009d123efef84a1..b0f486e588209aea75b0dfd25d6ff3929c858870 100644
 --- a/open-sse/handlers/chatCore/streamingPipeline.ts
 +++ b/open-sse/handlers/chatCore/streamingPipeline.ts
-@@ -95,6 +95,8 @@
+@@ -95,6 +95,8 @@ export function assembleStreamingPipeline(
      /** Total lifetime budget for this stream (see resolveStreamActiveTimeoutMs).
       * Omitted falls back to STREAM_ACTIVE_TIMEOUT_MS; 0 leaves the watchdog off. */
      activeTimeoutMs?: number;
@@ -11,7 +11,7 @@ index 31202a7d6caa6ae71054852fd56b6a37d133386e..dc58a518c3d02911abf850f2286011ba
    },
    deps: StreamingPipelineDeps = DEFAULT_DEPS
  ) {
-@@ -112,6 +114,8 @@
+@@ -112,6 +114,8 @@ export function assembleStreamingPipeline(
      args.streamController,
      {
        contentStallTimeoutMs: args.contentStallTimeoutMs,

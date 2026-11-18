@@ -1,5 +1,5 @@
 diff --git a/open-sse/services/claudeCodeConstraints.ts b/open-sse/services/claudeCodeConstraints.ts
-index 30a0ecda3e5b6ee6b21929d1f4a1680ab3c4411c..2c42f947d82438d756efaf44b09ceb3bbff29418 100644
+index 14d51965b9854f4acf4a000bb54d93d923669e6b..9d2d9ac2b26f3e3b46fc4fba28029a0e570a441f 100644
 --- a/open-sse/services/claudeCodeConstraints.ts
 +++ b/open-sse/services/claudeCodeConstraints.ts
 @@ -5,7 +5,7 @@
@@ -11,7 +11,7 @@ index 30a0ecda3e5b6ee6b21929d1f4a1680ab3c4411c..2c42f947d82438d756efaf44b09ceb3b
   * 4. Normalize cache_control TTL ordering
   * 5. Default missing cache_control.ttl to "1h" on the native Claude OAuth path
   */
-@@ -45,6 +45,7 @@ export function finalizeClaudeBodyConstraints(body: Record<string, unknown>): vo
+@@ -45,6 +45,7 @@
    hoistLeadingSystemMessages(body);
    relocateDirectiveOnlyMessages(body);
    enforceThinkingTemperature(body);
@@ -19,7 +19,7 @@ index 30a0ecda3e5b6ee6b21929d1f4a1680ab3c4411c..2c42f947d82438d756efaf44b09ceb3b
  }
  
  function isSystemRole(role: unknown): boolean {
-@@ -198,6 +199,11 @@ export function disableThinkingIfToolChoiceForced(body: Record<string, unknown>)
+@@ -198,6 +199,11 @@
  
  const MAX_CACHE_CONTROL_BLOCKS = 4;
  
@@ -31,37 +31,23 @@ index 30a0ecda3e5b6ee6b21929d1f4a1680ab3c4411c..2c42f947d82438d756efaf44b09ceb3b
  export function enforceCacheControlLimit(body: Record<string, unknown>): void {
    let count = 0;
  
-@@ -229,10 +235,11 @@ export function enforceCacheControlLimit(body: Record<string, unknown>): void {
+@@ -229,10 +235,11 @@
      }
    }
  
 -  if (count <= MAX_CACHE_CONTROL_BLOCKS) return;
-+  const budget = getCacheControlBudget(body);
-+  if (count <= budget) return;
- 
+-
 -  // Strip excess cache_control blocks from the end (keep first 4)
 -  let remaining = MAX_CACHE_CONTROL_BLOCKS;
++  const budget = getCacheControlBudget(body);
++  if (count <= budget) return;
++
 +  // Keep the existing prefix markers within the available client budget.
 +  let remaining = budget;
  
    if (Array.isArray(system)) {
      for (const block of system) {
-@@ -289,6 +296,14 @@ export function ensureCacheControlOnLastUserMessage(body: Record<string, unknown
-       )
-     : false;
- 
-+  const tools = body.tools as Array<Record<string, unknown>> | undefined;
-+  if (Array.isArray(tools)) {
-+    cacheControlCount += tools.filter((tool) => tool.cache_control).length;
-+    hasFiveMinuteCacheControl ||= tools.some(
-+      (tool) => (tool.cache_control as Record<string, unknown> | undefined)?.ttl === "5m"
-+    );
-+  }
-+
-   for (const message of messages) {
-     const content = message.content as Array<Record<string, unknown>> | undefined;
-     if (!Array.isArray(content)) continue;
-@@ -304,7 +319,7 @@ export function ensureCacheControlOnLastUserMessage(body: Record<string, unknown
+@@ -312,7 +319,7 @@
        const content = messages[i].content;
        if (Array.isArray(content) && content.length > 0) {
          const lastBlock = content[content.length - 1] as Record<string, unknown>;

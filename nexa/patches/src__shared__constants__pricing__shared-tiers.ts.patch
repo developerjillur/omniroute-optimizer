@@ -22,12 +22,10 @@ index dca5e92c26581136113440e67f3297288d6baf97..20f8d2045550cf0758e1e40ca4ed3dde
  export const GPT_6_ASTRA_PRICING = {
    input: 10.0,
    output: 50.0,
-@@ -99,6 +112,17 @@
-   cached: 7.5,
-   reasoning: 112.5,
+@@ -101,6 +114,17 @@ export const CLAUDE_FABLE_5_PRICING = {
    cache_creation: 15.0,
-+};
-+
+ };
+ 
 +// Anthropic published rates per million tokens; explicit TTL fields keep cache writes distinct.
 +export const CLAUDE_FABLE_5_2_PRICING = {
 +  input: 8.0,
@@ -37,6 +35,8 @@ index dca5e92c26581136113440e67f3297288d6baf97..20f8d2045550cf0758e1e40ca4ed3dde
 +  cache_creation: 10.0,
 +  cache_creation_5m: 10.0,
 +  cache_creation_1h: 16.0,
- };
- 
++};
++
  export const CLAUDE_FABLE_5_1_PRICING = {
+   input: 10.0,
+   output: 50.0,

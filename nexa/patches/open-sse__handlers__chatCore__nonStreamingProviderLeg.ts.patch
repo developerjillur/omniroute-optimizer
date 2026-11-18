@@ -1,24 +1,24 @@
 diff --git a/open-sse/handlers/chatCore/nonStreamingProviderLeg.ts b/open-sse/handlers/chatCore/nonStreamingProviderLeg.ts
-index d260a026ba17feb19a9a18ad7a19c988c22f6573..0e1c69754507c898ce42f8e67f62b3e6a19d38aa 100644
+index 58a6f93c1dfeec4107f27490e5adc65b909b7d7e..0e8cd4b0977d3193fdd4b82deb11343d1222a8f5 100644
 --- a/open-sse/handlers/chatCore/nonStreamingProviderLeg.ts
 +++ b/open-sse/handlers/chatCore/nonStreamingProviderLeg.ts
-@@ -26,6 +26,7 @@ import { translateNonStreamingClientResponse } from "./nonStreamingClientTransla
- import { parseNonStreamingResponseBody, isJsonRecord } from "./nonStreamingResponseParse.ts";
+@@ -28,6 +28,7 @@
  import { restoreNonStreamingToolNames } from "./passthroughToolNames.ts";
+ import { inheritCodexResponseFence } from "../../services/codexAccount/fences.ts";
  import { extractUsageFromResponse } from "../usageExtractor.ts";
 +import { getCacheCreationTtlFields } from "@/lib/usage/cacheCreationTtl";
+ import { cacheCreationFields } from "../../utils/cacheWriteUsage.ts";
  import { sanitizeUsagePayloadForRequest } from "../../utils/usageTracking.ts";
- import { createErrorResult, formatProviderError } from "../../utils/error.ts";
- import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
-@@ -162,6 +163,7 @@ function extractUsage(
-   const pt = typeof r.prompt_tokens === "number" ? r.prompt_tokens : 0;
+ import { createErrorResult, formatProviderError, readErrorBodyText } from "../../utils/error.ts";
+@@ -172,6 +173,7 @@
    const ct = typeof r.completion_tokens === "number" ? r.completion_tokens : 0;
    return {
-+    ...getCacheCreationTtlFields(r),
+     ...cacheCreationFields(raw),
++    ...getCacheCreationTtlFields(raw),
      prompt_tokens: pt,
      completion_tokens: ct,
      total_tokens: typeof r.total_tokens === "number" ? r.total_tokens : pt + ct,
-@@ -251,6 +253,60 @@ function parseRetryAfterMs(response: Response): number | null {
+@@ -261,6 +263,60 @@
    return null;
  }
  
@@ -79,7 +79,7 @@ index d260a026ba17feb19a9a18ad7a19c988c22f6573..0e1c69754507c898ce42f8e67f62b3e6
  function finishOk(
    input: ProviderLegInput,
    params: {
-@@ -274,6 +330,10 @@ function finishOk(
+@@ -284,6 +340,10 @@
      requestUrl?: string;
    }
  ): NonStreamingProviderLegResult {
@@ -90,7 +90,7 @@ index d260a026ba17feb19a9a18ad7a19c988c22f6573..0e1c69754507c898ce42f8e67f62b3e6
    const failed = bufferedResponsesFailure(input, params, { legError, extractUsage, buildReceipt });
    if (failed) return failed;
    // F-02: restore + sanitize + translate is the only success tail.
-@@ -917,6 +977,17 @@ export async function runNonStreamingProviderLeg(
+@@ -957,6 +1017,17 @@
    const responsePayloadFormat = parsed.responsePayloadFormat;
    const looksLikeSSE = parsed.looksLikeSSE;
  

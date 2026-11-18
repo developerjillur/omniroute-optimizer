@@ -1,7 +1,8 @@
 diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.tsx b/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.tsx
+index 3a089ddc63f274a08f82b1642b00329e1e1c038b..bbd4130943751dda23222c01372b360938d066f4 100644
 --- a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.tsx
 +++ b/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.tsx
-@@ -15,6 +15,7 @@
+@@ -15,6 +15,7 @@ import { useTranslations } from "next-intl";
  import {
    getStoredClaudeAuthValue,
    normalizeClaudeBaseUrl,
@@ -9,7 +10,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
  } from "@/shared/services/claudeCliConfig";
  import { cn } from "@/shared/utils/cn";
  import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
-@@ -26,7 +27,7 @@
+@@ -26,7 +27,7 @@ const defaultKeyId = (selectedId, apiKeys) =>
    selectedId || (apiKeys?.length > 0 ? apiKeys[0].id : "");
  
  /**
@@ -18,7 +19,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
   * after a status fetch resolves: mirror the env model mappings into the form
   * and re-select the API key whose masked value matches the stored token.
   */
-@@ -74,6 +75,7 @@
+@@ -74,6 +75,7 @@ export default function ClaudeToolCard({
    const [claudeStatus, setClaudeStatus] = useState(null);
    const [checkingClaude, setCheckingClaude] = useState(false);
    const [applying, setApplying] = useState(false);
@@ -26,7 +27,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
    const [restoring, setRestoring] = useState(false);
    const [message, setMessage] = useState(null);
    const [showInstallGuide, setShowInstallGuide] = useState(false);
-@@ -84,6 +86,7 @@
+@@ -84,6 +86,7 @@ export default function ClaudeToolCard({
    const [showManualConfigModal, setShowManualConfigModal] = useState(false);
    const [customBaseUrl, setCustomBaseUrl] = useState("");
    const hasInitializedModels = useRef(false);
@@ -34,7 +35,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
    // Backups state
    const [backups, setBackups] = useState([]);
    const [showBackups, setShowBackups] = useState(false);
-@@ -92,11 +95,17 @@
+@@ -92,11 +95,17 @@ export default function ClaudeToolCard({
  
    const getConfigStatus = () => {
      if (!cliReady) return null;
@@ -53,7 +54,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
      return "other";
    };
  
-@@ -177,7 +186,7 @@
+@@ -177,7 +186,7 @@ export default function ClaudeToolCard({
      return normalizeClaudeBaseUrl(url);
    };
  
@@ -62,7 +63,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
      setApplying(true);
      setMessage(null);
      try {
-@@ -190,11 +199,23 @@
+@@ -190,11 +199,23 @@ export default function ClaudeToolCard({
  
        tool.defaultModels.forEach((model) => {
          const targetModel = modelMappings[model.alias] || model.defaultValue || "";
@@ -88,7 +89,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
  
        const res = await fetch("/api/cli-tools/claude-settings", {
          method: "POST",
-@@ -202,14 +223,17 @@
+@@ -202,14 +223,17 @@ export default function ClaudeToolCard({
          body: JSON.stringify(postBody),
        });
        const data = await res.json();
@@ -111,7 +112,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
          setMessage({
            type: "error",
            text:
-@@ -235,7 +259,10 @@
+@@ -235,7 +259,10 @@ export default function ClaudeToolCard({
          tool.defaultModels.forEach((model) =>
            onModelMappingChange(model.alias, model.defaultValue || "")
          );
@@ -122,18 +123,17 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
        } else {
          setMessage({
            type: "error",
-@@ -257,8 +284,19 @@
+@@ -257,9 +284,20 @@ export default function ClaudeToolCard({
    };
  
    const handleModelSelect = (model) => {
 -    if (currentEditingAlias) onModelMappingChange(currentEditingAlias, model.value);
--  };
 +    if (currentEditingAlias) {
 +      explicitlyEditedSlots.current.add(currentEditingAlias);
 +      onModelMappingChange(currentEditingAlias, model.value);
 +    }
-+  };
-+
+   };
+ 
 +  useEffect(() => {
 +    const refresh = () => {
 +      void checkClaudeStatus();
@@ -141,10 +141,11 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
 +    window.addEventListener("omniroute:claude-terminal-mode", refresh);
 +    return () => window.removeEventListener("omniroute:claude-terminal-mode", refresh);
 +  }, [checkClaudeStatus]);
- 
++
    // Generate settings.json content for manual copy
    const getManualConfigs = () => {
-@@ -271,12 +309,12 @@
+     const env = { ANTHROPIC_BASE_URL: getEffectiveBaseUrl() };
+@@ -271,12 +309,12 @@ export default function ClaudeToolCard({
  
      tool.defaultModels.forEach((model) => {
        const targetModel = modelMappings[model.alias];
@@ -159,7 +160,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
          content: JSON.stringify({ env }, null, 2),
        },
      ];
-@@ -342,6 +380,14 @@
+@@ -342,6 +380,14 @@ export default function ClaudeToolCard({
  
        {isExpanded && (
          <div className="mt-4 pt-4 border-t border-border flex flex-col gap-4">
@@ -174,7 +175,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
            {checkingClaude && (
              <div role="status" className="flex items-center gap-2 text-text-muted">
                <Spinner decorative size="sm" />
-@@ -502,7 +548,10 @@
+@@ -502,7 +548,10 @@ export default function ClaudeToolCard({
                      </Button>
                      <Input
                        value={modelMappings[model.alias] || ""}
@@ -186,7 +187,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
                        placeholder={t("providerModelPlaceholder")}
                        aria-label={model.name}
                        className="min-w-0 w-auto flex-1"
-@@ -512,7 +561,10 @@
+@@ -512,7 +561,10 @@ export default function ClaudeToolCard({
                        <Button
                          variant="ghost"
                          size="icon-sm"
@@ -198,7 +199,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
                          title={t("clear")}
                          aria-label={t("clear")}
                          className="text-text-muted hover:text-error"
-@@ -525,6 +577,32 @@
+@@ -525,6 +577,32 @@ export default function ClaudeToolCard({
                </div>
  
                {/* Opt-in (default off): Claude Code auto-permission classifier compat mode. */}
@@ -231,7 +232,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/ClaudeToolCard.ts
                <ClaudeClassifierCompatToggle />
  
                {/* Info link to the discovery-alias gate (claude/<provider>/<model> mirror ids) */}
-@@ -546,12 +624,12 @@
+@@ -546,12 +624,12 @@ export default function ClaudeToolCard({
                  <Button
                    variant="primary"
                    size="sm"

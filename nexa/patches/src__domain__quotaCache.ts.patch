@@ -1,5 +1,5 @@
 diff --git a/src/domain/quotaCache.ts b/src/domain/quotaCache.ts
-index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1b0f153ac 100644
+index 0a22d76a586822d1ce7764bd88ffad95ef9857e0..cebb486ad58c3a06de0ed37792f98958ae441c6e 100644
 --- a/src/domain/quotaCache.ts
 +++ b/src/domain/quotaCache.ts
 @@ -8,7 +8,8 @@
@@ -12,13 +12,14 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
   *
   * @changes
   * - [2026-07-24] [Composer] - Scope Antigravity per-model exhaustion to exact model + family weekly windows
-@@ -17,13 +18,16 @@
-  */
- 
+@@ -24,14 +25,17 @@
+   withCodexConnectionWrite,
+ } from "@/lib/db/codexConnectionFences";
  import { hasOllamaPurchasedCredits } from "@omniroute/open-sse/services/ollamaPurchasedCredits.ts";
 -import { getCachedProviderConnectionById } from "@/lib/db/readCache";
 +import { getQuotaUsageWithRefreshedToken } from "./quotaAccountRefresh";
 +import { getCachedProviderConnectionById, getCachedProviderConnections } from "@/lib/db/readCache";
+ import { isCompleteUsageReading } from "@/lib/usage/usageReading";
  import { resolveProxyForConnection } from "@/lib/db/settings";
  import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
  import { safePercentage } from "@/shared/utils/formatting";
@@ -31,12 +32,13 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
  import {
    CODEX_SPARK_QUOTA_SESSION,
    CODEX_SPARK_QUOTA_WEEKLY,
-@@ -64,7 +68,12 @@
- } from "./quotaCacheState";
- import { isCodexPaidCreditsEnabled } from "@/lib/providers/codexPaidCredits";
+@@ -74,8 +78,14 @@
  import { updateQuotaBurnMetrics } from "./quotaBurnMetrics";
--import { persistQuotaWindowSnapshots } from "./quotaSnapshotPersistence";
-+import { persistQuotaWindowSnapshots, quotaSnapshotChanged } from "./quotaSnapshotPersistence";
+ import {
+   persistQuotaWindowSnapshots,
++  quotaSnapshotChanged,
+   retireUnreportedQuotaWindows,
+ } from "./quotaSnapshotPersistence";
 +import {
 +  getClaudeQuotaSchedule,
 +  isBlockingClaudeQuotaWindow,
@@ -45,7 +47,7 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
  
  // Keep markQuotaHealthy's public import path; the remaining leaf state stays internal.
  export { markQuotaHealthy } from "./quotaCacheState";
-@@ -92,7 +101,6 @@
+@@ -103,7 +113,6 @@
  // ─── Constants ──────────────────────────────────────────────────────────────
  
  const EXHAUSTED_TTL_MS = 5 * 60 * 1000; // 5 minutes for 429-sourced entries (no resetAt)
@@ -53,7 +55,7 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
  const REFRESH_INTERVAL_MS = 60 * 1000; // Background tick every 1 minute
  export const DEFAULT_QUOTA_THRESHOLD_PERCENT = 99;
  
-@@ -288,6 +296,7 @@
+@@ -299,6 +308,7 @@
  
  export function __clearForTests() {
    getState().cache.clear();
@@ -61,7 +63,7 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
  }
  
  function resolveAntigravityQuotaWindowsForModel(
-@@ -511,7 +520,7 @@
+@@ -546,7 +556,7 @@
    if (
      globalWindows.some(
        (quota) =>
@@ -70,7 +72,7 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
          (quota.claudeQuota.kind !== "session" || !sessionRecoveryEnabled)
      )
    ) {
-@@ -520,7 +529,7 @@
+@@ -555,7 +565,7 @@
    if (!requestedModel) return isStandardQuotaExhausted(entry, now);
    return scopedWindows.some(
      (quota) =>
@@ -79,16 +81,28 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
        claudeQuotaMatchesModel(quota.claudeQuota, requestedModel)
    );
  }
-@@ -720,7 +729,7 @@
-   requestedModel: string | null = null,
-   providerSpecificData?: unknown
+@@ -757,7 +767,7 @@
+   providerSpecificData: unknown
  ): boolean {
--  if (isQuotaHealthy(connectionId)) return false;
-+  if (isQuotaHealthy(connectionId) && resolveProviderId(provider) !== "claude") return false;
-   if (isCodexQuotaFilteringDisabled(provider, providerSpecificData)) return false;
-   if (isClaudeExtraUsageAllowed(provider, providerSpecificData)) return false;
+   if (provider === "codex") getQuotaCache(connectionId); // expire a replaced owner's override
+-  if (isQuotaHealthy(connectionId)) return true;
++  if (isQuotaHealthy(connectionId) && resolveProviderId(provider) !== "claude") return true;
+   if (isCodexQuotaFilteringDisabled(provider, providerSpecificData)) return true;
+   if (isClaudeExtraUsageAllowed(provider, providerSpecificData)) return true;
    // Subscription snapshots cannot decide paid-credit eligibility. The mandatory
-@@ -735,6 +744,12 @@
+@@ -773,7 +783,10 @@
+ ): boolean {
+   if (isQuotaFilterBypassed(connectionId, provider, requestedModel, providerSpecificData))
+     return false;
+-  const entry = getQuotaCache(connectionId) || hydrateQuotaCacheFromSnapshots(connectionId);
++  const entry =
++    (resolveProviderId(provider) === "claude"
++      ? getState().cache.get(connectionId)
++      : getQuotaCache(connectionId)) || hydrateQuotaCacheFromSnapshots(connectionId);
+   if (!entry) return false;
+ 
+   // Codex releases stale windows independently; another scope's reset cannot clear this one.
+@@ -782,6 +795,12 @@
    }
  
    const now = Date.now();
@@ -101,7 +115,7 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
    const advanced = advancedWindowResetAt(entry, now);
    if (advanced) {
      entry.exhausted = false;
-@@ -746,10 +761,6 @@
+@@ -793,10 +812,6 @@
        return isStandardQuotaExhausted(entry, now);
      }
      return isAntigravityQuotaExhausted(connectionId, entry, requestedModel);
@@ -112,10 +126,10 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
    }
  
    // Standard (non-per-model-quota) providers: check connection-wide aggregate
-@@ -837,6 +848,16 @@
-   const prior =
-     getState().cache.get(connectionId) ||
-     (provider === "codex" ? hydrateQuotaCacheFromSnapshots(connectionId) : null);
+@@ -918,6 +933,16 @@
+   // #4438 — capture the prior entry BEFORE overwriting the cache so we can skip
+   // redundant snapshot writes for idle connections whose quota didn't change.
+   const prior = priorQuotaEntry(connectionId, provider);
 +  // A missing/unknown usage response does not prove that a scheduled wall recovered.
 +  if (
 +    provider === "claude" &&
@@ -129,7 +143,7 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
    const retainedCodexWindows =
      provider === "codex"
        ? retainFreshCodexObservations(connectionId, quotas, prior)
-@@ -860,18 +881,87 @@
+@@ -941,20 +966,89 @@
        Date.now()
      ),
    };
@@ -138,6 +152,7 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
 +    entry.nextResetAt =
 +      claudeSchedule.checkAt === null ? null : new Date(claudeSchedule.checkAt).toISOString();
 +  }
+   const codexOwnerEpoch = tagCodexOwnerEpoch(entry);
    getState().cache.set(connectionId, entry);
  
    if (entry && rawQuotas) {
@@ -148,7 +163,8 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
 -      rawQuotas,
 -      quotas,
 -      prior,
--      retainedCodexWindows
+-      retainedCodexWindows,
+-      codexOwnerEpoch
 -    );
 +    if (provider === "claude") {
 +      for (const [windowKey, quotaInfo] of Object.entries({
@@ -220,13 +236,14 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
 +        rawQuotas,
 +        quotas,
 +        prior,
-+        retainedCodexWindows
++        retainedCodexWindows,
++        codexOwnerEpoch
 +      );
 +    }
    }
+   recordCompleteReading(entry, prior, options.complete === true);
  }
- /**
-@@ -903,6 +993,7 @@
+@@ -1029,6 +1123,7 @@
    if (!snapshots.length) return null;
  
    const quotas: Record<string, QuotaInfo> = {};
@@ -234,7 +251,7 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
    let provider = "";
    let fetchedAt = 0;
    let windowDurationMs: number | null = null;
-@@ -921,10 +1012,12 @@
+@@ -1047,10 +1142,12 @@
      if (!windowKey) continue;
      provider = provider || snapshot.provider || "";
      let fractionReported: false | undefined;
@@ -247,7 +264,7 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
      } catch {
        // Legacy snapshots need not contain JSON metadata.
      }
-@@ -943,7 +1036,28 @@
+@@ -1069,7 +1166,28 @@
        ),
        resetAt: camelSnapshot.nextResetAt ?? snapshot.next_reset_at ?? null,
        fractionReported,
@@ -276,7 +293,7 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
      const snapshotWindowDurationMs =
        camelSnapshot.windowDurationMs ?? snapshot.window_duration_ms ?? null;
      if (snapshotWindowDurationMs && snapshotWindowDurationMs > 0) {
-@@ -952,20 +1066,24 @@
+@@ -1078,20 +1196,24 @@
      if (createdAtMs !== null) fetchedAt = Math.max(fetchedAt, createdAtMs);
    }
  
@@ -300,11 +317,11 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
 +  if (claudeSchedule)
 +    entry.nextResetAt =
 +      claudeSchedule.checkAt === null ? null : new Date(claudeSchedule.checkAt).toISOString();
+   if (codexOwner) entry.codexOwnerEpoch = codexOwner.epoch;
    cache.set(connectionId, entry);
    return entry;
- }
-@@ -1149,6 +1267,11 @@
- export function markAccountExhaustedFrom429(connectionId: string, provider: string) {
+@@ -1291,6 +1413,11 @@
+   const owner = provider === "codex" ? readCodexQuotaOwner(connectionId) : null;
    // #14359 — a real upstream 429 is authoritative: drop any healthy override.
    unmarkQuotaHealthy(connectionId);
 +  const prior = getState().cache.get(connectionId) || hydrateQuotaCacheFromSnapshots(connectionId);
@@ -315,7 +332,7 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
    getState().cache.set(connectionId, {
      connectionId,
      provider,
-@@ -1166,6 +1289,7 @@
+@@ -1309,6 +1436,7 @@
    const { cache, refreshingSet } = getState();
    if (refreshingSet.has(entry.connectionId)) return;
    refreshingSet.add(entry.connectionId);
@@ -323,9 +340,9 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
  
    try {
      const connection = await getCachedProviderConnectionById(entry.connectionId);
-@@ -1175,8 +1299,9 @@
-     }
- 
+@@ -1322,8 +1450,9 @@
+         ? captureCodexConnectionFence(connection, entry.connectionId)
+         : null;
      const proxyInfo = await resolveProxyForConnection(entry.connectionId);
 -    const getUsage = (await import("@omniroute/open-sse/services/usage.ts")).getUsageForProvider;
 -    const usage = await runWithProxyContext(proxyInfo?.proxy || null, () => getUsage(connection));
@@ -334,10 +351,10 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
 +    );
  
      if (usage?.quotas) {
-       setQuotaCache(
-@@ -1185,6 +1310,18 @@
-         usage.quotas,
-         usage.modelQuotas && typeof usage.modelQuotas === "object" ? usage.modelQuotas : {}
+       runWithCodexConnectionFence(
+@@ -1338,6 +1467,18 @@
+           ),
+         true
        );
 +      if (entry.provider === "claude" && getState().cache.get(entry.connectionId) !== entry) {
 +        const previous = getProviderLimitsCache(entry.connectionId);
@@ -354,7 +371,7 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
      }
    } catch (err) {
      console.warn(
-@@ -1197,15 +1334,7 @@
+@@ -1350,15 +1491,7 @@
  }
  
  function needsRefresh(entry: QuotaCacheEntry, now: number): boolean {
@@ -371,7 +388,7 @@ index dd8005db92edc3fb29ebb2c95ecb557248e8cfc6..a99989a2bd2edc5d79dc140b302c09c1
  }
  
  async function backgroundRefreshTick() {
-@@ -1236,6 +1365,27 @@
+@@ -1389,6 +1522,27 @@
    if (state.refreshTimer) return;
    state.refreshTimer = setInterval(backgroundRefreshTick, REFRESH_INTERVAL_MS);
    state.refreshTimer?.unref?.();

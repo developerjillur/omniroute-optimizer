@@ -1,6 +1,6 @@
 # v3.8.54 release compatibility — ২০২৬-১১-১৮
 
-স্থিতি: **inspection সম্পন্ন; source port, full build ও live promotion অসম্পূর্ণ**।
+স্থিতি: **source port candidate প্রস্তুত; dependency lock, validation, full build ও live promotion অসম্পূর্ণ**।
 
 GitHub-এর নতুন stable release `v3.8.54` (১৭ নভেম্বর ২০২৬) নির্দিষ্ট commit
 `1c880c5c95b3f0240d5e4c6c8f0947ec46b5d25e`-এ পরীক্ষা করা হয়েছে। একই সময় npm
@@ -17,9 +17,19 @@ GitHub-এর নতুন stable release `v3.8.54` (১৭ নভেম্ব�
 - নয়টি preserved retired patch-এর পাঁচটির upstream target বদলেছে; অবশিষ্ট চারটি byte-identical। কোনো patch স্বয়ংক্রিয়ভাবে retire করা হয়নি।
 - 145টি নতুন application/test file-এর upstream path collision নেই।
 
-Accepted manifest এখনও `v3.8.53 / 191dce8d534ceb56c28a08e71381284a9a87838f`।
-আগের TypeScript ceilings, custom settings এবং application patches অপরিবর্তিত।
-Review artefact-এর conflict markers application বা live package-এ apply করা হয়নি।
+এই inspection-এর পরে আলাদা `fix/v3.8.54-models` worktree-তে 36টি source overlap
+মেলানো হয়েছে; `package-lock.json` পুনর্গঠন বাকি। বর্তমান candidate-এ 233টি active
+patch ও 146টি নতুন file আছে। আগের accepted v3.8.53 source পুরোনো worktree ও
+commit-এ অক্ষত। Candidate manifest এখন published v3.8.54 commit-এ pin করা,
+তবে এটি accepted release নয়। আগের TypeScript ceilings ও live settings অপরিবর্তিত।
+
+`proxyFetch.ts` ও analytics route-এর পুরোনো patch file মুছে ফেলা হয়নি; exact
+base/blob/patch hash-সহ retired registry-তে রাখা হয়েছে। সংশোধনগুলো যথাক্রমে
+নতুন transport-support ও analytics-pricing helper-এ আছে। Native payload,
+Thread/Fable thinking prefix, cumulative usage, cache TTL, quota reset scheduling,
+Google token-refresh health এবং namespaced migrations-এর আচরণ নতুন source-এর
+সঙ্গে মেলানো হয়েছে। Lock বাদে 232টি active patch-এর strict applicability পাস;
+functional acceptance এখনও বাকি।
 
 ## নতুন models এবং release gates
 
@@ -38,7 +48,10 @@ model বানানো এই update-এর অংশ নয়।
 Port-এর পরে lock regeneration, release-specific functional/TypeScript comparison,
 lint ও docs gates লাগবে। Inherited backlog-এর নতুন measured baseline প্রয়োজন হলে
 পুরোনো records অক্ষত রেখে মালিকের সিদ্ধান্ত নিতে হবে; ceiling অন্ধভাবে বাড়ানো হবে না।
-Resource admission পেলে full production build, sealed package, isolated installation,
+ছোট source-preparation profile-এর 30-second admission পাস করেছে; formatting ও
+isolated source checkout-এর measured peak যথাক্রমে 160 MiB ও 293 MiB। এতে full
+production build admitted হওয়ার দাবি করা হচ্ছে না। Source validation ও build
+resource admission পেলে full production build, sealed package, isolated installation,
 security/migration/config preservation, consistent rollback snapshot ও idle inference
 check-এর পরে live promotion করা যাবে।
 

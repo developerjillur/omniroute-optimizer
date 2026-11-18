@@ -1,0 +1,32 @@
+{
+  "status": "SOURCE_PORT_CANDIDATE_DEPENDENCY_LOCK_AND_VALIDATION_PENDING",
+  "base": {
+    "sha": "1c880c5c95b3f0240d5e4c6c8f0947ec46b5d25e",
+    "version": "3.8.54"
+  },
+  "counts": {
+    "total": 385,
+    "patches": 233,
+    "new": 146,
+    "tooling": 6,
+    "upstreamCandidates": 27,
+    "nexaSpecific": 108,
+    "needsReview": 250,
+    "pendingUpstreamPR": 10,
+    "mergedUpstreamPR": 2
+  },
+  "reviewCandidates": 41,
+  "retiredPatchesPreserved": 11,
+  "dependencyLockRegenerationPending": true,
+  "strictApplyFailuresExcludingLock": [],
+  "fullBuildStarted": false,
+  "liveChanged": false,
+  "atUtc": "2026-11-18T06:21:14.491073+00:00",
+  "branch": "fix/v3.8.54-models",
+  "manualOverlapsResolvedExcludingLock": 36,
+  "strictApplicabilityPassedExcludingLock": 232,
+  "newModelSourcePreserved": true,
+  "acceptedTypeBudgetsChanged": false,
+  "normalHooksRequired": true,
+  "userAppsOrSessionsStopped": false
+}

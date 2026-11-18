@@ -1,13 +1,13 @@
 diff --git a/src/lib/usage/usageHistory/helpers.ts b/src/lib/usage/usageHistory/helpers.ts
-index 4ce571fb407ec42f6063ede2194639e900c98e78..01beb2f56be8f39eca038ef58683ea8f78da524d 100644
+index 743cd108f47ee336b7bf73abbbfde1e1e7547589..ad42f61798ab0bbbfbd5e1b24a87137aabb44e83 100644
 --- a/src/lib/usage/usageHistory/helpers.ts
 +++ b/src/lib/usage/usageHistory/helpers.ts
 @@ -1,3 +1,4 @@
 +import { getCacheCreationTtl } from "../cacheCreationTtl";
+ import { storedUsageEvidence } from "../storedUsageEvidence";
  /**
   * Pure, stateless helpers extracted from usageHistory.ts.
-  * No DB access, no module-level state — safe to import anywhere.
-@@ -20,8 +21,10 @@
+@@ -21,8 +22,10 @@
    return typeof value === "string" && value.trim().length > 0 ? value : null;
  }
  
@@ -19,7 +19,7 @@ index 4ce571fb407ec42f6063ede2194639e900c98e78..01beb2f56be8f39eca038ef58683ea8f
    if (tier === "priority" || tier === "fast") return "priority";
    if (tier === "flex") return "flex";
    return "standard";
-@@ -37,7 +40,7 @@
+@@ -39,7 +42,7 @@
      apiKeyId: toStringOrNull(r.api_key_id),
      apiKeyName: toStringOrNull(r.api_key_name),
      billingTeamId: toStringOrNull(r.billing_team_id),
@@ -27,11 +27,11 @@ index 4ce571fb407ec42f6063ede2194639e900c98e78..01beb2f56be8f39eca038ef58683ea8f
 +    serviceTier: normalizeServiceTier(r.service_tier, r.provider),
      providerCredits: r.provider_credits ?? null,
      providerCostUsd: r.provider_cost_usd ?? null,
-     tokens: {
-@@ -45,6 +48,11 @@
-       output: toNumberValue(r.tokens_output),
-       cacheRead: toNumberValue(r.tokens_cache_read),
-       cacheCreation: toNumberValue(r.tokens_cache_creation),
+     calculatedCostUsd: r.calculated_cost_usd ?? null,
+@@ -52,6 +55,11 @@
+       cacheRead: r.tokens_cache_read == null ? null : toNumberValue(r.tokens_cache_read),
+       cacheCreation:
+         r.tokens_cache_creation == null ? null : toNumberValue(r.tokens_cache_creation),
 +      ...getCacheCreationTtl({
 +        cacheCreation: r.tokens_cache_creation,
 +        cacheCreation5m: r.tokens_cache_creation_5m,

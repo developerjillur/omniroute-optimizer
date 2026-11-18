@@ -1,5 +1,5 @@
 diff --git a/open-sse/handlers/chatCore/failureUsage.ts b/open-sse/handlers/chatCore/failureUsage.ts
-index 70223183604e6dc0633164386a2bb85606f4a3f2..60115c0a5c7c4f2caa002350e535f3b896df7ca9 100644
+index dfebe4d5c280ed000ba110ba6c0d96d06c93bf98..b4bd778432c864eedf1409e7ee5b1b92addc7942 100644
 --- a/open-sse/handlers/chatCore/failureUsage.ts
 +++ b/open-sse/handlers/chatCore/failureUsage.ts
 @@ -9,6 +9,7 @@
@@ -7,10 +7,10 @@ index 70223183604e6dc0633164386a2bb85606f4a3f2..60115c0a5c7c4f2caa002350e535f3b8
  
  import { buildErrorBody } from "../../utils/error.ts";
 +import { getCacheCreationTtlFields } from "@/lib/usage/cacheCreationTtl";
+ import { type AgentContext } from "./agentContext.ts";
  
  export { readCpaAuthIndex } from "./cpaTraceAuthIndex.ts";
- 
-@@ -30,6 +31,8 @@ export interface FailureUsageAggregate {
+@@ -31,6 +32,8 @@
    completion_tokens?: number;
    cache_read_input_tokens?: number;
    cache_creation_input_tokens?: number;
@@ -19,7 +19,7 @@ index 70223183604e6dc0633164386a2bb85606f4a3f2..60115c0a5c7c4f2caa002350e535f3b8
    reasoning_tokens?: number;
  }
  
-@@ -40,6 +43,8 @@ export function toFailureUsageAggregate(
+@@ -41,6 +44,8 @@
          completion_tokens?: number;
          cache_read_input_tokens?: number;
          cache_creation_input_tokens?: number;
@@ -28,7 +28,7 @@ index 70223183604e6dc0633164386a2bb85606f4a3f2..60115c0a5c7c4f2caa002350e535f3b8
          reasoning_tokens?: number;
        }
      | null
-@@ -51,6 +56,7 @@ export function toFailureUsageAggregate(
+@@ -52,6 +57,7 @@
      completion_tokens: usage.completion_tokens,
      cache_read_input_tokens: usage.cache_read_input_tokens,
      cache_creation_input_tokens: usage.cache_creation_input_tokens,
@@ -36,7 +36,7 @@ index 70223183604e6dc0633164386a2bb85606f4a3f2..60115c0a5c7c4f2caa002350e535f3b8
      reasoning_tokens: usage.reasoning_tokens,
    };
  }
-@@ -78,6 +84,7 @@ export function buildFailureUsageRecord(opts: {
+@@ -80,6 +86,7 @@
        output: opts.aggregate?.completion_tokens ?? 0,
        cacheRead: opts.aggregate?.cache_read_input_tokens ?? 0,
        cacheCreation: opts.aggregate?.cache_creation_input_tokens ?? 0,

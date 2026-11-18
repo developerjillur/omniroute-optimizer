@@ -1,5 +1,5 @@
 diff --git a/src/app/(dashboard)/dashboard/costs/CostOverviewTab.tsx b/src/app/(dashboard)/dashboard/costs/CostOverviewTab.tsx
-index ac9f6c69b6fdca351721124d05e6a4c7ff034687..e70194086cbb381233e6483ffd62b0e2993cb85e 100644
+index 70cf5260a06b25670fdb2f975a390a7da1a4bfb3..e1ff29633b66eea9a579452df8d99bb3d0fc226e 100644
 --- a/src/app/(dashboard)/dashboard/costs/CostOverviewTab.tsx
 +++ b/src/app/(dashboard)/dashboard/costs/CostOverviewTab.tsx
 @@ -1,6 +1,6 @@
@@ -10,7 +10,7 @@ index ac9f6c69b6fdca351721124d05e6a4c7ff034687..e70194086cbb381233e6483ffd62b0e2
  import { useSearchParams } from "next/navigation";
  import { useLocale, useTranslations } from "next-intl";
  import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
-@@ -58,6 +58,7 @@
+@@ -58,6 +58,7 @@ import {
  import { ApiKeyUsageLimitCard } from "./components/ApiKeyUsageLimitCard";
  import { TopListCard } from "./components/TopListCard";
  import { useApiKeyUsageLimits } from "./useApiKeyUsageLimits";
@@ -18,7 +18,7 @@ index ac9f6c69b6fdca351721124d05e6a4c7ff034687..e70194086cbb381233e6483ffd62b0e2
  
  interface UsageAnalyticsSummary {
    totalCost: number;
-@@ -362,15 +363,29 @@
+@@ -368,15 +369,29 @@ export default function CostOverviewTab() {
    const apiKeyFilter = useMemo(() => selectedApiKeyIds.join(","), [selectedApiKeyIds]);
    const currencyFormatter = useMemo(() => createCurrencyFormatter(locale), [locale]);
    const [range, setRange] = useState<CostRange>(() => parseCostRange(searchParams.get("range")));
@@ -57,11 +57,10 @@ index ac9f6c69b6fdca351721124d05e6a4c7ff034687..e70194086cbb381233e6483ffd62b0e2
    const [explorerGroupBy, setExplorerGroupBy] = useState<CostExplorerGroupBy>(() =>
      parseExplorerGroupBy(searchParams.get("groupBy"))
    );
-@@ -383,52 +398,6 @@
-     loading: apiKeyUsageLimitsLoading,
+@@ -390,52 +405,6 @@ export default function CostOverviewTab() {
      save: saveApiKeyUsageLimits,
    } = useApiKeyUsageLimits(selectedApiKeyId);
--
+ 
 -  useEffect(() => {
 -    let active = true;
 -
@@ -107,10 +106,11 @@ index ac9f6c69b6fdca351721124d05e6a4c7ff034687..e70194086cbb381233e6483ffd62b0e2
 -      active = false;
 -    };
 -  }, [apiKeyFilter, range, t]);
- 
+-
    const selectedRangeLabel = t(
      RANGE_OPTIONS.find((option) => option.value === range)?.labelKey || "range30d"
-@@ -534,6 +503,9 @@
+   );
+@@ -540,6 +509,9 @@ export default function CostOverviewTab() {
      return (
        <Card className="p-6">
          <EmptyState icon="payments" title={t("overviewTitle")} description={error} />
@@ -120,7 +120,7 @@ index ac9f6c69b6fdca351721124d05e6a4c7ff034687..e70194086cbb381233e6483ffd62b0e2
        </Card>
      );
    }
-@@ -546,6 +518,16 @@
+@@ -552,6 +524,16 @@ export default function CostOverviewTab() {
          description={t("overviewDescription")}
          actions={
            <div className="flex flex-wrap items-center gap-3">
@@ -137,7 +137,7 @@ index ac9f6c69b6fdca351721124d05e6a4c7ff034687..e70194086cbb381233e6483ffd62b0e2
              {summary.streak > 0 && (
                <Badge variant="warning" icon={<Icon name="local_fire_department" size={14} />}>
                  <span className="font-semibold">{summary.streak}</span>
-@@ -599,6 +581,39 @@
+@@ -607,6 +589,39 @@ export default function CostOverviewTab() {
            </div>
          }
        />

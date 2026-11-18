@@ -1,8 +1,8 @@
 diff --git a/bin/cli/api.mjs b/bin/cli/api.mjs
-index c53e385446a7c77f28eae4065c8462274fa4442d..ef8f6632398e03eee0aea9e7ac4ee5d38532b925 100644
+index 76836a9459d34317eb8a45edc1af99f4126cb52e..18520df02e3c9f64844f6b18461758a859fc2aa9 100644
 --- a/bin/cli/api.mjs
 +++ b/bin/cli/api.mjs
-@@ -298,7 +298,9 @@ function normalizeNetworkError(err) {
+@@ -309,7 +309,9 @@ function normalizeNetworkError(err) {
  
  export async function isServerUp(opts = {}) {
    try {

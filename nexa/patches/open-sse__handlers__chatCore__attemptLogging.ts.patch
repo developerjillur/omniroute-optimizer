@@ -1,8 +1,8 @@
 diff --git a/open-sse/handlers/chatCore/attemptLogging.ts b/open-sse/handlers/chatCore/attemptLogging.ts
-index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b9473397107be39ba8 100644
+index ad33519e88f9f9cfca25eb35813c1c18902a96bc..2c6d8f27b06638bf63fdcff93c99018d39a9be6d 100644
 --- a/open-sse/handlers/chatCore/attemptLogging.ts
 +++ b/open-sse/handlers/chatCore/attemptLogging.ts
-@@ -7,6 +7,12 @@
+@@ -7,6 +7,12 @@ import type {
    HttpAttemptCollector,
    HttpAttemptSelection,
  } from "../../utils/providerHttpAttempts.ts";
@@ -15,7 +15,7 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
  /**
   * chatCore per-attempt logging persistence (Quality Gate v2 / Fase 9 — chatCore god-file
   * decomposition, #3501).
-@@ -40,7 +46,9 @@
+@@ -41,7 +47,9 @@ import {
  } from "../../utils/proxyFetch.ts";
  import { clientSessionIdFromRawRequest } from "./clientSessionId.ts";
  
@@ -26,7 +26,7 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
  
  interface VideoLogCloneState {
    source: Record<string, unknown>;
-@@ -55,7 +63,7 @@
+@@ -56,7 +64,7 @@ function mutableVideoLogMessage(
    messageIndex: number,
    originalContainer: unknown[],
    originalMessage: Record<string, unknown>,
@@ -35,7 +35,7 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
  ): Record<string, unknown> {
    if (!state.rootClone) state.rootClone = { ...state.source };
    let containerClone = state.containers.get(container);
-@@ -68,7 +76,8 @@
+@@ -69,7 +77,8 @@ function mutableVideoLogMessage(
    let messageClone = state.messages.get(messageKey);
    if (!messageClone) {
      messageClone = { ...originalMessage };
@@ -45,7 +45,7 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
      state.messages.set(messageKey, messageClone);
      containerClone[messageIndex] = messageClone;
    }
-@@ -120,7 +129,7 @@
+@@ -121,7 +130,7 @@ function mutableVideoLogMessage(
  export function applyVideoBridgeLogRedaction(
    body: unknown,
    redaction: VideoBridgeLogRedactionEntry[] | null | undefined,
@@ -54,7 +54,7 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
  ): unknown {
    if (!redaction || redaction.length === 0) {
      return failClosedOnMiss ? OMITTED_VIDEO_TRANSCRIPT_REQUEST : body;
-@@ -155,10 +164,15 @@
+@@ -156,10 +165,15 @@ export function applyVideoBridgeLogRedaction(
      // check, at zero extra cost.
      const expectedPartType = container === "input" ? "input_text" : "text";
  
@@ -72,7 +72,7 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
  
        // Derived-prompt dispatches (pipeline-strategy stages, smart-auto-pipeline,
        // context-handoff summaries — #12430 item 4) embed the transcript as a
-@@ -178,7 +192,7 @@
+@@ -179,7 +193,7 @@ export function applyVideoBridgeLogRedaction(
            messageIndex,
            originalContainer,
            originalMessage as Record<string, unknown>,
@@ -81,7 +81,7 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
          );
  
          // Re-read from the (possibly already-cloned) message so a second
-@@ -188,7 +202,9 @@
+@@ -189,7 +203,9 @@ export function applyVideoBridgeLogRedaction(
          // needs no regex and is safe. replaceAll (not replace): a stage/summary
          // prompt can quote the transcript back more than once.
          const currentText =
@@ -92,7 +92,7 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
          messageClone.content = currentText.replaceAll(fullText, redactedText);
          redacted = true;
          matchedEntry = true;
-@@ -212,7 +228,7 @@
+@@ -213,7 +229,7 @@ export function applyVideoBridgeLogRedaction(
            messageIndex,
            originalContainer,
            originalMessage as Record<string, unknown>,
@@ -101,7 +101,7 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
          );
  
          const contentClone = messageClone.content as unknown[];
-@@ -221,7 +237,8 @@
+@@ -222,7 +238,8 @@ export function applyVideoBridgeLogRedaction(
          matchedEntry = true;
        }
      }
@@ -111,7 +111,7 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
    }
  
    const result = redacted && cloneState.rootClone ? cloneState.rootClone : body;
-@@ -242,7 +259,10 @@
+@@ -243,7 +260,10 @@ export function applyVideoBridgeLogRedaction(
   * summary under `.summary` (see createStructuredSSECollector in
   * streamPayloadCollector.ts) -- check both shapes rather than assuming one.
   */
@@ -123,12 +123,10 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
    if (sourceFormat !== FORMATS.OPENAI_RESPONSES) return null;
    if (!clientResponse || typeof clientResponse !== "object") return null;
    const record = clientResponse as { id?: unknown; summary?: unknown };
-@@ -254,6 +274,29 @@
-     if (typeof summaryId === "string" && summaryId.length > 0) return summaryId;
-   }
+@@ -257,6 +277,29 @@ export function extractResponsesId(sourceFormat: unknown, clientResponse: unknow
    return null;
-+}
-+
+ }
+ 
 +/** Native message IDs support exact session/usage correlation without storing content. */
 +export function extractNativeMessageId(
 +  sourceFormat: unknown,
@@ -150,10 +148,12 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
 +    /^msg_[A-Za-z0-9_-]{1,192}$/.test(body.id)
 +    ? body.id
 +    : null;
- }
- 
++}
++
  export type PersistAttemptLogsArgs = {
-@@ -297,7 +340,10 @@
+   upstreamHttpSelection?: HttpAttemptSelection | null;
+   status: number;
+@@ -298,7 +341,10 @@ export type PersistAttemptLogsContext = {
    model: string | null | undefined;
    skillRequestId: string;
    detailedLoggingEnabled: boolean;
@@ -165,7 +165,7 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
    pendingRequestId: unknown;
    pendingRequestGeneration?: string;
    clientRawRequest: { endpoint?: string; headers?: unknown; body?: unknown } | null | undefined;
-@@ -340,15 +386,18 @@
+@@ -341,15 +387,18 @@ export type PersistAttemptLogsContext = {
  };
  
  function toConnectionId(value: unknown): string | null {
@@ -187,7 +187,7 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
    if (initialConnectionId === finalConnectionId) return null;
  
    return {
-@@ -378,15 +427,26 @@
+@@ -379,15 +428,26 @@ export function resolveRequestLifecycleEvent(input: {
  }):
    | { name: "request.completed"; payload: RequestCompletedPayload }
    | { name: "request.failed"; payload: RequestFailedPayload } {
@@ -222,7 +222,7 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
      return {
        name: "request.completed",
        payload: {
-@@ -394,8 +454,14 @@
+@@ -395,8 +455,14 @@ export function resolveRequestLifecycleEvent(input: {
          status: "success",
          model: model || "unknown",
          provider: provider || "unknown",
@@ -239,7 +239,7 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
          latencyMs,
          comboName: resolvedComboName,
        },
-@@ -521,11 +587,12 @@
+@@ -522,11 +588,12 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
      videoContentRemoved,
    } = ctx;
    const initialConnectionId = toConnectionId(connectionId);
@@ -254,7 +254,7 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
    );
  
    // The upstream response can quote a video transcript in arbitrary prose,
-@@ -535,7 +602,7 @@
+@@ -536,7 +603,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
    const redactedRequest = applyVideoBridgeLogRedaction(
      body,
      videoBridgeLogRedaction,
@@ -263,9 +263,9 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
    );
    // The observed signal and its per-part shadow normally arrive together.
    // If the shadow is missing or even one entry fails to match after request
-@@ -550,12 +617,19 @@
-     : (responseBody ?? (status >= 400 ? providerResponse : undefined));
-   const retainedError = videoContentRemoved && error ? "[omitted: video transcript]" : error;
+@@ -556,12 +623,19 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
+     ? captureReasoningSnapshotMeta(retainedResponse)
+     : null;
  
 -  const providerWarnings = extractProviderWarnings(providerResponse, clientResponse, responseBody);
 +  const providerWarnings = extractProviderWarnings(
@@ -285,7 +285,7 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
        resourceType: "provider_warning",
        status: "warning",
        requestId: skillRequestId,
-@@ -605,13 +679,22 @@
+@@ -611,13 +685,22 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
  
    if (pipelinePayloads) {
      if (providerRequest !== undefined && !pipelinePayloads.providerRequest) {
@@ -311,7 +311,7 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
      }
      if (retainedError) {
        pipelinePayloads.error = {
-@@ -630,7 +713,8 @@
+@@ -636,7 +719,8 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
        const earlyClientBytes = takeEarlyKeepaliveBytes(correlationId);
        if (earlyClientBytes.length > 0) {
          const existingStreamChunks =
@@ -321,7 +321,7 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
          pipelinePayloads.streamChunks = {
            ...existingStreamChunks,
            client: [...earlyClientBytes, ...(existingStreamChunks.client ?? [])],
-@@ -652,8 +736,38 @@
+@@ -658,8 +742,38 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
    // first byte left for the provider. Null when nothing was dispatched
    // (rejected before egress) — mirrors the addedWait late-read above.
    const upstreamDispatchedAt = readUpstreamDispatchedAt();
@@ -360,7 +360,7 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
      pendingRequestId: ctx.pendingRequestId,
      pendingRequestGeneration: ctx.pendingRequestGeneration,
      method: "POST",
-@@ -664,11 +778,15 @@
+@@ -670,11 +784,15 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
      provider,
      connectionId: finalConnectionId || undefined,
      duration: Date.now() - startTime,
@@ -378,7 +378,7 @@ index c8ac0303c8a37c87f9012c1c89e872825c3bb828..195764fa10122397d7f495b947339710
      // Encrypted-reasoning observation: stream-side flag plus duration, and
      // the two request bodies so the sink can read effort values
      // (requested from the client body, upstream from the post-strip body).
-@@ -715,7 +833,11 @@
+@@ -727,7 +845,11 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
      modelPinned: modelPinned || false,
      sessionTag: sessionTag || null,
      clientSessionId: clientSessionIdFromRawRequest(clientRawRequest),

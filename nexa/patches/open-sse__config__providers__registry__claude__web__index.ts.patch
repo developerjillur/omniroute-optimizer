@@ -2,7 +2,7 @@ diff --git a/open-sse/config/providers/registry/claude/web/index.ts b/open-sse/c
 index 6876810fcad91798067c9764706930a5fd6b6a4d..0461cb5e5b0701be3ad050d52cb7ab5e0ba11c37 100644
 --- a/open-sse/config/providers/registry/claude/web/index.ts
 +++ b/open-sse/config/providers/registry/claude/web/index.ts
-@@ -9,6 +9,17 @@
+@@ -9,6 +9,17 @@ export const claude_webProvider: RegistryEntry = {
    authType: "apikey",
    authHeader: "cookie",
    models: [

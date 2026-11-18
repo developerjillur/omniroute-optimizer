@@ -1,4 +1,5 @@
 diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-tools/claude-settings/route.ts
+index b6030494126d56ccb729597b31019d08d7f94200..3dca79f68b5666ce4f7eb944a3828015f1b37caa 100644
 --- a/src/app/api/cli-tools/claude-settings/route.ts
 +++ b/src/app/api/cli-tools/claude-settings/route.ts
 @@ -3,6 +3,7 @@
@@ -9,7 +10,7 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
  import { requireCliToolsAuth } from "@/lib/api/requireCliToolsAuth";
  import {
    ensureCliConfigWriteAllowed,
-@@ -10,23 +11,47 @@
+@@ -10,23 +11,47 @@ import {
    getCliRuntimeStatus,
  } from "@/shared/services/cliRuntime";
  import { createBackup } from "@/shared/services/backupService";
@@ -68,7 +69,7 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
  };
  
  // GET - Check claude CLI and read current settings
-@@ -54,7 +79,10 @@
+@@ -54,7 +79,10 @@ export async function GET(request: Request) {
      }
  
      const settings = await readSettings();
@@ -80,21 +81,20 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
  
      return NextResponse.json({
        installed: runtime.installed,
-@@ -66,9 +94,10 @@
+@@ -66,9 +94,10 @@ export async function GET(request: Request) {
        settings: settings,
        hasOmniRoute: hasOmniRoute,
        settingsPath: getClaudeSettingsPath(),
--    });
++      routingMode,
+     });
 -  } catch (error) {
 -    console.log("Error checking claude settings:", error);
-+      routingMode,
-+    });
 +  } catch {
 +    console.error("Error reading Claude Terminal settings");
      return NextResponse.json({ error: "Failed to check claude settings" }, { status: 500 });
    }
  }
-@@ -123,42 +152,45 @@
+@@ -123,42 +152,45 @@ export async function POST(request: Request) {
        }
      }
  
@@ -110,11 +110,10 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
 -
      // Read current settings
      let currentSettings: Record<string, any> = {};
--    try {
++    let currentContent = "";
+     try {
 -      const content = await fs.readFile(settingsPath, "utf-8");
 -      currentSettings = JSON.parse(content);
-+    let currentContent = "";
-+    try {
 +      currentContent = await fs.readFile(settingsPath, "utf-8");
 +      currentSettings = parseSettingsJson(currentContent);
      } catch (error: any) {
@@ -126,16 +125,6 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
 -    // Claude Code gateway mode expects the unified root endpoint, not a forced /v1 suffix.
 -    if (env.ANTHROPIC_BASE_URL) {
 -      env.ANTHROPIC_BASE_URL = normalizeClaudeBaseUrl(env.ANTHROPIC_BASE_URL);
--    }
--
--    // Merge new env with existing settings
--    const newSettings = {
--      ...currentSettings,
--      env: {
--        ...(currentSettings.env || {}),
--        ...env,
--      },
--    };
 +    if (!currentSettings || typeof currentSettings !== "object" || Array.isArray(currentSettings)) {
 +      throw new Error("Expected a settings object");
 +    }
@@ -151,8 +140,16 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
 +        { error: "Settings changed; review the changes again" },
 +        { status: 409 }
 +      );
-+    }
-+
+     }
+ 
+-    // Merge new env with existing settings
+-    const newSettings = {
+-      ...currentSettings,
+-      env: {
+-        ...(currentSettings.env || {}),
+-        ...env,
+-      },
+-    };
 +    await fs.mkdir(claudeDir, { recursive: true, mode: 0o700 });
 +    await createBackup("claude-terminal", settingsPath);
  
@@ -163,7 +160,7 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
  
      // Persist last-configured timestamp
      try {
-@@ -171,14 +203,19 @@
+@@ -171,14 +203,19 @@ export async function POST(request: Request) {
        success: true,
        message: "Settings updated successfully",
      });
@@ -185,7 +182,7 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
    "ANTHROPIC_BASE_URL",
    "ANTHROPIC_AUTH_TOKEN",
    "ANTHROPIC_API_KEY",
-@@ -199,15 +236,17 @@
+@@ -199,15 +236,17 @@ export async function DELETE(request: Request) {
        return NextResponse.json({ error: writeGuard }, { status: 403 });
      }
  
@@ -204,7 +201,7 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
          return NextResponse.json({
            success: true,
            message: "No settings file to reset",
-@@ -217,7 +256,7 @@
+@@ -217,7 +256,7 @@ export async function DELETE(request: Request) {
      }
  
      // Backup current settings before resetting
@@ -213,7 +210,7 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
  
      // Remove specified env fields
      if (currentSettings.env) {
-@@ -232,7 +271,10 @@
+@@ -232,7 +271,10 @@ export async function DELETE(request: Request) {
      }
  
      // Write updated settings
@@ -225,7 +222,7 @@ diff --git a/src/app/api/cli-tools/claude-settings/route.ts b/src/app/api/cli-to
  
      // Clear last-configured timestamp
      try {
-@@ -245,8 +287,8 @@
+@@ -245,8 +287,8 @@ export async function DELETE(request: Request) {
        success: true,
        message: "Settings reset successfully",
      });

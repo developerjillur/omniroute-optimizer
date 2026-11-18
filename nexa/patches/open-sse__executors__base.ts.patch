@@ -1,5 +1,5 @@
 diff --git a/open-sse/executors/base.ts b/open-sse/executors/base.ts
-index 27dd027..4afcf40 100644
+index 505e03eb9addb70425156c6ee8ad56c78cde5b31..dc7eceab593dce96f1d9d0d9790182c476d2dc35 100644
 --- a/open-sse/executors/base.ts
 +++ b/open-sse/executors/base.ts
 @@ -1,11 +1,15 @@
@@ -18,10 +18,11 @@ index 27dd027..4afcf40 100644
  import { getRegistryEntry, requireCompatibleBaseUrl } from "../config/providerRegistry.ts";
  import { resolveFetchStartTimeout } from "../utils/fetchStartTimeoutPolicy.ts";
  import {
-@@ -94,6 +98,22 @@
+@@ -100,6 +104,22 @@ import {
+   stripTrailingAssistantTurns,
  } from "../services/assistantPrefill.ts";
  import { randomUUID } from "node:crypto";
- import {
++import {
 +  isNativeClaudeThreadRequest,
 +  captureNativeClaudeThreadFields,
 +  restoreNativeClaudeThreadFields,
@@ -37,11 +38,10 @@ index 27dd027..4afcf40 100644
 +  getNativeClaudeSessionId,
 +  accountScopedClaudeSessionId,
 +} from "../services/nativeClaudeSession.ts";
-+import {
+ import {
    getClaudeCodeVersion,
    CLAUDE_CODE_STAINLESS_VERSION,
-   buildUserIdJson,
-@@ -240,6 +260,7 @@
+@@ -248,6 +268,7 @@ export type ExecuteInput = {
  };
  
  export type CountTokensInput = {
@@ -49,7 +49,7 @@ index 27dd027..4afcf40 100644
    body: Record<string, unknown>;
    credentials: ProviderCredentials;
    log?: ExecutorLog | null;
-@@ -692,19 +713,37 @@
+@@ -700,13 +721,13 @@ export class BaseExecutor {
      return query ? `${normalizedPath}?${query}` : normalizedPath;
    }
  
@@ -66,10 +66,10 @@ index 27dd027..4afcf40 100644
        body && typeof body === "object"
          ? {
              ...body,
-             model,
+@@ -714,6 +735,24 @@ export class BaseExecutor {
            }
          : { model };
-+
+ 
 +    if (this.provider === "claude") {
 +      const replay = sanitizeAnthropicThinkingReplay(requestBody);
 +      if (replay !== requestBody) requestBody.messages = replay.messages;
@@ -87,10 +87,11 @@ index 27dd027..4afcf40 100644
 +        nativeClient
 +      );
 +    }
- 
++
      let timeoutId: ReturnType<typeof setTimeout> | null = null;
      let activeSignal = signal || null;
-@@ -771,6 +810,30 @@
+     let controller: AbortController | null = null;
+@@ -779,6 +818,30 @@ export class BaseExecutor {
        contextEditing,
      } = input;
      assertValidationCredentials(input.validationDispatch, credentials);
@@ -121,7 +122,7 @@ index 27dd027..4afcf40 100644
      const fallbackCount = this.getFallbackCount();
      let lastError: unknown = null;
      let lastStatus = 0;
-@@ -940,7 +1003,7 @@
+@@ -948,7 +1011,7 @@ export class BaseExecutor {
  
        const rawTransformedBody = await this.transformRequest(
          model,
@@ -130,7 +131,7 @@ index 27dd027..4afcf40 100644
          stream,
          requestCredentials
        );
-@@ -1055,13 +1118,6 @@
+@@ -1081,13 +1144,6 @@ export class BaseExecutor {
            }
          };
  
@@ -144,7 +145,7 @@ index 27dd027..4afcf40 100644
          // Anthropic's user:sessions:claude_code OAuth scope expects CLI-shaped
          // traffic. Apply the cloak whenever we have an OAuth token, regardless
          // of upstream client.
-@@ -1078,16 +1134,20 @@
+@@ -1104,16 +1160,20 @@ export class BaseExecutor {
          ) {
            const tb = transformedBody as Record<string, unknown>;
            detachClaudeCodeRewriteTargets(tb);
@@ -169,7 +170,7 @@ index 27dd027..4afcf40 100644
  
            // NOTE (issue #2260): This is the native `claude` provider OAuth path.
            // It is intentionally NOT routed through applyCcBridgeTransformPipeline.
-@@ -1178,22 +1238,38 @@
+@@ -1204,22 +1264,38 @@ export class BaseExecutor {
              // must opt in with x-omniroute-thinking; force-injecting adaptive thinking
              // leaks non-standard reasoning replay fields back into those clients.
              const isHaiku = typeof tb.model === "string" && tb.model.includes("haiku");
@@ -213,7 +214,7 @@ index 27dd027..4afcf40 100644
                tb.thinking = { type: "adaptive" };
                tb.context_management = {
                  edits: [{ type: "clear_thinking_20251015", keep: "all" }],
-@@ -1204,7 +1280,11 @@
+@@ -1230,7 +1306,11 @@ export class BaseExecutor {
              // When an operator budget (custom/adaptive mode) produced an enabled block
              // upstream, remap it to adaptive + output_config.effort here.
              const th = tb.thinking as Record<string, unknown> | undefined;
@@ -226,7 +227,7 @@ index 27dd027..4afcf40 100644
                const b = typeof th.budget_tokens === "number" ? th.budget_tokens : 0;
                tb.thinking = { type: "adaptive" };
                tb.output_config = {
-@@ -1232,10 +1312,9 @@
+@@ -1258,10 +1338,9 @@ export class BaseExecutor {
            let deviceId: string;
            let accountUUID: string;
  
@@ -240,7 +241,7 @@ index 27dd027..4afcf40 100644
            const cloakIdentity = isClaudeCodeClient || hasClaudeOAuthToken;
            const upstreamUserId = cloakIdentity ? null : parseUpstreamMetadataUserId(tb);
            if (upstreamUserId) {
-@@ -1249,7 +1328,16 @@
+@@ -1275,7 +1354,16 @@ export class BaseExecutor {
                : passthroughUpstreamSessionId(
                    clientHeaders as Record<string, string | undefined> | undefined
                  );
@@ -258,7 +259,7 @@ index 27dd027..4afcf40 100644
              deviceId = resolveCliUserID(psd, seed);
              accountUUID = resolveAccountUUID(psd, seed, activeCredentials?.accessToken);
              identitySource = headerSid
-@@ -1276,7 +1364,9 @@
+@@ -1302,7 +1390,9 @@ export class BaseExecutor {
            stripClaudeSystemPrefixBlocks(sysBlocks, SENTINEL);
            sysBlocks.unshift({ type: "text", text: billingLine }, { type: "text", text: SENTINEL });
            tb.system = sysBlocks;
@@ -269,7 +270,7 @@ index 27dd027..4afcf40 100644
  
            // Run the configurable system-transforms pipeline for the native
            // `claude` provider (issue #2260 / comment 4459544580). The default
-@@ -1286,7 +1376,9 @@
+@@ -1312,7 +1402,9 @@ export class BaseExecutor {
            // `inject_billing_header` — billing + sentinel are already
            // prepended above. Users can extend the pipeline via Settings UI.
            {
@@ -280,7 +281,7 @@ index 27dd027..4afcf40 100644
              if (transformResult.appliedOpKinds.length > 0) {
                console.log(
                  `[SystemTransforms] claude-native: ${transformResult.appliedOpKinds.join(", ")}`
-@@ -1344,7 +1436,8 @@
+@@ -1370,7 +1462,8 @@ export class BaseExecutor {
                  // model that does not qualify (e.g. Haiku), which Anthropic rejects (#10119).
                  model,
                  // Gate skills-2025-10-02 on presence of code_execution tool in transformed body (#14200):
@@ -290,7 +291,7 @@ index 27dd027..4afcf40 100644
                ),
                "anthropic-dangerous-direct-browser-access": "true",
                "x-app": "cli",
-@@ -1490,6 +1583,19 @@
+@@ -1533,6 +1626,19 @@ export class BaseExecutor {
            connectionOptedIn: ccRequestDefaults.redactThinking === true,
            claudeOAuth: this.provider === "claude" && hasClaudeOAuthToken,
          });
@@ -310,7 +311,7 @@ index 27dd027..4afcf40 100644
          stripInternalBodyFields(transformedBody);
  
          const shouldFingerprint =
-@@ -1513,6 +1619,14 @@
+@@ -1556,6 +1662,14 @@ export class BaseExecutor {
          }
  
          mergeUpstreamExtraHeaders(finalHeaders, upstreamExtraHeaders);
@@ -325,7 +326,7 @@ index 27dd027..4afcf40 100644
          if (this.provider === "cline" || this.provider === "clinepass") {
            applyClineProtocolHeaders(finalHeaders, {
              taskId: headers["X-Task-ID"],
-@@ -1593,6 +1707,7 @@
+@@ -1638,6 +1752,7 @@ export class BaseExecutor {
  
          // Context Editing 400-fallback for Claude-compatible relays.
          if (
@@ -333,7 +334,7 @@ index 27dd027..4afcf40 100644
            response.status === HTTP_STATUS.BAD_REQUEST &&
            contextEditing?.enabled &&
            !contextEditingDisabled &&
-@@ -1628,6 +1743,7 @@
+@@ -1670,6 +1785,7 @@ export class BaseExecutor {
          // nested budget in the live transformedBody, and retry the same URL once.
          // Subsequent requests never pay this 400→retry round-trip.
          if (
@@ -341,7 +342,7 @@ index 27dd027..4afcf40 100644
            response.status === HTTP_STATUS.BAD_REQUEST &&
            thinkingBudgetClampedMax === null &&
            transformedBody &&
-@@ -1676,6 +1792,7 @@
+@@ -1715,6 +1831,7 @@ export class BaseExecutor {
          // → getLearnedReasoningEffort), clamp the live transformedBody by
          // re-running the sanitizer, and retry the same URL once.
          if (
@@ -349,7 +350,7 @@ index 27dd027..4afcf40 100644
            (response.status === HTTP_STATUS.BAD_REQUEST ||
              response.status === HTTP_STATUS.UNPROCESSABLE_ENTITY) &&
            !reasoningEffortClamped &&
-@@ -1727,21 +1844,23 @@
+@@ -1766,21 +1883,23 @@ export class BaseExecutor {
          }
  
          // Generic reactive 400 field-downgrade; each field is stripped at most once.
@@ -366,8 +367,6 @@ index 27dd027..4afcf40 100644
 -          protectedFields: forcedCodexTier ? ["service_tier"] : undefined,
 -          log,
 -        });
--
--        if (!advisorResultsReplaced) {
 +        if (!nativeThreadFields) {
 +          response = await applyFieldDowngradeRecovery({
 +            response,
@@ -383,12 +382,13 @@ index 27dd027..4afcf40 100644
 +            log,
 +          });
 +        }
-+
+ 
+-        if (!advisorResultsReplaced) {
 +        if (!nativeThreadFields && !advisorResultsReplaced) {
            const advisorRecovery = await applyAdvisorUndecryptableRecovery({
              response,
              url,
-@@ -1844,9 +1963,22 @@
+@@ -1880,9 +1999,22 @@ export class BaseExecutor {
            continue;
          }
  

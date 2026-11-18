@@ -2,7 +2,7 @@ diff --git a/next.config.mjs b/next.config.mjs
 index edbe7bb855bef118cbec95f9e592ab5bcdfcdd65..29b2d44934acf25c7c7dbdda84ad2ac73538a201 100644
 --- a/next.config.mjs
 +++ b/next.config.mjs
-@@ -21,10 +21,26 @@
+@@ -21,10 +21,26 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
  const LOCALE_MESSAGES_JSON = /[\\/]src[\\/]i18n[\\/]messages[\\/][^\\/]+\.json$/;
  const distDir = process.env.NEXT_DIST_DIR || ".build/next";
  const projectRoot = dirname(fileURLToPath(import.meta.url));
@@ -33,7 +33,7 @@ index edbe7bb855bef118cbec95f9e592ab5bcdfcdd65..29b2d44934acf25c7c7dbdda84ad2ac7
  const contentSecurityPolicy = [
    "default-src 'self'",
    "base-uri 'self'",
-@@ -36,11 +52,7 @@
+@@ -36,11 +52,7 @@ const contentSecurityPolicy = [
    "font-src 'self' https://fonts.gstatic.com data:",
    "img-src 'self' data: blob: https:",
    "media-src 'self' data: blob:",
@@ -46,7 +46,7 @@ index edbe7bb855bef118cbec95f9e592ab5bcdfcdd65..29b2d44934acf25c7c7dbdda84ad2ac7
    "worker-src 'self' blob:",
    "manifest-src 'self'",
  ].join("; ");
-@@ -205,6 +217,13 @@
+@@ -205,6 +217,13 @@ const nextConfig = {
      // macOS development only: avoid the EBADF spawn failures of Next's TypeScript
      // CLI and static-path worker (see scripts/build/macosDevWorkaround.mjs).
      ...macosDevExperimentalOverrides(),
@@ -60,7 +60,7 @@ index edbe7bb855bef118cbec95f9e592ab5bcdfcdd65..29b2d44934acf25c7c7dbdda84ad2ac7
      serverActions: {
        bodySizeLimit: process.env.OMNIROUTE_SERVER_ACTIONS_BODY_LIMIT || "50mb",
      },
-@@ -381,6 +400,11 @@
+@@ -381,6 +400,11 @@ const nextConfig = {
      if (!dev && process.env.OMNIROUTE_WEBPACK_BUILD_CACHE !== "1") {
        config.cache = false;
      }

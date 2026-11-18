@@ -22,8 +22,8 @@ index cf19166f186ee842c02fadb7439e4b95454817d0..7dcfb3f41eb4d6872822260e8940031d
    CLAUDE_FABLE_5_1_PRICING,
    CLAUDE_FABLE_5_PRICING,
    CLAUDE_OPUS_5_5_PRICING,
-@@ -26,6 +28,8 @@
-
+@@ -26,6 +28,8 @@ import {
+ 
  export const DEFAULT_PRICING_FRONTIER = {
    openai: {
 +    "gpt-6.2-sol": GPT_6_2_SOL_PRICING,
@@ -31,7 +31,7 @@ index cf19166f186ee842c02fadb7439e4b95454817d0..7dcfb3f41eb4d6872822260e8940031d
      // Rows below that OpenAI prices with a >272K long-context tier carry it via
      // withOpenAiLongContextTier (see shared-tiers.ts for the source).
      "gpt-6-astra": withOpenAiLongContextTier(GPT_6_ASTRA_PRICING),
-@@ -46,7 +50,7 @@
+@@ -46,7 +50,7 @@ export const DEFAULT_PRICING_FRONTIER = {
        reasoning: 0.5,
        cache_creation: 0.125,
      }),
@@ -40,7 +40,7 @@ index cf19166f186ee842c02fadb7439e4b95454817d0..7dcfb3f41eb4d6872822260e8940031d
      "gpt-5.6": withOpenAiLongContextTier(GPT_5_6_SOL_PRICING),
      "gpt-5.6-sol": withOpenAiLongContextTier(GPT_5_6_SOL_PRICING),
      "gpt-5.6-terra": withOpenAiLongContextTier(GPT_5_6_TERRA_PRICING),
-@@ -244,6 +248,7 @@
+@@ -244,6 +248,7 @@ export const DEFAULT_PRICING_FRONTIER = {
      // Common model IDs (without dates) used across providers
      // Intentional duplicates of dot-notation variants (e.g. claude-opus-4.6)
      // to cover hyphen-notation IDs (claude-opus-4-6) used by some clients

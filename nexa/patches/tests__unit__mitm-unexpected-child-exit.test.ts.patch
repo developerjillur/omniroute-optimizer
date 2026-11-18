@@ -1,5 +1,5 @@
 diff --git a/tests/unit/mitm-unexpected-child-exit.test.ts b/tests/unit/mitm-unexpected-child-exit.test.ts
-index 1a39a0a9fd1d0dc637fbb918d9a87f098d34baa6..b857adcf15af9c80f7b97ce8e15cad73e3dd5aa9 100644
+index 2a58c3f379ff86a9d502f52cb06e8152f7d02a11..a697bfe5b0a0fd666f9aa8c3ba1b9efac0f3d718 100644
 --- a/tests/unit/mitm-unexpected-child-exit.test.ts
 +++ b/tests/unit/mitm-unexpected-child-exit.test.ts
 @@ -12,14 +12,14 @@
@@ -43,8 +43,8 @@ index 1a39a0a9fd1d0dc637fbb918d9a87f098d34baa6..b857adcf15af9c80f7b97ce8e15cad73
 +  return proc;
  }
  
- test.after(() => {
-@@ -140,6 +143,8 @@ test("child exit after stopMitm() (intentional) does not run a second teardown",
+ test.beforeEach((t) => {
+@@ -158,6 +161,8 @@ test("child exit after stopMitm() (intentional) does not run a second teardown",
    const stopDeps = recorder("pw").deps;
    await manager.stopMitm("pw", stopDeps);
    assert.equal(proc.killed, true, "precondition: stopMitm() killed the child");

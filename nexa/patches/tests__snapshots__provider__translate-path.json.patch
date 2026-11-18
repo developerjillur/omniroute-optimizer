@@ -1,8 +1,8 @@
 diff --git a/tests/snapshots/provider/translate-path.json b/tests/snapshots/provider/translate-path.json
-index 0c0a1a571e1e50685c90444c9f00369b2f9aab3b..1da5ad9c9f7c16f624ff043c87b0530d19bf0685 100644
+index 2e21e5f6c202570ba8247706a025550e04ae8c07..bac2141541eb4a590d411d9fab7cab9d52bb577b 100644
 --- a/tests/snapshots/provider/translate-path.json
 +++ b/tests/snapshots/provider/translate-path.json
-@@ -2715,7 +2715,7 @@
+@@ -2784,7 +2784,7 @@
          "copilot-integration-id": "copilot-developer-cli",
          "editor-version": "copilot/1.0.91",
          "openai-intent": "conversation-agent",
@@ -11,16 +11,7 @@ index 0c0a1a571e1e50685c90444c9f00369b2f9aab3b..1da5ad9c9f7c16f624ff043c87b0530d
          "x-client-machine-id": "<UUID>",
          "x-github-api-version": "2026-08-01",
          "x-interaction-type": "conversation-user"
-@@ -2729,7 +2729,7 @@
-         "copilot-integration-id": "copilot-developer-cli",
-         "editor-version": "copilot/1.0.91",
-         "openai-intent": "conversation-agent",
--        "user-agent": "copilot/1.0.91 (linux) term/unknown",
-+        "user-agent": "copilot/1.0.91 (<PLATFORM>) term/unknown",
-         "x-client-machine-id": "<UUID>",
-         "x-github-api-version": "2026-08-01",
-         "x-interaction-type": "conversation-user"
-@@ -2743,7 +2743,7 @@
+@@ -2798,7 +2798,7 @@
          "copilot-integration-id": "copilot-developer-cli",
          "editor-version": "copilot/1.0.91",
          "openai-intent": "conversation-agent",
@@ -37,8 +28,8 @@ index 0c0a1a571e1e50685c90444c9f00369b2f9aab3b..1da5ad9c9f7c16f624ff043c87b0530d
 +        "user-agent": "copilot/1.0.91 (<PLATFORM>) term/unknown",
          "x-client-machine-id": "<UUID>",
          "x-github-api-version": "2026-08-01",
-         "x-interaction-type": "conversation-user",
-@@ -2827,7 +2827,7 @@
+         "x-interaction-type": "conversation-user"
+@@ -2881,7 +2881,7 @@
          "copilot-integration-id": "copilot-developer-cli",
          "editor-version": "copilot/1.0.91",
          "openai-intent": "conversation-agent",
@@ -47,7 +38,16 @@ index 0c0a1a571e1e50685c90444c9f00369b2f9aab3b..1da5ad9c9f7c16f624ff043c87b0530d
          "x-client-machine-id": "<UUID>",
          "x-github-api-version": "2026-08-01",
          "x-interaction-type": "conversation-user",
-@@ -2842,7 +2842,7 @@
+@@ -2896,7 +2896,7 @@
+         "copilot-integration-id": "copilot-developer-cli",
+         "editor-version": "copilot/1.0.91",
+         "openai-intent": "conversation-agent",
+-        "user-agent": "copilot/1.0.91 (linux) term/unknown",
++        "user-agent": "copilot/1.0.91 (<PLATFORM>) term/unknown",
+         "x-client-machine-id": "<UUID>",
+         "x-github-api-version": "2026-08-01",
+         "x-interaction-type": "conversation-user",
+@@ -2911,7 +2911,7 @@
          "copilot-integration-id": "copilot-developer-cli",
          "editor-version": "copilot/1.0.91",
          "openai-intent": "conversation-agent",

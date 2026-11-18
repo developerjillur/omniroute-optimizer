@@ -1,8 +1,8 @@
 diff --git a/src/app/(dashboard)/dashboard/analytics/CacheHealthTab.tsx b/src/app/(dashboard)/dashboard/analytics/CacheHealthTab.tsx
-index 38ecc0a101be69f67ac1ad4439b5437bfbf12a30..9059cfe28c80d575adbbc51c5cc59f3b66adbbe3 100644
+index 278018c573dea569ca4af8b8d7d65f023122d141..6db12e76d303eb488251b5062d7eced2bbee1e8e 100644
 --- a/src/app/(dashboard)/dashboard/analytics/CacheHealthTab.tsx
 +++ b/src/app/(dashboard)/dashboard/analytics/CacheHealthTab.tsx
-@@ -16,6 +16,8 @@
+@@ -17,6 +17,8 @@ import {
    TableHeader,
    TableRow,
  } from "@omniroute/ui-kit/table";
@@ -11,7 +11,7 @@ index 38ecc0a101be69f67ac1ad4439b5437bfbf12a30..9059cfe28c80d575adbbc51c5cc59f3b
  
  type CacheHealthVerdict = "healthy" | "degraded" | "thrash" | "no-data";
  
-@@ -50,6 +52,8 @@
+@@ -58,6 +60,8 @@ type CacheHealthResponse = {
    timeRange: UtilizationTimeRange;
    since: string;
    truncated: boolean;
@@ -20,7 +20,7 @@ index 38ecc0a101be69f67ac1ad4439b5437bfbf12a30..9059cfe28c80d575adbbc51c5cc59f3b
  };
  
  type Translator = ((key: string, values?: Record<string, unknown>) => string) & {
-@@ -282,6 +286,9 @@
+@@ -344,6 +348,9 @@ export default function CacheHealthTab() {
                </TableBody>
              </Table>
            </Card>

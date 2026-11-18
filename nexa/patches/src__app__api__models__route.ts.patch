@@ -2,10 +2,10 @@ diff --git a/src/app/api/models/route.ts b/src/app/api/models/route.ts
 index c886f9b1519c191d81e796c015fca0f5d1c91e0f..9980f71f892aab02d37a50517bdb14bdd04e89d3 100644
 --- a/src/app/api/models/route.ts
 +++ b/src/app/api/models/route.ts
-@@ -26,6 +26,12 @@
+@@ -26,6 +26,12 @@ import {
  import { buildAliasMaps } from "@/app/api/v1/models/catalogProviderMaps";
  import { resolveCanonicalProviderId as resolveCanonicalProviderIdFromMaps } from "@/app/api/v1/models/catalogProviderMaps";
-
+ 
 +import { getModelCompatOverrides, isOverrideHiddenForModality } from "@/lib/db/models/compat";
 +import {
 +  mergeDashboardModelRows,
@@ -15,8 +15,8 @@ index c886f9b1519c191d81e796c015fca0f5d1c91e0f..9980f71f892aab02d37a50517bdb14bd
  interface GetModelsDependencies {
    createCapabilitySnapshot?: typeof createModelCapabilityResolutionSnapshot;
  }
-@@ -79,10 +85,12 @@
-
+@@ -79,10 +85,12 @@ export async function handleGetModels(request: Request, dependencies: GetModelsD
+ 
      // Get active provider connections to filter available models
      let activeProviders: Set<string> | null = null;
 +    let activeConnections: Awaited<ReturnType<typeof getProviderConnections>> = [];
@@ -28,10 +28,10 @@ index c886f9b1519c191d81e796c015fca0f5d1c91e0f..9980f71f892aab02d37a50517bdb14bd
          // Include both provider IDs and their aliases in the active set.
          // PROVIDER_MODELS keys are aliases (e.g. 'cc' for 'claude', 'gh' for 'github').
          // DB connections are stored under provider IDs ('claude', 'github').
-@@ -148,11 +156,42 @@
+@@ -148,11 +156,42 @@ export async function handleGetModels(request: Request, dependencies: GetModelsD
        hidePaid = settings?.hidePaidModels === true;
      } catch {}
-
+ 
 +    const hiddenByProvider = new Map<string, Set<string>>();
 +    const hiddenForProvider = (provider: string, alias: string) => {
 +      const key = `${provider}:${alias}`;
@@ -71,7 +71,7 @@ index c886f9b1519c191d81e796c015fca0f5d1c91e0f..9980f71f892aab02d37a50517bdb14bd
        return (
          !hidePaid ||
          (providerHasFreeModels(model.provider) && isFreeModel(model.provider, { id: model.model }))
-@@ -166,10 +205,11 @@
+@@ -166,10 +205,11 @@ export async function handleGetModels(request: Request, dependencies: GetModelsD
      // dropped it because a provider's live-synced catalog covers it (or, for
      // exclusive-listing providers like Cursor, replaces the static list entirely).
      // Recompute the same suppression /v1/models applies so the two endpoints agree.
@@ -84,10 +84,10 @@ index c886f9b1519c191d81e796c015fca0f5d1c91e0f..9980f71f892aab02d37a50517bdb14bd
          customModelsByProvider: capabilitySnapshot.customModelsByProvider,
        });
        const { aliasToProviderId, providerIdToAlias } = buildAliasMaps();
-@@ -224,7 +264,36 @@
+@@ -224,7 +264,36 @@ export async function handleGetModels(request: Request, dependencies: GetModelsD
        };
      });
-
+ 
 -    return NextResponse.json({ models });
 +    // The active synced catalog also introduces new releases; it is not only a
 +    // suppression list for static models. Preserve operator visibility and rules.

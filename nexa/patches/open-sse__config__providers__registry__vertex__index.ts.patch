@@ -2,7 +2,7 @@ diff --git a/open-sse/config/providers/registry/vertex/index.ts b/open-sse/confi
 index d3a7b68de9411a5b50d7fa72375b924cc1f7026f..4062435d1e3b8ccd0583d96f682c8c7bf1ddc4b4 100644
 --- a/open-sse/config/providers/registry/vertex/index.ts
 +++ b/open-sse/config/providers/registry/vertex/index.ts
-@@ -48,6 +48,7 @@
+@@ -48,6 +48,7 @@ export const vertexProvider: RegistryEntry = {
      },
      { id: "zai-org/glm-5-maas", name: "GLM 5 (Vertex MaaS)", targetFormat: "openai" },
      ...VERTEX_XAI_MODELS,

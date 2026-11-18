@@ -1,8 +1,8 @@
 diff --git a/src/lib/usage/providerLimits.ts b/src/lib/usage/providerLimits.ts
-index c7474ec0a7f959a208b7e15aafc3725d5eb045f2..84bdce690f8edb6ff526ec6051459d7b6547e802 100644
+index d2b66856fb0c74d17899202461c861898f77627f..f28991db381ee3b2ecb01f512c76513035d28137 100644
 --- a/src/lib/usage/providerLimits.ts
 +++ b/src/lib/usage/providerLimits.ts
-@@ -13,7 +13,8 @@
+@@ -22,7 +22,8 @@
    type ProviderLimitsCacheEntry,
  } from "@/lib/db/providerLimits";
  import { syncToCloud } from "@/lib/cloudSync";
@@ -12,21 +12,7 @@ index c7474ec0a7f959a208b7e15aafc3725d5eb045f2..84bdce690f8edb6ff526ec6051459d7b
  import { buildClaudeExtraUsageConnectionUpdate } from "@/lib/providers/claudeExtraUsage";
  import { clearRecoveredProviderState } from "@/sse/services/auth";
  import { hasObservedClaudeQuotaResetAfter } from "@/lib/db/quotaResetEvents";
-@@ -1316,11 +1317,13 @@
-   const caches: Record<string, ProviderLimitsCacheEntry> = {};
-   const errors: Record<string, string> = {};
- 
-+  let succeeded = 0;
-   const recordResult = (
-     connectionId: string,
-     result: PromiseSettledResult<{ connectionId: string; cache: ProviderLimitsCacheEntry }>
-   ) => {
-     if (result.status === "fulfilled") {
-+      succeeded++;
-       const { cache } = result.value;
-       const previous = getProviderLimitsCache(connectionId);
-       if (cache === previous) {
-@@ -1335,8 +1338,17 @@
+@@ -1387,8 +1388,17 @@
      errors[connectionId] = reason?.message || "Failed to refresh provider limits";
    };
  
@@ -46,14 +32,14 @@ index c7474ec0a7f959a208b7e15aafc3725d5eb045f2..84bdce690f8edb6ff526ec6051459d7b
  
    // OAuth connections are processed STRICTLY SEQUENTIALLY (chunk size 1) with a
    // spacing gap so a single host never bursts simultaneous usage/refresh
-@@ -1370,8 +1382,8 @@
+@@ -1424,8 +1434,8 @@
  
    return {
      total: connections.length,
--    succeeded: cacheEntries.length,
--    failed: connections.length - cacheEntries.length,
-+    succeeded,
-+    failed: connections.length - succeeded,
+-    succeeded: currentEntries.length,
+-    failed: connections.length - currentEntries.length,
++    succeeded: Object.keys(caches).length,
++    failed: connections.length - Object.keys(caches).length,
      caches,
      errors,
    };

@@ -1,8 +1,8 @@
 diff --git a/Dockerfile b/Dockerfile
-index 008cb17577c86884cbc0654908b589482fb4c0ce..8b701fc1c8f6dfddc00b94629ecd91237a0b36a6 100644
+index aca259ae855a02514a297396e2cdbcda3272d30d..f28e21e95a2b544ae63a4d453be8d1e2f79bf292 100644
 --- a/Dockerfile
 +++ b/Dockerfile
-@@ -68,8 +68,12 @@
+@@ -68,8 +68,12 @@ RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-apt-cache,targe
  # tar ^7.5.4 and undici ^6.25.0 — hence undici stays on the 6.x line, NOT 8.x).
  # --install-strategy=nested makes each replacement self-contained, so it cannot
  # perturb the versions the rest of npm's flat tree resolves.
@@ -16,7 +16,7 @@ index 008cb17577c86884cbc0654908b589482fb4c0ce..8b701fc1c8f6dfddc00b94629ecd9123
    npm install --prefix /tmp/npm-cve-patch --no-audit --no-fund --ignore-scripts \
      --install-strategy=nested \
      brace-expansion@5.0.12 ip-address@10.7.4 postcss-selector-parser@7.1.6 tar@7.5.22 undici@6.29.1; \
-@@ -103,6 +107,13 @@
+@@ -103,6 +107,13 @@ RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-apt-cache,targe
    && rm -rf /var/lib/apt/lists/*
  
  COPY package*.json ./

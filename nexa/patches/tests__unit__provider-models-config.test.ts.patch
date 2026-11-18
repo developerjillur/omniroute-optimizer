@@ -2,7 +2,7 @@ diff --git a/tests/unit/provider-models-config.test.ts b/tests/unit/provider-mod
 index 51f4d3d143200aa62d4d84f6b9ae6d3d3db08f16..07acb30d7d8cf08580679655c594454173caa2a3 100644
 --- a/tests/unit/provider-models-config.test.ts
 +++ b/tests/unit/provider-models-config.test.ts
-@@ -125,11 +125,11 @@
+@@ -125,11 +125,11 @@ test("GitHub Copilot registry reflects the current supported model lineup", () =
    assert.equal(getModelTargetFormat("gh", "kimi-k3"), "openai");
  });
  

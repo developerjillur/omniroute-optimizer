@@ -1,24 +1,16 @@
 diff --git a/open-sse/translator/response/claude-to-openai.ts b/open-sse/translator/response/claude-to-openai.ts
-index 72ebfb5d12584fd84e24433e391f1ffcf8214db1..d9b9d64ab6011651d75c445380e3927a0184d6cc 100644
+index ed0faa8bd4c019ca471faa109c883b8fbb457adc..fe7a67b963a343f7154c0ff5eb7a69ccf120086b 100644
 --- a/open-sse/translator/response/claude-to-openai.ts
 +++ b/open-sse/translator/response/claude-to-openai.ts
-@@ -1,6 +1,14 @@
+@@ -1,6 +1,7 @@
  import { register } from "../registry.ts";
+ import { cacheCreationFields, mergeCacheCreationFields } from "../../utils/cacheWriteUsage.ts";
  import { FORMATS } from "../formats.ts";
--import { initThinkState, applyThinkTag, flushThinkBuffer } from "../../utils/thinkTagParser.ts";
-+import {
-+  mergeAnthropicUsage,
-+  normalizeAnthropicUsage,
-+} from "../../utils/anthropicUsage.ts";
-+import {
-+  initThinkState,
-+  applyThinkTag,
-+  flushThinkBuffer,
-+} from "../../utils/thinkTagParser.ts";
++import { mergeAnthropicUsage, normalizeAnthropicUsage } from "../../utils/anthropicUsage.ts";
+ import { initThinkState, applyThinkTag, flushThinkBuffer } from "../../utils/thinkTagParser.ts";
  import { storeClaudeThinkingBlocks } from "../../services/claudeThinkingStore.ts";
  
- type OpenAIUsage = {
-@@ -8,10 +16,12 @@ type OpenAIUsage = {
+@@ -9,11 +10,13 @@
    completion_tokens: number;
    total_tokens: number;
    reasoning_tokens?: number;
@@ -27,12 +19,13 @@ index 72ebfb5d12584fd84e24433e391f1ffcf8214db1..d9b9d64ab6011651d75c445380e3927a
    prompt_tokens_details?: {
      cached_tokens?: number;
      cache_creation_tokens?: number;
+     cache_creation?: unknown;
 -    // false: cache_creation_tokens is not included in prompt_tokens (#2215).
 +    // Native metering uses an inclusive prompt count; retain its cache inclusion flag.
      cache_creation_in_prompt?: boolean;
    };
    completion_tokens_details?: {
-@@ -88,40 +98,11 @@ export function claudeToOpenAIResponse(chunk, state) {
+@@ -90,41 +93,8 @@
        // shouldParseTextualReasoningTags) so it strips <think> markup out of
        // delta.content and re-emits it as delta.reasoning_content.
        state.thinkState = initThinkState(true, state.provider, state.model);
@@ -61,6 +54,7 @@ index 72ebfb5d12584fd84e24433e391f1ffcf8214db1..d9b9d64ab6011651d75c445380e3927a
 -        if (inputTokens > 0 || outputTokens > 0 || cacheRead > 0 || cacheCreation > 0) {
 -          const billableInputTokens = inputTokens + cacheRead;
 -          state.usage = {
+-            ...cacheCreationFields(startUsage),
 -            prompt_tokens: billableInputTokens,
 -            completion_tokens: outputTokens,
 -            input_tokens: billableInputTokens,
@@ -70,15 +64,12 @@ index 72ebfb5d12584fd84e24433e391f1ffcf8214db1..d9b9d64ab6011651d75c445380e3927a
 -          if (cacheCreation > 0) state.usage.cache_creation_input_tokens = cacheCreation;
 -        }
 -      }
-+      state.nativeAnthropicUsage = mergeAnthropicUsage(
-+        null,
-+        chunk.message?.usage,
-+      );
++      state.nativeAnthropicUsage = mergeAnthropicUsage(null, chunk.message?.usage);
 +      state.usage = normalizeAnthropicUsage(state.nativeAnthropicUsage);
        results.push(createChunk(state, { role: "assistant" }));
        break;
      }
-@@ -183,7 +164,11 @@ export function claudeToOpenAIResponse(chunk, state) {
+@@ -186,7 +156,11 @@
          };
          if (state.thinkState) applyThinkTag(state.thinkState, textDelta);
          if (textDelta.reasoning_content) {
@@ -86,32 +77,12 @@ index 72ebfb5d12584fd84e24433e391f1ffcf8214db1..d9b9d64ab6011651d75c445380e3927a
 +          results.push(
 +            createChunk(state, {
 +              reasoning_content: textDelta.reasoning_content,
-+            }),
++            })
 +          );
          }
          if (textDelta.content) {
            results.push(createChunk(state, { content: textDelta.content }));
-@@ -210,7 +195,7 @@ export function claudeToOpenAIResponse(chunk, state) {
-                   function: { arguments: delta.partial_json },
-                 },
-               ],
--            })
-+            }),
-           );
-         }
-       }
-@@ -225,7 +210,9 @@ export function claudeToOpenAIResponse(chunk, state) {
-       if (state.thinkState?.active) {
-         const flushed = flushThinkBuffer(state.thinkState);
-         if (flushed.reasoningDelta) {
--          results.push(createChunk(state, { reasoning_content: flushed.reasoningDelta }));
-+          results.push(
-+            createChunk(state, { reasoning_content: flushed.reasoningDelta }),
-+          );
-         }
-         if (flushed.contentDelta) {
-           results.push(createChunk(state, { content: flushed.contentDelta }));
-@@ -249,76 +236,18 @@ export function claudeToOpenAIResponse(chunk, state) {
+@@ -252,80 +226,15 @@
      }
  
      case "message_delta": {
@@ -163,6 +134,7 @@ index 72ebfb5d12584fd84e24433e391f1ffcf8214db1..d9b9d64ab6011651d75c445380e3927a
 -            ? inputTokens + cacheReadTokens
 -            : previousInputTokens;
 -        state.usage = {
+-          ...mergeCacheCreationFields(previousUsage, chunk.usage),
 -          prompt_tokens: billableInputTokens,
 -          completion_tokens: outputTokens,
 -          input_tokens: billableInputTokens,
@@ -183,12 +155,12 @@ index 72ebfb5d12584fd84e24433e391f1ffcf8214db1..d9b9d64ab6011651d75c445380e3927a
 -        if (effectiveCacheReadTokens > 0) {
 -          state.usage.cache_read_input_tokens = effectiveCacheReadTokens;
 -        }
--        if (effectiveCacheCreationTokens > 0) {
+-        if (
+-          effectiveCacheCreationTokens > 0 &&
+-          state.usage.cache_creation_input_tokens === undefined
+-        ) {
 -          state.usage.cache_creation_input_tokens = effectiveCacheCreationTokens;
-+        state.nativeAnthropicUsage = mergeAnthropicUsage(
-+          state.nativeAnthropicUsage,
-+          chunk.usage,
-+        );
++        state.nativeAnthropicUsage = mergeAnthropicUsage(state.nativeAnthropicUsage, chunk.usage);
 +        state.usage = normalizeAnthropicUsage(state.nativeAnthropicUsage);
 +        const reasoning = state.usage.reasoning_tokens;
 +        if (typeof reasoning === "number") {
@@ -199,13 +171,9 @@ index 72ebfb5d12584fd84e24433e391f1ffcf8214db1..d9b9d64ab6011651d75c445380e3927a
          }
        }
  
-@@ -367,10 +296,11 @@ export function claudeToOpenAIResponse(chunk, state) {
-           const inputTokens = state.usage.input_tokens || 0;
-           const outputTokens = state.usage.output_tokens || 0;
+@@ -376,8 +285,8 @@
            const cachedTokens = state.usage.cache_read_input_tokens || 0;
--          const cacheCreationTokens = state.usage.cache_creation_input_tokens || 0;
-+          const cacheCreationTokens =
-+            state.usage.cache_creation_input_tokens || 0;
+           const cacheCreationTokens = state.usage.cache_creation_input_tokens || 0;
  
 -          // prompt_tokens = input_tokens (input + cache_read, per #2215 —
 -          // cache_creation is exposed separately in prompt_tokens_details below).
@@ -214,22 +182,20 @@ index 72ebfb5d12584fd84e24433e391f1ffcf8214db1..d9b9d64ab6011651d75c445380e3927a
            // completion_tokens = output_tokens
            // total_tokens = prompt_tokens + completion_tokens
            const promptTokens = inputTokens;
-@@ -378,6 +308,8 @@ export function claudeToOpenAIResponse(chunk, state) {
-           const totalTokens = promptTokens + completionTokens;
+@@ -386,6 +295,12 @@
  
            finalChunk.usage = {
-+            ...(state.usage.cacheCreation5m !== undefined ? {cacheCreation5m:state.usage.cacheCreation5m} : {}),
-+            ...(state.usage.cacheCreation1h !== undefined ? {cacheCreation1h:state.usage.cacheCreation1h} : {}),
+             ...cacheCreationFields(state.usage),
++            ...(state.usage.cacheCreation5m !== undefined
++              ? { cacheCreation5m: state.usage.cacheCreation5m }
++              : {}),
++            ...(state.usage.cacheCreation1h !== undefined
++              ? { cacheCreation1h: state.usage.cacheCreation1h }
++              : {}),
              prompt_tokens: promptTokens,
              completion_tokens: completionTokens,
              total_tokens: totalTokens,
-@@ -395,11 +327,12 @@ export function claudeToOpenAIResponse(chunk, state) {
-           if (cachedTokens > 0 || cacheCreationTokens > 0) {
-             finalChunk.usage.prompt_tokens_details = {};
-             if (cachedTokens > 0) {
--              finalChunk.usage.prompt_tokens_details.cached_tokens = cachedTokens;
-+              finalChunk.usage.prompt_tokens_details.cached_tokens =
-+                cachedTokens;
+@@ -407,7 +322,7 @@
              }
              if (cacheCreationTokens > 0) {
                finalChunk.usage.prompt_tokens_details.cache_creation_tokens = cacheCreationTokens;
@@ -238,40 +204,20 @@ index 72ebfb5d12584fd84e24433e391f1ffcf8214db1..d9b9d64ab6011651d75c445380e3927a
              }
            }
          }
-@@ -414,16 +347,22 @@ export function claudeToOpenAIResponse(chunk, state) {
-       flushThinkingContinuity(state);
-       if (!state.finishReasonSent) {
-         const finishReason =
--          state.finishReason || (state.toolCalls?.size > 0 ? "tool_calls" : "stop");
-+          state.finishReason ||
-+          (state.toolCalls?.size > 0 ? "tool_calls" : "stop");
-         const cachedTokens = state.usage?.cache_read_input_tokens || 0;
--        const cacheCreationTokens = state.usage?.cache_creation_input_tokens || 0;
-+        const cacheCreationTokens =
-+          state.usage?.cache_creation_input_tokens || 0;
-         const usageObj =
-           state.usage && typeof state.usage === "object"
+@@ -430,6 +345,12 @@
              ? {
                  usage: {
-+                  ...(state.usage.cacheCreation5m !== undefined ? {cacheCreation5m:state.usage.cacheCreation5m} : {}),
-+                  ...(state.usage.cacheCreation1h !== undefined ? {cacheCreation1h:state.usage.cacheCreation1h} : {}),
+                   ...cacheCreationFields(state.usage),
++                  ...(state.usage.cacheCreation5m !== undefined
++                    ? { cacheCreation5m: state.usage.cacheCreation5m }
++                    : {}),
++                  ...(state.usage.cacheCreation1h !== undefined
++                    ? { cacheCreation1h: state.usage.cacheCreation1h }
++                    : {}),
                    prompt_tokens: state.usage.input_tokens || 0,
                    completion_tokens: state.usage.output_tokens || 0,
--                  total_tokens: (state.usage.input_tokens || 0) + (state.usage.output_tokens || 0),
-+                  total_tokens:
-+                    (state.usage.input_tokens || 0) +
-+                    (state.usage.output_tokens || 0),
-                   ...(typeof state.usage.reasoning_tokens === "number"
-                     ? {
-                         reasoning_tokens: state.usage.reasoning_tokens,
-@@ -435,11 +374,13 @@ export function claudeToOpenAIResponse(chunk, state) {
-                   ...(cachedTokens > 0 || cacheCreationTokens > 0
-                     ? {
-                         prompt_tokens_details: {
--                          ...(cachedTokens > 0 ? { cached_tokens: cachedTokens } : {}),
-+                          ...(cachedTokens > 0
-+                            ? { cached_tokens: cachedTokens }
-+                            : {}),
+                   total_tokens: (state.usage.input_tokens || 0) + (state.usage.output_tokens || 0),
+@@ -449,7 +370,7 @@
                            ...(cacheCreationTokens > 0
                              ? {
                                  cache_creation_tokens: cacheCreationTokens,
@@ -280,7 +226,7 @@ index 72ebfb5d12584fd84e24433e391f1ffcf8214db1..d9b9d64ab6011651d75c445380e3927a
                                }
                              : {}),
                          },
-@@ -478,12 +419,13 @@ function convertStopReason(reason) {
+@@ -488,12 +409,13 @@
        return "stop";
      case "max_tokens":
        return "length";

@@ -1,13 +1,13 @@
 diff --git a/open-sse/config/antigravityModelAliases.ts b/open-sse/config/antigravityModelAliases.ts
-index ae70142cf3277b7dccd44aa0fca618791b5653ad..44456ba5bb2bc9d4c81e043cda344284bc0bc17a 100644
+index dc29ee228dcae88f6a625fcec2b2b505b9856d3c..4e9786e2ab8faa58b0817d1c280bbf0e9999ef29 100644
 --- a/open-sse/config/antigravityModelAliases.ts
 +++ b/open-sse/config/antigravityModelAliases.ts
 @@ -1,3 +1,4 @@
 +import { isDisabledDiscoveryModelId } from "./discoveryAvailability.ts";
  import { ANTIGRAVITY_SHARED_MODELS, buildSurfaceCatalog } from "./antigravitySharedModels.ts";
-
+ 
  export const ANTIGRAVITY_PUBLIC_MODELS = buildSurfaceCatalog(ANTIGRAVITY_SHARED_MODELS, {
-@@ -20,6 +21,10 @@
+@@ -20,6 +21,10 @@ export const ANTIGRAVITY_MODEL_ALIASES = Object.freeze({
    "gemini-3.8-flash-tiered": "gemini-3.8-flash-high",
    // Gemini 4 Argon is served only at its tier ids; the bare id defaults to medium.
    "gemini-4-argon": "gemini-4-argon-medium",
@@ -18,7 +18,7 @@ index ae70142cf3277b7dccd44aa0fca618791b5653ad..44456ba5bb2bc9d4c81e043cda344284
    "gpt-oss-120b": "gpt-oss-120b-medium",
    // gemini-3.1-pro-low is not aliased: the upstream accepts it verbatim.
    // gemini-3.1-pro-high: the discovery slot returns HTTP 400 on v1internal;
-@@ -177,6 +182,7 @@
+@@ -179,6 +184,7 @@ export function isDiscoverableAntigravityModelId(modelId: string): boolean {
    const id = modelId.trim();
    if (
      !id ||

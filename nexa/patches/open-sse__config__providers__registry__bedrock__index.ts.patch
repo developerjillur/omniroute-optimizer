@@ -2,7 +2,7 @@ diff --git a/open-sse/config/providers/registry/bedrock/index.ts b/open-sse/conf
 index 1443f45662b0e221978fa87d1e7fa01d4044b8b4..196a830a1ea600374c6e15bdcd81ab58c13a0176 100644
 --- a/open-sse/config/providers/registry/bedrock/index.ts
 +++ b/open-sse/config/providers/registry/bedrock/index.ts
-@@ -9,6 +9,17 @@
+@@ -9,6 +9,17 @@ export const bedrockProvider: RegistryEntry = {
    authHeader: "bearer",
    defaultContextLength: 200000,
    models: [

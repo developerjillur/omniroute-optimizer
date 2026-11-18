@@ -1,8 +1,8 @@
 diff --git a/src/lib/resilience/settings.ts b/src/lib/resilience/settings.ts
-index 212ad56a87fa221643ed8c46618977248677a4ef..26fbb5b662f2e017b127556869aea08f3cd0f79d 100644
+index 0496f4e7c7ac27d48fd23cbf2471f3ba7d36722c..c3d953f3b8eab8c24e371840d4960a4cdf651cc0 100644
 --- a/src/lib/resilience/settings.ts
 +++ b/src/lib/resilience/settings.ts
-@@ -178,6 +178,7 @@ export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
+@@ -186,6 +186,7 @@ export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
      ),
    },
    quotaPreflight: {

@@ -1,8 +1,8 @@
 diff --git a/tests/unit/hard-session-lease-bypass-inventory.test.ts b/tests/unit/hard-session-lease-bypass-inventory.test.ts
-index 481398b48411178b1b3541e727f07096ab4d24e8..aed1bac29ffdeb1663dc736e050cc90b45dbdb01 100644
+index 8b3aacfcbc8c49ee3ae186f7f6484dba5e739138..db8e3d6aabb69b54b76110a085f0a36117af13f4 100644
 --- a/tests/unit/hard-session-lease-bypass-inventory.test.ts
 +++ b/tests/unit/hard-session-lease-bypass-inventory.test.ts
-@@ -105,7 +105,7 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
+@@ -123,7 +123,7 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
      "src/lib/search/executeWebSearch.ts": 2,
      "src/lib/skills/webFetchExecution.ts": 1,
      "src/sse/handlers/chat.ts": 2,
@@ -11,9 +11,9 @@ index 481398b48411178b1b3541e727f07096ab4d24e8..aed1bac29ffdeb1663dc736e050cc90b
      "src/sse/services/imageCredentialRetry.ts": 1,
    },
    executor: {
-@@ -338,7 +338,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
-     // owner's connection id — so this is a state read (class C).
-     "src/sse/handlers/chat/museOwnership.ts": 1,
+@@ -394,7 +394,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
+     // `museSessionIsOwned` deciding whether provider failover may change provider.
+     "src/sse/handlers/chat/museOwnership.ts": 2,
      "src/sse/handlers/chatHelpers.ts": 1,
 +    // Native ownership reads add one eligible-account lookup.
      "src/sse/services/auth.ts": 4,

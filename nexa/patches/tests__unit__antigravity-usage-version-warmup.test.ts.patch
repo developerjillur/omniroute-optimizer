@@ -2,7 +2,7 @@ diff --git a/tests/unit/antigravity-usage-version-warmup.test.ts b/tests/unit/an
 index e76333f9adac8e4bf60157f3e61136c344d1c307..a29aa9709796378eb2fb43ee2ea6fbb7f20bb220 100644
 --- a/tests/unit/antigravity-usage-version-warmup.test.ts
 +++ b/tests/unit/antigravity-usage-version-warmup.test.ts
-@@ -152,7 +152,7 @@
+@@ -152,7 +152,7 @@ test("unreachable release feed falls back to the 2.5.5 floor and still fetches u
    const quotaCalls = calls.filter((call) => call.url.includes("fetchAvailableModels"));
    assert.equal(cliFeedCalls.length, 1, "the CLI release is attempted once");
    assert.ok(quotaCalls.length >= 1, "fetchAvailableModels must still be called");

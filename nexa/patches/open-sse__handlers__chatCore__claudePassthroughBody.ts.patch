@@ -1,5 +1,5 @@
 diff --git a/open-sse/handlers/chatCore/claudePassthroughBody.ts b/open-sse/handlers/chatCore/claudePassthroughBody.ts
-index 987d76abcb76c3fbe6702d4a9a46f99bd9d5e470..b3cd82f91c57b89986840c2ffcf87046c303419a 100644
+index ac0ffae869d5a3813aed6a5205c648fed1f27526..420f5456f5f837c1884f3e393075601ee8bc4211 100644
 --- a/open-sse/handlers/chatCore/claudePassthroughBody.ts
 +++ b/open-sse/handlers/chatCore/claudePassthroughBody.ts
 @@ -1,3 +1,4 @@
@@ -13,12 +13,12 @@ index 987d76abcb76c3fbe6702d4a9a46f99bd9d5e470..b3cd82f91c57b89986840c2ffcf87046
  
 +import { isNativeClaudeThreadRequest } from "../../services/nativeClaudeThread.ts";
  import { shouldUseMidConversationSystem } from "../../executors/claudeIdentity.ts";
+ import { detachClaudeCodeRewriteTargets } from "../../executors/claudeOauthBodyIsolation.ts";
  import { ensureCacheControlOnLastUserMessage } from "../../services/claudeCodeConstraints.ts";
- import { hoistDeferredToolsForTarget } from "../../translator/helpers/claudeDeferredTools.ts";
-@@ -58,6 +60,16 @@
-   applyReasoningRuleDirective: (bodyInput: unknown, targetFormat?: "claude") => unknown;
-   log?: LoggerLike;
- }): Record<string, unknown> {
+@@ -106,6 +108,16 @@
+   applyReasoningRuleDirective,
+   log,
+ }: ClaudePassthroughBodyInput): Record<string, unknown> {
 +  const nativeThreadPassthrough =
 +    isClaudeCodeSemanticPassthrough && provider === "claude" && isNativeClaudeThreadRequest(body);
 +  const immutableNativePrefix =

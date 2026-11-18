@@ -1,8 +1,8 @@
 diff --git a/src/i18n/messages/vi.json b/src/i18n/messages/vi.json
-index 060fdee9ab035a618fb0a6f219a7e79c2c467c95..3ef0241f13bc1f2555cc6262f87f20eaa27e73ad 100644
+index 0dca72816f95261ff54e77e99bb0e5be4ef443c3..c803813f6f2f56f4981c7cf04b0e2e52cf718e32 100644
 --- a/src/i18n/messages/vi.json
 +++ b/src/i18n/messages/vi.json
-@@ -3217,6 +3217,10 @@
+@@ -3555,6 +3555,10 @@
      "other": "Khác",
      "preview": "Xem trước",
      "refreshAll": "Làm mới tất cả",

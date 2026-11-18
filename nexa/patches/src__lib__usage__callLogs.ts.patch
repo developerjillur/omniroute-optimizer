@@ -1,8 +1,8 @@
 diff --git a/src/lib/usage/callLogs.ts b/src/lib/usage/callLogs.ts
-index ceb8bc2aee68090044165cab44290fdac31aa9e4..20259cf74b34247bc92fe9dd7c5dcf864a7db165 100644
+index da7b687f068b93303ff37207ba1d582e0b0ed422..cc13acfdf8ba46e6a0624d0b02ec7614990855db 100644
 --- a/src/lib/usage/callLogs.ts
 +++ b/src/lib/usage/callLogs.ts
-@@ -3,6 +3,7 @@
+@@ -4,6 +4,7 @@
    UPSTREAM_HTTP_ATTEMPT,
    type UpstreamHttpSummary,
  } from "@/shared/utils/upstreamHttp";
@@ -10,17 +10,15 @@ index ceb8bc2aee68090044165cab44290fdac31aa9e4..20259cf74b34247bc92fe9dd7c5dcf86
  /**
   * Structured call log management.
   *
-@@ -105,6 +106,9 @@
-   tokens_out: number | null;
-   tokens_cache_read: number | null;
-   tokens_cache_creation: number | null;
-+  tokens_cache_creation_5m?: number | null;
-+  tokens_cache_creation_1h?: number | null;
+@@ -122,6 +123,7 @@
+   cache_creation_tier_status?: string | null;
+   cache_write_cost_usd?: number | null;
+   cache_write_priced_tokens?: number | null;
 +  native_session_tag?: string | null;
    tokens_reasoning: number | null;
    tokens_compressed: number | null;
    reasoning_source?: string | null;
-@@ -232,6 +236,8 @@
+@@ -245,6 +247,8 @@
      tokensOut: number;
      tokensCacheRead: number | null;
      tokensCacheCreation: number | null;
@@ -29,7 +27,7 @@ index ceb8bc2aee68090044165cab44290fdac31aa9e4..20259cf74b34247bc92fe9dd7c5dcf86
      tokensReasoning: number | null;
      tokensCompressed: number | null;
      requestType: string | null;
-@@ -267,6 +273,8 @@
+@@ -280,6 +284,8 @@
          out: logEntry.tokensOut,
          cacheRead: logEntry.tokensCacheRead,
          cacheWrite: logEntry.tokensCacheCreation,
@@ -38,7 +36,7 @@ index ceb8bc2aee68090044165cab44290fdac31aa9e4..20259cf74b34247bc92fe9dd7c5dcf86
          reasoning: logEntry.tokensReasoning,
          compressed: logEntry.tokensCompressed,
        },
-@@ -410,6 +418,8 @@
+@@ -454,6 +460,8 @@
        out: toNumber(row.tokens_out),
        cacheRead: row.tokens_cache_read != null ? toNumber(row.tokens_cache_read) : null,
        cacheWrite: row.tokens_cache_creation != null ? toNumber(row.tokens_cache_creation) : null,
@@ -47,7 +45,7 @@ index ceb8bc2aee68090044165cab44290fdac31aa9e4..20259cf74b34247bc92fe9dd7c5dcf86
        reasoning: row.tokens_reasoning != null ? toNumber(row.tokens_reasoning) : null,
        compressed: row.tokens_compressed != null ? toNumber(row.tokens_compressed) : null,
      },
-@@ -601,24 +611,8 @@
+@@ -662,24 +670,10 @@
        ? 1
        : null;
    const reasoningDurationMs = reasoningObservation.source === "encrypted" ? streamDurationMs : null;
@@ -69,23 +67,36 @@ index ceb8bc2aee68090044165cab44290fdac31aa9e4..20259cf74b34247bc92fe9dd7c5dcf86
 -      : null;
 -  const reasoningEffortUpstream =
 -    reasoningObservation.source === "encrypted" ? readEffortValue(entry.upstreamRequestBody) : null;
-+  const reasoningEffortRequested = readRequestedEffort(entry.clientRequestBody ?? entry.requestBody);
++  const reasoningEffortRequested = readRequestedEffort(
++    entry.clientRequestBody ?? entry.requestBody
++  );
 +  const reasoningEffortUpstream = readRequestedEffort(entry.upstreamRequestBody);
    const errorType = toStoredErrorType(
      classifyCallLogError(entry.status, entry.error, entry.provider)
    );
-@@ -665,6 +659,23 @@
-     tokensOut: toNumber(getLoggedOutputTokens(entry.tokens)),
-     tokensCacheRead: getPromptCacheReadTokensOrNull(entry.tokens),
-     tokensCacheCreation: getPromptCacheCreationTokensOrNull(entry.tokens),
-+    tokensCacheCreation5m:
+@@ -701,7 +695,17 @@
+         tokens: entry.tokens,
+         isSuccess,
+       });
+-  const cacheWriteUsage = readCacheWriteUsage(entry.tokens);
++  const cacheWriteUsage = readCacheWriteUsage({
++    ...entry.tokens,
++    cacheCreation5m:
 +      Number.isInteger(entry.cacheCreation5mTokens) && entry.cacheCreation5mTokens >= 0
 +        ? entry.cacheCreation5mTokens
-+        : null,
-+    tokensCacheCreation1h:
++        : entry.tokens?.cacheCreation5m,
++    cacheCreation1h:
 +      Number.isInteger(entry.cacheCreation1hTokens) && entry.cacheCreation1hTokens >= 0
 +        ? entry.cacheCreation1hTokens
-+        : null,
++        : entry.tokens?.cacheCreation1h,
++  });
+   let cacheWriteEstimate = estimateApiEquivalentCacheWrite(null, cacheWriteUsage, {
+     provider: rawProvider,
+     model: entry.model || "",
+@@ -748,6 +752,15 @@
+     cacheCreationTierStatus: cacheWriteUsage.status,
+     cacheWriteCostUsd: cacheWriteEstimate.knownTierCostUsd,
+     cacheWritePricedTokens: cacheWriteEstimate.pricedTokens,
 +    nativeSessionTag:
 +      typeof entry.nativeSessionTag === "string" && /^[0-9a-f]{64}$/.test(entry.nativeSessionTag)
 +        ? entry.nativeSessionTag
@@ -98,35 +109,35 @@ index ceb8bc2aee68090044165cab44290fdac31aa9e4..20259cf74b34247bc92fe9dd7c5dcf86
      tokensReasoning,
      reasoningSource: reasoningObservation.source,
      reasoningChars: reasoningObservation.chars,
-@@ -780,6 +791,15 @@
+@@ -862,6 +875,15 @@
    // Optional column (migration 191) — only fixed identifiers are spliced in.
    const resilienceCol = hasResilienceColumn ? ", resilience_actions" : "";
    const resilienceParam = hasResilienceColumn ? ", @resilienceActions" : "";
 +  const hasNativeUsageColumns =
-+    hasCallLogsColumn("native_session_tag") && hasCallLogsColumn("native_cache_group_tag") &&
-+    hasCallLogsColumn("tokens_cache_creation_5m") && hasCallLogsColumn("tokens_cache_creation_1h");
++    hasCallLogsColumn("native_session_tag") &&
++    hasCallLogsColumn("native_cache_group_tag") &&
++    hasCallLogsColumn("tokens_cache_creation_5m") &&
++    hasCallLogsColumn("tokens_cache_creation_1h");
 +  const nativeUsageCol = hasNativeUsageColumns
-+    ? ", tokens_cache_creation_5m, tokens_cache_creation_1h, native_session_tag, native_cache_group_tag"
++    ? ", native_session_tag, native_cache_group_tag"
 +    : "";
-+  const nativeUsageParam = hasNativeUsageColumns
-+    ? ", @tokensCacheCreation5m, @tokensCacheCreation1h, @nativeSessionTag, @nativeCacheGroupTag"
-+    : "";
++  const nativeUsageParam = hasNativeUsageColumns ? ", @nativeSessionTag, @nativeCacheGroupTag" : "";
    const insertStmt = db.prepare(
      `
        INSERT INTO call_logs (
-@@ -795,7 +815,7 @@
+@@ -879,7 +901,7 @@
          has_request_body, has_response_body, has_pipeline_details, request_summary,
          correlation_id, model_pinned, session_tag, client_session_id, response_id, error_type,
-         video_content_removed, has_content, usage_provenance,
+         video_content_removed, has_content, usage_provenance, usage_evidence,
 -        added_wait_ms, added_wait_cause, queue_wait_ms${resilienceCol}
 +        added_wait_ms, added_wait_cause, queue_wait_ms${resilienceCol}${nativeUsageCol}
        )
        VALUES (
          @id, @timestamp, @method, @path, @status, @model, @requestedModel, @provider,
-@@ -810,7 +830,7 @@
+@@ -896,7 +918,7 @@
          @hasRequestBody, @hasResponseBody, @hasPipelineDetails, @requestSummary,
          @correlationId, @modelPinned, @sessionTag, @clientSessionId, @responseId, @errorType,
-         @videoContentRemoved, @hasContent, @usageProvenance,
+         @videoContentRemoved, @hasContent, @usageProvenance, @usageEvidence,
 -        @addedWaitMs, @addedWaitCause, @queueWaitMs${resilienceParam}
 +        @addedWaitMs, @addedWaitCause, @queueWaitMs${resilienceParam}${nativeUsageParam}
        )

@@ -4,12 +4,12 @@ Jillur Rahman / NexaLance-এর OmniRoute optimization ও fixing overlay। Om
 
 ## v3.8.54 compatibility inspection — ২০২৬-১১-১৮
 
-নতুন stable release `v3.8.54`-এ 231টি active Nexa patch-এর 194টি conflict ছাড়া
-merge candidate হয়েছে; 37টিতে manual review প্রয়োজন। নতুন file collision নেই;
-পাঁচটি changed retired target-ও review করতে হবে। এটি source acceptance নয়।
-Reviewed full-build resource gate পূরণ হয়নি, তাই full build/live update হয়নি;
-accepted base ও live package এখনও `v3.8.53`। নতুন models-এর আগের validated
-source সংরক্ষিত। [Upgrade note](nexa/docs/UPGRADE-3.8.54-2026-11-18.md) ও
+নতুন stable release `v3.8.54`-এ 36টি source overlap মেলানো হয়েছে; dependency lock
+পুনর্গঠন ও functional validation বাকি। Candidate-এ 233টি active patch ও 146টি
+নতুন file আছে। দুইটি পুরোনো facade patch exact hashes-সহ সংরক্ষিত; তাদের
+fixes নতুন upstream helper-এ আছে। এটি source acceptance নয়। Full build/live
+update এখনও হয়নি; live package `v3.8.53`। নতুন models-এর আগের validated source
+ও customization সংরক্ষিত। [Upgrade note](nexa/docs/UPGRADE-3.8.54-2026-11-18.md) ও
 [inspection receipt](reports/v3.8.54-inspection-2026-11-18.json)-এ exact release,
 compatibility blockers, resource measurement এবং পরের gates আছে।
 

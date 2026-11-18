@@ -1,8 +1,8 @@
 diff --git a/open-sse/config/providerModels.ts b/open-sse/config/providerModels.ts
-index 580ab5f3b219ea99b93c772ed42532af68fd772a..004e649d5f610b998a7a93e5a189744080ed81e8 100644
+index 0888b40563851715359e212f975a2f5d583f792b..3d8f6bd71a023fbd5628d179db49240196bd151e 100644
 --- a/open-sse/config/providerModels.ts
 +++ b/open-sse/config/providerModels.ts
-@@ -4,6 +4,7 @@
+@@ -4,6 +4,7 @@ import {
    getPublishedModelNpm,
    surfaceTargetFormatForNpm,
  } from "../utils/opencodePublishedCatalog.ts";
@@ -10,7 +10,7 @@ index 580ab5f3b219ea99b93c772ed42532af68fd772a..004e649d5f610b998a7a93e5a1897440
  
  // Lazy PROVIDER_MODELS: deferred until first property access to speed up startup.
  // The Proxy defers `generateModels()` from module-evaluation time to the first read.
-@@ -434,6 +435,7 @@
+@@ -443,6 +444,7 @@ export function supportsClaudeMaxEffort(modelId: string | null | undefined): boo
    const claudeMatch = normalized.match(CLAUDE_MODEL_PATTERN);
    if (!claudeMatch) return false;
    const claudeScopedId = normalized.slice(claudeMatch.index ?? 0).replace(/^[\/._-]/, "");

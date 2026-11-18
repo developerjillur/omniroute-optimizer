@@ -1,8 +1,8 @@
 diff --git a/.env.example b/.env.example
-index 66594a5f28a483924c6fa1802dcce44b6a69d58e..e73e3c27226331b7176b8feb01ae82ebe2d7e363 100644
+index a1b65c7a6126cbfb07e14013c46a99728c71ac60..897858774cc65ef673b04ba0171e28f0e2ef57f8 100644
 --- a/.env.example
 +++ b/.env.example
-@@ -3314,6 +3314,14 @@
+@@ -3509,6 +3509,14 @@
  # ── MITM debug proxy (development only) ──
  # Used by: src/mitm/server.cjs — captures upstream traffic for inspection.
  # MITM_LOCAL_PORT=443
@@ -17,11 +17,10 @@ index 66594a5f28a483924c6fa1802dcce44b6a69d58e..e73e3c27226331b7176b8feb01ae82eb
  # MITM_DISABLE_TLS_VERIFY=0
  # Idle socket timeout (ms) for proxied connections; sockets idle past this are torn
  # down to avoid leaking half-open tunnels (src/mitm/socketTimeouts.ts, server.cjs).
-@@ -4134,3 +4142,11 @@
- # OMNIROUTE_MEDIA_PROVIDER=omniroute
+@@ -4371,6 +4379,14 @@
  # OMNIROUTE_MEDIA_MODEL=auto
  # OMNIROUTE_MEDIA_API_KEY=
-+
+ 
 +# Cloud sync accepts signed responses; unsigned compatibility is opt-in.
 +# OMNIROUTE_CLOUD_SYNC_ALLOW_UNVERIFIED=false
 +
@@ -29,3 +28,7 @@ index 66594a5f28a483924c6fa1802dcce44b6a69d58e..e73e3c27226331b7176b8feb01ae82eb
 +# Leave unset for 540000 normally and 1290000 for buffered native thinking.
 +# Valid override range: integer 1000 through 1290000; applies to both paths.
 +# MITM_ROUTER_TIMEOUT_MS=
++
+ # ── Vision image normalization (opt-in) ──
+ # Normalizes every inline (base64) image in chat request bodies before
+ # dispatch: RGB conversion (alpha flattened onto white), long edge <= 4096px,

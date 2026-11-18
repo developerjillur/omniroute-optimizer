@@ -2,7 +2,7 @@ diff --git a/open-sse/config/providers/registry/gemini/index.ts b/open-sse/confi
 index 6a51f8c5021ca38c3984b5f5597c2a4be64624c0..82e6ed3d7e8b9bc9fd6813151de9a9fa1278008b 100644
 --- a/open-sse/config/providers/registry/gemini/index.ts
 +++ b/open-sse/config/providers/registry/gemini/index.ts
-@@ -18,6 +18,28 @@
+@@ -18,6 +18,28 @@ export const geminiProvider: RegistryEntry = {
      clientSecretDefault: resolvePublicCred("gemini_alt"),
    },
    models: [

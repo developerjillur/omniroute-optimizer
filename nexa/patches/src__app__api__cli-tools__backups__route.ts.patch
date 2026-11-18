@@ -1,16 +1,17 @@
 diff --git a/src/app/api/cli-tools/backups/route.ts b/src/app/api/cli-tools/backups/route.ts
+index d32a62e3f87e226eb228ff1859b30c985eea7d40..9f1b7cf9bfae5e4a86870a13688315dc15b8bc22 100644
 --- a/src/app/api/cli-tools/backups/route.ts
 +++ b/src/app/api/cli-tools/backups/route.ts
-@@ -7,6 +7,8 @@
- import { cliBackupMutationSchema } from "@/shared/validation/schemas";
+@@ -8,6 +8,8 @@ import { cliBackupMutationSchema } from "@/shared/validation/schemas";
  import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
  import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
-+
-+const backupScope = (tool: string) => (tool === "claude" ? "claude-terminal" : tool);
  
++const backupScope = (tool: string) => (tool === "claude" ? "claude-terminal" : tool);
++
  const VALID_TOOLS = ["claude", "codex", "droid", "grok-build", "openclaw", "cline", "kilo", "qwen"];
  
-@@ -24,14 +26,14 @@
+ // GET /api/cli-tools/backups?tool=claude — list backups
+@@ -24,14 +26,14 @@ export async function GET(request) {
      }
  
      if (tool) {
@@ -27,7 +28,7 @@ diff --git a/src/app/api/cli-tools/backups/route.ts b/src/app/api/cli-tools/back
      }
      return NextResponse.json({ backups: result });
    } catch (error) {
-@@ -77,7 +79,7 @@
+@@ -77,7 +79,7 @@ export async function POST(request) {
        return NextResponse.json({ error: `Invalid tool: ${tool}` }, { status: 400 });
      }
  
@@ -36,7 +37,7 @@ diff --git a/src/app/api/cli-tools/backups/route.ts b/src/app/api/cli-tools/back
      return NextResponse.json({
        success: true,
        message: `Backup restored for ${tool}`,
-@@ -128,7 +130,7 @@
+@@ -128,7 +130,7 @@ export async function DELETE(request) {
        return NextResponse.json({ error: `Invalid tool: ${tool}` }, { status: 400 });
      }
  

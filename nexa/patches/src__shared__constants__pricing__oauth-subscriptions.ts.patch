@@ -1,5 +1,5 @@
 diff --git a/src/shared/constants/pricing/oauth-subscriptions.ts b/src/shared/constants/pricing/oauth-subscriptions.ts
-index 9cbbba7102357650ff3bcffb96911b917a21448d..061b20d87fcf3afd82166e0c089071f65ec9f1a5 100644
+index 6bb4023ac5a01c615f2363729f52852097fb937b..cbfc58ecd643da08f701fb0aa79499502a045f3b 100644
 --- a/src/shared/constants/pricing/oauth-subscriptions.ts
 +++ b/src/shared/constants/pricing/oauth-subscriptions.ts
 @@ -1,9 +1,12 @@
@@ -24,18 +24,18 @@ index 9cbbba7102357650ff3bcffb96911b917a21448d..061b20d87fcf3afd82166e0c089071f6
 -  cached: 0.1,
 -};
 +const GPT_6_1_SOL_CODEX_PRICING = GPT_6_1_SOL_PRICING;
- const GPT_6_LUNA_CODEX_PRICING = {
-   input: 0.1,
-   output: 0.5,
-@@ -127,6 +127,7 @@
-
+ // GPT-6.1 Terra Standard: 25 / 1.25 / 125 credits per MTok (input / cached / output), the same
+ // 25 credits/USD convention. Matches the API pricing table row $1.00 / $0.05 / $5.00, cache write $1.25.
+ // https://learn.chatgpt.com/docs/pricing#token-rates (checked 2026-11-09)
+@@ -137,6 +137,7 @@
+ 
  export const DEFAULT_PRICING_OAUTH = {
    cc: {
 +    "claude-fable-5-2": CLAUDE_FABLE_5_2_PRICING,
      "claude-fable-5-1": CLAUDE_FABLE_5_1_PRICING,
      "claude-fable-5": {
        input: 10.0,
-@@ -197,6 +198,8 @@
+@@ -207,6 +208,8 @@
      "claude-haiku-5-5": CLAUDE_HAIKU_5_PRICING,
    },
    cx: {

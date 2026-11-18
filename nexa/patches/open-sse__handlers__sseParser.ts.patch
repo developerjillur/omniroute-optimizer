@@ -1,8 +1,8 @@
 diff --git a/open-sse/handlers/sseParser.ts b/open-sse/handlers/sseParser.ts
-index 2a757e40e776eb93423bf93f090082b0dd29171b..de4e033cc2cd0f6ec30e3c3698664ff4373d8b05 100644
+index 6ff94390764438d5f2f4a950986bfd9aaf1c2fbf..9e7fb1ddfe4278c0e3171cc9c7853ff9215c50cc 100644
 --- a/open-sse/handlers/sseParser.ts
 +++ b/open-sse/handlers/sseParser.ts
-@@ -1035,6 +1035,7 @@
+@@ -1055,6 +1055,7 @@ export function parseSSEToResponsesOutput(rawSSE, fallbackModel) {
        }),
        usage: picked.usage || null,
        ...terminalStatus,

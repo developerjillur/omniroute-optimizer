@@ -1,5 +1,5 @@
 diff --git a/tests/e2e/providers-management.spec.ts b/tests/e2e/providers-management.spec.ts
-index d4be2aa4fe673b3fcba7b9fc591500ed9c64b894..989bc47b2bb187f807d7fd2d96694590ede45882 100644
+index 3daeccee9e835e7b5a03aabc43ed5dedff876d16..4bf5dd8eaff14c1416b8da85cdd5ed63fab7b06c 100644
 --- a/tests/e2e/providers-management.spec.ts
 +++ b/tests/e2e/providers-management.spec.ts
 @@ -278,7 +278,14 @@ test.describe("Providers management", () => {

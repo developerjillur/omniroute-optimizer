@@ -1,17 +1,17 @@
 diff --git a/open-sse/utils/usageTracking.ts b/open-sse/utils/usageTracking.ts
-index 729718115ddd8491cd2efbe94b6c0264f636d6f4..35691d9ff9270072b9f498b9514d3dd83f87b07e 100644
+index 24788336c2b30da51bf9acb5ada2a1d14cb34228..2d6690095c87b842faa92b6b15d42b6e3d62bef4 100644
 --- a/open-sse/utils/usageTracking.ts
 +++ b/open-sse/utils/usageTracking.ts
-@@ -13,6 +13,8 @@
+@@ -14,6 +14,8 @@
  import { FORMATS } from "../translator/formats.ts";
  import { pickCacheCreationTokens } from "./pickCacheCreationTokens.ts";
  import { sharedSymbol } from "@/shared/utils/processSingleton";
 +import { getCacheCreationTtlFields } from "@/lib/usage/cacheCreationTtl";
 +import { normalizeAnthropicUsage } from "./anthropicUsage.ts";
  
- export { pickCacheCreationTokens };
- 
-@@ -47,6 +49,8 @@
+ import {
+   carryUsageEvidence,
+@@ -58,6 +60,8 @@
    cost_usd?: number;
    cache_read_input_tokens?: number;
    cache_creation_input_tokens?: number;
@@ -20,7 +20,7 @@ index 729718115ddd8491cd2efbe94b6c0264f636d6f4..35691d9ff9270072b9f498b9514d3dd8
    /** OpenRouter / Devin Desktop / codex-chatgpt-web alias for cache creation. */
    cache_write_tokens?: number;
    prompt_cache_hit_tokens?: number;
-@@ -69,7 +73,7 @@
+@@ -80,7 +84,7 @@
  }
  
  /** SSE/JSON chunk shapes this module inspects for embedded usage containers. */
@@ -29,7 +29,7 @@ index 729718115ddd8491cd2efbe94b6c0264f636d6f4..35691d9ff9270072b9f498b9514d3dd8
    type?: string;
    done?: boolean;
    prompt_eval_count?: number;
-@@ -77,7 +81,11 @@
+@@ -88,7 +92,11 @@
    usage?: UsageLike;
    usageMetadata?: UsageLike;
    message?: { usage?: UsageLike; [field: string]: unknown };
@@ -42,7 +42,7 @@ index 729718115ddd8491cd2efbe94b6c0264f636d6f4..35691d9ff9270072b9f498b9514d3dd8
    [field: string]: unknown;
  }
  
-@@ -449,6 +457,17 @@
+@@ -476,6 +484,17 @@
      return value.some((item) => hasRemoteContextReference(item, depth + 1));
    }
  
@@ -60,7 +60,7 @@ index 729718115ddd8491cd2efbe94b6c0264f636d6f4..35691d9ff9270072b9f498b9514d3dd8
    for (const [key, nested] of Object.entries(value)) {
      if (REMOTE_CONTEXT_REFERENCE_KEYS.has(key) && hasValue(nested)) {
        return true;
-@@ -638,8 +657,8 @@
+@@ -671,8 +690,8 @@
      return replaceUsage(payload.message, "usage", FORMATS.CLAUDE);
    }
    if (payload.type === "message_delta" && payload.usage) {
@@ -71,15 +71,15 @@ index 729718115ddd8491cd2efbe94b6c0264f636d6f4..35691d9ff9270072b9f498b9514d3dd8
      const delta = payload.usage;
      const deltaInput =
        tokenNumber(delta.input_tokens) +
-@@ -684,6 +703,7 @@
+@@ -717,6 +736,7 @@
    assignNumber("output_tokens", usage?.output_tokens);
    assignNumber("cache_read_input_tokens", usage?.cache_read_input_tokens);
-   assignNumber("cache_creation_input_tokens", pickCacheCreationTokens(usage));
+   assignNumber("cache_creation_input_tokens", readCacheWriteUsage(usage).total);
 +  Object.assign(normalized, getCacheCreationTtlFields(usage));
    const reportedCachedTokens =
      usage?.cached_tokens ??
      usage?.prompt_tokens_details?.cached_tokens ??
-@@ -733,7 +753,10 @@
+@@ -763,7 +783,10 @@
    const estimated =
      !!source && typeof source === "object" && (source as UsageLike).estimated === true;
    if (estimated && rebuilt && typeof rebuilt === "object") {
@@ -91,7 +91,7 @@ index 729718115ddd8491cd2efbe94b6c0264f636d6f4..35691d9ff9270072b9f498b9514d3dd8
    }
    return rebuilt;
  }
-@@ -838,44 +861,14 @@
+@@ -868,52 +891,15 @@
      return null;
    }
  
@@ -108,52 +108,61 @@ index 729718115ddd8491cd2efbe94b6c0264f636d6f4..35691d9ff9270072b9f498b9514d3dd8
 -    const u = chunk.message.usage;
 -    const inputTokens = u.input_tokens || u.prompt_tokens || 0;
 -    const cacheRead = u.cache_read_input_tokens || 0;
--    const cacheCreation = u.cache_creation_input_tokens || 0;
+-    const cacheCreation = readCacheWriteUsage(u).total ?? 0;
 -    if (inputTokens > 0 || cacheRead > 0 || cacheCreation > 0) {
--      return normalizeUsage({
--        prompt_tokens: inputTokens + cacheRead + cacheCreation,
--        completion_tokens: u.output_tokens || u.completion_tokens || 0,
--        input_tokens: inputTokens + cacheRead + cacheCreation,
--        output_tokens: u.output_tokens || u.completion_tokens || 0,
--        cache_read_input_tokens: u.cache_read_input_tokens,
--        cache_creation_input_tokens: u.cache_creation_input_tokens,
--      });
+-      return carryUsageEvidence(
+-        u,
+-        normalizeUsage({
+-          ...cacheCreationFields(u),
+-          prompt_tokens: inputTokens + cacheRead + cacheCreation,
+-          completion_tokens: u.output_tokens || u.completion_tokens || 0,
+-          input_tokens: inputTokens + cacheRead + cacheCreation,
+-          output_tokens: u.output_tokens || u.completion_tokens || 0,
+-          cache_read_input_tokens: u.cache_read_input_tokens,
+-          cache_creation_input_tokens: u.cache_creation_input_tokens,
+-        })
+-      );
 -    }
 -  }
 -
 -  // Claude format (message_delta event) — typically carries OUTPUT tokens
 +    const usage = normalizeAnthropicUsage(chunk.message.usage);
-+    if (usage.prompt_tokens > 0 || usage.completion_tokens > 0) return normalizeUsage(usage);
++    if (usage.prompt_tokens > 0 || usage.completion_tokens > 0)
++      return carryUsageEvidence(chunk.message.usage, normalizeUsage(usage));
 +  }
    if (chunk.type === "message_delta" && chunk.usage && typeof chunk.usage === "object") {
 -    const deltaInput = chunk.usage.input_tokens || 0;
 -    const deltaCacheRead = chunk.usage.cache_read_input_tokens || 0;
 -    const deltaCacheCreation = chunk.usage.cache_creation_input_tokens || 0;
--    return normalizeUsage({
--      prompt_tokens: deltaInput + deltaCacheRead + deltaCacheCreation,
--      completion_tokens: chunk.usage.output_tokens || 0,
--      input_tokens: deltaInput + deltaCacheRead + deltaCacheCreation,
--      output_tokens: chunk.usage.output_tokens || 0,
--      cache_read_input_tokens: chunk.usage.cache_read_input_tokens,
--      cache_creation_input_tokens: chunk.usage.cache_creation_input_tokens,
--      reasoning_tokens: chunk.usage.output_tokens_details?.thinking_tokens,
--    });
-+    return normalizeUsage(normalizeAnthropicUsage(chunk.usage));
+-    return carryUsageEvidence(
+-      chunk.usage,
+-      normalizeUsage({
+-        ...cacheCreationFields(chunk.usage),
+-        prompt_tokens: deltaInput + deltaCacheRead + deltaCacheCreation,
+-        completion_tokens: chunk.usage.output_tokens || 0,
+-        input_tokens: deltaInput + deltaCacheRead + deltaCacheCreation,
+-        output_tokens: chunk.usage.output_tokens || 0,
+-        cache_read_input_tokens: chunk.usage.cache_read_input_tokens,
+-        cache_creation_input_tokens: chunk.usage.cache_creation_input_tokens,
+-        reasoning_tokens: chunk.usage.output_tokens_details?.thinking_tokens,
+-      })
+-    );
++    return carryUsageEvidence(chunk.usage, normalizeUsage(normalizeAnthropicUsage(chunk.usage)));
    }
  
    // OpenAI Responses API format (response.completed or response.done)
-@@ -888,6 +881,7 @@
-     return normalizeUsage({
-       provider_credits: usage.provider_credits,
-       cost_in_usd_ticks: usage.cost_in_usd_ticks,
-+      ...getCacheCreationTtlFields(usage),
-       prompt_tokens: usage.input_tokens || usage.prompt_tokens || 0,
-       completion_tokens: usage.output_tokens || usage.completion_tokens || 0,
-       cached_tokens:
-@@ -909,6 +903,7 @@
-     (chunk.usage.prompt_tokens !== undefined || chunk.usage.input_tokens !== undefined)
+@@ -927,6 +913,7 @@
+       usage,
+       normalizeUsage({
+         ...cacheCreationFields(usage),
++        ...getCacheCreationTtlFields(usage),
+         provider_credits: usage.provider_credits,
+         cost_in_usd_ticks: usage.cost_in_usd_ticks,
+         prompt_tokens: usage.input_tokens || usage.prompt_tokens || 0,
+@@ -952,6 +939,7 @@
    ) {
      const normalized = normalizeUsage({
+       ...cacheCreationFields(chunk.usage),
 +      ...getCacheCreationTtlFields(chunk.usage),
        prompt_tokens: chunk.usage.prompt_tokens ?? chunk.usage.input_tokens ?? 0,
        completion_tokens: chunk.usage.completion_tokens ?? chunk.usage.output_tokens ?? 0,

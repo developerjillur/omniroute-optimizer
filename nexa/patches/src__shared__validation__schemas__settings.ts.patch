@@ -1,8 +1,8 @@
 diff --git a/src/shared/validation/schemas/settings.ts b/src/shared/validation/schemas/settings.ts
-index ba5b4b04858fd0c4057e010745dd2cdcbfc90fcc..71bca4826723e4c476d952ee4e585ef2511c380c 100644
+index 5c22486397e75efe9b8aaa69cf7cf1d46eeadfbd..7b1529546b7b8efe62f6eed92ecf6b885cdf0dc5 100644
 --- a/src/shared/validation/schemas/settings.ts
 +++ b/src/shared/validation/schemas/settings.ts
-@@ -161,6 +161,7 @@
+@@ -161,6 +161,7 @@ export const streamRecoverySettingsSchema = z
  // bounds the wire shape.
  export const quotaPreflightSettingsSchema = z
    .object({

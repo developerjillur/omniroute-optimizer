@@ -2,7 +2,7 @@ diff --git a/open-sse/config/providers/registry/anthropic/index.ts b/open-sse/co
 index 4959c0f32637d9c0147ff1904cdffa533b417e9a..847ee99a8eacba433c458d87e8c81eaaa370751a 100644
 --- a/open-sse/config/providers/registry/anthropic/index.ts
 +++ b/open-sse/config/providers/registry/anthropic/index.ts
-@@ -16,6 +16,17 @@
+@@ -16,6 +16,17 @@ export const anthropicProvider: RegistryEntry = {
      "Anthropic-Beta": ANTHROPIC_BETA_API_KEY,
    },
    models: [

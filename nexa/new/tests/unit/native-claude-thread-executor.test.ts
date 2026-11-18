@@ -186,7 +186,8 @@ test("native Thread errors are forwarded without field or effort downgrade retri
 });
 
 test("native CCH re-signing is idempotent and changes only the integrity token", async () => {
-  const body = '{"system":[{"text":"cc_version=fixture; cch=abcde;"}],"model":"claude-sonnet-5-5"}';
+  const body =
+    '{"system":[{"text":"x-anthropic-billing-header: cc_version=fixture; cch=abcde;"}],"model":"claude-sonnet-5-5"}';
   const signed = await signRequestBody(body);
   assert.equal(await signRequestBody(signed), signed);
   assert.equal(await signRequestBody(body.replace("abcde", "00000")), signed);

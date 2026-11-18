@@ -1,8 +1,8 @@
 diff --git a/tests/unit/combo-routing-engine.test.ts b/tests/unit/combo-routing-engine.test.ts
-index 9080bd918d1ccac846bca67ad3bf4fb904d5acba..dbaf6f5e1612d2a35a76c72cbd4eac71324dda27 100644
+index b83acba98a286472ec497d020b90fd5fff407ea6..667bec4316fc76ce77f5cce17fb4c7dda762e1ef 100644
 --- a/tests/unit/combo-routing-engine.test.ts
 +++ b/tests/unit/combo-routing-engine.test.ts
-@@ -1617,6 +1617,8 @@ test("handleComboChat preserves fallback request bodies when zero-latency optimi
+@@ -1619,6 +1619,8 @@ test("handleComboChat preserves fallback request bodies when zero-latency optimi
  });
  
  test("handleComboChat applies fallback compression only after explicit zero-latency opt-in", async () => {

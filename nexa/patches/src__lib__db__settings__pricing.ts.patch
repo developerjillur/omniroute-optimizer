@@ -2,7 +2,7 @@ diff --git a/src/lib/db/settings/pricing.ts b/src/lib/db/settings/pricing.ts
 index 4845d6385b8e8ac91c36a6f7eede9c741f37b3c3..403b8b73551dfa18876a6128da0033d63f72b1b6 100644
 --- a/src/lib/db/settings/pricing.ts
 +++ b/src/lib/db/settings/pricing.ts
-@@ -204,8 +204,27 @@
+@@ -204,8 +204,27 @@ export function findModelPricing(
  
  export async function getPricingForModel(provider: string, model: string) {
    const pricing = (await getCachedPricing()) as PricingByProvider;

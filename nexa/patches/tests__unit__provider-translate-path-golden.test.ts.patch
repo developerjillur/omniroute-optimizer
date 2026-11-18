@@ -1,12 +1,12 @@
 diff --git a/tests/unit/provider-translate-path-golden.test.ts b/tests/unit/provider-translate-path-golden.test.ts
-index 36e81677d17086a7997af50c45bbad42b118874a..6194283471a01dd907550385f2115131b50ef263 100644
+index 4b9ace2934344dc15da4a697ac5c6f74d227255b..3ee006f0aa6bf61a7e2497fbabb5c40604763b80 100644
 --- a/tests/unit/provider-translate-path-golden.test.ts
 +++ b/tests/unit/provider-translate-path-golden.test.ts
-@@ -79,6 +79,7 @@ function sanitize(headers: Record<string, unknown>): Record<string, unknown> {
+@@ -80,6 +80,7 @@
          "<PLATFORM>"
        )
        .replace(/(antigravity\/ide\/\d+\.\d+\.\d+) [^/\s]+\/[^\s)]+/g, "$1 <OS>/<ARCH>")
 +      .replace(/(copilot\/\d+\.\d+\.\d+) \((?:linux|darwin|win32)\)/g, "$1 (<PLATFORM>)")
+       // The Muse Code client User-Agent reports the host as `<os>-<arch>` (museCodeClientUserAgent).
        .replace(
-         /(antigravity\/cli\/\d+\.\d+\.\d+ \(aidev_client; os_type=)[^;]+(; arch=)[^;]+(; auth_method=[^)]+\))/g,
-         "$1<OS>$2<ARCH>$3"
+         /(muse-build\/\d+\.\d+\.\d+ \((?:non-)?interactive; )[a-z0-9]+-[a-z0-9_]+(;)/g,

@@ -1,8 +1,8 @@
 diff --git a/open-sse/utils/earlyStreamKeepalive.ts b/open-sse/utils/earlyStreamKeepalive.ts
-index ac83438dcb826d77123af6d19fcc60e4ad712088..25f4b88f7ae1b959579794b5079c5ffab816df39 100644
+index a18c1955d6e0af2319cce45494c0f1ecb50d3252..9c0fcbc8e965e999f7bc76f9b0bb67147b5e265b 100644
 --- a/open-sse/utils/earlyStreamKeepalive.ts
 +++ b/open-sse/utils/earlyStreamKeepalive.ts
-@@ -776,18 +776,26 @@
+@@ -801,18 +801,26 @@ export async function withEarlyStreamKeepalive(
      },
    });
  

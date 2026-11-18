@@ -14,9 +14,9 @@ index 6a9f23e9f32c1b3979984d8a02656f2fa832ffde..3ad05864414a300f2bee4307e8529333
    hasMessageStop: boolean;
 -  stopReason?: string | null;
  };
--
--const CLEAN_EMPTY_STOP_REASONS = new Set(["end_turn", "stop_sequence", "refusal"]);
  
+-const CLEAN_EMPTY_STOP_REASONS = new Set(["end_turn", "stop_sequence", "refusal"]);
+-
  export function shouldAbortEmptyClaudeStream(
    lifecycle: ClaudeEmptyLifecycleLike,
    sawAnyUpstreamPayload: boolean

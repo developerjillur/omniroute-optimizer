@@ -1,8 +1,8 @@
 diff --git a/src/domain/quotaCacheState.ts b/src/domain/quotaCacheState.ts
-index 42b0c013bc1463592f8e44c35e27bdf7d42d88cb..a103babd7ab61f0398894dd9d30974d922a08c00 100644
+index 8645c3b8ad2625c941a08a9845f48aa3684b2935..b53e29f6652e55449cacfaa0cff63e17a8eb6399 100644
 --- a/src/domain/quotaCacheState.ts
 +++ b/src/domain/quotaCacheState.ts
-@@ -73,6 +73,7 @@ export function parseDate(value: string): number | null {
+@@ -76,6 +76,7 @@ export function parseDate(value: string): number | null {
  interface QuotaCacheState {
    cache: Map<string, QuotaCacheEntry>;
    refreshingSet: Set<string>;
@@ -10,7 +10,7 @@ index 42b0c013bc1463592f8e44c35e27bdf7d42d88cb..a103babd7ab61f0398894dd9d30974d9
    // #14359 — connectionId → epoch ms the healthy override stands the predicates down; shared state per #8065.
    healthyUntil: Map<string, number>;
    refreshTimer: ReturnType<typeof setInterval> | null;
-@@ -88,6 +89,7 @@ export function getQuotaCacheState(): QuotaCacheState {
+@@ -91,6 +92,7 @@ export function getQuotaCacheState(): QuotaCacheState {
      globalThis.__omnirouteQuotaCacheState = {
        cache: new Map(),
        refreshingSet: new Set(),

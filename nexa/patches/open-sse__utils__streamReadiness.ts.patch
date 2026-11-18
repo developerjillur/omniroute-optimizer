@@ -1,8 +1,8 @@
 diff --git a/open-sse/utils/streamReadiness.ts b/open-sse/utils/streamReadiness.ts
-index 7a7ffa1ec9f88f32bf6c8aa8e0b09709b8d6a906..b7c97b00dd8d682122e33facea3964b0c9eae635 100644
+index 19855d94f57f9dc51a3f1ef3e5a050f29987d410..7e2d28955af5e8a1282f7be6ac659386a6e350f4 100644
 --- a/open-sse/utils/streamReadiness.ts
 +++ b/open-sse/utils/streamReadiness.ts
-@@ -474,6 +474,10 @@
+@@ -514,6 +514,10 @@ export type StreamContentWatcher = {
     * so #8649 can stand down without treating errors as model output.
     */
    sawError: () => boolean;
@@ -13,7 +13,7 @@ index 7a7ffa1ec9f88f32bf6c8aa8e0b09709b8d6a906..b7c97b00dd8d682122e33facea3964b0
  };
  
  /**
-@@ -506,9 +510,29 @@
+@@ -546,9 +550,29 @@ export function createStreamContentWatcher(
    let error = false;
    let progress = 0;
    let compaction = 0;
@@ -43,7 +43,7 @@ index 7a7ffa1ec9f88f32bf6c8aa8e0b09709b8d6a906..b7c97b00dd8d682122e33facea3964b0
      if (!sse && SSE_FIELD_LINE.test(frame)) sse = true;
      if (!error && frameHasStructuredStreamError(frame)) error = true;
      if (!content && hasUsefulStreamContent(frame, { contentProbe })) content = true;
-@@ -558,6 +582,8 @@
+@@ -598,6 +622,8 @@ export function createStreamContentWatcher(
      sawNormalStopTerminal: () => normalStop,
      sawSseFrame: () => sse,
      sawError: () => error,

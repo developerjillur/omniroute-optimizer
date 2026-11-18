@@ -1,5 +1,5 @@
 diff --git a/src/mitm/server.cjs b/src/mitm/server.cjs
-index 9eba321081ab589de44eb22fe8bb66bb0cae6b20..12da32d9de3ea67f56348a48a7c8c22bf158f089 100644
+index e27ce3b54ccfb978e404eda516dbd1bd813e0333..30e9da06757c636571db7bc21924cad928ae590b 100644
 --- a/src/mitm/server.cjs
 +++ b/src/mitm/server.cjs
 @@ -5,6 +5,22 @@ const path = require("path");
@@ -51,7 +51,7 @@ index 9eba321081ab589de44eb22fe8bb66bb0cae6b20..12da32d9de3ea67f56348a48a7c8c22b
  
  // Inspector capture (D4 fallback). The standalone proxy intercepts AgentBridge
  // traffic inline (no MitmHandlerBase / agentBridgeHook), so it posts captured
-@@ -444,6 +470,7 @@ async function passthrough(req, res, bodyBuffer) {
+@@ -446,6 +472,7 @@ async function passthrough(req, res, bodyBuffer) {
    // in controlled local environments where the target uses a self-signed cert.
    const rejectUnauthorized = process.env.MITM_DISABLE_TLS_VERIFY !== "1";
  
@@ -59,7 +59,7 @@ index 9eba321081ab589de44eb22fe8bb66bb0cae6b20..12da32d9de3ea67f56348a48a7c8c22b
    const forwardReq = https.request(
      {
        hostname: targetIP,
-@@ -455,6 +482,13 @@ async function passthrough(req, res, bodyBuffer) {
+@@ -457,6 +484,13 @@ async function passthrough(req, res, bodyBuffer) {
        rejectUnauthorized,
      },
      (forwardRes) => {
@@ -73,7 +73,7 @@ index 9eba321081ab589de44eb22fe8bb66bb0cae6b20..12da32d9de3ea67f56348a48a7c8c22b
        res.writeHead(forwardRes.statusCode, forwardRes.headers);
        forwardRes.pipe(res);
      }
-@@ -462,9 +496,23 @@ async function passthrough(req, res, bodyBuffer) {
+@@ -464,9 +498,23 @@ async function passthrough(req, res, bodyBuffer) {
  
    forwardReq.on("error", (err) => {
      console.error(`❌ Passthrough error: ${err.message}`);
@@ -98,7 +98,7 @@ index 9eba321081ab589de44eb22fe8bb66bb0cae6b20..12da32d9de3ea67f56348a48a7c8c22b
  
    if (bodyBuffer.length > 0) forwardReq.write(bodyBuffer);
    forwardReq.end();
-@@ -527,9 +575,9 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
+@@ -532,9 +580,9 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
      // present and, for a reasoning-effort override, sets `reasoningEffortOverride` at the
      // same top-level envelope depth so the antigravity→openai translator can read it
      // ahead of its thinkingConfig-derived guess (ported from upstream #2584).
@@ -111,7 +111,7 @@ index 9eba321081ab589de44eb22fe8bb66bb0cae6b20..12da32d9de3ea67f56348a48a7c8c22b
      );
  
      // Gap B — the Antigravity IDE speaks cloudcode (the Gemini payload wrapped
-@@ -562,35 +610,99 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
+@@ -567,35 +615,99 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
      };
      res.once("close", onDownstreamClose);
      let reader = null;
@@ -231,7 +231,7 @@ index 9eba321081ab589de44eb22fe8bb66bb0cae6b20..12da32d9de3ea67f56348a48a7c8c22b
  
        reader = response.body.getReader();
        const decoder = new TextDecoder();
-@@ -611,9 +723,11 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
+@@ -616,9 +728,11 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
          // #14528: a slow client must drain before the next upstream read,
          // otherwise the socket write queue grows without bound. A close
          // during the wait is caught by the downstreamClosed check above.
@@ -244,7 +244,7 @@ index 9eba321081ab589de44eb22fe8bb66bb0cae6b20..12da32d9de3ea67f56348a48a7c8c22b
        res.off("close", onDownstreamClose);
        if (reader) {
          try {
-@@ -632,13 +746,29 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
+@@ -637,13 +751,29 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
      // Log the raw message locally (server console only) but never expose it
      // in the response body. Hard Rule #12 — sanitize before sending.
      captureError = sanitizeErrorMessage(error && error.message);
@@ -277,7 +277,7 @@ index 9eba321081ab589de44eb22fe8bb66bb0cae6b20..12da32d9de3ea67f56348a48a7c8c22b
          },
        })
      );
-@@ -674,12 +804,25 @@ async function startMitmServer() {
+@@ -679,12 +809,25 @@ async function startMitmServer() {
    const sslOptions =
      CERT_MODE === "root-ca" ? await loadRootCaSslOptions() : loadLegacySslOptions();
  
@@ -305,7 +305,7 @@ index 9eba321081ab589de44eb22fe8bb66bb0cae6b20..12da32d9de3ea67f56348a48a7c8c22b
      const host = String(req.headers.host || "")
        .split(":")[0]
        .toLowerCase();
-@@ -694,12 +837,12 @@ async function startMitmServer() {
+@@ -699,12 +842,12 @@ async function startMitmServer() {
  
      if (req.headers["x-omniroute-source"] === "omniroute") {
        vlog(1, `[MITM] → PASSTHROUGH (OmniRoute source loop)`);
@@ -320,7 +320,7 @@ index 9eba321081ab589de44eb22fe8bb66bb0cae6b20..12da32d9de3ea67f56348a48a7c8c22b
      }
  
      const agentId = TARGET_HOST_AGENT.get(host) || "antigravity";
-@@ -737,14 +880,34 @@ async function startMitmServer() {
+@@ -742,14 +885,34 @@ async function startMitmServer() {
  
      if (!isChatRequest) {
        vlog(1, `[MITM] → PASSTHROUGH (URL ${req.url} does not match chat patterns)`);
@@ -357,7 +357,7 @@ index 9eba321081ab589de44eb22fe8bb66bb0cae6b20..12da32d9de3ea67f56348a48a7c8c22b
      }
  
      stats.interceptedRequests++;
-@@ -759,6 +922,28 @@ async function startMitmServer() {
+@@ -764,6 +927,28 @@ async function startMitmServer() {
            : "")
      );
      return intercept(req, res, bodyBuffer, mappedOverride, model);
@@ -386,7 +386,7 @@ index 9eba321081ab589de44eb22fe8bb66bb0cae6b20..12da32d9de3ea67f56348a48a7c8c22b
    });
  
    // =========================================================================
-@@ -899,36 +1084,50 @@ async function startMitmServer() {
+@@ -904,36 +1089,50 @@ async function startMitmServer() {
    server.headersTimeout = MITM_IDLE_TIMEOUT_MS; // time allowed to send headers
    server.keepAliveTimeout = MITM_IDLE_TIMEOUT_MS; // idle keep-alive window
  
@@ -442,7 +442,7 @@ index 9eba321081ab589de44eb22fe8bb66bb0cae6b20..12da32d9de3ea67f56348a48a7c8c22b
        stats.activeConnections = Math.max(0, stats.activeConnections - 1);
        writeStats();
      });
-@@ -945,12 +1144,25 @@ async function startMitmServer() {
+@@ -950,12 +1149,25 @@ async function startMitmServer() {
      process.exit(1);
    });
  

@@ -1,5 +1,5 @@
 diff --git a/open-sse/services/sessionManager.ts b/open-sse/services/sessionManager.ts
-index a8c385caaece25cc690ede68d6b7781b406773ff..ed2548e360a2e9056ad7faf885d1fed865b5f9c0 100644
+index cb2554753b6476cc8b8e6b09a5b951125acffa95..67a39fff016ab6a8777b62e96bd9eff1e85b0538 100644
 --- a/open-sse/services/sessionManager.ts
 +++ b/open-sse/services/sessionManager.ts
 @@ -6,6 +6,7 @@
@@ -7,10 +7,10 @@ index a8c385caaece25cc690ede68d6b7781b406773ff..ed2548e360a2e9056ad7faf885d1fed8
  
  import { createHash } from "node:crypto";
 +import { getNativeClaudeSessionId } from "./nativeClaudeSession.ts";
+ import { resolveTtlMsFromEnv } from "../utils/ttlFromEnv.ts";
  
  interface SessionEntry {
-   createdAt: number;
-@@ -105,6 +106,8 @@ export function generateSessionId(
+@@ -108,6 +109,8 @@
    options: SessionFingerprintOptions = {}
  ): string | null {
    if (!body || typeof body !== "object") return null;
@@ -19,7 +19,7 @@ index a8c385caaece25cc690ede68d6b7781b406773ff..ed2548e360a2e9056ad7faf885d1fed8
    const parts: string[] = [];
  
    // Model contributes to fingerprint
-@@ -340,7 +343,10 @@ export function extractExternalSessionId(
+@@ -343,7 +346,10 @@
      h.get("x-omniroute-session") ?? // OmniRoute-specific form
      h.get("session-id") ?? // Bare session-id
      null;

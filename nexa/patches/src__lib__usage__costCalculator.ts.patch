@@ -1,5 +1,5 @@
 diff --git a/src/lib/usage/costCalculator.ts b/src/lib/usage/costCalculator.ts
-index 8ce361cacf94cf18c14efcb9db127ab1148199fb..284116f092b48850b0a62c4472df0388ab177c59 100644
+index bf7f9d09144ffa36beb8afadb8a849b7798133d4..ea110c31bd68d18cf6d9b79bc0d2f74e1d2fffcb 100644
 --- a/src/lib/usage/costCalculator.ts
 +++ b/src/lib/usage/costCalculator.ts
 @@ -1,3 +1,4 @@
@@ -7,27 +7,27 @@ index 8ce361cacf94cf18c14efcb9db127ab1148199fb..284116f092b48850b0a62c4472df0388
  /**
   * Cost Calculator — extracted from usageDb.js (T-15)
   *
-@@ -11,6 +12,7 @@
- import { splitCodexReasoningSuffix } from "@omniroute/open-sse/executors/codex/reasoningSuffix.ts";
+@@ -12,6 +13,7 @@
+ import { resolveClaudeEffortVariantBase } from "@omniroute/open-sse/handlers/chatCore/claudeEffortVariant.ts";
  import { isCreditMeteredProvider } from "./creditMeteredProviders";
  import { isFlatRateProvider } from "./flatRateProviders";
 +import { getCacheCreationTtl } from "./cacheCreationTtl";
-
+ 
  /**
   * Normalize model name — strip provider path prefixes.
-@@ -38,6 +40,8 @@
+@@ -39,6 +41,8 @@
     * `provider` to be set.
     */
    flatRateAsZero?: boolean;
 +  /** Aggregates must carry their original per-request context bucket. */
 +  longContext?: boolean;
- };
-
- /**
-@@ -169,11 +173,16 @@
+   /**
+    * When true, the token counts are a SUM over many requests (e.g. the GROUP BY
+    * rows of usage analytics), so the per-request long-context pricing tier is
+@@ -188,11 +192,16 @@
    // while still using the Responses API with service_tier="flex".
    if (tier === "flex") return 0.5;
-
+ 
 -  if (tier !== "priority" && tier !== "fast") return 1;
 -
    const modelKey = stripCodexEffortSuffix(
@@ -43,10 +43,10 @@ index 8ce361cacf94cf18c14efcb9db127ab1148199fb..284116f092b48850b0a62c4472df0388
    const compactModelKey = modelKey.replace(/-/g, "");
    // Codex GPT-6 Fast is 2.5x Standard (https://developers.openai.com/codex/pricing).
    if (
-@@ -193,6 +202,17 @@
+@@ -212,6 +221,17 @@
    return 1;
  }
-
+ 
 +/** Anthropic fast-mode cache multipliers stack on top of the doubled Fable 5.2 rates. */
 +export function getClaudeFastCostMultiplier(
 +  provider: string | null | undefined,
@@ -61,7 +61,7 @@ index 8ce361cacf94cf18c14efcb9db127ab1148199fb..284116f092b48850b0a62c4472df0388
  /**
   * Long-context pricing tier: a row may carry `long_context: { threshold, inclusive?, ...rates }`
   * (e.g. OpenAI bills prompts above 272K input tokens at 2x input / 1.5x output for the whole
-@@ -202,14 +222,15 @@
+@@ -221,14 +241,15 @@
   */
  function applyLongContextTier(
    pricing: Record<string, unknown>,
@@ -78,12 +78,12 @@ index 8ce361cacf94cf18c14efcb9db127ab1148199fb..284116f092b48850b0a62c4472df0388
 +  const crossed = selected ?? (inclusive === true ? inputTokens >= limit : inputTokens > limit);
    return crossed ? { ...pricing, ...tierRates } : pricing;
  }
-
-@@ -245,12 +266,37 @@
+ 
+@@ -264,12 +285,43 @@
    // never a cost basis: pricing them would bill the request a second time.
    if (isCreditMeteredProvider(options.provider)) return 0;
    const inputTokens = tokens.input ?? tokens.prompt_tokens ?? tokens.input_tokens ?? 0;
--  const rates = applyLongContextTier(pricing, inputTokens);
+-  const rates = options.aggregatedTokens ? pricing : applyLongContextTier(pricing, inputTokens);
 -  const inputPrice = toNumber(rates.input, 0);
 -  const cachedPrice = toNumber(rates.cached, inputPrice);
 -  const outputPrice = toNumber(rates.output, 0);
@@ -92,11 +92,17 @@ index 8ce361cacf94cf18c14efcb9db127ab1148199fb..284116f092b48850b0a62c4472df0388
 +  const rates = applyLongContextTier(
 +    pricing,
 +    inputTokens,
-+    Number.isFinite(Number(pricing.long_context_threshold)) ? options.longContext : undefined
++    Number.isFinite(Number(pricing.long_context_threshold))
++      ? (options.longContext ?? (options.aggregatedTokens ? false : undefined))
++      : options.aggregatedTokens
++        ? false
++        : undefined
 +  );
 +  const legacyLongContext =
 +    !pricing.long_context &&
-+    (options.longContext ?? inputTokens > toNumber(pricing.long_context_threshold, Infinity));
++    (options.longContext ??
++      (!options.aggregatedTokens &&
++        inputTokens > toNumber(pricing.long_context_threshold, Infinity)));
 +  const inputMultiplier = legacyLongContext
 +    ? toNumber(pricing.long_context_input_multiplier, 1)
 +    : 1;
@@ -120,13 +126,13 @@ index 8ce361cacf94cf18c14efcb9db127ab1148199fb..284116f092b48850b0a62c4472df0388
 +        ? toNumber(rates.input, 0) * 2
 +        : toNumber(rates.cache_creation, toNumber(rates.input, 0))
 +    ) * inputMultiplier;
-
+ 
    let cost = 0;
    const promptDetails = tokens.prompt_tokens_details;
-@@ -302,9 +348,19 @@
+@@ -321,9 +373,19 @@
    }
    cost = Math.max(0, cost);
-
+ 
 -  if (cacheCreationTokens > 0) cost += cacheCreationTokens * (cacheCreationPrice / 1_000_000);
 -
 -  return cost * getCodexFastCostMultiplier(options.provider, options.model, options.serviceTier);
@@ -144,5 +150,5 @@ index 8ce361cacf94cf18c14efcb9db127ab1148199fb..284116f092b48850b0a62c4472df0388
 +    getClaudeFastCostMultiplier(options.provider, options.model, options.serviceTier)
 +  );
  }
-
+ 
  /**

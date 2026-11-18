@@ -1,5 +1,5 @@
 diff --git a/open-sse/services/thinkingBudget.ts b/open-sse/services/thinkingBudget.ts
-index edb519b31e5475b827b9beddfcb165389f9c507e..c29385aae63d63ded1249c2807551cf50cce6db9 100644
+index b71c08cdbc48b24059a19a602d1d6f39e5784206..9cc0599b0abd44fdb845aded0a38ff63f59c443b 100644
 --- a/open-sse/services/thinkingBudget.ts
 +++ b/open-sse/services/thinkingBudget.ts
 @@ -1,3 +1,4 @@
@@ -7,7 +7,7 @@ index edb519b31e5475b827b9beddfcb165389f9c507e..c29385aae63d63ded1249c2807551cf5
  /**
   * Thinking Budget Control — Phase 2
   *
-@@ -101,7 +102,10 @@
+@@ -121,7 +122,10 @@ export function gemini38ThinkingConfig(
    body: Record<string, unknown>
  ):
    | { thinkingLevel: Gemini38ThinkingLevel; includeThoughts?: boolean }
@@ -17,5 +17,5 @@ index edb519b31e5475b827b9beddfcb165389f9c507e..c29385aae63d63ded1249c2807551cf5
 +  const gemini4 = gemini4ThinkingConfig(model, budget, body);
 +  if (gemini4) return gemini4;
    if (budget <= 0) {
-     return { thinkingBudget: 0, includeThoughts: false };
-   }
+     if (isGemini4PlusModel(model)) {
+       return { thinkingLevel: "low" };

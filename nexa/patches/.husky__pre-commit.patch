@@ -1,8 +1,8 @@
 diff --git a/.husky/pre-commit b/.husky/pre-commit
-index f56d9044b5b660566e3bca72986afde5301e6727..d822798731235ecb5ddfb7808a15bf8a13591388 100755
+index 44b7198c1fa6b332f0268da7490fe2f2091897f0..7b22d7a292ae6e1b724892911646f34f53cc4f69 100755
 --- a/.husky/pre-commit
 +++ b/.husky/pre-commit
-@@ -18,3 +18,11 @@
+@@ -21,3 +21,11 @@ node scripts/check/check-type-scale-ratchet.mjs --ratchet --quiet
  node scripts/check/check-tracked-artifacts.mjs
  # vendored kit must stay byte-identical to the pinned upstream commit; skips with a warning where the private clone is absent
  npm run --silent check:ui-kit-snapshot

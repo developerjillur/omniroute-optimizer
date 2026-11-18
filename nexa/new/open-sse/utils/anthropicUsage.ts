@@ -1,3 +1,8 @@
+import {
+  cacheCreationFields,
+  mergeCacheCreationFields,
+  readCacheWriteUsage,
+} from "./cacheWriteUsage.ts";
 import { getCacheCreationTtlFields } from "../../src/lib/usage/cacheCreationTtl.ts";
 
 type UsageRecord = Record<string, unknown>;
@@ -14,8 +19,8 @@ function tokens(value: unknown): number {
 export function mergeAnthropicUsage(previous: unknown, incoming: unknown): UsageRecord {
   const before = record(previous);
   const next = record(incoming);
-  const result = { ...before, ...next };
-  for (const key of ["cache_creation", "output_tokens_details"]) {
+  const result = { ...before, ...next, ...mergeCacheCreationFields(before, next) };
+  for (const key of ["output_tokens_details"]) {
     if (next[key] && typeof next[key] === "object" && !Array.isArray(next[key])) {
       result[key] = { ...record(before[key]), ...record(next[key]) };
     }
@@ -85,13 +90,24 @@ export function getAnthropicMeteredUsage(value: unknown): UsageRecord {
 }
 
 /** Canonical inclusive input for internal metering and OpenAI-format clients. */
-export function normalizeAnthropicUsage(value: unknown): Record<string, number> {
+export function normalizeAnthropicUsage(value: unknown): {
+  [key: string]: unknown;
+  prompt_tokens: number;
+  input_tokens: number;
+  completion_tokens: number;
+  output_tokens: number;
+  cache_read_input_tokens?: number;
+  cache_creation_input_tokens?: number;
+  reasoning_tokens?: number;
+} {
   const usage = getAnthropicMeteredUsage(value);
   const read = tokens(usage.cache_read_input_tokens);
-  const write = tokens(usage.cache_creation_input_tokens);
+  const reportedWrite = readCacheWriteUsage(usage).total;
+  const write = reportedWrite ?? 0;
   const input = tokens(usage.input_tokens ?? usage.prompt_tokens) + read + write;
   const output = tokens(usage.output_tokens ?? usage.completion_tokens);
-  const result: Record<string, number> = {
+  const result: ReturnType<typeof normalizeAnthropicUsage> = {
+    ...cacheCreationFields(usage),
     ...getCacheCreationTtlFields(usage),
     prompt_tokens: input,
     input_tokens: input,
@@ -99,7 +115,7 @@ export function normalizeAnthropicUsage(value: unknown): Record<string, number> 
     output_tokens: output,
   };
   if (usage.cache_read_input_tokens !== undefined) result.cache_read_input_tokens = read;
-  if (usage.cache_creation_input_tokens !== undefined) result.cache_creation_input_tokens = write;
+  if (reportedWrite !== null) result.cache_creation_input_tokens = write;
   const details = record(usage.output_tokens_details);
   const reasoning = details.thinking_tokens ?? details.reasoning_tokens ?? usage.reasoning_tokens;
   if (typeof reasoning === "number" && Number.isFinite(reasoning) && reasoning >= 0) {

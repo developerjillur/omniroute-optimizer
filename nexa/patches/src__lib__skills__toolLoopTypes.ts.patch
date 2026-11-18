@@ -1,5 +1,5 @@
 diff --git a/src/lib/skills/toolLoopTypes.ts b/src/lib/skills/toolLoopTypes.ts
-index 05482af7df5e18ab11339dd8820a2d16b7e61a0a..4309afac4b4018e70b7502ca97411ec015ef6877 100644
+index 995e0ab251751557df35caf1c552c967a091adc6..a88857464cf19d6f73920216a8c37ff98427a28c 100644
 --- a/src/lib/skills/toolLoopTypes.ts
 +++ b/src/lib/skills/toolLoopTypes.ts
 @@ -13,6 +13,8 @@ export interface ProviderLegUsage {

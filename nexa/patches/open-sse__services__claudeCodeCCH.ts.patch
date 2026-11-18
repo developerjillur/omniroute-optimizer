@@ -1,20 +1,51 @@
 diff --git a/open-sse/services/claudeCodeCCH.ts b/open-sse/services/claudeCodeCCH.ts
-index 567de2cc1572f6e50fa0914a5da5e2f87313f74e..069f7b70ddf2a74848cccdbf8f8586562bdf4cf0 100644
+index 49128f0c4cd756632d8f0a0f15c4bc9707617740..14721df2cc62843c3d69cb639b0657a480276ce5 100644
 --- a/open-sse/services/claudeCodeCCH.ts
 +++ b/open-sse/services/claudeCodeCCH.ts
-@@ -40,10 +40,13 @@ export async function computeCCH(bodyBytes: Uint8Array): Promise<string> {
- 
- export async function signRequestBody(bodyString: string): Promise<string> {
-   if (!CCH_PATTERN.test(bodyString)) return bodyString;
-+  // Native clients already signed their body; local model/identity edits require
-+  // signing the placeholder form again, never hashing a previous signature.
-+  const unsigned = bodyString.replace(CCH_PATTERN, "cch=00000;");
-   const encoder = new TextEncoder();
--  const bodyBytes = encoder.encode(bodyString);
-+  const bodyBytes = encoder.encode(unsigned);
-   const token = await computeCCH(bodyBytes);
--  return bodyString.replace(CCH_PATTERN, `cch=${token};`);
-+  return unsigned.replace(CCH_PATTERN, `cch=${token};`);
+@@ -81,7 +81,7 @@
  }
  
- export { CCH_PATTERN };
+ /** Index of the billing header's `cch=00000;` placeholder, or -1. */
+-function findBillingPlaceholder(body: string): number {
++function findBillingCch(body: string): number {
+   // Cheap exit: most bodies carry no billing header, so skip the scan below.
+   if (!body.includes("x-anthropic-billing-header")) return -1;
+   let from = body.indexOf(LEGACY_ANCHOR);
+@@ -95,8 +95,8 @@
+   }
+   // The placeholder must sit inside this one string value.
+   const valueEnd = body.indexOf('"', from);
+-  const placeholderAt = body.indexOf(CCH_PLACEHOLDER, from);
+-  return placeholderAt >= 0 && (valueEnd < 0 || placeholderAt < valueEnd) ? placeholderAt : -1;
++  const match = body.slice(from, valueEnd < 0 ? undefined : valueEnd).match(CCH_PATTERN);
++  return match && match.index !== undefined ? from + match.index : -1;
+ }
+ 
+ let xxhashPromise: Promise<void> | null = null;
+@@ -121,18 +121,15 @@
+ }
+ 
+ export async function signRequestBody(bodyString: string): Promise<string> {
+-  // Sign only the literal placeholder inside the billing header. A first-match
+-  // `cch=[0-9a-f]{5};` rewrite can hit user text (messages serialise before
+-  // system), leaving the real billing header unsigned.
+-  const placeholderAt = findBillingPlaceholder(bodyString);
+-  if (placeholderAt < 0) return bodyString;
+-  const encoder = new TextEncoder();
+-  const bodyBytes = encoder.encode(bodyString);
+-  const token = await computeCCH(bodyBytes);
++  const tokenAt = findBillingCch(bodyString);
++  if (tokenAt < 0) return bodyString;
++  const unsigned =
++    bodyString.slice(0, tokenAt) +
++    CCH_PLACEHOLDER +
++    bodyString.slice(tokenAt + CCH_PLACEHOLDER.length);
++  const token = await computeCCH(new TextEncoder().encode(unsigned));
+   return (
+-    bodyString.slice(0, placeholderAt) +
+-    `cch=${token};` +
+-    bodyString.slice(placeholderAt + CCH_PLACEHOLDER.length)
++    unsigned.slice(0, tokenAt) + `cch=${token};` + unsigned.slice(tokenAt + CCH_PLACEHOLDER.length)
+   );
+ }
+ 

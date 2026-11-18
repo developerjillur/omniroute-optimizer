@@ -1,17 +1,17 @@
 diff --git a/src/app/(dashboard)/dashboard/usage/components/ProviderLimits/parts/QuotaCardExpanded.tsx b/src/app/(dashboard)/dashboard/usage/components/ProviderLimits/parts/QuotaCardExpanded.tsx
-index a8b100dba02ab41e83434d883518a66f73fc0215..97446c1ce5f6c552fde9a378b1607b805484a24e 100644
+index c997d204e063050e17d99ecc4b1ed927dc327d51..df3a28b713f3fe1bca59ad2580767e767e638919 100644
 --- a/src/app/(dashboard)/dashboard/usage/components/ProviderLimits/parts/QuotaCardExpanded.tsx
 +++ b/src/app/(dashboard)/dashboard/usage/components/ProviderLimits/parts/QuotaCardExpanded.tsx
-@@ -33,6 +33,8 @@ import KiloPassMeter from "./KiloPassMeter";
+@@ -33,6 +33,8 @@
  import QuotaCardSpeed from "./QuotaCardSpeed";
  import { hasCodexPaidCredits, type CodexPaidCredits } from "@/lib/providers/codexPaidCredits";
  import AntigravityQuotaGroups, { resolveAntigravityQuotaGroups } from "../AntigravityQuotaGroups";
 +// nexa overlay: additive per-account catalog-model enumeration (display-only).
 +import QuotaModelList from "./QuotaModelList";
+ import CursorModelUsageTable from "../CursorModelUsageTable";
  
  const CURRENCY_SYMBOLS: Record<string, string> = {
-   USD: "$",
-@@ -482,6 +484,10 @@ export default function QuotaCardExpanded({
+@@ -495,6 +497,10 @@
          </Button>
        )}
  
@@ -20,5 +20,5 @@ index a8b100dba02ab41e83434d883518a66f73fc0215..97446c1ce5f6c552fde9a378b1607b80
 +      {!loading && !error && providerId ? <QuotaModelList provider={providerId} /> : null}
 +
        <div className="min-w-0 space-y-1.5 pt-1.5 border-t border-border/40">
-         <div className="flex min-w-0 items-center justify-between gap-2">
+         <div className="flex min-w-0 items-center justify-end gap-2">
            {refreshedLabel && (

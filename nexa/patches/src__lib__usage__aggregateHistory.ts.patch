@@ -1,8 +1,8 @@
 diff --git a/src/lib/usage/aggregateHistory.ts b/src/lib/usage/aggregateHistory.ts
-index 953e1759257e69a49586f1268c6fbc037d211fdf..01f728ee75c8dd4ac3b2c176cfb7935501683f40 100644
+index fc8560e84b1646ed29520664f517d3a87ccec1cf..a32ddfea8dbbd25b7247913520d2837d0e76bc6c 100644
 --- a/src/lib/usage/aggregateHistory.ts
 +++ b/src/lib/usage/aggregateHistory.ts
-@@ -268,6 +268,8 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
+@@ -273,6 +273,8 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
            COALESCE(tokens_output, 0) as requestOutputTokens,
            COALESCE(tokens_cache_read, 0) as requestCacheReadTokens,
            COALESCE(tokens_cache_creation, 0) as requestCacheCreationTokens,
@@ -11,7 +11,7 @@ index 953e1759257e69a49586f1268c6fbc037d211fdf..01f728ee75c8dd4ac3b2c176cfb79355
            COALESCE(tokens_reasoning, 0) as requestReasoningTokens,
            COALESCE(SUM(tokens_input), 0) as inputTokens,
            COALESCE(SUM(tokens_output), 0) as outputTokens,
-@@ -282,7 +284,8 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
+@@ -290,7 +292,8 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
            AND model IS NOT NULL AND model != ''
          GROUP BY LOWER(provider), LOWER(model), DATE(timestamp), serviceTier,
            requestInputTokens, requestOutputTokens, requestCacheReadTokens,
@@ -21,7 +21,7 @@ index 953e1759257e69a49586f1268c6fbc037d211fdf..01f728ee75c8dd4ac3b2c176cfb79355
        )
        .all(beforeDate) as Array<{
        provider: string;
-@@ -294,6 +297,8 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
+@@ -302,6 +305,8 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
        requestOutputTokens: number;
        requestCacheReadTokens: number;
        requestCacheCreationTokens: number;
@@ -30,7 +30,7 @@ index 953e1759257e69a49586f1268c6fbc037d211fdf..01f728ee75c8dd4ac3b2c176cfb79355
        requestReasoningTokens: number;
        inputTokens: number;
        outputTokens: number;
-@@ -327,6 +332,8 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
+@@ -338,6 +343,8 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
                  output: row.requestOutputTokens,
                  cacheRead: row.requestCacheReadTokens,
                  cacheCreation: row.requestCacheCreationTokens,

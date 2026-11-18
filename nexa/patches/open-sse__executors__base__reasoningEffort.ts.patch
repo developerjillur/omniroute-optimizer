@@ -1,5 +1,5 @@
 diff --git a/open-sse/executors/base/reasoningEffort.ts b/open-sse/executors/base/reasoningEffort.ts
-index ffb708f665ddf019adc37987b0c85c354f0dbdef..d7a5b5ff3f4fd51dedcb68acb03370ce0e6bbcce 100644
+index cfcec385b1d9f6ef45fd175ca237220173bd3b5b..5c643c31cd7bea9c3638ed72e55de025dd265bbe 100644
 --- a/open-sse/executors/base/reasoningEffort.ts
 +++ b/open-sse/executors/base/reasoningEffort.ts
 @@ -1,5 +1,6 @@
@@ -9,7 +9,7 @@ index ffb708f665ddf019adc37987b0c85c354f0dbdef..d7a5b5ff3f4fd51dedcb68acb03370ce
  import { PROVIDER_CLAUDE } from "../../services/systemTransforms.ts";
  import { isClaudeCodeCompatible } from "../../services/provider.ts";
  import {
-@@ -803,6 +804,11 @@
+@@ -867,6 +868,11 @@ export function sanitizeReasoningEffortForProvider(
    // upstream, and if it 400s the user gets a clear signal. This prevents
    // new models from being unusable for weeks until they're whitelisted (#8057).
    if (effortStr === "max") {

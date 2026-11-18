@@ -1,5 +1,5 @@
 diff --git a/src/app/(dashboard)/dashboard/costs/components/ApiKeyUsageLimitCard.tsx b/src/app/(dashboard)/dashboard/costs/components/ApiKeyUsageLimitCard.tsx
-index 60394b3b186d3916082c2a28abca3fa248d84919..51269d3cf8e07f8efe862471acd84421412fa528 100644
+index 76111c0beeeee1db747bc25085f46965a7b212d8..a7477ab3623e6c55ffc4cd5093b2515377d0be78 100644
 --- a/src/app/(dashboard)/dashboard/costs/components/ApiKeyUsageLimitCard.tsx
 +++ b/src/app/(dashboard)/dashboard/costs/components/ApiKeyUsageLimitCard.tsx
 @@ -89,11 +89,18 @@ export function ApiKeyUsageLimitCard({

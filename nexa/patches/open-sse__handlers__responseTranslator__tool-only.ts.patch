@@ -1,8 +1,8 @@
 diff --git a/open-sse/handlers/responseTranslator.ts b/open-sse/handlers/responseTranslator.ts
-index 7373a72306482f830bbe61df8468c953e8d93737..af26967854b765201d1a79cee0ddd85b4039cd75 100644
+index 65c69f38fb394ace988ba6330edfe7cc9c5f4964..4173ab369a464d38f5574595018c00ecd8427443 100644
 --- a/open-sse/handlers/responseTranslator.ts
 +++ b/open-sse/handlers/responseTranslator.ts
-@@ -857,7 +857,7 @@ function convertOpenAINonStreamingToClaude(
+@@ -866,7 +866,7 @@ function convertOpenAINonStreamingToClaude(
      });
    }
  
@@ -11,7 +11,7 @@ index 7373a72306482f830bbe61df8468c953e8d93737..af26967854b765201d1a79cee0ddd85b
    const hasToolCalls = Array.isArray(messageObj.tool_calls) && messageObj.tool_calls.length > 0;
  
    if (typeof messageObj.refusal === "string" && messageObj.refusal) {
-@@ -869,8 +869,8 @@ function convertOpenAINonStreamingToClaude(
+@@ -878,8 +878,8 @@ function convertOpenAINonStreamingToClaude(
    } else if (messageObj.content !== undefined && messageObj.content !== null) {
      hasTextOrReasoning = true;
      const resolvedText = toString(messageObj.content);
@@ -22,7 +22,7 @@ index 7373a72306482f830bbe61df8468c953e8d93737..af26967854b765201d1a79cee0ddd85b
        content.push({
          type: "text",
          text: resolvedText === "" ? "(empty response)" : resolvedText,
-@@ -886,7 +886,7 @@ function convertOpenAINonStreamingToClaude(
+@@ -895,7 +895,7 @@ function convertOpenAINonStreamingToClaude(
        type: "text",
        text: reasoningText,
      });

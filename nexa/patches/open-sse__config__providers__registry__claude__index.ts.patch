@@ -7,7 +7,7 @@ index 4313e95bd96eca35386943bd5a5eecd52de8ca61..e811f76b25e3c4dbd6ece85f04142e48
  import type { RegistryEntry } from "../../shared.ts";
  import {
    getClaudeCliHeaders,
-@@ -26,142 +27,5 @@
+@@ -26,142 +27,5 @@ export const claudeProvider: RegistryEntry = {
      clientIdDefault: resolvePublicCred("claude_id"),
      tokenUrl: "https://api.anthropic.com/v1/oauth/token",
    },

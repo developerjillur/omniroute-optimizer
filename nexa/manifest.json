@@ -1,19 +1,19 @@
 {
   "_comment": "NexaLance OmniRoute child-theme overlay registry. layer: patch=surgical diff onto pristine upstream; new=net-new file copied in at build; tooling=overlay machinery. class: upstream-candidate=generic fix worth PRing to diegosouzapw/OmniRoute (Phase-2 shrinker); nexa-specific=stays in the overlay; needs-review=triage. Base stays byte-for-byte pristine; regenerate with `node nexa/gen-manifest.mjs`.",
   "upstreamBase": {
-    "sha": "191dce8d534ceb56c28a08e71381284a9a87838f",
-    "version": "3.8.53"
+    "sha": "1c880c5c95b3f0240d5e4c6c8f0947ec46b5d25e",
+    "version": "3.8.54"
   },
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 382,
-    "patches": 231,
-    "new": 145,
+    "total": 385,
+    "patches": 233,
+    "new": 146,
     "tooling": 6,
     "upstreamCandidates": 27,
-    "nexaSpecific": 109,
-    "needsReview": 246,
+    "nexaSpecific": 108,
+    "needsReview": 250,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
   },
@@ -586,6 +586,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/open-sse__utils__cacheWriteUsage.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/utils/cacheWriteUsage.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/open-sse__utils__earlyStreamKeepalive.ts.patch",
       "layer": "patch",
       "class": "needs-review",
@@ -594,10 +602,10 @@
       "upstreamPR": null
     },
     {
-      "file": "patches/open-sse__utils__proxyFetch.ts.patch",
+      "file": "patches/open-sse__utils__proxyFetchTransportSupport.ts.patch",
       "layer": "patch",
-      "class": "nexa-specific",
-      "target": "open-sse/utils/proxyFetch.ts",
+      "class": "needs-review",
+      "target": "open-sse/utils/proxyFetchTransportSupport.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -890,14 +898,6 @@
       "upstreamPR": null
     },
     {
-      "file": "patches/src__app__api__usage__analytics__route.ts.patch",
-      "layer": "patch",
-      "class": "needs-review",
-      "target": "src/app/api/usage/analytics/route.ts",
-      "conflictRisk": "on-overlap",
-      "upstreamPR": null
-    },
-    {
       "file": "patches/src__app__api__usage__cache-health__route.ts.patch",
       "layer": "patch",
       "class": "nexa-specific",
@@ -1101,6 +1101,14 @@
       "upstreamPR": null
     },
     {
+      "file": "patches/src__lib__db__usageAnalytics__billing.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/lib/db/usageAnalytics/billing.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
       "file": "patches/src__lib__db__usageAnalytics__sources.ts.patch",
       "layer": "patch",
       "class": "needs-review",
@@ -1177,6 +1185,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "src/lib/usage/aggregateHistory.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/src__lib__usage__analyticsPricing.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "src/lib/usage/analyticsPricing.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -2969,6 +2985,14 @@
       "layer": "new",
       "class": "needs-review",
       "target": "tests/unit/nexa-model-test-connection.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/nexa-v354-compatibility.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/nexa-v354-compatibility.test.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },

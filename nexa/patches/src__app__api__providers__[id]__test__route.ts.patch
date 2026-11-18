@@ -1,8 +1,8 @@
 diff --git a/src/app/api/providers/[id]/test/route.ts b/src/app/api/providers/[id]/test/route.ts
-index bfd3b022647482bb17ec920acd4ba023f45a81fd..a5542bf79a31fa9775b2bf660d37ffd546b7f648 100644
+index cdd5c0473d9b48f7842e30a23360bc4c2356d846..932d6c9d2be41ffd2555ac34adc3cba21bd5a29e 100644
 --- a/src/app/api/providers/[id]/test/route.ts
 +++ b/src/app/api/providers/[id]/test/route.ts
-@@ -40,6 +40,8 @@
+@@ -41,6 +41,8 @@ import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLease
  import * as apiKeyTestResult from "./apiKeyTestResult";
  import { classifyOAuthProbeInconclusive, OAUTH_TEST_CONFIG } from "./oauthTestConfig";
  import { isGeoBlockedError } from "@omniroute/open-sse/services/errorClassifier.ts";
@@ -11,7 +11,7 @@ index bfd3b022647482bb17ec920acd4ba023f45a81fd..a5542bf79a31fa9775b2bf660d37ffd5
  import * as retirement from "@/lib/providers/chatgptWebRetirementResponse";
  import {
    classifyFailure,
-@@ -681,6 +683,7 @@
+@@ -682,6 +684,7 @@ export async function testOAuthConnection(
          error: null,
          refreshed,
          newTokens,
@@ -19,7 +19,7 @@ index bfd3b022647482bb17ec920acd4ba023f45a81fd..a5542bf79a31fa9775b2bf660d37ffd5
          diagnosis: makeDiagnosis("ok", "upstream", null, null),
        };
      }
-@@ -887,7 +890,9 @@
+@@ -888,7 +891,9 @@ export async function testOAuthConnection(
        connection.provider === "gitlab-duo" && res.status === 403
          ? `Access denied: ${sanitizeUpstreamBodyText(bodyText)}`
          : "Access denied";
@@ -30,7 +30,7 @@ index bfd3b022647482bb17ec920acd4ba023f45a81fd..a5542bf79a31fa9775b2bf660d37ffd5
        ? "Egress location blocked by Google (User location is not supported). The Cloud Code API is not offered from this server's proxy exit region — route antigravity/agy through a proxy in a supported region (e.g. US/EU) or use a different provider. This is NOT an account problem."
        : isAccountDeactivatedMessage(bodyText)
          ? "Account deactivated by the provider"
-@@ -1005,6 +1010,8 @@
+@@ -1011,6 +1016,8 @@ export async function testSingleConnection(
      };
    }
    retirement.assertProviderAvailable(provider);
@@ -39,7 +39,7 @@ index bfd3b022647482bb17ec920acd4ba023f45a81fd..a5542bf79a31fa9775b2bf660d37ffd5
  
    let proxyInfo: any = null;
    try {
-@@ -1141,7 +1148,8 @@
+@@ -1147,7 +1154,8 @@ export async function testSingleConnection(
    // A passing probe means Google lifted the "verify your account" challenge: drop the stored
    // link so the Verify button and the pending-verification filter clear without waiting for
    // the next successful chat request.
@@ -49,16 +49,16 @@ index bfd3b022647482bb17ec920acd4ba023f45a81fd..a5542bf79a31fa9775b2bf660d37ffd5
      await clearAntigravityVerificationUrl(
        provider,
        connectionId,
-@@ -1149,6 +1157,12 @@
-     ).catch(() => {
+@@ -1156,6 +1164,12 @@ export async function testSingleConnection(
        console.warn("[ConnectionTest] Could not clear the antigravity verification link");
      });
-+  }
+   }
 +  if (isGoogleVerificationFailure(provider, result.statusCode, result.error)) {
 +    await setGoogleAccountVerification(connectionId, true);
 +  } else if (isGoogleCloudAccount(provider) && result.valid &&
 +    Number(result.statusCode) >= 200 && Number(result.statusCode) < 300) {
 +    await setGoogleAccountVerification(connectionId, false, googleVerificationObservedAt(connection), verificationSnapshot);
-   }
++  }
  
    // Sync to cloud if token was refreshed
+   if (result.refreshed) {

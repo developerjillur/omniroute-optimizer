@@ -1,8 +1,8 @@
 diff --git a/bin/omniroute.mjs b/bin/omniroute.mjs
-index 7f3c34670ffc501a979b9e38a801b0751fecf2d5..1ad5f92c72aabe2eacae4de55fc5b35524d7a051 100755
+index 45b0bf417a7a677c30064672d68d4c276daea1ed..23f075048c3351ff3108bce6e8e21d34b506b437 100644
 --- a/bin/omniroute.mjs
 +++ b/bin/omniroute.mjs
-@@ -201,8 +201,19 @@ function loadEnvFile() {
+@@ -244,8 +244,19 @@
      }
    }
  
@@ -16,20 +16,20 @@ index 7f3c34670ffc501a979b9e38a801b0751fecf2d5..1ad5f92c72aabe2eacae4de55fc5b355
 +    argv.some((a) => /^--output=(json|jsonl|csv)$/.test(a)) ||
 +    argv.some((a, i) => a === "--output" && ["json", "jsonl", "csv"].includes(argv[i + 1]));
    for (const envPath of loadedEnvPaths) {
--    console.log(`  \x1b[2m📋 Loaded env from ${envPath}\x1b[0m`);
-+    const line = `  \x1b[2m📋 Loaded env from ${envPath}\x1b[0m`;
+-    console.log(`  \x1b[2m📋 Loaded env from ${printablePath(envPath)}\x1b[0m`);
++    const line = `  \x1b[2m📋 Loaded env from ${printablePath(envPath)}\x1b[0m`;
 +    if (machineOutput) process.stderr.write(line + "\n");
 +    else console.log(line);
    }
  
    for (const [key, { winner, loser }] of shadowed) {
-@@ -233,6 +244,9 @@ function loadEnvFile() {
+@@ -295,6 +306,9 @@
+ }
  
  loadEnvFile();
- 
++
 +const { pinPackageMigrations } = await import("./cli/utils/packageMigrations.mjs");
 +pinPackageMigrations(ROOT);
-+
+ 
  // Next.js has no android branch in getCacheDirectory(): if ~/.cache (and tmp)
  // do not already exist it aborts the instrumentation hook, and every request
- // then returns a silent HTTP 500 even though the CLI still looks "running".

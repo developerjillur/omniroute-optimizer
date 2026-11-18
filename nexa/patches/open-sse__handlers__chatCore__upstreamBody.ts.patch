@@ -1,8 +1,8 @@
 diff --git a/open-sse/handlers/chatCore/upstreamBody.ts b/open-sse/handlers/chatCore/upstreamBody.ts
-index 8e8a4fb7fb9adccd5a35463f1bfc4fc350370520..75bf43bfb1fe3784434d58b11eaed2d32660edd2 100644
+index b1a86a8e0d3eb6c5e1b218ae82370ab7c4212b30..02a3d3202fc1ef8a6d2cf638753302c7bf446fbe 100644
 --- a/open-sse/handlers/chatCore/upstreamBody.ts
 +++ b/open-sse/handlers/chatCore/upstreamBody.ts
-@@ -9,6 +9,12 @@
+@@ -9,6 +9,12 @@ import {
    resolvePayloadRuleProtocols,
  } from "../../services/payloadRules.ts";
  import { getEffectiveToolLimit, getKnownToolLimit } from "../../services/toolLimitDetector.ts";
@@ -15,9 +15,9 @@ index 8e8a4fb7fb9adccd5a35463f1bfc4fc350370520..75bf43bfb1fe3784434d58b11eaed2d3
  import { OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME } from "../../services/webSearchFallback.ts";
  import { OMNIROUTE_WEB_FETCH_FALLBACK_TOOL_NAME } from "../../services/webFetchInterception.ts";
  import { CLAUDE_OAUTH_TOOL_PREFIX } from "../../translator/request/openai-to-claude.ts";
-@@ -497,28 +503,37 @@
-     }
-   }
+@@ -520,28 +526,37 @@ export async function prepareUpstreamBody(opts: PrepareUpstreamBodyOptions): Pro
+   // After the sanitizers, which read `reasoning.effort`, and after payload rules can add it.
+   bodyToSend = foldReasoningForOpenAIChat(bodyToSend, provider, targetFormat);
    bodyToSend = defaultImageDetail(bodyToSend, isOpencodeClient);
 -  // Relevance selection runs before the provider cap so the cap keeps the useful tools.
 -  const disclosure = applyToolDisclosure(bodyToSend, opts.toolDisclosure, {
@@ -73,7 +73,7 @@ index 8e8a4fb7fb9adccd5a35463f1bfc4fc350370520..75bf43bfb1fe3784434d58b11eaed2d3
    const connectionCacheOverride = resolveConnectionCacheOverride(credentials?.providerSpecificData);
    bodyToSend = await injectPromptCacheKey(
      bodyToSend,
-@@ -527,5 +542,14 @@
+@@ -550,5 +565,14 @@ export async function prepareUpstreamBody(opts: PrepareUpstreamBodyOptions): Pro
      connectionCacheOverride
    );
  

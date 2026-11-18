@@ -1,5 +1,5 @@
 diff --git a/open-sse/utils/stream.ts b/open-sse/utils/stream.ts
-index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3435bc35b 100644
+index 9959cdfb05580010bda1073b6474ddadeb2ed673..b7c10ea8c5ebbfc9c58845d51772fc97bebf0ea7 100644
 --- a/open-sse/utils/stream.ts
 +++ b/open-sse/utils/stream.ts
 @@ -1,3 +1,4 @@
@@ -7,7 +7,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
  import { translateResponse, initState } from "../translator/index.ts";
  import { FORMATS } from "../translator/formats.ts";
  import { appendRequestLog } from "@/lib/usageDb";
-@@ -18,7 +19,9 @@
+@@ -28,7 +29,9 @@
    normalizeUsage as normalizeTokenUsage,
    sanitizeUsagePayloadForRequest,
    type UsageLike,
@@ -17,7 +17,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
  import {
    parseSSELine,
    parseSSEDataPayload,
-@@ -151,6 +154,7 @@
+@@ -173,6 +176,7 @@
  };
  
  type StreamCompletePayload = {
@@ -25,7 +25,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
    status: number;
    usage: unknown;
    /** Minimal response body for call log (streaming: usage + note; non-streaming not used) */
-@@ -185,6 +189,7 @@
+@@ -207,6 +211,7 @@
  const DEFAULT_STREAM_BUFFER_BYTES = 16384;
  
  type StreamOptions = {
@@ -33,7 +33,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
    mode?: string;
    targetFormat?: string;
    sourceFormat?: string;
-@@ -519,12 +524,12 @@
+@@ -569,12 +574,12 @@
  }
  
  type ClaudeEmptyResponseLifecycle = {
@@ -47,7 +47,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
    syntheticContentInjected: boolean;
    warningLogged: boolean;
  };
-@@ -533,12 +538,12 @@
+@@ -583,12 +588,12 @@
  
  export function createClaudeEmptyResponseLifecycle(): ClaudeEmptyResponseLifecycle {
    return {
@@ -61,7 +61,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
      syntheticContentInjected: false,
      warningLogged: false,
    };
-@@ -570,7 +575,7 @@
+@@ -620,7 +625,7 @@
      case "content_block_stop":
        lifecycle.hasContentBlock = true;
        break;
@@ -70,7 +70,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
        lifecycle.hasMessageDelta = true;
        {
          const delta = (payload as JsonRecord).delta;
-@@ -579,6 +584,7 @@
+@@ -629,6 +634,7 @@
          if (typeof reason === "string" && reason) lifecycle.stopReason = reason;
        }
        break;
@@ -78,7 +78,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
      case "message_stop":
        lifecycle.hasMessageStop = true;
        break;
-@@ -600,15 +606,14 @@
+@@ -650,15 +656,14 @@
  ): boolean {
    const type = getClaudeEventType(payload);
    if (!type || lifecycle.hasError || lifecycle.hasContentBlock) return false;
@@ -101,7 +101,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
    return type === "message_delta" || type === "message_stop";
  }
  
-@@ -812,6 +817,7 @@
+@@ -862,6 +867,7 @@
      requestToolIdentityMap = null,
      streamBufferBytes = DEFAULT_STREAM_BUFFER_BYTES,
      pendingRequestId = null,
@@ -109,7 +109,19 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
    } = options;
    // Request-body-size metric (for monitoring payload size distribution & correlation with TTFT).
    // The size is JSON-serialised byte count; stored as a performance mark detail so monitoring
-@@ -1091,8 +1097,39 @@
+@@ -1025,6 +1031,11 @@
+     const changed =
+       !hasPriorInputForTrailingUsage(payload, usage) &&
+       sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat);
++    if (isClaudeEventPayload(payload)) {
++      const extracted = extractStreamUsage(payload as UsagePayloadLike);
++      if (extracted) usage = extracted;
++      mergePassthroughCacheCreationUsage(extracted);
++    }
+     return repairClaudeFinalWireUsage(payload, getAccountingUsage()) || changed;
+   };
+   // Passthrough: accumulate content and reasoning separately for call log response body
+@@ -1168,8 +1179,39 @@
    let streamTimedOut = false;
    const claudeEmptyResponseLifecycle = createClaudeEmptyResponseLifecycle();
    // #12398: `timing.firstByteAt` doubles as "any upstream chunk ever arrived".
@@ -129,7 +141,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
 +    return extractUsage(payload);
 +  };
 +  const collectProviderPayload = (payload: unknown) => {
-+    providerPayloadCollector.push(payload);
++    observeProviderPayload(payload);
 +    const event = asRecord(payload);
 +    if (
 +      nativeSuggestionRequest &&
@@ -149,7 +161,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
      shouldAbortEmptyClaudeStream(claudeEmptyResponseLifecycle, timing.firstByteAt !== null);
    // `event:` framing is only part of the SSE protocol for OpenAI Responses API
    // and Claude Messages API passthrough; a plain OpenAI Chat-Completions-format
-@@ -1244,7 +1281,10 @@
+@@ -1326,7 +1368,10 @@
        `[STREAM] Empty Claude stream at flush - emitting error (${provider || "provider"}:${model || "unknown"})`
      );
      const errorBody = buildErrorBody(502, msg);
@@ -161,7 +173,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
      const errOutput = formatSSE(errorEvent, FORMATS.CLAUDE);
      reqLogger?.appendConvertedChunk?.(errOutput);
      clientPayloadCollector.push(errorEvent);
-@@ -1314,6 +1354,7 @@
+@@ -1396,6 +1441,7 @@
  
      if (
        sourceFormat === FORMATS.CLAUDE &&
@@ -169,7 +181,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
        shouldInjectClaudeEmptyResponseBeforeCurrentEvent(claudeEmptyResponseLifecycle, itemSanitized)
      ) {
        emitClaudeEmptyStreamErrorAndAbort(controller);
-@@ -1486,7 +1527,7 @@
+@@ -1612,7 +1658,7 @@
      const failure = prepareTranslatedStreamFailure(payload);
      if (!failure) return false;
      failure.internalFailure.streamSnapshot ??= buildStreamFailureSnapshot(providerPayloadCollector);
@@ -178,25 +190,25 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
      const output = formatTranslatedStreamError(failure.record, sourceFormat);
      reqLogger?.appendConvertedChunk?.(output);
      forward(controller, encoder.encode(output));
-@@ -1638,7 +1679,7 @@
+@@ -1769,7 +1815,7 @@
              if (trimmed.startsWith("data:")) {
                const providerPayload = parsedPassthroughData ?? parseSSELine(trimmed);
                if (providerPayload) {
--                providerPayloadCollector.push(providerPayload);
+-                observeProviderPayload(providerPayload);
 +                collectProviderPayload(providerPayload);
+                 passthroughUnparsableDataTail = false;
+                 if (isTerminalStreamPayload(providerPayload)) passthroughSawTerminalEvent = true;
                  if ((providerPayload as { done?: unknown }).done === true) {
-                   continue;
-                 }
-@@ -1748,7 +1789,7 @@
+@@ -1881,7 +1927,7 @@
                      passthroughResponsesId = responseId;
                    }
                    // Responses SSE: only extract usage, forward payload as-is
 -                  const extracted = extractUsage(parsed);
 +                  const extracted = extractStreamUsage(parsed);
                    if (extracted) {
-                     usage = mergeUsageSnapshot(usage, extracted);
-                   }
-@@ -2087,21 +2128,8 @@
+                     usage = {
+                       ...mergeUsageSnapshot(usage, extracted),
+@@ -2217,25 +2263,31 @@
                  } else if (isClaudeSSE) {
                    // Claude SSE: extract usage, track content, forward as-is
                    const thinkingSignatureInjected = injectThinkingSignature(parsed, provider);
@@ -207,6 +219,11 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
 -                    if (!usage) usage = {};
 -                    const u = usage;
 -                    const eu = extracted as UsageTokenRecord;
+-                    Object.assign(
+-                      u,
+-                      { usage_evidence: mergeUsageEvidence(u, extracted) },
+-                      mergeCacheCreationFields(u, extracted)
+-                    );
 -                    if (eu.prompt_tokens > 0) u.prompt_tokens = eu.prompt_tokens;
 -                    if (eu.completion_tokens > 0) u.completion_tokens = eu.completion_tokens;
 -                    if (eu.total_tokens > 0) u.total_tokens = eu.total_tokens;
@@ -214,13 +231,35 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
 -                      u.cache_read_input_tokens = eu.cache_read_input_tokens;
 -                    if (eu.cache_creation_input_tokens !== undefined)
 -                      u.cache_creation_input_tokens = eu.cache_creation_input_tokens;
--                  }
-+                  const extracted = extractStreamUsage(parsed);
-+                  if (extracted) usage = extracted;
++                  if (isClaudeEventPayload(parsed)) {
++                    const extracted = extractStreamUsage(parsed);
++                    if (extracted) usage = extracted;
++                    mergePassthroughCacheCreationUsage(extracted);
++                  } else {
++                    const extracted = extractUsage(parsed);
++                    if (extracted) {
++                      // Non-destructive merge: never overwrite a positive value with 0
++                      // message_start carries input_tokens, message_delta carries output_tokens;
++                      if (!usage) usage = {};
++                      const u = usage;
++                      const eu = extracted as UsageTokenRecord;
++                      Object.assign(
++                        u,
++                        { usage_evidence: mergeUsageEvidence(u, extracted) },
++                        mergeCacheCreationFields(u, extracted)
++                      );
++                      if (eu.prompt_tokens > 0) u.prompt_tokens = eu.prompt_tokens;
++                      if (eu.completion_tokens > 0) u.completion_tokens = eu.completion_tokens;
++                      if (eu.total_tokens > 0) u.total_tokens = eu.total_tokens;
++                      if (eu.cache_read_input_tokens !== undefined)
++                        u.cache_read_input_tokens = eu.cache_read_input_tokens;
++                      if (eu.cache_creation_input_tokens !== undefined)
++                        u.cache_creation_input_tokens = eu.cache_creation_input_tokens;
++                    }
+                   }
                    if (
                      shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
-                       claudeEmptyResponseLifecycle,
-@@ -2166,7 +2194,7 @@
+@@ -2303,7 +2355,7 @@
                          Object.keys(parsed.choices[0].delta).length === 0 &&
                          !parsed.choices[0]?.finish_reason))
                    ) {
@@ -229,7 +268,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
                      if (hasValidUsage(emptyChoicesUsage) && !passthroughForwardedUsageSummary) {
                        usage = resolveTrailingUsageSummary(
                          emptyChoicesUsage,
-@@ -2258,7 +2286,10 @@
+@@ -2404,7 +2456,10 @@
                        choices: [
                          {
                            ...parsed.choices[0],
@@ -241,25 +280,25 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
                            finish_reason: null,
                          },
                          ...parsed.choices.slice(1),
-@@ -2390,7 +2421,7 @@
+@@ -2538,7 +2593,7 @@
                        reasoningDelta
                      );
  
 -                  const extracted = extractUsage(parsed);
 +                  const extracted = extractStreamUsage(parsed);
                    if (extracted) {
-                     usage = mergeUsageSnapshot(usage, extracted);
-                   }
-@@ -2544,7 +2575,7 @@
+                     usage = {
+                       ...mergeUsageSnapshot(usage, extracted),
+@@ -2710,7 +2765,7 @@
+             reasoningObserver.note(parsed, Date.now());
  
            if (shouldDropResponsesCommentary && dropCommentary(parsed as JsonRecord)) continue;
-           nativeClaudeUsage?.observe(parsed);
--          providerPayloadCollector.push(parsed);
+-          observeProviderPayload(parsed);
 +          collectProviderPayload(parsed);
            if (parsed && parsed.done) {
              continue;
            }
-@@ -2699,13 +2730,19 @@
+@@ -2865,7 +2920,7 @@
            }
  
            // Extract usage
@@ -268,9 +307,10 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
            if (extracted) {
              if (!state.usage) {
                state.usage = extracted;
-             } else {
-               const su = state.usage as UsageLike;
-               const eu = extracted as UsageLike;
+@@ -2877,6 +2932,12 @@
+                 { usage_evidence: mergeUsageEvidence(su, extracted) },
+                 mergeCacheCreationFields(su, extracted)
+               );
 +              if (eu.cache_creation_input_tokens !== undefined) {
 +                delete su.cacheCreation5m;
 +                delete su.cacheCreation1h;
@@ -280,51 +320,36 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
                if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
                if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
                if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
-@@ -2804,10 +2841,20 @@
+@@ -2999,7 +3060,7 @@
                  reqLogger?.appendConvertedChunk?.(output);
                  forward(controller, encoder.encode(output));
                },
--              pushProviderPayload: (payload: unknown) => providerPayloadCollector.push(payload),
-+              pushProviderPayload: (payload: unknown) => collectProviderPayload(payload),
+-              pushProviderPayload: observeProviderPayload,
++              pushProviderPayload: collectProviderPayload,
                pushClientPayload: (payload: unknown) => clientPayloadCollector.push(payload),
--              sanitizeUsagePayload: (payload: unknown) =>
--                sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat),
-+              sanitizeUsagePayload: (payload: unknown) => {
-+                const changed = sanitizeUsagePayloadForRequest(
-+                  payload as UsagePayloadLike,
-+                  body,
-+                  clientResponseFormat
-+                );
-+                if (isClaudeEventPayload(payload)) {
-+                  const extracted = extractStreamUsage(payload as UsagePayloadLike);
-+                  if (extracted) usage = extracted;
-+                }
-+                return changed;
-+              },
+               sanitizeUsagePayload: sanitizePassthroughUsage,
                setPassthroughResponsesId: (value: string) => {
-                 passthroughResponsesId = value;
-               },
-@@ -2874,7 +2921,7 @@
+@@ -3082,7 +3143,7 @@
                }
                let bufferedPayload = parseSSELine(bufferedLine);
                if (bufferedPayload) {
--                providerPayloadCollector.push(bufferedPayload);
+-                observeProviderPayload(bufferedPayload);
 +                collectProviderPayload(bufferedPayload);
+                 passthroughUnparsableDataTail = false;
                  bufferedProjectedFailure = projectStreamFailureEvent(bufferedPayload);
                  if (bufferedProjectedFailure) {
-                   bufferedPayload = bufferedProjectedFailure.publicPayload;
-@@ -2887,6 +2934,10 @@
+@@ -3096,6 +3157,10 @@
                  }
-                 if (sanitizeUsagePayloadForRequest(bufferedPayload, body, clientResponseFormat))
+                 if (sanitizePassthroughUsage(bufferedPayload))
                    output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
 +                if (isClaudeEventPayload(bufferedPayload)) {
 +                  const extracted = extractStreamUsage(bufferedPayload as UsagePayloadLike);
 +                  if (extracted) usage = extracted;
 +                }
+                 mergePassthroughCacheCreationUsage(extractUsage(bufferedPayload));
                  if (
                    shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
-                     claudeEmptyResponseLifecycle,
-@@ -3145,20 +3196,23 @@
+@@ -3375,33 +3440,36 @@
                    message.content = "";
                  }
  
@@ -332,15 +357,28 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
 -                  choices: [
 -                    {
 -                      message,
--                      finish_reason: passthroughHasToolCalls ? "tool_calls" : "stop",
+-                      // Keep the upstream's own terminal reason ("length",
+-                      // "content_filter", …): masking it made a cut reply cache as
+-                      // complete. Only "stop" upgrades to "tool_calls".
+-                      finish_reason:
+-                        passthroughFinishReason && passthroughFinishReason !== "stop"
+-                          ? passthroughFinishReason
+-                          : summaryHasToolCalls
+-                            ? "tool_calls"
+-                            : "stop",
 -                    },
 -                  ],
 -                  usage: {
+-                    ...usage,
 -                    prompt_tokens: prompt,
 -                    completion_tokens: completion,
 -                    total_tokens: prompt + completion,
 -                  },
 -                  _streamed: true,
+-                  ...summaryTextTailMarker(
+-                    passthroughAccumulatedContent,
+-                    passthroughAccumulatedReasoning
+-                  ),
 -                };
 +                const responseBody =
 +                  clientResponseFormat === FORMATS.CLAUDE
@@ -349,29 +387,43 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
 +                        choices: [
 +                          {
 +                            message,
-+                            finish_reason: passthroughHasToolCalls ? "tool_calls" : "stop",
++                            // Keep the upstream's own terminal reason ("length",
++                            // "content_filter", …): masking it made a cut reply cache as
++                            // complete. Only "stop" upgrades to "tool_calls".
++                            finish_reason:
++                              passthroughFinishReason && passthroughFinishReason !== "stop"
++                                ? passthroughFinishReason
++                                : summaryHasToolCalls
++                                  ? "tool_calls"
++                                  : "stop",
 +                          },
 +                        ],
 +                        usage: {
++                          ...usage,
 +                          prompt_tokens: prompt,
 +                          completion_tokens: completion,
 +                          total_tokens: prompt + completion,
 +                        },
 +                        _streamed: true,
++                        ...summaryTextTailMarker(
++                          passthroughAccumulatedContent,
++                          passthroughAccumulatedReasoning
++                        ),
 +                      };
+                 outcomeRecorded = true;
                  onComplete({
                    status: 200,
-                   usage,
-@@ -3180,7 +3234,7 @@
+@@ -3424,7 +3492,8 @@
                    // reasoning-heavy stream (live incident 2026-09-04) -- see
                    // providerPayloadCollector's own `format:` construction comment above.
                    providerPayload: providerPayloadCollector.build(
--                    sourceFormat === FORMATS.OPENAI_RESPONSES
-+                    sourceFormat === FORMATS.OPENAI_RESPONSES || sourceFormat === FORMATS.CLAUDE
+-                    providerWireFormat === FORMATS.OPENAI_RESPONSES
++                    providerWireFormat === FORMATS.OPENAI_RESPONSES ||
++                      providerWireFormat === FORMATS.CLAUDE
                        ? providerPayloadCollector.getSummary()
                        : { object: "chat.completion", ...responseBody },
                      { includeEvents: false }
-@@ -3197,7 +3251,8 @@
+@@ -3441,7 +3510,8 @@
                    // reasoning as providerPayload above; clientPayloadCollector's own `format:`
                    // construction above gives it the same live, cap-independent reducer.
                    clientPayload: clientPayloadCollector.build(
@@ -381,11 +433,11 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
                        ? clientPayloadCollector.getSummary()
                        : responseBody,
                      { includeEvents: false }
-@@ -3290,20 +3345,26 @@
+@@ -3532,14 +3602,14 @@
+             if (parsed && !parsed.done) {
                if (emitTranslatedFailureAndAbort(controller, parsed)) return;
                if (targetFormat === FORMATS.OPENAI) normalizeArrayContentChunk(parsed);
-               nativeClaudeUsage?.observe(parsed);
--              providerPayloadCollector.push(parsed);
+-              observeProviderPayload(parsed);
 +              collectProviderPayload(parsed);
                // Extract usage from remaining buffer — if the usage-bearing event
                // (e.g. response.completed) is the last SSE line, it ends up here
@@ -398,9 +450,10 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
                if (extracted) {
                  if (!state.usage) {
                    state.usage = extracted;
-                 } else {
-                   const su = state.usage as UsageLike;
-                   const eu = extracted as UsageLike;
+@@ -3551,6 +3621,12 @@
+                     { usage_evidence: mergeUsageEvidence(su, extracted) },
+                     mergeCacheCreationFields(su, extracted)
+                   );
 +                  if (eu.cache_creation_input_tokens !== undefined) {
 +                    delete su.cacheCreation5m;
 +                    delete su.cacheCreation1h;
@@ -410,7 +463,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
                    if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
                    if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
                    if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
-@@ -3390,6 +3451,7 @@
+@@ -3637,6 +3713,7 @@
            // (all-empty `choices: []`) instead of completing with an empty 200.
            if (
              mode === STREAM_MODE.TRANSLATE &&
@@ -418,15 +471,15 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
              rejectEmptyChoicesStream({
                forwardedValuableChunk,
                hasValidUsage: hasValidUsage(state?.usage),
-@@ -3569,6 +3631,7 @@
-               };
+@@ -3820,6 +3897,7 @@
+               outcomeRecorded = true;
                onComplete({
                  status: 200,
 +                nativeSuggestionSilence: completedSilentSuggestion,
                  usage: accountingUsage,
                  cacheEvidence: state?.cacheEvidence,
                  responseBody,
-@@ -3586,7 +3649,7 @@
+@@ -3837,7 +3915,7 @@
                  // reasoning-heavy stream (live incident 2026-09-04) -- see
                  // providerPayloadCollector's own `format:` construction comment above.
                  providerPayload: providerPayloadCollector.build(
@@ -435,7 +488,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
                      ? providerPayloadCollector.getSummary()
                      : { object: "chat.completion", ...responseBody },
                    { includeEvents: false }
-@@ -3655,7 +3718,8 @@
+@@ -3920,7 +3998,8 @@
    requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null = null,
    clientTools: unknown = null,
    streamBufferBytes: number = DEFAULT_STREAM_BUFFER_BYTES,
@@ -445,7 +498,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
  ) {
    return createSSEStream({
      mode: STREAM_MODE.TRANSLATE,
-@@ -3678,6 +3742,7 @@
+@@ -3943,6 +4022,7 @@
      streamBufferBytes,
      clientTools,
      pendingRequestId,
@@ -453,7 +506,7 @@ index 145e7f20fbe4a9d801e8d2a9fe26e1c1a11d16c9..731d7a82838bfb17fa8b53543f8f43c3
    });
  }
  
-@@ -3698,6 +3763,9 @@
+@@ -3963,6 +4043,9 @@
  ) {
    return createSSEStream({
      mode: STREAM_MODE.PASSTHROUGH,

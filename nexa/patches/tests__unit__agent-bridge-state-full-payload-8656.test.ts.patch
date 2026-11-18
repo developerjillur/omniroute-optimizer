@@ -2,7 +2,7 @@ diff --git a/tests/unit/agent-bridge-state-full-payload-8656.test.ts b/tests/uni
 index 885248f16ef8ba7038ed098b070b653c0e02cd50..ef2b9c511351c78a3ad3f99dc7705b8a612c388c 100644
 --- a/tests/unit/agent-bridge-state-full-payload-8656.test.ts
 +++ b/tests/unit/agent-bridge-state-full-payload-8656.test.ts
-@@ -17,6 +17,7 @@
+@@ -17,6 +17,7 @@ import assert from "node:assert/strict";
  import fs from "fs";
  import os from "os";
  import path from "path";
@@ -10,7 +10,7 @@ index 885248f16ef8ba7038ed098b070b653c0e02cd50..ef2b9c511351c78a3ad3f99dc7705b8a
  
  const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-8656-"));
  process.env.DATA_DIR = TEST_DATA_DIR;
-@@ -95,9 +96,23 @@
+@@ -95,9 +96,23 @@ test("GET /state: returns mappings object keyed by agentId (#8656)", async () =>
    // Assert: mappings must be present so the UI can render the model mapping table
    assert.ok(typeof body.mappings === "object", "body.mappings missing");
    assert.ok(Array.isArray(body.mappings["claude-code"]), "mappings[claude-code] missing");

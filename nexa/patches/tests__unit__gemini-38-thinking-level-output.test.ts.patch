@@ -1,14 +1,14 @@
 diff --git a/tests/unit/gemini-38-thinking-level-output.test.ts b/tests/unit/gemini-38-thinking-level-output.test.ts
-index 77c49f8f026956c677896066cc12496efa22e737..e816dbb454b91741d1f5d0ba4bd901bacd99197a 100644
+index 6c8d9a8136dfcfc668b40a5544e7086580900ee1..2e30ad9a26065ff7ef4db01031a2aa2e3cfdf874 100644
 --- a/tests/unit/gemini-38-thinking-level-output.test.ts
 +++ b/tests/unit/gemini-38-thinking-level-output.test.ts
-@@ -199,7 +199,8 @@
-
+@@ -200,7 +200,8 @@ test("gemini38ThinkingLevelFromBudget maps above medium cap to high", () => {
+ 
  test("vertex/gemini-4-argon emits thinkingLevel, never thinkingBudget (#16603)", () => {
    const silent = thinkingConfigOf("vertex/gemini-4-argon");
 -  assert.equal(silent?.thinkingLevel, "medium");
 +  // Gemini 4 keeps its native default when no reasoning level was requested.
 +  assert.equal(silent?.thinkingLevel, undefined);
    assert.equal(silent?.thinkingBudget, undefined);
-
+ 
    const low = thinkingConfigOf("vertex/gemini-4-argon", { reasoning_effort: "low" });

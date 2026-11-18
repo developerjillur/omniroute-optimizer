@@ -1,7 +1,8 @@
 diff --git a/src/shared/constants/cliTools.ts b/src/shared/constants/cliTools.ts
+index b5caf53dac8b0dd2ffe08765f7d8ab88cf054524..830bf17eae2f4dcd7ffd4fde51c6f3634621b9e9 100644
 --- a/src/shared/constants/cliTools.ts
 +++ b/src/shared/constants/cliTools.ts
-@@ -29,7 +29,7 @@
+@@ -29,7 +29,7 @@ export const CLI_TOOLS: Record<string, CliCatalogEntry> = {
        haikuModel: "ANTHROPIC_DEFAULT_HAIKU_MODEL",
      },
      modelAliases: ["default", "fable", "sonnet", "opus", "haiku", "opusplan"],
@@ -10,7 +11,7 @@ diff --git a/src/shared/constants/cliTools.ts b/src/shared/constants/cliTools.ts
      defaultCommand: "claude",
      defaultModels: [
        {
-@@ -37,7 +37,7 @@
+@@ -37,7 +37,7 @@ export const CLI_TOOLS: Record<string, CliCatalogEntry> = {
          name: "Default Model",
          alias: "model",
          envKey: "ANTHROPIC_MODEL",
@@ -19,7 +20,7 @@ diff --git a/src/shared/constants/cliTools.ts b/src/shared/constants/cliTools.ts
          isTopLevel: true,
        },
        {
-@@ -45,29 +45,28 @@
+@@ -45,29 +45,28 @@ export const CLI_TOOLS: Record<string, CliCatalogEntry> = {
          name: "Claude Fable",
          alias: "fable",
          envKey: "ANTHROPIC_DEFAULT_FABLE_MODEL",

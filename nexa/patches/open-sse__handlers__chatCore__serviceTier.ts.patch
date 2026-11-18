@@ -1,5 +1,5 @@
 diff --git a/open-sse/handlers/chatCore/serviceTier.ts b/open-sse/handlers/chatCore/serviceTier.ts
-index e79fb4a8bfe0d267940d569a9f6b11da0c2b41ad..52fba73373a783a2cda540715730f2ffe8b5119d 100644
+index f2cd877add00670803f3d9431c1c8eb5fce74085..2adca3d096e7780487a1e2f976a8855f7833b0c0 100644
 --- a/open-sse/handlers/chatCore/serviceTier.ts
 +++ b/open-sse/handlers/chatCore/serviceTier.ts
 @@ -1,13 +1,4 @@
@@ -17,9 +17,9 @@ index e79fb4a8bfe0d267940d569a9f6b11da0c2b41ad..52fba73373a783a2cda540715730f2ff
  
  import {
    getCodexRequestDefaults,
-@@ -15,12 +6,16 @@
-   type CodexServiceTier,
+@@ -16,12 +7,16 @@ import {
  } from "@/lib/providers/requestDefaults";
+ import { scopeCodexServiceTierDefault } from "../../config/codexServiceTierModels.ts";
  
 -/** The effective service tier carried through a request: "standard" or a normalized Codex tier. */
 -export type EffectiveServiceTier = "standard" | CodexServiceTier;
@@ -38,7 +38,7 @@ index e79fb4a8bfe0d267940d569a9f6b11da0c2b41ad..52fba73373a783a2cda540715730f2ff
   * default applies, falling back to "standard".
   */
  export function resolveEffectiveServiceTier(
-@@ -28,6 +23,13 @@
+@@ -29,6 +24,13 @@ export function resolveEffectiveServiceTier(
    providerSpecificData: unknown,
    requestBody?: unknown
  ): EffectiveServiceTier {
@@ -52,7 +52,7 @@ index e79fb4a8bfe0d267940d569a9f6b11da0c2b41ad..52fba73373a783a2cda540715730f2ff
    if (provider !== "codex") return "standard";
    const requestRecord =
      requestBody && typeof requestBody === "object" && !Array.isArray(requestBody)
-@@ -42,8 +44,8 @@
+@@ -48,8 +50,8 @@ export function resolveEffectiveServiceTier(
  }
  
  /**
@@ -63,7 +63,7 @@ index e79fb4a8bfe0d267940d569a9f6b11da0c2b41ad..52fba73373a783a2cda540715730f2ff
   * and otherwise descends through nested `response` envelopes up to `maxDepth` levels.
   */
  export function resolveReportedServiceTier(
-@@ -53,7 +55,7 @@
+@@ -59,7 +61,7 @@ export function resolveReportedServiceTier(
  ): EffectiveServiceTier | null {
    if (
      maxDepth <= 0 ||
@@ -72,7 +72,7 @@ index e79fb4a8bfe0d267940d569a9f6b11da0c2b41ad..52fba73373a783a2cda540715730f2ff
      !payload ||
      typeof payload !== "object" ||
      Array.isArray(payload)
-@@ -61,6 +63,15 @@
+@@ -67,6 +69,15 @@ export function resolveReportedServiceTier(
      return null;
    }
    const record = payload as Record<string, unknown>;

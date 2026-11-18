@@ -2,7 +2,7 @@ diff --git a/open-sse/config/claudeCodeCompatibleIdentity.ts b/open-sse/config/c
 index 0158a2f8090f18b120ef4f81f37940807f9fb7bd..6c90e86dc70d00f7a31dbb31f2ce022fa04276c7 100644
 --- a/open-sse/config/claudeCodeCompatibleIdentity.ts
 +++ b/open-sse/config/claudeCodeCompatibleIdentity.ts
-@@ -16,20 +16,29 @@
+@@ -16,20 +16,29 @@ export { getClaudeCodeUserAgent };
  export const CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = CLAUDE_CODE_SDK_PACKAGE_VERSION;
  export const CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = CLAUDE_CODE_RUNTIME_VERSION;
  const CONTEXT_1M_NATIVE_MODELS = [

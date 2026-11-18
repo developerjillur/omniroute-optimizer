@@ -1,5 +1,5 @@
 diff --git a/src/lib/usage/providerWindowCosts.ts b/src/lib/usage/providerWindowCosts.ts
-index ac2addc706c0deb665766535265e90ac8d90e7a4..b1ddab5d45c1453672e3c8519b72c99446c67c79 100644
+index a76c2a5e5f2c1fe0f8f6cf034434d040f4450360..23f1a75cd38dc07e5bc9f2dc9283b5f8c4efb999 100644
 --- a/src/lib/usage/providerWindowCosts.ts
 +++ b/src/lib/usage/providerWindowCosts.ts
 @@ -10,6 +10,7 @@
@@ -15,12 +15,12 @@ index ac2addc706c0deb665766535265e90ac8d90e7a4..b1ddab5d45c1453672e3c8519b72c994
    type RecordedCostRow,
  } from "./recordedCostMatcher";
 +import { GPT_6_1_SOL_LONG_CONTEXT_THRESHOLD } from "@/shared/constants/pricing/shared-tiers";
-
+ 
  const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
  const RECORDED_COST_MATCH_TOLERANCE_MS = 30_000;
 @@ -30,6 +32,7 @@
  }
-
+ 
  interface AggregatedUsageCostRow {
 +  longContext: number;
    apiKeyId: string | null;
@@ -61,7 +61,7 @@ index ac2addc706c0deb665766535265e90ac8d90e7a4..b1ddab5d45c1453672e3c8519b72c994
    const resetIso = new Date(resetMs).toISOString();
    const start = getProviderQuotaWindowStart(connectionId, resetIso, nowMs);
 @@ -348,7 +362,7 @@
-
+ 
  function fetchAggregatedUsageRows(filter: UsageHistoryFilter): AggregatedUsageCostRow[] {
    return getDbInstance()
 -    .prepare<AggregatedUsageCostRow>(
@@ -86,12 +86,12 @@ index ac2addc706c0deb665766535265e90ac8d90e7a4..b1ddab5d45c1453672e3c8519b72c994
          COALESCE(SUM(tokens_input + tokens_output), 0) as totalTokens,
          MAX(timestamp) as lastUsed,
 @@ -369,6 +387,8 @@
-         COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_output ELSE 0 END), 0) as costCompletionTokens,
-         COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_read ELSE 0 END), 0) as costCacheReadTokens,
-         COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_creation ELSE 0 END), 0) as costCacheCreationTokens,
-+        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN ${cacheTtlTokenSql().five} ELSE 0 END), 0) as costCacheCreation5mTokens,
-+        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN ${cacheTtlTokenSql().hour} ELSE 0 END), 0) as costCacheCreation1hTokens,
-         COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_reasoning ELSE 0 END), 0) as costReasoningTokens
+         COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_output ELSE 0 END), 0) as costCompletionTokens,
+         COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_read ELSE 0 END), 0) as costCacheReadTokens,
+         COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_creation ELSE 0 END), 0) as costCacheCreationTokens,
++        COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN ${cacheTtlTokenSql().five} ELSE 0 END), 0) as costCacheCreation5mTokens,
++        COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN ${cacheTtlTokenSql().hour} ELSE 0 END), 0) as costCacheCreation1hTokens,
+         COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_reasoning ELSE 0 END), 0) as costReasoningTokens
        FROM usage_history
        WHERE ${filter.whereSql}
 @@ -377,16 +397,17 @@
@@ -107,7 +107,7 @@ index ac2addc706c0deb665766535265e90ac8d90e7a4..b1ddab5d45c1453672e3c8519b72c994
 -    .all(filter.params);
 +    .all(filter.params) as AggregatedUsageCostRow[];
  }
-
+ 
  function fetchUsageRequestCountByApiKey(filter: UsageHistoryFilter): Map<string, number> {
    const rows = getDbInstance()
 -    .prepare<{ apiKeyId: string; requestCount: number }>(
@@ -121,7 +121,7 @@ index ac2addc706c0deb665766535265e90ac8d90e7a4..b1ddab5d45c1453672e3c8519b72c994
      )
 -    .all(filter.params);
 +    .all(filter.params) as { apiKeyId: string; requestCount: number }[];
-
+ 
    const counts = new Map<string, number>();
    for (const row of rows) {
 @@ -411,7 +432,7 @@
@@ -149,7 +149,7 @@ index ac2addc706c0deb665766535265e90ac8d90e7a4..b1ddab5d45c1453672e3c8519b72c994
 -    .all({ ...filter.params, apiKeyId });
 +    .all({ ...filter.params, apiKeyId }) as UsageCostRow[];
  }
-
+ 
  function getRecordedCostSummariesByApiKey(
 @@ -451,7 +474,7 @@
      };
@@ -170,7 +170,7 @@ index ac2addc706c0deb665766535265e90ac8d90e7a4..b1ddab5d45c1453672e3c8519b72c994
 +      totalCost: number;
 +      entryCount: number;
 +    }[];
-
+ 
      const summaries = new Map<string, RecordedCostSummary>();
      for (const row of rows) {
 @@ -508,7 +535,7 @@
@@ -188,7 +188,7 @@ index ac2addc706c0deb665766535265e90ac8d90e7a4..b1ddab5d45c1453672e3c8519b72c994
        )
 -      .all(params);
 +      .all(params) as RecordedCostRow[];
-
+ 
      const byApiKey = new Map<string, RecordedCostRow[]>();
      let processed = 0;
 @@ -561,6 +588,8 @@

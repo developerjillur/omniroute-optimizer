@@ -1,5 +1,5 @@
 diff --git a/src/lib/db/migrationRunner.ts b/src/lib/db/migrationRunner.ts
-index 861d0412f179c2253c314f6ed96b1539e132e8aa..6c72567b4fdb0cea18ab07e336ae44ccbdf3370a 100644
+index 4389917a34baded9f700466ed2b0d1e4adf42435..07e158f9f2ca26de20658cffc15ea1a78a5d7ee3 100644
 --- a/src/lib/db/migrationRunner.ts
 +++ b/src/lib/db/migrationRunner.ts
 @@ -1,3 +1,4 @@
@@ -7,27 +7,56 @@ index 861d0412f179c2253c314f6ed96b1539e132e8aa..6c72567b4fdb0cea18ab07e336ae44cc
  /**
   * Migration Runner — Versioned SQL Migrations for SQLite
   *
-@@ -227,11 +228,10 @@ function getMigrationFiles(): Array<{ version: string; name: string; path: strin
-     .filter((f) => f.endsWith(".sql"))
-     .sort()
-     .map((filename) => {
--      const match = filename.match(/^(\d+)_(.+)\.sql$/);
--      if (!match) return null;
+@@ -247,24 +248,19 @@
+   // make them vanish silently.
+   if (!fs.existsSync(MIGRATIONS_DIR)) return getExtraMigrationFiles();
+ 
+-  // Numeric, not text, order: as text `20261113120000_x.sql` would sort before
+-  // `235_x.sql` and run ahead of the tables it depends on. Files sharing a slot
+-  // (superseded duplicates) keep their file-name order, as with the old text sort.
+-  const files = (
+-    fs
+-      .readdirSync(MIGRATIONS_DIR)
+-      .filter((f) => f.endsWith(".sql"))
+-      .map((filename) => {
+-        const match = filename.match(/^(\d+)_(.+)\.sql$/);
+-        if (!match) return null;
+-        return {
+-          version: match[1],
+-          name: match[2],
+-          path: path.join(MIGRATIONS_DIR, filename),
+-        };
+-      })
+-      .filter(Boolean) as Array<{ version: string; name: string; path: string }>
+-  ).sort(compareMigrationFiles);
++  const files = fs
++    .readdirSync(MIGRATIONS_DIR)
++    .filter((f) => f.endsWith(".sql"))
++    .sort()
++    .map((filename) => {
 +      const identity = resolveMigrationIdentity(filename);
 +      if (!identity) return null;
-       return {
--        version: match[1],
--        name: match[2],
++      return {
 +        ...identity,
-         path: path.join(MIGRATIONS_DIR, filename),
-       };
-     })
-@@ -275,7 +275,9 @@ function getMigrationFiles(): Array<{ version: string; name: string; path: strin
++        path: path.join(MIGRATIONS_DIR, filename),
++      };
++    })
++    .filter(Boolean) as Array<{ version: string; name: string; path: string }>;
+ 
+   // Detect version collisions early: two files sharing the same numeric prefix
+   // would otherwise be silently skipped by the runner (only the first applied
+@@ -312,10 +308,12 @@
+   // the upstream one. Their versions are namespaced (`ee-134`), so they cannot
    // collide with a numeric slot, and every downstream consumer here — the applied
    // set, the gap reconciliation, the name-mismatch check — keys on the version
-   // string and needs no further change. Empty and filesystem-free when unset.
+-  // string and needs no further change. Empty and filesystem-free when unset. The
+-  // combined array is NOT re-sorted: the extras keep their declared order after the
+-  // whole main set, including every timestamped migration.
 -  return [...files, ...getExtraMigrationFiles()];
-+  const numericFiles = files.filter((file) => /^\d+$/.test(file.version));
++  // string and needs no further change. Empty and filesystem-free when unset.
++  const numericFiles = files
++    .filter((file) => /^\d+$/.test(file.version))
++    .sort(compareMigrationFiles);
 +  const distributionFiles = files.filter((file) => !/^\d+$/.test(file.version));
 +  return [...numericFiles, ...distributionFiles, ...getExtraMigrationFiles()];
  }

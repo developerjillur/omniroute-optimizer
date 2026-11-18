@@ -1,0 +1,32 @@
+diff --git a/src/lib/usage/analyticsPricing.ts b/src/lib/usage/analyticsPricing.ts
+index 59367169871385f33dcde8c93e10e55d62b5e50a..4bc6ea264eb50b325bb382fbf42c9d0d0fa9610c 100644
+--- a/src/lib/usage/analyticsPricing.ts
++++ b/src/lib/usage/analyticsPricing.ts
+@@ -190,6 +190,8 @@
+     output: toNumber(row.costCompletionTokens ?? row.completionTokens),
+     cacheRead: toNumber(row.costCacheReadTokens ?? row.cacheReadTokens),
+     cacheCreation: toNumber(row.costCacheCreationTokens ?? row.cacheCreationTokens),
++    cacheCreation5m: toNumber(row.costCacheCreation5mTokens ?? row.cacheCreation5mTokens),
++    cacheCreation1h: toNumber(row.costCacheCreation1hTokens ?? row.cacheCreation1hTokens),
+     reasoning: toNumber(row.costReasoningTokens ?? row.reasoningTokens),
+   };
+ }
+@@ -208,7 +210,9 @@
+   const provider = toStringValue(row.provider);
+   const model = toStringValue(row.model);
+   if (!provider || !model) return 0;
+-  const serviceTier = normalizeServiceTier(row.serviceTier ?? row.service_tier);
++  const serviceTier = toStringValue(row.serviceTier ?? row.service_tier, "standard")
++    .trim()
++    .toLowerCase();
+   const isAggregated = toNumber(row.isAggregated ?? row.is_aggregated) > 0;
+   const storedCost = toNumber(row.storedCost ?? row.stored_cost);
+ 
+@@ -240,6 +244,7 @@
+       model,
+       serviceTier,
+       flatRateAsZero,
++      longContext: toNumber(row.longContext) === 1,
+       // Analytics rows sum many requests: no per-request long-context tier (#19429).
+       aggregatedTokens: true,
+     })

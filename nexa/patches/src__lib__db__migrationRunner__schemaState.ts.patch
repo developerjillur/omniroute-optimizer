@@ -1,8 +1,8 @@
 diff --git a/src/lib/db/migrationRunner/schemaState.ts b/src/lib/db/migrationRunner/schemaState.ts
-index 4ab52c19ae61317d2f37fa8ac655f12a9624e75e..61c9e2c5f5ef9f825cb83d47e9b6d2108333b501 100644
+index ba8294d0a54a2e77e5d8d994532dd42a11c6c36d..45d30f15dee9eea81d0163263c97374d61e12495 100644
 --- a/src/lib/db/migrationRunner/schemaState.ts
 +++ b/src/lib/db/migrationRunner/schemaState.ts
-@@ -252,9 +252,12 @@ export function rehomeLegacyVersionSlotMigrations(
+@@ -411,9 +411,12 @@ export function rehomeLegacyVersionSlotMigrations(
      const legacyVersion = `legacy-${legacy.version}-${legacy.name}`;
      const applyRepair = db.transaction(() => {
        const existingLegacyRow = db

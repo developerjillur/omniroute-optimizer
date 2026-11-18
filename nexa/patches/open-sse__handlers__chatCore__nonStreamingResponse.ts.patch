@@ -1,5 +1,5 @@
 diff --git a/open-sse/handlers/chatCore/nonStreamingResponse.ts b/open-sse/handlers/chatCore/nonStreamingResponse.ts
-index 4a80a255c9a5b15bd44a029d45647e2b4e386d0f..07d69dc77fe2fcf7c89f203bdde308f731a5c0a4 100644
+index 05a8ec697be6a25614cf454d9fccd833c3dcbd04..4eaeb2449a22e451472db6479a933642892753ef 100644
 --- a/open-sse/handlers/chatCore/nonStreamingResponse.ts
 +++ b/open-sse/handlers/chatCore/nonStreamingResponse.ts
 @@ -1,4 +1,5 @@
@@ -8,7 +8,7 @@ index 4a80a255c9a5b15bd44a029d45647e2b4e386d0f..07d69dc77fe2fcf7c89f203bdde308f7
  /**
   * Non-streaming response path, lifted out of handleChatCore.
   * The body matches the barrel. Closed-over request state arrives through
-@@ -44,6 +45,7 @@
+@@ -44,6 +45,7 @@ export {
  };
  
  import { HTTP_STATUS } from "../../config/constants.ts";
@@ -16,7 +16,7 @@ index 4a80a255c9a5b15bd44a029d45647e2b4e386d0f..07d69dc77fe2fcf7c89f203bdde308f7
  import { buildMalformedResponseDiagnostic } from "../../utils/responseShapeDiagnostic.ts";
  
  import { lockModel } from "../../services/accountFallback.ts";
-@@ -80,6 +82,8 @@
+@@ -87,6 +89,8 @@ type Loose = any;
  export type NonStreamingDeps = Record<string, Loose> & { [k: string]: Loose };
  
  export async function runNonStreamingResponse(deps: NonStreamingDeps) {
@@ -25,7 +25,7 @@ index 4a80a255c9a5b15bd44a029d45647e2b4e386d0f..07d69dc77fe2fcf7c89f203bdde308f7
    const {
      apiKeyInfo,
      appendRequestLog,
-@@ -441,6 +445,7 @@
+@@ -453,6 +457,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
          error: err.error || "Provider request failed",
          providerRequest: finalBody || translatedBody,
          providerResponse: persistedProviderErrorBody,
@@ -33,7 +33,7 @@ index 4a80a255c9a5b15bd44a029d45647e2b4e386d0f..07d69dc77fe2fcf7c89f203bdde308f7
          // On a client abort the client already disconnected before we got here, so this
          // body is what we WOULD have sent, not what was delivered. The dashboard reads
          // `clientResponse` as "what the client received", so logging it misleads —
-@@ -448,7 +453,7 @@
+@@ -460,7 +465,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
          // the leg-based path must keep doing so.
          clientResponse: isLocalStreamLifecycleError(err.originalError)
            ? undefined
@@ -42,7 +42,7 @@ index 4a80a255c9a5b15bd44a029d45647e2b4e386d0f..07d69dc77fe2fcf7c89f203bdde308f7
          cacheSource: "upstream",
        });
        persistFailureUsage(err.status, err.errorCode || `upstream_${err.status}`);
-@@ -883,7 +888,9 @@
+@@ -906,7 +911,9 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
      // this check runs after translation + sanitization + tool-call execution to catch
      // cases where a provider returns a structurally valid raw body that translates into
      // choices:[] or output:[] with no usable content (Responses API shape included).

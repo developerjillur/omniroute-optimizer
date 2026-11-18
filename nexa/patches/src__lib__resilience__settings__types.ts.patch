@@ -1,5 +1,5 @@
 diff --git a/src/lib/resilience/settings/types.ts b/src/lib/resilience/settings/types.ts
-index a599420ae8867bad65645c8a4a2826c1f35e19f3..a813986a276cc5b83f3c01c9ad0eb971f0000dfb 100644
+index 0fb310c88d76d6972a4f136ecd5fa61823d3d0a9..25623506dad691c6821ff865e7828b5f8a06c14f 100644
 --- a/src/lib/resilience/settings/types.ts
 +++ b/src/lib/resilience/settings/types.ts
 @@ -184,6 +184,8 @@ export interface ProviderCooldownSettings {

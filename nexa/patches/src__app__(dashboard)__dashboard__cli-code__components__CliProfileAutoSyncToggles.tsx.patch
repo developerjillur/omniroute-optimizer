@@ -1,7 +1,8 @@
 diff --git a/src/app/(dashboard)/dashboard/cli-code/components/CliProfileAutoSyncToggles.tsx b/src/app/(dashboard)/dashboard/cli-code/components/CliProfileAutoSyncToggles.tsx
+index 566ed6773c83a941af88f2106ea5dff6b2ce6c41..5b9debf0122e8b4ad14337deee14cbb407e3c143 100644
 --- a/src/app/(dashboard)/dashboard/cli-code/components/CliProfileAutoSyncToggles.tsx
 +++ b/src/app/(dashboard)/dashboard/cli-code/components/CliProfileAutoSyncToggles.tsx
-@@ -14,10 +14,11 @@
+@@ -14,10 +14,11 @@ function isOn(value: string | undefined): boolean {
  }
  
  /**
@@ -15,7 +16,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/CliProfileAutoSyn
   */
  export default function CliProfileAutoSyncToggles() {
    const t = useTranslations("cliTools");
-@@ -52,6 +53,14 @@
+@@ -52,6 +53,14 @@ export default function CliProfileAutoSyncToggles() {
      })();
    }, [load]);
  
@@ -30,7 +31,7 @@ diff --git a/src/app/(dashboard)/dashboard/cli-code/components/CliProfileAutoSyn
    const persist = useCallback(
      async (key: string, next: boolean, previous: boolean, apply: (v: boolean) => void) => {
        apply(next); // optimistic
-@@ -64,6 +73,7 @@
+@@ -64,6 +73,7 @@ export default function CliProfileAutoSyncToggles() {
            body: JSON.stringify({ key, value: next ? "true" : "false" }),
          });
          if (!res.ok) throw new Error(`HTTP ${res.status}`);

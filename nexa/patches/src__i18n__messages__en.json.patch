@@ -1,7 +1,8 @@
 diff --git a/src/i18n/messages/en.json b/src/i18n/messages/en.json
+index b1fd99eda72fc748d1a842e491577b64cea46615..dbb34566517d073a198279b2fe8ecc792024bd90 100644
 --- a/src/i18n/messages/en.json
 +++ b/src/i18n/messages/en.json
-@@ -2894,13 +2894,13 @@
+@@ -3155,13 +3155,13 @@
      "ccOnboardingKeyPlaceholder": "'<your OmniRoute API key>'",
      "ccOnboardingWindowNote": "Claude Code assumes a 200K context window for any model id it does not recognize. For a model with a different real window, add CLAUDE_CODE_AUTO_COMPACT_WINDOW just under it so auto-compaction does not fire too early.",
      "failedSave": "Failed to save",
@@ -19,7 +20,7 @@ diff --git a/src/i18n/messages/en.json b/src/i18n/messages/en.json
      "noActiveProviders": "No active providers",
      "noActiveProvidersDesc": "Please add and connect providers first to configure CLI tools.",
      "mapModels": "Map Models",
-@@ -3336,6 +3336,10 @@
+@@ -3597,6 +3597,10 @@
      "hermesRoleMoaReferenceDesc": "Mixture-of-Agents reference model",
      "hermesRoleMoaAggregator": "MoA Aggregator",
      "hermesRoleMoaAggregatorDesc": "Mixture-of-Agents synthesis model",
@@ -30,7 +31,7 @@ diff --git a/src/i18n/messages/en.json b/src/i18n/messages/en.json
      "hermesSelectBeforePreview": "Select models for roles, or ensure the roles are loaded, before previewing.",
      "hermesPreviewFailed": "Failed to generate preview",
      "hermesSavedTo": "Saved to {path}",
-@@ -3407,7 +3411,10 @@
+@@ -3668,7 +3672,10 @@
      "useDefaultKey": "Use the OmniRoute default key",
      "mainModelAria": "Main model",
      "manualConfigTitle": "Grok Build manual config",

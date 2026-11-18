@@ -10,7 +10,7 @@ index 04fc19bc42d23086e5ef85140424a905ba97629c..523cc6f2a3ad6b4b3824a153c6298737
  
  function normalizeModelId(model: string | null | undefined): string {
    return String(model || "")
-@@ -31,6 +31,11 @@
+@@ -31,6 +31,11 @@ export function getAntigravityQuotaFamily(
      return "argon";
    }
    if (bare.startsWith("gemini-") || bare.includes("/gemini-") || bare.includes("gemini")) {
@@ -22,7 +22,7 @@ index 04fc19bc42d23086e5ef85140424a905ba97629c..523cc6f2a3ad6b4b3824a153c6298737
      return "gemini";
    }
    if (
-@@ -125,6 +130,8 @@
+@@ -125,6 +130,8 @@ export function remainingPercentFromQuotaWindows(
  
  const FAMILY_AGGREGATE_WINDOWS: Record<AntigravityQuotaFamily, string[]> = {
    gemini: ["gemini_session", "gemini_weekly"],
@@ -31,7 +31,7 @@ index 04fc19bc42d23086e5ef85140424a905ba97629c..523cc6f2a3ad6b4b3824a153c6298737
    claude: ["claude_gpt_session", "claude_gpt_weekly"],
    argon: ["gemini_4_argon_weekly", "argon_weekly"],
    other: [],
-@@ -139,7 +146,7 @@
+@@ -139,7 +146,7 @@ function argonFallbackWindowNames(quotaNames: string[]): string[] {
      quotaNames.includes(key)
    );
    if (geminiAggregates.length > 0) return geminiAggregates;

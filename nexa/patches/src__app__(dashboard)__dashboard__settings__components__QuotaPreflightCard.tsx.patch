@@ -1,5 +1,5 @@
 diff --git a/src/app/(dashboard)/dashboard/settings/components/QuotaPreflightCard.tsx b/src/app/(dashboard)/dashboard/settings/components/QuotaPreflightCard.tsx
-index c0ac3e804f41600c9686e0f16fe84f983487446a..a52649ac87fd40f96eed5a43ded64224ae3e56c4 100644
+index 0ca469196f99b3bc7d9d86341faa691226d30287..e2f90f289a51e443f04063770405d2aa127d59e3 100644
 --- a/src/app/(dashboard)/dashboard/settings/components/QuotaPreflightCard.tsx
 +++ b/src/app/(dashboard)/dashboard/settings/components/QuotaPreflightCard.tsx
 @@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";

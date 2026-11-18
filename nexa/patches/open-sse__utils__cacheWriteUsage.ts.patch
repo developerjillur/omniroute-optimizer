@@ -1,0 +1,26 @@
+diff --git a/open-sse/utils/cacheWriteUsage.ts b/open-sse/utils/cacheWriteUsage.ts
+index 76de032c74774f171a43766d8f463863e634de88..d9ed2333ba5728109e4b1bd179fa9e414b5bf436 100644
+--- a/open-sse/utils/cacheWriteUsage.ts
++++ b/open-sse/utils/cacheWriteUsage.ts
+@@ -35,7 +35,20 @@
+       input.cache_write_tokens ??
+       usage.cache_write_tokens ??
+       usage.cacheCreation,
+-    rawTiers: usage.cache_creation ?? prompt.cache_creation ?? input.cache_creation,
++    rawTiers:
++      usage.cache_creation ??
++      prompt.cache_creation ??
++      input.cache_creation ??
++      (usage.cacheCreation5m !== undefined || usage.cacheCreation1h !== undefined
++        ? {
++            ...(usage.cacheCreation5m !== undefined
++              ? { ephemeral_5m_input_tokens: usage.cacheCreation5m }
++              : {}),
++            ...(usage.cacheCreation1h !== undefined
++              ? { ephemeral_1h_input_tokens: usage.cacheCreation1h }
++              : {}),
++          }
++        : undefined),
+   };
+ }
+ 

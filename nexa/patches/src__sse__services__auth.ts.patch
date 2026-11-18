@@ -1,5 +1,5 @@
 diff --git a/src/sse/services/auth.ts b/src/sse/services/auth.ts
-index ee6ea15091f5810edfc0df087a18fff448a2c8d2..979ab022b0a4ec493423ac27b7d37bb6a665a9fa 100644
+index ee6ea15091f5810edfc0df087a18fff448a2c8d2..b620c4c41719193bdfab582dbf5a61b3604aaf09 100644
 --- a/src/sse/services/auth.ts
 +++ b/src/sse/services/auth.ts
 @@ -5,6 +5,18 @@
@@ -79,7 +79,7 @@ index ee6ea15091f5810edfc0df087a18fff448a2c8d2..979ab022b0a4ec493423ac27b7d37bb6
 +        bypassQuotaPolicy: bypassQuotaPolicy || !cachedQuotaFilteringEnabled,
          isQuotaExhausted: (connectionId) => {
 -          if (bypassQuotaPolicy) return false;
-+          if (!cachedQuotaFilteringEnabled || bypassQuotaPolicy) return false;
++          if (!cachedQuotaFilteringEnabled) return false;
            const conn = connections.find((candidate) => candidate.id === connectionId);
            return isQuotaExhaustedForRequest(
              connectionId,
@@ -147,7 +147,7 @@ index ee6ea15091f5810edfc0df087a18fff448a2c8d2..979ab022b0a4ec493423ac27b7d37bb6
        policyEligibleConnections = peakHourEligibleConnections.filter((connection) => {
          const evaluation = evaluateQuotaLimitPolicy(provider, connection, requestedModel);
          quotaResults.set(connection.id, { blocked: evaluation.blocked, exhausted: false });
-@@ -1797,10 +1842,11 @@
+@@ -1797,10 +1842,12 @@
      for (const c of policyEligibleConnections) {
        // Hosted image requests have independent eligibility; cached text quota
        // exhaustion cannot veto them or penalize their candidate ranking.
@@ -156,14 +156,15 @@ index ee6ea15091f5810edfc0df087a18fff448a2c8d2..979ab022b0a4ec493423ac27b7d37bb6
 -        : isQuotaExhaustedForRequest(c.id, provider, requestedModel, c.providerSpecificData);
 -      if (bypassQuotaPolicy) {
 +      const exhausted =
-+        bypassQuotaPolicy || !cachedQuotaFilteringEnabled
++        !cachedQuotaFilteringEnabled ||
++        (bypassQuotaPolicy && resolveProviderId(provider) !== "claude")
 +          ? false
 +          : isQuotaExhaustedForRequest(c.id, provider, requestedModel, c.providerSpecificData);
 +      if (bypassQuotaPolicy || !cachedQuotaFilteringEnabled) {
          quotaResults.set(c.id, { blocked: false, exhausted: false });
        }
        const existing = quotaResults.get(c.id);
-@@ -1820,6 +1866,22 @@
+@@ -1820,6 +1867,22 @@
      }
  
      if (withQuota.length === 0 && exhaustedQuota.length > 0) {
@@ -186,7 +187,7 @@ index ee6ea15091f5810edfc0df087a18fff448a2c8d2..979ab022b0a4ec493423ac27b7d37bb6
        const earliestResetAt = getEarliestFutureDate(
          exhaustedQuota.map((c) => {
            if (resolveProviderId(provider) === "claude") {
-@@ -1879,7 +1941,10 @@
+@@ -1879,7 +1942,10 @@
          allRateLimited: true,
          retryAfter,
          retryAfterHuman: formatRetryAfter(retryAfter),
@@ -198,7 +199,7 @@ index ee6ea15091f5810edfc0df087a18fff448a2c8d2..979ab022b0a4ec493423ac27b7d37bb6
          lastErrorCode: 429,
        };
      }
-@@ -1928,6 +1993,8 @@
+@@ -1928,6 +1994,8 @@
      >;
      const providerOverride = providerStrategyOverrides[resolvedId] || {};
      const strategy = providerOverride.fallbackStrategy || settings.fallbackStrategy || "fill-first";
@@ -207,7 +208,7 @@ index ee6ea15091f5810edfc0df087a18fff448a2c8d2..979ab022b0a4ec493423ac27b7d37bb6
      let commitSelectionSideEffects: (() => Promise<void> | void) | undefined;
      let connection = leasePolicy.activeLease
        ? allOrderedConnections.find(
-@@ -1960,7 +2027,8 @@
+@@ -1960,7 +2028,8 @@
              options.sessionKey,
              allOrderedConnections,
              sessionAffinityTtlMs,
@@ -217,7 +218,7 @@ index ee6ea15091f5810edfc0df087a18fff448a2c8d2..979ab022b0a4ec493423ac27b7d37bb6
            )
          : null;
      const affinityConnection = connection
-@@ -1971,7 +2039,8 @@
+@@ -1971,7 +2040,8 @@
              provider,
              options.sessionKey,
              allOrderedConnections,
@@ -227,7 +228,7 @@ index ee6ea15091f5810edfc0df087a18fff448a2c8d2..979ab022b0a4ec493423ac27b7d37bb6
            );
      if (affinityConnection) {
        connection = affinityConnection;
-@@ -2162,13 +2231,17 @@
+@@ -2162,13 +2232,17 @@
        }
      } else {
        // Default: fill-first (already sorted by priority in getProviderConnections)
@@ -247,7 +248,7 @@ index ee6ea15091f5810edfc0df087a18fff448a2c8d2..979ab022b0a4ec493423ac27b7d37bb6
      ) {
        const selectedPriority = connection.priority || 999;
        const selectedAvailability = getOAuthSessionAvailability(connection.id, options.sessionKey);
-@@ -2190,6 +2263,17 @@
+@@ -2190,6 +2264,17 @@
              getOAuthSessionAvailability(candidate.id, options.sessionKey) > selectedAvailability
          );
        if (moreAvailablePeer) connection = moreAvailablePeer;
@@ -265,7 +266,7 @@ index ee6ea15091f5810edfc0df087a18fff448a2c8d2..979ab022b0a4ec493423ac27b7d37bb6
      }
  
      let exclusiveLease: ExclusiveConnectionLease | undefined;
-@@ -2301,6 +2385,18 @@
+@@ -2301,6 +2386,18 @@
    );
  
    const resilience = resolveResilienceSettings(await getCachedSettings());
@@ -284,7 +285,7 @@ index ee6ea15091f5810edfc0df087a18fff448a2c8d2..979ab022b0a4ec493423ac27b7d37bb6
    const { warnThresholdPercent } = resilience.quotaPreflight;
    let pendingCredentialSelection: Awaited<ReturnType<typeof getProviderCredentials>> | undefined;
  
-@@ -2719,6 +2815,14 @@
+@@ -2719,6 +2816,14 @@
      // Request-scoped refusal: nothing about it belongs on this account or this model.
      if (isOpencodeFreeTierRefusalForProvider(provider, status, errorText))
        return { shouldFallback: true, cooldownMs: 0 };

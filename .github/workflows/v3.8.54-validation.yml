@@ -43,6 +43,16 @@ jobs:
           git -C "$fixture" fetch --depth=1 upstream 1c880c5c95b3f0240d5e4c6c8f0947ec46b5d25e
           git -C "$fixture" checkout --detach FETCH_HEAD
           git -C "$fixture" branch upstream-main HEAD
+          previousFixture="$RUNNER_TEMP/upstream-3.8.51-schema"
+          mkdir "$previousFixture"
+          git -C "$fixture" fetch --depth=1 upstream c1e30b7676975feb298b49eff6ff58923c04b89e
+          git -C "$fixture" archive c1e30b7676975feb298b49eff6ff58923c04b89e src/lib/db/migrations src/lib/db/core.ts src/lib/db/schemaColumns.ts | tar -x -C "$previousFixture"
+          echo "NEXA_PREVIOUS_MIGRATIONS_DIR=$previousFixture/src/lib/db/migrations" >> "$GITHUB_ENV"
+          previous52="$RUNNER_TEMP/upstream-3.8.52-schema"
+          mkdir "$previous52"
+          git -C "$fixture" fetch --depth=1 upstream ad6f33f66bda34eba98645d3bfdabbde294bc843
+          git -C "$fixture" archive ad6f33f66bda34eba98645d3bfdabbde294bc843 src/lib/db/migrations src/lib/db/core.ts src/lib/db/schemaColumns.ts | tar -x -C "$previous52"
+          echo "NEXA_PREVIOUS_MIGRATIONS_V52_DIR=$previous52/src/lib/db/migrations" >> "$GITHUB_ENV"
           cp -R nexa "$fixture/nexa"
           cd "$fixture"
           node nexa/check/pristine-base.mjs
@@ -68,9 +78,9 @@ jobs:
           node bin/cli/utils/dependencySecurity.mjs --apply
           npm rebuild better-sqlite3 --foreground-scripts
           npx --no-install fumadocs-mdx
-          echo "DATA_DIR=$RUNNER_TEMP/validation-data" >> "$GITHUB_ENV"
+          echo "DATA_DIR=$RUNNER_TEMP/model-release-validation-data" >> "$GITHUB_ENV"
           echo "TMPDIR=$RUNNER_TEMP/validation-tmp" >> "$GITHUB_ENV"
-          mkdir "$RUNNER_TEMP/validation-data" "$RUNNER_TEMP/validation-tmp"
+          mkdir "$RUNNER_TEMP/model-release-validation-data" "$RUNNER_TEMP/validation-tmp"
       - name: Parse every applied source module
         id: syntax
         continue-on-error: true
@@ -159,7 +169,7 @@ jobs:
         working-directory: ${{ runner.temp }}/omniroute-fixture
         run: |
           set -euo pipefail
-          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/nexa-v354-compatibility.test.ts tests/unit/frontier-model-release.test.ts tests/unit/dashboard-live-model-release.test.ts tests/unit/claude-fable-5-2.test.ts tests/unit/native-claude-thread-executor.test.ts tests/unit/native-claude-thread-chatcore.test.ts tests/unit/native-thinking-signature-switch.test.ts tests/unit/native-usage-fidelity.test.ts tests/unit/inference-transport-no-replay.test.ts | tee "$RUNNER_TEMP/v354-production-native.tap"
+          node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --import ./nexa/tests/isolated-network.mjs --test --test-reporter=tap --test-concurrency=1 tests/unit/nexa-v354-compatibility.test.ts tests/unit/nexa-v354-metering.test.ts tests/unit/frontier-model-release.test.ts tests/unit/dashboard-live-model-release.test.ts tests/unit/claude-fable-5-2.test.ts tests/unit/native-claude-thread-executor.test.ts tests/unit/native-claude-thread-chatcore.test.ts tests/unit/native-thinking-signature-switch.test.ts tests/unit/native-usage-fidelity.test.ts tests/unit/inference-transport-no-replay.test.ts | tee "$RUNNER_TEMP/v354-production-native.tap"
       - name: Require every release gate
         if: always()
         env:

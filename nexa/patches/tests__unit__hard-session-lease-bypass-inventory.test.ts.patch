@@ -1,8 +1,8 @@
 diff --git a/tests/unit/hard-session-lease-bypass-inventory.test.ts b/tests/unit/hard-session-lease-bypass-inventory.test.ts
-index 8b3aacfcbc8c49ee3ae186f7f6484dba5e739138..db8e3d6aabb69b54b76110a085f0a36117af13f4 100644
+index 8b3aacfcbc8c49ee3ae186f7f6484dba5e739138..db66f9c6251ee7d9acb10c0453adc8161c6e766e 100644
 --- a/tests/unit/hard-session-lease-bypass-inventory.test.ts
 +++ b/tests/unit/hard-session-lease-bypass-inventory.test.ts
-@@ -123,7 +123,7 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
+@@ -123,7 +123,7 @@
      "src/lib/search/executeWebSearch.ts": 2,
      "src/lib/skills/webFetchExecution.ts": 1,
      "src/sse/handlers/chat.ts": 2,
@@ -11,7 +11,17 @@ index 8b3aacfcbc8c49ee3ae186f7f6484dba5e739138..db8e3d6aabb69b54b76110a085f0a361
      "src/sse/services/imageCredentialRetry.ts": 1,
    },
    executor: {
-@@ -394,7 +394,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
+@@ -200,7 +200,8 @@
+     // #16747: combo import reads the connection rows only for their provider names, to warn
+     // about combos whose provider has no connection; no selection or dispatch (class C).
+     "src/app/api/combos/import/route.ts": 1,
+-    "src/app/api/models/route.ts": 1,
++    // The synced catalog adds one read-only active-account listing; both sites are class C.
++    "src/app/api/models/route.ts": 2,
+     // #13487 (61198da9e): Test-all reads the provider's rows once only to reject
+     // with 409 when every connection is disabled — a state read behind the
+     // management route; the per-model probes it dispatches still go through the
+@@ -394,7 +395,10 @@
      // `museSessionIsOwned` deciding whether provider failover may change provider.
      "src/sse/handlers/chat/museOwnership.ts": 2,
      "src/sse/handlers/chatHelpers.ts": 1,

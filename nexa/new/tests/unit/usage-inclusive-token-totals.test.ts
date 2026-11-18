@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { DatabaseSync } from "node:sqlite";
+import { DatabaseSync, type SQLInputValue } from "node:sqlite";
 import { buildApiKeySelfServiceStatus } from "../../src/lib/usage/apiKeySelfService.ts";
 import { getDbInstance } from "../../src/lib/db/core.ts";
 import { getMonthlyProviderTokensForConnection } from "../../src/lib/usage/usageStats.ts";
@@ -53,9 +53,12 @@ for (const fixture of [
     try {
       db.exec(`CREATE TABLE usage_history (
         api_key_id TEXT, timestamp TEXT, tokens_input INTEGER, tokens_output INTEGER,
-        tokens_cache_read INTEGER, tokens_cache_creation INTEGER, tokens_reasoning INTEGER
+        tokens_cache_read INTEGER, tokens_cache_creation INTEGER, tokens_reasoning INTEGER,
+        provider TEXT, model TEXT, service_tier TEXT DEFAULT 'standard', success INTEGER DEFAULT 1
       )`);
-      const insert = db.prepare("INSERT INTO usage_history VALUES (?, ?, ?, ?, ?, ?, ?)");
+      const insert = db.prepare(
+        "INSERT INTO usage_history (api_key_id, timestamp, tokens_input, tokens_output, tokens_cache_read, tokens_cache_creation, tokens_reasoning) VALUES (?, ?, ?, ?, ?, ?, ?)"
+      );
       insert.run(
         metadata.id,
         "2026-11-05T12:00:00.000Z",
@@ -75,10 +78,8 @@ for (const fixture of [
           prepare: (sql: string) => {
             const statement = db.prepare(sql);
             return {
-              get: (...params: unknown[]) => {
-                assert.ok(params.every((value) => typeof value === "string"));
-                return statement.get(...(params as string[]));
-              },
+              get: (...params: unknown[]) => statement.get(...(params as SQLInputValue[])),
+              all: (...params: unknown[]) => statement.all(...(params as SQLInputValue[])),
             };
           },
         }),

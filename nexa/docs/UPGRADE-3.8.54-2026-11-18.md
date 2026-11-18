@@ -19,7 +19,7 @@ GitHub-এর নতুন stable release `v3.8.54` (১৭ নভেম্ব�
 
 এই inspection-এর পরে আলাদা `fix/v3.8.54-models` worktree-তে 36টি source overlap
 মেলানো হয়েছে এবং `package-lock.json` পুনর্গঠন করা হয়েছে। Security integration-সহ
-বর্তমান candidate-এ 234টি active patch ও 149টি নতুন file আছে। আগের accepted v3.8.53 source পুরোনো worktree ও
+বর্তমান candidate-এ 234টি active patch ও 151টি নতুন file আছে। আগের accepted v3.8.53 source পুরোনো worktree ও
 commit-এ অক্ষত। Candidate manifest এখন published v3.8.54 commit-এ pin করা,
 তবে এটি accepted release নয়। আগের TypeScript ceilings ও live settings অপরিবর্তিত।
 
@@ -28,10 +28,21 @@ base/blob/patch hash-সহ retired registry-তে রাখা হয়েছে
 নতুন transport-support ও analytics-pricing helper-এ আছে। Native payload,
 Thread/Fable thinking prefix, cumulative usage, cache TTL, quota reset scheduling,
 Google token-refresh health এবং namespaced migrations-এর আচরণ নতুন source-এর
-সঙ্গে মেলানো হয়েছে। Lock-সহ আগের 233টি active patch-এর strict applicability পাস;
-নতুন security integration-এর পর পুরো manifest আবার যাচাই করতে হবে। Independent
-compatibility, Bridge, model helper ও core typecheck gates cloud runner-এ পাস করেছে;
-পূর্ণ validation ও installed acceptance এখনও বাকি।
+সঙ্গে মেলানো হয়েছে। প্রথম পূর্ণ cloud acceptance ব্যর্থ হয়েছে: duplicate DNS helper,
+TTL declaration, compatibility ও fixture failures ছিল। Step চলতে থাকা বা green
+conclusion-কে test acceptance ধরা হয়নি; final receipt-এর actual gate outcomes ব্যবহার করা হয়।
+প্রথম completed compiler-এ pristine 8291, applied 8251 এবং 11টি নতুন diagnostic ছিল;
+তাই সেই candidate গ্রহণ করা হয়নি। Compiler crash-এর আগের attempt-ও measurement নয়।
+
+পরবর্তী isolated source-এ duplicate DNS implementation retire করে upstream-এর bounded
+DNS validation ও connect-time guard রাখা হয়েছে। Native header/body affinity এক করা,
+quota-wall filtering, cache marker budget, native streaming compaction/TTL এবং whole
+REAL SQLite cache counters সংশোধিত। Fractional ও inconsistent TTL এখনও প্রত্যাখ্যাত।
+সংশোধনের পরে 91টি focused test পাস। পরের বিস্তৃত local run-এ 1447টির মধ্যে 1442 পাস;
+অবশিষ্ট host-dependent fixture ও native user-breakpoint failures সংশোধন করে পৃথক re-run
+করা হয়েছে। Antigravity golden-এর তিনটি CLI version field ছাড়া অন্য provider snapshot
+পাল্টানো হয়নি; installed app metadata-র প্রভাব import-এর আগেই fixture-তে আটকানো হয়েছে।
+এই চূড়ান্ত candidate-এর full source, compiler, lint/docs ও installed acceptance বাকি।
 
 ## Dependency security
 

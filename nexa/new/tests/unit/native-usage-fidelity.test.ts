@@ -43,7 +43,10 @@ test("malformed or empty Thread references do not disable the stateless usage gu
   ]) {
     const result = sanitizeProviderUsageForRequest(usage, { ...body, thread }, FORMATS.CLAUDE);
     assert.notEqual(result, usage);
-    assert.equal(result?.cache_read_input_tokens, 0);
+    assert.equal(result?.cache_read_input_tokens, undefined);
+    assert.equal(result?.cache_creation_input_tokens, undefined);
+    assert.equal(result?.estimated, true);
+    assert.equal(result?.usage_evidence?.input.source, "estimated");
   }
 });
 

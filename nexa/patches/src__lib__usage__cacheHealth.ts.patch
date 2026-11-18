@@ -1,5 +1,5 @@
 diff --git a/src/lib/usage/cacheHealth.ts b/src/lib/usage/cacheHealth.ts
-index f1b683b8f1e74cf943e056f25ae601a56ac76284..27132a5b8160404a861557fbc60695d6f542887f 100644
+index f1b683b8f1e74cf943e056f25ae601a56ac76284..256153266c002b9c14eb8a5657d60296cfda2af6 100644
 --- a/src/lib/usage/cacheHealth.ts
 +++ b/src/lib/usage/cacheHealth.ts
 @@ -1,3 +1,4 @@
@@ -7,19 +7,17 @@ index f1b683b8f1e74cf943e056f25ae601a56ac76284..27132a5b8160404a861557fbc60695d6
  /**
   * Prompt-cache health — turns the raw cache columns of `call_logs` into a
   * summary an operator can act on.
-@@ -239,6 +240,11 @@
+@@ -239,6 +240,9 @@
    cache_write_cost_usd: number | null;
    cache_write_priced_tokens: number | null;
    timestamp: string | null;
 +  tokens_in?: number | null;
 +  tokens_out?: number | null;
-+  tokens_cache_creation_5m?: number | null;
-+  tokens_cache_creation_1h?: number | null;
 +  first_request?: number | null;
  };
  
  export interface CacheHealthResponse extends CacheHealthSummary {
-@@ -246,6 +252,7 @@
+@@ -246,6 +250,7 @@
    since: string;
    /** True when the window held more calls than `MAX_ROWS` and only the newest were summarized. */
    truncated: boolean;
@@ -27,7 +25,7 @@ index f1b683b8f1e74cf943e056f25ae601a56ac76284..27132a5b8160404a861557fbc60695d6
  }
  
  /**
-@@ -272,12 +279,27 @@
+@@ -272,12 +277,27 @@
    }
    params.push(MAX_ROWS + 1);
  
@@ -59,7 +57,7 @@ index f1b683b8f1e74cf943e056f25ae601a56ac76284..27132a5b8160404a861557fbc60695d6
          WHERE timestamp >= ?
            AND status = 200
            AND (tokens_cache_read IS NOT NULL OR tokens_cache_creation IS NOT NULL
-@@ -307,5 +329,17 @@
+@@ -307,5 +327,17 @@
      }))
    );
  

@@ -1,0 +1,41 @@
+diff --git a/open-sse/utils/nativeClaudeUsage.ts b/open-sse/utils/nativeClaudeUsage.ts
+index 875f1292d6a69460a9e534559ef2dba0e339c119..2620085fb858f15512400a9aa4586488b56cf6a2 100644
+--- a/open-sse/utils/nativeClaudeUsage.ts
++++ b/open-sse/utils/nativeClaudeUsage.ts
+@@ -1,4 +1,6 @@
+ import { FORMATS } from "../translator/formats.ts";
++import { getAnthropicMeteredUsage } from "./anthropicUsage.ts";
++import { getCacheCreationTtlFields } from "../../src/lib/usage/cacheCreationTtl.ts";
+ import { sanitizeProviderUsageForRequest, type UsageLike } from "./usageTracking.ts";
+ import { mergeCacheCreationFields, readCacheWriteUsage } from "./cacheWriteUsage.ts";
+ import { deriveUsageEvidence, usableTokenCounter } from "./usageEvidence.ts";
+@@ -29,6 +31,8 @@
+   return observed;
+ }
+ function copyDiagnostics(counters: UsageLike, usage: Record<string, unknown>): void {
++  if (Array.isArray(usage.iterations)) counters.iterations = usage.iterations;
++  else if (COUNTERS.some((key) => usage[key] !== undefined)) delete counters.iterations;
+   if (usage.output_tokens_details)
+     counters.output_tokens_details =
+       usage.output_tokens_details as UsageLike["output_tokens_details"];
+@@ -39,7 +43,11 @@
+   if (usableTokenCounter(usage.no_cache_tokens)) counters.no_cache_tokens = usage.no_cache_tokens;
+ }
+ function normalizedReceipt(raw: UsageLike, body: unknown, finalOutput: boolean): UsageLike {
+-  const sanitized = sanitizeProviderUsageForRequest(raw, body, FORMATS.CLAUDE)!;
++  const sanitized = sanitizeProviderUsageForRequest(
++    getAnthropicMeteredUsage(raw),
++    body,
++    FORMATS.CLAUDE
++  )!;
+   const evidence = deriveUsageEvidence(sanitized);
+   if (!finalOutput && !((sanitized.output_tokens ?? 0) > 0))
+     evidence.output = { source: "unknown" };
+@@ -50,6 +58,7 @@
+   const { input_tokens: _input, output_tokens: _output, ...rest } = sanitized;
+   return {
+     ...rest,
++    ...getCacheCreationTtlFields(sanitized),
+     prompt_tokens: prompt,
+     completion_tokens: completion,
+     usage_evidence: evidence,

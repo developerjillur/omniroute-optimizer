@@ -1,10 +1,11 @@
 diff --git a/open-sse/translator/response/claude-to-openai.ts b/open-sse/translator/response/claude-to-openai.ts
-index ed0faa8bd4c019ca471faa109c883b8fbb457adc..fe7a67b963a343f7154c0ff5eb7a69ccf120086b 100644
+index ed0faa8bd4c019ca471faa109c883b8fbb457adc..61e33911c45b781a51c2099ac01de754406bb39e 100644
 --- a/open-sse/translator/response/claude-to-openai.ts
 +++ b/open-sse/translator/response/claude-to-openai.ts
 @@ -1,6 +1,7 @@
  import { register } from "../registry.ts";
- import { cacheCreationFields, mergeCacheCreationFields } from "../../utils/cacheWriteUsage.ts";
+-import { cacheCreationFields, mergeCacheCreationFields } from "../../utils/cacheWriteUsage.ts";
++import { cacheCreationFields } from "../../utils/cacheWriteUsage.ts";
  import { FORMATS } from "../formats.ts";
 +import { mergeAnthropicUsage, normalizeAnthropicUsage } from "../../utils/anthropicUsage.ts";
  import { initThinkState, applyThinkTag, flushThinkBuffer } from "../../utils/thinkTagParser.ts";

@@ -1,8 +1,31 @@
 diff --git a/tests/unit/antigravity-discovery-bootstrap.test.ts b/tests/unit/antigravity-discovery-bootstrap.test.ts
-index 40eeb3e2cc39d6feb3a859228c6933d8acbf2a78..cf517368fcf7239236906315bcce4914d26f5aa6 100644
+index 40eeb3e2cc39d6feb3a859228c6933d8acbf2a78..e0804af3abe0a7b9c6eb974a8aedd61631ade7f6 100644
 --- a/tests/unit/antigravity-discovery-bootstrap.test.ts
 +++ b/tests/unit/antigravity-discovery-bootstrap.test.ts
-@@ -143,7 +143,7 @@ describe("ensureAntigravityProjectAssigned", () => {
+@@ -15,7 +15,8 @@
+  *    BEFORE any :models request.
+  */
+ 
+-import { test, describe, beforeEach } from "node:test";
++import { test, describe, beforeEach, afterEach } from "node:test";
++import { hideInstalledAntigravityApp } from "../helpers/antigravityAppFixture.ts";
+ import assert from "node:assert/strict";
+ 
+ import {
+@@ -28,9 +29,12 @@
+ } from "../../open-sse/services/antigravityProjectBootstrap.ts";
+ 
+ // Reset the module-level memoization cache between tests.
++let restoreInstalledApp = () => {};
+ beforeEach(() => {
++  restoreInstalledApp = hideInstalledAntigravityApp();
+   clearAntigravityProjectCache();
+ });
++afterEach(() => restoreInstalledApp());
+ 
+ describe("ensureAntigravityProjectAssigned", () => {
+   test("calls loadCodeAssist and caches the returned project id", async () => {
+@@ -143,7 +147,7 @@
  
      assert.match(
        capturedHeaders?.get("User-Agent") || "",

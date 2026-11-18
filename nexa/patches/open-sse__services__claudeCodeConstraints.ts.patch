@@ -1,5 +1,5 @@
 diff --git a/open-sse/services/claudeCodeConstraints.ts b/open-sse/services/claudeCodeConstraints.ts
-index 14d51965b9854f4acf4a000bb54d93d923669e6b..9d2d9ac2b26f3e3b46fc4fba28029a0e570a441f 100644
+index 14d51965b9854f4acf4a000bb54d93d923669e6b..95aea78738a10ca3ac916def4b9751d218226748 100644
 --- a/open-sse/services/claudeCodeConstraints.ts
 +++ b/open-sse/services/claudeCodeConstraints.ts
 @@ -5,7 +5,7 @@
@@ -47,6 +47,15 @@ index 14d51965b9854f4acf4a000bb54d93d923669e6b..9d2d9ac2b26f3e3b46fc4fba28029a0e
  
    if (Array.isArray(system)) {
      for (const block of system) {
+@@ -295,7 +302,7 @@
+  */
+ export function ensureCacheControlOnLastUserMessage(
+   body: Record<string, unknown>,
+-  { countTools = false }: { countTools?: boolean } = {}
++  { countTools = true }: { countTools?: boolean } = {}
+ ): void {
+   const messages = body.messages as Array<Record<string, unknown>> | undefined;
+   if (!Array.isArray(messages) || messages.length === 0) return;
 @@ -312,7 +319,7 @@
        const content = messages[i].content;
        if (Array.isArray(content) && content.length > 0) {

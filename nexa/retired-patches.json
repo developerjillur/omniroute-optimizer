@@ -78,6 +78,13 @@
       "patchSha256": "38d1a8e106850c664667e97b11bbed72c209c63023cc266172a8c3db63d879d3",
       "upstreamBlob": "584b4da13be9dc08acae7c717625998c4033cb2a",
       "reason": "Pricing helpers were extracted upstream. The retained service-tier, TTL and long-context behavior is patched in analyticsPricing.ts; route wrapper is unchanged and preserved."
+    },
+    {
+      "patch": "src__shared__network__safeOutboundFetch.ts.patch",
+      "target": "src/shared/network/safeOutboundFetch.ts",
+      "patchSha256": "88007e8d0211bde5850e149932c8aef18578e4f7acbd58e8dc56633edb534b61",
+      "upstreamBlob": "e16edff4fd0fa59c64d90037a6ef9f726fa8e249",
+      "reason": "v3.8.54 owns bounded DNS validation of every answer and optional connect-time pinning in resolveCheckedHost. The previous Nexa precheck became redundant and duplicated assertResolvedAddressAllowed. Retained DNS-guard and security regressions remain required."
     }
   ]
 }

@@ -7,13 +7,13 @@
   "productionBranch": "nexalance",
   "generatedFrom": "live nexa/ contents",
   "counts": {
-    "total": 389,
+    "total": 391,
     "patches": 234,
-    "new": 149,
+    "new": 151,
     "tooling": 6,
     "upstreamCandidates": 27,
     "nexaSpecific": 108,
-    "needsReview": 254,
+    "needsReview": 256,
     "pendingUpstreamPR": 10,
     "mergedUpstreamPR": 2
   },
@@ -598,6 +598,14 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "open-sse/utils/earlyStreamKeepalive.ts",
+      "conflictRisk": "on-overlap",
+      "upstreamPR": null
+    },
+    {
+      "file": "patches/open-sse__utils__nativeClaudeUsage.ts.patch",
+      "layer": "patch",
+      "class": "needs-review",
+      "target": "open-sse/utils/nativeClaudeUsage.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -1415,14 +1423,6 @@
       "layer": "patch",
       "class": "needs-review",
       "target": "src/shared/constants/pricing/shared-tiers.ts",
-      "conflictRisk": "on-overlap",
-      "upstreamPR": null
-    },
-    {
-      "file": "patches/src__shared__network__safeOutboundFetch.ts.patch",
-      "layer": "patch",
-      "class": "needs-review",
-      "target": "src/shared/network/safeOutboundFetch.ts",
       "conflictRisk": "on-overlap",
       "upstreamPR": null
     },
@@ -2369,6 +2369,14 @@
       "upstreamPR": null
     },
     {
+      "file": "new/tests/helpers/antigravityAppFixture.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/helpers/antigravityAppFixture.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
       "file": "new/tests/helpers/cacheTtlDatabase.ts",
       "layer": "new",
       "class": "needs-review",
@@ -3025,6 +3033,14 @@
       "layer": "new",
       "class": "needs-review",
       "target": "tests/unit/nexa-v354-compatibility.test.ts",
+      "conflictRisk": "none",
+      "upstreamPR": null
+    },
+    {
+      "file": "new/tests/unit/nexa-v354-metering.test.ts",
+      "layer": "new",
+      "class": "needs-review",
+      "target": "tests/unit/nexa-v354-metering.test.ts",
       "conflictRisk": "none",
       "upstreamPR": null
     },

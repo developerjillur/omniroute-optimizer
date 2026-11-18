@@ -1,5 +1,5 @@
 diff --git a/open-sse/handlers/chatCore/claudePassthroughBody.ts b/open-sse/handlers/chatCore/claudePassthroughBody.ts
-index ac0ffae869d5a3813aed6a5205c648fed1f27526..420f5456f5f837c1884f3e393075601ee8bc4211 100644
+index ac0ffae869d5a3813aed6a5205c648fed1f27526..17140ed5230fe175ff915e2e727e5bc2ab8f5528 100644
 --- a/open-sse/handlers/chatCore/claudePassthroughBody.ts
 +++ b/open-sse/handlers/chatCore/claudePassthroughBody.ts
 @@ -1,3 +1,4 @@
@@ -32,3 +32,23 @@ index ac0ffae869d5a3813aed6a5205c648fed1f27526..420f5456f5f837c1884f3e393075601e
    // applyReasoningRuleDirective returns unknown; the hoist helper requires a record.
    const claudePassthroughBody = applyReasoningRuleDirective({ ...body }, "claude");
    const translatedBody = hoistDeferredToolsForTarget(
+@@ -165,7 +177,18 @@
+         translatedBody.messages as ClaudeMessage[]
+       ) as typeof translatedBody.messages;
+     }
+-    if (isFirstPartyAnthropic) {
++    const clientOwnsUserBreakpoint =
++      preserveCacheControl &&
++      Array.isArray(body.messages) &&
++      body.messages.some(
++        (message) =>
++          message?.role === "user" &&
++          Array.isArray(message.content) &&
++          message.content.some(
++            (block) => block && typeof block === "object" && "cache_control" in block
++          )
++      );
++    if (isFirstPartyAnthropic && !clientOwnsUserBreakpoint) {
+       ensureCacheControlOnLastUserMessage(translatedBody, { countTools: provider === "anthropic" });
+     }
+   } else {

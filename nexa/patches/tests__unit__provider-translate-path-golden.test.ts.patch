@@ -1,8 +1,40 @@
 diff --git a/tests/unit/provider-translate-path-golden.test.ts b/tests/unit/provider-translate-path-golden.test.ts
-index 4b9ace2934344dc15da4a697ac5c6f74d227255b..3ee006f0aa6bf61a7e2497fbabb5c40604763b80 100644
+index 4b9ace2934344dc15da4a697ac5c6f74d227255b..274646140d94795d550d2a90022cd14aec7d49f2 100644
 --- a/tests/unit/provider-translate-path-golden.test.ts
 +++ b/tests/unit/provider-translate-path-golden.test.ts
-@@ -80,6 +80,7 @@
+@@ -4,14 +4,24 @@
+ import os from "node:os";
+ import path from "node:path";
+ 
+-import { PROVIDERS } from "../../open-sse/config/constants.ts";
+-import { APP_CONFIG } from "../../src/shared/constants/appConfig.ts";
+-import {
+-  buildProviderHeaders,
+-  buildProviderUrl,
+-  getTargetFormat,
+-} from "../../open-sse/services/provider.ts";
+ import { goldenSnapshot } from "../helpers/goldenSnapshot.ts";
++import { hideInstalledAntigravityApp } from "../helpers/antigravityAppFixture.ts";
++
++// Capture provider header constants while this fixture has no installed app.
++// The exact IDE fallback remains asserted by the golden on every test host.
++const [{ PROVIDERS }, { APP_CONFIG }, { buildProviderHeaders, buildProviderUrl, getTargetFormat }] =
++  await (async () => {
++    const restore = hideInstalledAntigravityApp();
++    try {
++      return await Promise.all([
++        import("../../open-sse/config/constants.ts"),
++        import("../../src/shared/constants/appConfig.ts"),
++        import("../../open-sse/services/provider.ts"),
++      ]);
++    } finally {
++      restore();
++    }
++  })();
+ 
+ // A1 GOLDEN LOCK: freeze the OUTPUT of services/provider.ts on the translate route
+ // path — buildProviderUrl / buildProviderHeaders / getTargetFormat — across every
+@@ -80,6 +90,7 @@
          "<PLATFORM>"
        )
        .replace(/(antigravity\/ide\/\d+\.\d+\.\d+) [^/\s]+\/[^\s)]+/g, "$1 <OS>/<ARCH>")

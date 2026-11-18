@@ -63,9 +63,9 @@ export function cacheTtlTokenSql(prefix = ""): { five: string; hour: string } {
   const total = `${prefix}tokens_cache_creation`;
   const five = `${prefix}${TTL_COLUMNS[0]}`;
   const hour = `${prefix}${TTL_COLUMNS[1]}`;
-  const valid = `typeof(${total}) = 'integer' AND ${total} BETWEEN 0 AND 9007199254740991 AND
-    (${five} IS NULL OR (typeof(${five}) = 'integer' AND ${five} >= 0)) AND
-    (${hour} IS NULL OR (typeof(${hour}) = 'integer' AND ${hour} >= 0)) AND
+  const valid = `typeof(${total}) IN ('integer', 'real') AND ${total} = CAST(${total} AS INTEGER) AND ${total} BETWEEN 0 AND 9007199254740991 AND
+    (${five} IS NULL OR (typeof(${five}) IN ('integer', 'real') AND ${five} = CAST(${five} AS INTEGER) AND ${five} >= 0)) AND
+    (${hour} IS NULL OR (typeof(${hour}) IN ('integer', 'real') AND ${hour} = CAST(${hour} AS INTEGER) AND ${hour} >= 0)) AND
     COALESCE(${five}, 0) + COALESCE(${hour}, 0) <= ${total}`;
   return {
     five: `CASE WHEN ${valid} THEN COALESCE(${five}, 0) ELSE 0 END`,

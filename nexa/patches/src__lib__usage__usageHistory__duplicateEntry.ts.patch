@@ -1,14 +1,14 @@
 diff --git a/src/lib/usage/usageHistory/duplicateEntry.ts b/src/lib/usage/usageHistory/duplicateEntry.ts
-index 62106f6c444137b695241e382976464845231afb..25755fa18b5f73c56febbbe000bbf0805c4408ff 100644
+index 62106f6c444137b695241e382976464845231afb..159cf2fcda0566162b70e2793efc8c6cbfb83ad7 100644
 --- a/src/lib/usage/usageHistory/duplicateEntry.ts
 +++ b/src/lib/usage/usageHistory/duplicateEntry.ts
 @@ -1,3 +1,5 @@
-+import { getCacheCreationTtl } from "../cacheCreationTtl";
++import { getBillableCacheCreationTtl } from "../cacheCreationTtl";
 +import { getPromptCacheCreationTokens } from "../tokenAccounting";
  import type { getDbInstance } from "../../db/core";
  import { resolveProviderId } from "@/shared/constants/providers";
  import type { UsageEntry } from "../usageHistory";
-@@ -12,7 +14,7 @@ export function backfillDuplicateUsageEntry(
+@@ -12,7 +14,7 @@
  ): boolean {
    const existing = db
      .prepare(
@@ -17,7 +17,7 @@ index 62106f6c444137b695241e382976464845231afb..25755fa18b5f73c56febbbe000bbf080
         WHERE timestamp = ?
           AND COALESCE(provider, '')     = COALESCE(?, '')
           AND COALESCE(model, '')        = COALESCE(?, '')
-@@ -30,7 +32,7 @@ export function backfillDuplicateUsageEntry(
+@@ -30,7 +32,7 @@
        entry.apiKeyId || null,
        tokensInput,
        tokensOutput
@@ -26,11 +26,11 @@ index 62106f6c444137b695241e382976464845231afb..25755fa18b5f73c56febbbe000bbf080
  
    if (!existing) return false;
    // Back-fill endpoint if the original row missed it.
-@@ -47,5 +49,12 @@ export function backfillDuplicateUsageEntry(
+@@ -47,5 +49,12 @@
        existing.id
      );
    }
-+  const ttl = getCacheCreationTtl(entry.tokens);
++  const ttl = getBillableCacheCreationTtl(entry.tokens);
 +  if (existing.tokens_cache_creation_5m === null && existing.tokens_cache_creation_1h === null &&
 +      existing.tokens_cache_creation === getPromptCacheCreationTokens(entry.tokens) &&
 +      (ttl.cacheCreation5m !== null || ttl.cacheCreation1h !== null)) {

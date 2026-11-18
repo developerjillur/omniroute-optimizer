@@ -15,8 +15,6 @@ function count(value: unknown): number | null {
 /** Reported TTL detail is usable only with a compatible, known total write count. */
 export function getCacheCreationTtl(value: unknown): TtlSplit {
   const usage = record(value);
-  if (["invalid", "inconsistent"].includes(String(usage.cache_creation_tier_status)))
-    return { cacheCreation5m: null, cacheCreation1h: null };
   const creation = record(usage.cache_creation);
   const five = count(usage.cacheCreation5m ?? creation.ephemeral_5m_input_tokens);
   const hour = count(usage.cacheCreation1h ?? creation.ephemeral_1h_input_tokens);
@@ -31,6 +29,14 @@ export function getCacheCreationTtl(value: unknown): TtlSplit {
   if (total === null || (five ?? 0) + (hour ?? 0) > total)
     return { cacheCreation5m: null, cacheCreation1h: null };
   return { cacheCreation5m: five, cacheCreation1h: hour };
+}
+
+/** Diagnostic failures remain in raw receipts but cannot select a known TTL billing rate. */
+export function getBillableCacheCreationTtl(value: unknown): TtlSplit {
+  const usage = record(value);
+  if (["invalid", "inconsistent"].includes(String(usage.cache_creation_tier_status)))
+    return { cacheCreation5m: null, cacheCreation1h: null };
+  return getCacheCreationTtl(usage);
 }
 
 /** Internal numeric metadata; absence stays absent instead of inventing a zero. */

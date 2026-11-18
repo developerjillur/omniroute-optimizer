@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { DatabaseSync } from "node:sqlite";
 import test from "node:test";
-import { getCacheCreationTtl } from "../../src/lib/usage/cacheCreationTtl.ts";
+import { getBillableCacheCreationTtl, getCacheCreationTtl } from "../../src/lib/usage/cacheCreationTtl.ts";
 import { cacheTtlTokenSql } from "../../src/lib/db/usageAnalytics/cacheTtl.ts";
 import { createNativeClaudeUsageTracker } from "../../open-sse/utils/nativeClaudeUsage.ts";
 
@@ -119,10 +119,18 @@ test("a later cumulative counter update supersedes earlier iteration detail", ()
 
 test("invalid and inconsistent cache diagnostics never produce known TTL billing", () => {
   for (const status of ["invalid", "inconsistent"]) {
-    assert.deepEqual(getCacheCreationTtl({
+    assert.deepEqual(getBillableCacheCreationTtl({
       cache_creation_input_tokens: 10,
       cache_creation: { ephemeral_5m_input_tokens: 5, ephemeral_1h_input_tokens: 5 },
       cache_creation_tier_status: status,
     }), { cacheCreation5m: null, cacheCreation1h: null });
   }
+});
+
+test("a partial receipt retains explicit zeroes while flagged tiers cannot alter billing", () => {
+  const usage = { cache_creation_input_tokens: 100,
+    cache_creation: { ephemeral_5m_input_tokens: 0, ephemeral_1h_input_tokens: 40 },
+    cache_creation_tier_status: "inconsistent" };
+  assert.deepEqual(getCacheCreationTtl(usage), { cacheCreation5m: 0, cacheCreation1h: 40 });
+  assert.deepEqual(getBillableCacheCreationTtl(usage), { cacheCreation5m: null, cacheCreation1h: null });
 });

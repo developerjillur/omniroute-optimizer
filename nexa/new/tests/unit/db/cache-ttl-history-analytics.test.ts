@@ -162,3 +162,23 @@ test("legacy stats, connection estimates and provider windows retain TTL cost", 
     9
   );
 });
+
+test("flagged TTL diagnostics cannot enter persisted estimates or enrich duplicate billing", async () => {
+  for (const status of ["invalid", "inconsistent"]) {
+    const detail = { cacheCreation5m: 0, cacheCreation1h: 1000000, cache_creation_tier_status: status };
+    const fresh = `fixture-ttl-flag-${status}`;
+    await seed(fresh, detail);
+    const [row] = await history.getUsageHistory({ model: fresh });
+    assert.equal(row.tokens.cacheCreation, 1000000);
+    assert.equal(row.tokens.cacheCreation5m, null);
+    assert.equal(row.tokens.cacheCreation1h, null);
+    const duplicate = `fixture-ttl-flag-duplicate-${status}`;
+    const timestamp = new Date(Date.now() - 1000).toISOString();
+    await seed(duplicate, {}, timestamp);
+    await seed(duplicate, detail, timestamp);
+    const rows = await history.getUsageHistory({ model: duplicate });
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].tokens.cacheCreation5m, null);
+    assert.equal(rows[0].tokens.cacheCreation1h, null);
+  }
+});

@@ -1,9 +1,9 @@
 diff --git a/src/lib/usage/usageWriteRetry.ts b/src/lib/usage/usageWriteRetry.ts
-index 865e469c50eef6d642486c1181777d0a166b4e20..88f703a17ea607a891047c579304c48a5cd161f4 100644
+index 865e469c50eef6d642486c1181777d0a166b4e20..2278f6fed70e134f2f8a5c24ab1ff3f35b4e525c 100644
 --- a/src/lib/usage/usageWriteRetry.ts
 +++ b/src/lib/usage/usageWriteRetry.ts
 @@ -1,3 +1,4 @@
-+import { getCacheCreationTtl } from "./cacheCreationTtl";
++import { getBillableCacheCreationTtl } from "./cacheCreationTtl";
  import { serializeUsageEvidence } from "./storedUsageEvidence";
  import { resolveUsageProvenance } from "./callContentProvenance";
  /**
@@ -20,7 +20,7 @@ index 865e469c50eef6d642486c1181777d0a166b4e20..88f703a17ea607a891047c579304c48a
      accountIdentity,
    } = prepared;
    const { providerCredits, providerCostUsd } = readReportedCost(entry.provider, entry.tokens);
-+  const ttl = getCacheCreationTtl(entry.tokens);
++  const ttl = getBillableCacheCreationTtl(entry.tokens);
    // Only a row that is actually inserted counts toward its session (dedup no-ops do not).
    // A lock fails the whole write, so the deferred retry replays the row and its session.
    const agentSessionId = recordAgentSession(db, prepared.agentSession, isWriteLockError);

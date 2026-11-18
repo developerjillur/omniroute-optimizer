@@ -1,5 +1,5 @@
 diff --git a/src/lib/usage/costCalculator.ts b/src/lib/usage/costCalculator.ts
-index bf7f9d09144ffa36beb8afadb8a849b7798133d4..ea110c31bd68d18cf6d9b79bc0d2f74e1d2fffcb 100644
+index bf7f9d09144ffa36beb8afadb8a849b7798133d4..ffcebe49b1098ee23362c24da6262d7e5501b9cb 100644
 --- a/src/lib/usage/costCalculator.ts
 +++ b/src/lib/usage/costCalculator.ts
 @@ -1,3 +1,4 @@
@@ -11,7 +11,7 @@ index bf7f9d09144ffa36beb8afadb8a849b7798133d4..ea110c31bd68d18cf6d9b79bc0d2f74e
  import { resolveClaudeEffortVariantBase } from "@omniroute/open-sse/handlers/chatCore/claudeEffortVariant.ts";
  import { isCreditMeteredProvider } from "./creditMeteredProviders";
  import { isFlatRateProvider } from "./flatRateProviders";
-+import { getCacheCreationTtl } from "./cacheCreationTtl";
++import { getBillableCacheCreationTtl } from "./cacheCreationTtl";
  
  /**
   * Normalize model name — strip provider path prefixes.
@@ -137,7 +137,7 @@ index bf7f9d09144ffa36beb8afadb8a849b7798133d4..ea110c31bd68d18cf6d9b79bc0d2f74e
 -
 -  return cost * getCodexFastCostMultiplier(options.provider, options.model, options.serviceTier);
 +  if (cacheCreationTokens > 0) {
-+    const ttl = getCacheCreationTtl(tokens);
++    const ttl = getBillableCacheCreationTtl(tokens);
 +    const five = ttl.cacheCreation5m ?? 0;
 +    const hour = ttl.cacheCreation1h ?? 0;
 +    const unknown = Math.max(0, cacheCreationTokens - five - hour);

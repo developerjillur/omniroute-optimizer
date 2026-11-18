@@ -179,3 +179,12 @@ test("an exact provider cost still takes precedence over all TTL estimates", () 
     1
   );
 });
+
+test("flagged TTL evidence preserves the aggregate fallback rather than a one-hour premium", () => {
+  for (const status of ["invalid", "inconsistent"]) {
+    assert.equal(computeCostFromPricing(pricing, {
+      input: 1000000, cacheCreation: 1000000, cacheCreation5m: 0, cacheCreation1h: 1000000,
+      cache_creation_tier_status: status,
+    }), 2.5);
+  }
+});

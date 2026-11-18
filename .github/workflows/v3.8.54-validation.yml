@@ -6,7 +6,8 @@ on:
     branches: [fix/v3.8.54-models]
     paths:
       - .github/workflows/v3.8.54-validation.yml
-      - nexa/patches/package-lock.json.patch
+      - nexa/**
+      - overlay-inventory.json
 
 permissions:
   contents: read

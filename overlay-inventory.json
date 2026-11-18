@@ -7,7 +7,7 @@
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
   "trackedNexaFiles": 563,
-  "totalNexaBytes": 2626042,
+  "totalNexaBytes": 2626638,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -671,9 +671,9 @@
     {
       "path": "nexa/docs/MODEL-CATALOG-2026-11-18.md",
       "mode": "100644",
-      "gitBlobSha": "508b1897c9e47d17167109a695a585baab156e5a",
-      "bytes": 8121,
-      "sha256": "9277b7b0a9a5c2e65470791a7c58568cec38835f8f9680a87648cb1fb72d692a"
+      "gitBlobSha": "392a6de1cc20dc2a471de1ab53ab89e1fb6de8c2",
+      "bytes": 8709,
+      "sha256": "899b7e3387cd08c3512d5edaa36f72aa9b634641e7b46ccbcfb334560551f6cf"
     },
     {
       "path": "nexa/docs/NATIVE-ARTIFACT-RECOVERY-AND-GPT61-PRICING-2026-10-14.md",
@@ -2561,9 +2561,9 @@
     {
       "path": "nexa/patches/src__app__api__models__route.ts.patch",
       "mode": "100644",
-      "gitBlobSha": "d3aaf8dfa0c5c4c85a3975b8fd3b004654afcf65",
-      "bytes": 5909,
-      "sha256": "a673ca112f15ee58faaf69b8f56f6e9b5e7eae58549ea4042529258abad3d5d5"
+      "gitBlobSha": "645b749502614b32ba5eac0a129af1d0bc8fb0c7",
+      "bytes": 5917,
+      "sha256": "cf3912d0b3e33d918f7dbc5d338b677844c8cda9f6cc1401a85ca13d34382048"
     },
     {
       "path": "nexa/patches/src__app__api__models__test__route.ts.patch",

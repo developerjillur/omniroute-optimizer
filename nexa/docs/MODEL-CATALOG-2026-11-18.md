@@ -65,6 +65,11 @@ Source candidate প্রস্তুত; local helper tests 10/10 পাস।
   পুরোনো test `1.3.4` CLI header আশা করেছিল; নতুন fallback `1.5.8` অনুযায়ী শুধু
   ওই exact expectations আপডেট হয়েছে। অন্য header checks বা functional assertion বাদ যায়নি।
   প্রথম run: https://github.com/developerjillur/omniroute-optimizer/actions/runs/44232777124 ।
+- দ্বিতীয় run-এ metadata 10/10 ও application 295/295 tests, core typecheck,
+  lint এবং docs-all পাস। পূর্ণ compiler তুলনায় pristine 7361, applied 7314
+  diagnostic পাওয়া গেলেও নতুন `TS2538` identity 1টি থাকায় acceptance ব্যর্থ হয়।
+  Dashboard-এর provider index string করে ওই error সংশোধিত; ceiling বাড়ানো হয়নি।
+  দ্বিতীয় run: https://github.com/developerjillur/omniroute-optimizer/actions/runs/44233522999 ।
 - Model generation, provider quota consumption, account enable/rotation, default model
   switch, root job change, app update বা live restart করা হয়নি।
 - Provider dashboard-এর Playground-এ `catalog_build_timeout`-ও দেখা গেছে; এটি নতুন

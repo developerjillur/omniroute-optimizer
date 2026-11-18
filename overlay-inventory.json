@@ -6,8 +6,8 @@
   "sourceNexaTree": "f248d0de884ab5ae2b872d1222c6cb482eb9ef9e",
   "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
   "upstreamVersion": "3.8.53",
-  "trackedNexaFiles": 563,
-  "totalNexaBytes": 2627129,
+  "trackedNexaFiles": 564,
+  "totalNexaBytes": 2630787,
   "managedSourceIncludesNewFixes": true,
   "files": [
     {
@@ -671,9 +671,16 @@
     {
       "path": "nexa/docs/MODEL-CATALOG-2026-11-18.md",
       "mode": "100644",
-      "gitBlobSha": "120ca6602b13ee773e6a07575b598b4cf2808723",
-      "bytes": 9171,
-      "sha256": "7c37f079fc20ab1227570f595449fe2535059d1768c4813e76cf739d0446c14f"
+      "gitBlobSha": "6bca8a2114afda0e5e61f06c089055a38dfae905",
+      "bytes": 10553,
+      "sha256": "88b384ec168e01ef3d8ce42edcd8edee78613bb30f71ad6d6a653a6ea952d29e"
+    },
+    {
+      "path": "nexa/docs/MODEL-CATALOG-VALIDATION-2026-11-18.json",
+      "mode": "100644",
+      "gitBlobSha": "046190ca8c646674978ee4db85056e018611cd05",
+      "bytes": 2276,
+      "sha256": "3570d411ead9320b6a9f48c0ba177ca9f78c31f005e09ff96199777f1e36c6c5"
     },
     {
       "path": "nexa/docs/NATIVE-ARTIFACT-RECOVERY-AND-GPT61-PRICING-2026-10-14.md",

@@ -2,10 +2,19 @@
 
 ## বর্তমান অবস্থা
 
-Source candidate প্রস্তুত; local helper tests 10/10 পাস। Application integration,
-সম্পূর্ণ compiler comparison ও documentation gates-এর GitHub validation বাকি।
-এই candidate দিয়ে local full build বা live package promotion এখনও হয়নি।
-বর্তমান live version v3.8.53 অক্ষত আছে।
+Source ও tests validation সম্পন্ন। Final source commit
+`7737c7e5b8946c5247fd0cbb561f24da0b7cc812`-এ metadata tests 10/10 এবং
+application/adapter tests 297/297 পাস; fail/skip 0। সব 231টি active patch,
+manifest, core typecheck, lint এবং docs-all পাস। পূর্ণ compiler তুলনায় pristine
+7361, applied 7313 diagnostic; নতুন diagnostic identity 0। এটি zero-type-error দাবি নয়।
+
+[Accepted CI run](https://github.com/developerjillur/omniroute-optimizer/actions/runs/44237248865)
+এবং [machine-readable receipt](MODEL-CATALOG-VALIDATION-2026-11-18.json)।
+
+Operator-এর সর্বশেষ সিদ্ধান্ত অনুযায়ী build ও live promotion পরে হবে। এই candidate
+দিয়ে local full build/pack/install হয়নি। বর্তমান live version v3.8.53 অক্ষত;
+শেষ checks-এ core ও certificate-verified HTTPS IPv4/IPv6 health তিনটিই 200।
+Claude settings, core `.env`, startup plist ও hosts-এর protected hashes আগের মতোই আছে।
 
 ## বর্তমান evidence
 
@@ -60,7 +69,7 @@ Source candidate প্রস্তুত; local helper tests 10/10 পাস।
   শুধু ওই flag সরিয়ে 10/10 tests পাস হয়েছে। পুরোনো receipts সংরক্ষিত।
 - নতুন scoped GitHub workflow pinned v3.8.53-তে সব overlay patch applicability,
   isolated adapter/dashboard tests, পুরোনো pricing/effort/Fable regressions,
-  completed compiler diagnostics comparison এবং docs-all পরীক্ষা করবে।
+  completed compiler diagnostics comparison এবং docs-all পরীক্ষা করেছে।
 - প্রথম application run-এ 295টির মধ্যে 293টি পাস, 2টি ব্যর্থ। দুই failure-তেই
   পুরোনো test `1.3.4` CLI header আশা করেছিল; নতুন fallback `1.5.8` অনুযায়ী শুধু
   ওই exact expectations আপডেট হয়েছে। অন্য header checks বা functional assertion বাদ যায়নি।
@@ -74,8 +83,13 @@ Source candidate প্রস্তুত; local helper tests 10/10 পাস।
   application `TS2538` আর ছিল না; নতুন test call-এ required stream argument না
   দেওয়ায় `TS2554` 1টি পাওয়া যায়। Non-streaming flag explicit করে সংশোধন হয়েছে।
   তৃতীয় run: https://github.com/developerjillur/omniroute-optimizer/actions/runs/44235284412 ।
-- Model generation, provider quota consumption, account enable/rotation, default model
+- Final run-এ 10/10 ও 297/297 tests, পূর্ণ compiler comparison, lint এবং docs-all
+  সব পাস। দুই compiler-ই সম্পূর্ণ হয়েছে; inherited diagnostics-এর জন্য exit status
+  2, signal null। অনুমোদিত 7314 ceiling বা পুরোনো release records বাড়ানো হয়নি।
+- Model generation বা inference-token ব্যবহার, account enable/rotation, default model
   switch, root job change, app update বা live restart করা হয়নি।
+- Google Hydrogen/Carbon-এর নতুন local pricing override এই ধাপে লেখা হয়নি;
+  Gemini API, Cloud pricing ও Antigravity subscription quota এক হিসেবে ধরা হয়নি।
 - Provider dashboard-এর Playground-এ `catalog_build_timeout`-ও দেখা গেছে; এটি নতুন
   model-এর successful generation-এর evidence নয়। বর্তমান model task দিয়ে সেই
   আলাদা catalog latency issue সমাধান হয়েছে বলা যাবে না।

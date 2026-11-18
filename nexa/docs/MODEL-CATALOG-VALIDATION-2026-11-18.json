@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "status": "source_validated_build_held",
+  "verifiedAtUtc": "2026-11-18T04:42:40Z",
+  "sourceCommit": "7737c7e5b8946c5247fd0cbb561f24da0b7cc812",
+  "upstreamBase": "191dce8d534ceb56c28a08e71381284a9a87838f",
+  "upstreamVersion": "3.8.53",
+  "workflowRun": "https://github.com/developerjillur/omniroute-optimizer/actions/runs/44237248865",
+  "ciConclusion": "success",
+  "sourceChecks": {
+    "metadataTests": { "tests": 10, "passed": 10, "failed": 0, "skipped": 0 },
+    "applicationTests": { "tests": 297, "passed": 297, "failed": 0, "skipped": 0 },
+    "activePatchesApplicable": 231,
+    "manifestVerified": true,
+    "inventoryVerified": true,
+    "formatting": "passed",
+    "coreTypecheck": "passed",
+    "fullProjectCompiler": {
+      "pristineDiagnostics": 7361,
+      "appliedDiagnostics": 7313,
+      "newDiagnosticIdentities": 0,
+      "changedInheritedMessages": 263,
+      "approvedCeiling": 7314,
+      "sourceBaselineChanged": false,
+      "bothCompilersCompleted": true,
+      "bothExitStatus": 2,
+      "bothSignal": null
+    },
+    "lint": "passed",
+    "docsAll": "passed"
+  },
+  "livePreservation": {
+    "version": "3.8.53",
+    "coreHealth": 200,
+    "httpsIpv4Health": 200,
+    "httpsIpv6Health": 200,
+    "httpsCertificateVerification": true,
+    "protectedSettingsEnvironmentStartupHostsHashesUnchanged": true,
+    "modelGenerationCalls": 0,
+    "localFullBuildPerformed": false,
+    "packagePromotionPerformed": false,
+    "serviceRestartPerformed": false
+  },
+  "providerLimits": {
+    "codexGpt62": "Authenticated discovery includes Sol and Astra; new source has synthetic adapter acceptance, not a live generation receipt.",
+    "googleNativeAppOperatorReport": { "hydrogenSelectable": true, "argonSelectable": true, "carbonSelectable": false },
+    "googleDisabledPlaceholders": "Filtered, never renamed to manufacture access.",
+    "googleLiveCatalogAfterBuild": "pending",
+    "googleHydrogenCarbonPricingOverrideAdded": false,
+    "backgroundLongDecodeCertified": false
+  },
+  "nextPhase": {
+    "build": "held_at_operator_request",
+    "liveUpdate": "held_at_operator_request",
+    "requires": "A later build instruction, reviewed resource admission, package acceptance and live account/runtime verification."
+  }
+}
